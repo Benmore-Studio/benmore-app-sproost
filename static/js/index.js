@@ -15,8 +15,10 @@ function showStep(n) {
   }
   if (n == x.length - 1) {
     document.getElementById("nextBtn").innerHTML = "Submit"
+  } else if (n === 0) {
+    document.getElementById("nextBtn").textContent = "Continue"
   } else {
-    document.getElementById("nextBtn").innerHTML = "Next"
+    document.getElementById("nextBtn").textContent = "Next"
   }
   //... and run a function that will display the correct step indicator:
   fixStepIndicator(n)

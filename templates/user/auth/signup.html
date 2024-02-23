@@ -10,11 +10,10 @@
 </style>
 
 <div>
-  <form id="multiStepForm" action=" " method="POST">
+  <form id="multiStepForm" action="" method="POST">
     <!-- {% csrf_token %} -->
-    <!-- Step 1 -->
-    <div class="step" id="step1">
-      <div class="w-full p-4 pt-8">
+    <div class="step w-full p-4 pt-8" id="step1">
+      <div class="w-full">
         <div class="flex flex-col gap-8 items-center justify-center">
           <img src="{% static 'svgs/sproost.svg' %}" alt="" class="" />
           <div class="flex flex-col items-center justify-center">
@@ -87,9 +86,11 @@
       <input type="password" name="password" placeholder="Password" />
     </div>
 
-    <div class="">
+    <div class="p-4 pt-8">
       <button type="button" id="prevBtn" onclick="nextPrev(-1)">Previous</button>
-      <button type="button" id="nextBtn" onclick="nextPrev(1)">Next</button>
+      <div class="flex flex-col gap-2 w-full">
+        <button id="nextBtn" onclick="nextPrev(1)" type="button" class="w-full p-2 bg-primary text-white rounded-md font-semibold focus:outline-none focus:bg-primary"></button>
+      </div>
     </div>
   </form>
 </div>
