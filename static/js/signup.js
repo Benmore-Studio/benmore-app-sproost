@@ -52,7 +52,7 @@ function nextPrev(n) {
   // Increase or decrease the current tab by 1:
   currentStep = currentStep + n
   // if you have reached the end of the form...
-  if (currentStep >= x.length - 1) {
+  if (currentStep >= x.length) {
     // ... the form gets submitted:
     document.getElementById("signupForm").submit()
     return false
