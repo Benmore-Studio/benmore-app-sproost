@@ -1,0 +1,36 @@
+{% extends "user/auth/base.html" %} {% load static %} {% block authContent %}
+<style>
+  .step {
+    display: none;
+  }
+</style>
+
+<div>
+  <h3 class="">Hello signup</h3>
+  <form id="multiStepForm" action=" " method="POST">
+    <!-- {% csrf_token %} -->
+    <!-- Step 1 -->
+    <div class="step" id="step1">
+      <h2>Step 1</h2>
+      <input type="text" name="name" placeholder="Name" />
+    </div>
+
+    <!-- Step 2 -->
+    <div class="step" id="step2">
+      <h2>Step 2</h2>
+      <input type="email" name="email" placeholder="Email" />
+    </div>
+
+    <!-- Step 3 -->
+    <div class="step" id="step3">
+      <h2>Step 3</h2>
+      <input type="password" name="password" placeholder="Password" />
+    </div>
+
+    <div class="">
+      <button type="button" id="prevBtn" onclick="nextPrev(-1)">Previous</button>
+      <button type="button" id="nextBtn" onclick="nextPrev(1)">Next</button>
+    </div>
+  </form>
+</div>
+{% endblock authContent %}
