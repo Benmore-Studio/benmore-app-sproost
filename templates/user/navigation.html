@@ -1,3 +1,25 @@
-<div class="w-full fixed bottom-0 border-t border-neutral-100 p-4 shadow-sm z-24">
-  <h3>footer</h3>
+{% load static %}
+<div class="w-full fixed bottom-0 border-t border-neutral-100 p-4 shadow-md z-24">
+  <div class="flex items-center justify-between w-full">
+    <div class="inline-flex flex-col gap-1 items-center">
+      <img src="{% static 'svgs/Home.svg' %}" alt="" class="" />
+      <span class="text-primary text-xs">My Home</span>
+    </div>
+    <div class="inline-flex flex-col gap-1 items-center">
+      <img src="{% static 'svgs/search.svg' %}" alt="" class="" />
+      <span class="text-gray-500 text-xs">Search</span>
+    </div>
+    <div class="inline-flex flex-col gap-1 items-center">
+      <img src="{% static 'svgs/Add-upload.svg' %}" alt="" class="" />
+      <span class="text-gray-500 text-xs">Upload</span>
+    </div>
+    <div class="inline-flex flex-col gap-1 items-center">
+      <img src="{% static 'svgs/Message.svg' %}" alt="" class="" />
+      <span class="text-gray-500 text-xs">Messages</span>
+    </div>
+    <div class="inline-flex flex-col gap-1 items-center">
+      <img src="{% static 'svgs/more-horizon.svg' %}" alt="" class="" />
+      <span class="text-gray-500 text-xs">Menu</span>
+    </div>
+  </div>
 </div>
