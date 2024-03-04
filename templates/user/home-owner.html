@@ -1,4 +1,22 @@
-{% extends "user/base.html" %} {% block topNavigation %} {% include "user/top-navigation.html" %} {% endblock topNavigation %} {% block content %}
-<div class="">home owner</div>
+{% extends "user/base.html" %} {% load static %} {% block topNav %} {% include "user/top-navigation.html" %} {% endblock topNav %} {% block content %}
+<style>
+  #banner {
+    border-radius: 10px;
+    background: linear-gradient(90deg, rgba(159, 216, 141, 1) 48%, rgba(159, 216, 141, 0.16) 48%), url("{% static 'images/bannerBefore.png' %}");
+    background-position: center;
+    background-size: cover;
+  }
+</style>
+<div class="w-full p-4">
+  <div id="banner" class="w-full h-[150px] rounded-md">
+    <div class="w-1/2 p-3 flex flex-col gap-6">
+      <p class="text-sm font-bold">Get your renovation process started with a picture upload</p>
+      <button class="inline-flex w-5/6 items-center justify-center gap-2 bg-primary p-2 shadow-md rounded-md">
+        <span class="text-sm text-white">Get a quote</span>
+        <img src="{% static 'svgs/Arrow-Right.svg' %}" alt="" class="" />
+      </button>
+    </div>
+  </div>
+</div>
 
 {% endblock content %}
