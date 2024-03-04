@@ -26,9 +26,7 @@
   </head>
 
   <body>
-    <div class="">
-      <h1>Hello Sproost</h1>
-      {% block content %} {% endblock content %} {% include "user/navigation.html" %}
-    </div>
+    {% block topNavigation %} {% endblock topNavigation %}
+    <div class="">{% block content %} {% endblock content %} {% include "user/bottom_navigation.html" %}</div>
   </body>
 </html>
