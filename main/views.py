@@ -13,7 +13,12 @@ def home(request):
         'title':'Number of completed projects', 'status': 'completed', 'count': 2, 
         }
     ]
-    context = {'project_feed': project_feed}
+    project_history = [
+        {'name':'Bungalow Renovation', 'quotation_status': 'pending', 'home_owner': {'name':'Olivia Rhye', 'image':'/static/images/ownerAvatar.png'}, 'location': 'New Yersey, Newark', 'created_date': 'Jan 28, 2024'},
+        {'name':'Bungalow Renovation', 'quotation_status': 'pending', 'home_owner': {'name':'Olivia Rhye', 'image':'/static/images/ownerAvatar.png'}, 'location': 'New Yersey, Newark', 'created_date': 'Jan 28, 2024'},
+        {'name':'Bungalow Renovation', 'quotation_status': 'pending', 'home_owner': {'name':'Olivia Rhye', 'image':'/static/images/ownerAvatar.png'}, 'location': 'New Yersey, Newark', 'created_date': 'Jan 28, 2024'},
+    ]
+    context = {'project_feed': project_feed, 'project_history': project_history}
     return render(request, 'user/home-owner.html', context)
 
 def loginUser(request):

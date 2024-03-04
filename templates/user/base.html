@@ -26,7 +26,10 @@
   </head>
 
   <body>
-    {% block topNav %} {% endblock topNav %}
-    <div class="">{% block content %} {% endblock content %} {% include "user/bottom_navigation.html" %}</div>
+    <div class="">
+      {% block topNav %} {% endblock topNav %}
+      <div class="mb-20 mt-24">{% block content %} {% endblock content %}</div>
+      {% include "user/bottom_navigation.html" %}
+    </div>
   </body>
 </html>
