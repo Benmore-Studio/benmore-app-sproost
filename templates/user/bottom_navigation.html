@@ -1,9 +1,12 @@
 {% load static %}
 <div class="w-full fixed bg-white bottom-0 border-t border-neutral-150 p-4 shadow-md z-20">
+  {% with url_name=request.resolver_match.url_name %}
   <div class="flex items-center justify-between w-full">
     <div class="inline-flex flex-col gap-1 items-center">
-      <img src="{% static 'svgs/Home.svg' %}" alt="" class="" />
-      <span class="text-primary text-xs">My Home</span>
+      {% if url_name == 'home' %}
+      <img src="{% static 'svgs/Home.svg' %}" alt="" class="" /> <span class="text-primary text-xs">My Home</span> {% else %}
+      <img src="{% static 'svgs/Home-outline.svg' %}" alt="" class="" />
+      <span class="text-gray-500 text-xs">My Home</span> {% endif %}
     </div>
     <div class="inline-flex flex-col gap-1 items-center">
       <img src="{% static 'svgs/search.svg' %}" alt="" class="" />
@@ -22,4 +25,5 @@
       <span class="text-gray-500 text-xs">Menu</span>
     </div>
   </div>
+  {% endwith %}
 </div>
