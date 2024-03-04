@@ -19,23 +19,35 @@
   </div>
   <!-- project list -->
 
-  <div class="w-full my-8">
+  <div class="w-full my-8 flex flex-col gap-5">
+    {% for project in project_feed %}
     <div class="w-full p-4 bg-white border border-neutral-150 rounded-md shadow-sm">
       <div class="w-full flex flex-col gap-4">
         <div class="w-full flex items-center justify-between">
-          <h3 class="text-gray-900 font-medium">Number of Uploaded projects</h3>
+          <h3 class="text-gray-900 font-medium">{{project.title}}</h3>
           <span class="">
             <img src="{% static 'svgs/more-vertical.svg' %}" alt="" class="" />
           </span>
         </div>
         <div class="w-full flex items-center justify-between">
-          <h3 class="text-gray-900 text-2xl font-semibold">3</h3>
+          <h3 class="text-gray-900 text-2xl font-semibold">{{project.count}}</h3>
+          {% if project.status == 'uploaded' %}
           <span class="">
             <img src="{% static 'svgs/uploaded-project.svg' %}" alt="" class="" />
           </span>
+          {% elif project.status == 'quotes' %}
+          <span class="">
+            <img src="{% static 'svgs/quotes.svg' %}" alt="" class="" />
+          </span>
+          {% elif project.status == 'completed' %}
+          <span class="">
+            <img src="{% static 'svgs/completed-project.svg' %}" alt="" class="" />
+          </span>
+          {% endif %}
         </div>
       </div>
     </div>
+    {% endfor %}
   </div>
 </div>
 
