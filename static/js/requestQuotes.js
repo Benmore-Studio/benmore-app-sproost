@@ -15,7 +15,8 @@ function showStep(n) {
     document.getElementById("prevBtn").style.display = "block"
   }
   if (n == x.length - 1) {
-    document.getElementById("nextBtn").innerHTML = "Complete"
+    document.getElementById("nextBtn").innerHTML = "Confirm"
+    clearSuccessMsg()
   } else if (n === 0) {
     document.getElementById("nextBtn").textContent = "Request Quotes"
   } else {
@@ -32,12 +33,7 @@ function validateForm() {
   x = document.querySelectorAll("#step")
   y = x[currentStep].getElementsByTagName("input")
   // A loop that checks every input field in the current tab:
-  for (i = 0; i < y.length; i++) {
-    if (y[i].value != "") {
-      valid = true
-    } else if (y[i].type !== "radio" && y[i].value !== "") {
-      valid = true
-    }
+  if (y) {
   }
 
   return valid // return the valid status
@@ -46,7 +42,7 @@ function validateForm() {
 function nextPrev(n) {
   // This function will figure out which tab to display
   var x = document.querySelectorAll("#step")
-  if (n == 1 && !validateForm()) return false
+  //   if (n == 1 && !validateForm()) return false
   // Hide the current tab:
   x[currentStep].style.display = "none"
   // Increase or decrease the current tab by 1:
@@ -62,4 +58,10 @@ function nextPrev(n) {
 
 function goBack() {
   history.back()
+}
+
+function clearSuccessMsg() {
+  setTimeout(() => {
+    location.href = "/"
+  }, 2000)
 }
