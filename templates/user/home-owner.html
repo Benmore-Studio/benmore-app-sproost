@@ -7,7 +7,7 @@
     background-size: cover;
   }
 </style>
-<div class="w-full p-4 font['Inter']">
+<div class="w-full p-4 font['Inter'] mt-24">
   <div id="banner" class="w-full h-[150px] rounded-md">
     <div class="w-1/2 p-3 flex flex-col gap-6">
       <p class="text-sm font-bold">Get your renovation process started with a picture upload</p>
@@ -53,10 +53,10 @@
         <img src="{% static 'svgs/plus-green.svg' %}" alt="" class="" />
         <span class="text-primary text-sm font-semibold">Assign Agent</span>
       </button>
-      <button class="flex items-center justify-center gap-2 bg-primary p-3 w-full rounded-md shadow-sm">
+      <a href="{% url 'main:request-quotes' %}" class="flex items-center justify-center gap-2 bg-primary p-3 w-full rounded-md shadow-sm">
         <img src="{% static 'svgs/plus.svg' %}" alt="" class="" />
         <span class="text-white text-sm font-semibold">Request Quote</span>
-      </button>
+      </a>
     </div>
   </div>
   <!-- project request history -->

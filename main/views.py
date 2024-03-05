@@ -21,6 +21,10 @@ def home(request):
     context = {'project_feed': project_feed, 'project_history': project_history}
     return render(request, 'user/home-owner.html', context)
 
+def requestQuotes(request):
+    context ={}
+    return render(request, 'user/request_quotes.html', context)
+
 def loginUser(request):
     context = {}
     return render(request, 'user/auth/login.html', context)

@@ -1,0 +1,108 @@
+{% extends "user/base.html" %} {% load static %} {% block content %}
+
+<div class="w-full">
+  <!-- header -->
+  <div class="w-full p-4 flex items-center gap-8 mt-4 border-b border-neutral-150">
+    <img src="{% static 'svgs/chevron-left.svg' %}" alt="" class="" />
+    <h3 class="text-xl text-gray-900 font-medium">Request Quote</h3>
+  </div>
+  <!-- content -->
+  <div class="w-full p-4">
+    <div class="w-full">
+      <span class="text-sm text-gray-700 font-medium">Upload Pictures & Videos</span>
+      <p class="text-sm text-gray-500">This will be sent to the contractor to create a quotation</p>
+    </div>
+    <div class="w-full min-h-[150px] rounded-md border border-neutral-150 shadow-sm mt-4 flex flex-col gap-4 items-center justify-center">
+      <div class="w-12 h-12 flex items-center justify-center rounded-full bg-gray-200 bg-opacity-50 p-2">
+        <img src="{% static 'svgs/upload-cloud.svg' %}" alt="" class="" />
+      </div>
+      <p class="text-center text-sm text-gray-500">
+        <span class="text-primary font-semibold">Click to upload</span> or drag and drop <br />
+        SVG, PNG, JPG or GIF (max. 800x400px)
+      </p>
+    </div>
+    <!-- instruction -->
+    <div class="border-y border-neutral-150 py-5 mt-5">
+      <div class="w-full">
+        <span class="text-sm text-gray-700 font-medium">Instruction</span>
+        <p class="text-sm text-gray-500">Write a short instruction</p>
+      </div>
+
+      <form action="" class="w-full mt-4 flex flex-col gap-4">
+        <div class="w-full">
+          <label for="title" class="text-gray-700 font-medium text-sm">Title</label>
+          <input
+            type="text"
+            name="title"
+            id="title"
+            placeholder="Type here"
+            class="w-full p-2 border border-gray-300 rounded-md focus:outline-none mt-1 focus:border-gray-500"
+          />
+        </div>
+        <div class="w-full">
+          <label for="Summary" class="text-gray-700 font-medium text-sm">Summary</label>
+          <textarea
+            type="text"
+            name="Summary"
+            id="Summary"
+            placeholder="Type here"
+            class="w-full p-2 border min-h-[120px] border-gray-300 rounded-md focus:outline-none mt-1 focus:border-gray-500"
+          ></textarea>
+          <small class="text-gray-500">257 characters left</small>
+        </div>
+        <div class="w-full">
+          <span class="text-sm text-gray-700 font-medium">Contact Info</span>
+          <p class="text-sm text-gray-500">Provide your contact details</p>
+        </div>
+        <div class="w-full">
+          <label for="email" class="text-gray-700 font-medium text-sm">Phone number</label>
+          <div class="flex gap-2 p-2 border border-gray-300 p-2 mt-1 border border-gray-300 rounded-md">
+            <select
+              name="country"
+              id="country"
+              class="w-2/12 rounded-md focus:outline-none mt-1 disabled:bg-transparent bg-transparent outline-none border-none focus:border-gray-500"
+            >
+              <option value="" disabled selected>US</option>
+              <option value="USA">US</option>
+              <option value="Canada">Canada</option>
+              <option value="UK">UK</option>
+              <!-- Add more country options here -->
+            </select>
+            <input
+              type="tel"
+              name="phone"
+              id="phone"
+              placeholder="+1 (555) 000-0000"
+              class="w-10/12 rounded-md focus:outline-none mt-1 focus:border-gray-500"
+            />
+          </div>
+        </div>
+        <div class="w-full">
+          <label for="title" class="text-gray-700 font-medium text-sm">Email</label>
+          <div class="group border border-gray-300 rounded-md flex items-center gap-2 p-2 mt-1">
+            <img src="{% static 'svgs/mail.svg' %}" alt="" class="" />
+            <input
+              type="text"
+              name="title"
+              id="title"
+              placeholder="Type here"
+              class="w-full h-full outline-none group-focus:outline-none mt-1 focus-visible:border-none border-none"
+            />
+          </div>
+        </div>
+        <div class="w-full">
+          <label for="house-address" class="text-gray-700 font-medium text-sm">House Address</label>
+          <input
+            type="text"
+            name="house-address"
+            id="house-address"
+            placeholder="Type here"
+            class="w-full p-2 border border-gray-300 rounded-md focus:outline-none mt-1 focus:border-gray-500"
+          />
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
