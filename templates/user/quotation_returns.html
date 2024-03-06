@@ -11,7 +11,7 @@
     <!-- header -->
     <div class="w-full p-4 flex items-center gap-8 mt-4 border-b border-neutral-150">
       <img onclick="goBack()" src="{% static 'svgs/chevron-left.svg' %}" alt="" class="cursor-pointer" />
-      <h3 class="text-xl text-gray-900 font-medium">Request Quote</h3>
+      <h3 class="text-xl text-gray-900 font-medium">Quote Summary</h3>
     </div>
 
     <div class="w-full p-4">
@@ -153,20 +153,26 @@
               class="w-full p-2 border border-gray-300 rounded-md focus:outline-none mt-1 focus:border-gray-500"
             />
           </div>
-          <div class="flex justify-end gap-4 border-t border-neutral-150 pt-5">
+          <div class="flex items-center justify-between gap-4 border-t border-neutral-150 pt-5">
             <button
               type="button"
-              class="inline-flex p-3 rounded-lg items-center justify-center bg-white border border-neutral-150 shadow-sm font-semibold"
+              class="w-full flex p-3 rounded-lg items-center justify-center bg-white border border-neutral-150 shadow-sm font-semibold text-sm"
             >
               Cancel
+            </button>
+            <button
+              type="button"
+              class="w-full flex py-3 px-1 rounded-lg items-center justify-center bg-white border border-neutral-150 shadow-sm font-semibold text-sm"
+            >
+              Download PDF
             </button>
             <button
               id="nextBtn"
               onclick="nextPrev(1)"
               type="button"
-              class="inline-flex items-center justify-center p-3 rounded-lg bg-primary text-white border border-neutral-150 shadow-sm font-semibold"
+              class="w-full flex items-center justify-center py-3 px-1 rounded-lg bg-primary text-white border border-neutral-150 shadow-sm font-semibold text-sm"
             >
-              Request Quote
+              Accept Quote
             </button>
           </div>
         </form>
@@ -181,8 +187,8 @@
           <img src="{% static 'svgs/alert-triangle.svg' %}" alt="" class="" />
         </div>
         <div class="w-full">
-          <span class="text-lg mb-2 text-gray-900 font-semibold">Request Quotes</span>
-          <p class="text-sm text-gray-500">Please make sure that there are two angles of each room.</p>
+          <span class="text-lg mb-2 text-gray-900 font-semibold">Accept Quote</span>
+          <p class="text-sm text-gray-500">Are you sure you want to confirm the quotation given for your project?.</p>
         </div>
         <div class="w-full flex flex-col gap-3">
           <button
@@ -212,16 +218,24 @@
         <div class="rounded-full flex items-center justify-center">
           <img src="{% static 'svgs/success-tada.svg' %}" alt="" class="" />
         </div>
-        <div class="w-full text-center">
-          <span class="text-xl mb-2 text-gray-900 font-bold">Thank you for your submission</span>
-          <p class="text-sm text-gray-700">Our team will be in contact with you within 24-48hrs.</p>
+        <div class="w-full text-center flex flex-col gap-2">
+          <span class="text-xl mb-2 text-gray-900 font-bold">Congratulations</span>
+          <p class="text-sm text-gray-700 text-center">
+            A meeting will be set between you and one of our agents. Please click the button below to schedule based on your availability.
+          </p>
         </div>
+        <a
+          href="https://calendly.com/"
+          class="flex items-center w-full justify-center p-3 rounded-lg bg-primary text-white border border-neutral-150 shadow-sm font-semibold"
+        >
+          Schedule Meeting
+        </a>
       </div>
     </div>
   </div>
 </div>
 
 {% endblock %} {% block extraScripts %}
-<script src="{% static 'js/requestQuotes.js' %}"></script>
+<script src="{% static 'js/quotationReturn.js' %}"></script>
 
 {% endblock extraScripts %}
