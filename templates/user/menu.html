@@ -1,7 +1,39 @@
 {% extends "user/base.html" %} {% load static %} {% block content %}
 <main class="w-full">
   <div class="w-full p-8 flex items-center justify-center border-b border-neutral-150">
-    <img src="{% static 'svgs/sproost.svg' %}" alt="" class="" />
+    <img src="{% static 'svgs/sproost-name.svg' %}" alt="" class="" />
+  </div>
+  <div class="w-full p-4 flex flex-col gap-4">
+    <a href="#" class="w-full flex items-center justify-between py-2 border-b border-neutral-100 last:border-b-0">
+      <h3 class="text-gray-500 font-medium">Find contractors</h3>
+      <span class="">
+        <img src="{% static 'svgs/chevron-right-black.svg' %}" alt="" class="" />
+      </span>
+    </a>
+    <a href="#" class="w-full flex items-center justify-between py-2 border-b border-neutral-100 last:border-b-0">
+      <h3 class="text-gray-500 font-medium">Quotes</h3>
+      <span class="">
+        <img src="{% static 'svgs/chevron-right-black.svg' %}" alt="" class="" />
+      </span>
+    </a>
+    <a href="#" class="w-full flex items-center justify-between py-2 border-b border-neutral-100 last:border-b-0">
+      <h3 class="text-gray-500 font-medium">About</h3>
+      <span class="">
+        <img src="{% static 'svgs/chevron-right-black.svg' %}" alt="" class="" />
+      </span>
+    </a>
+    <a href="#" class="w-full flex items-center justify-between py-2 border-b border-neutral-100 last:border-b-0">
+      <h3 class="text-gray-500 font-medium">Notes</h3>
+      <span class="">
+        <img src="{% static 'svgs/chevron-right-black.svg' %}" alt="" class="" />
+      </span>
+    </a>
+    <a href="#" class="w-full flex items-center justify-between py-2 border-b border-neutral-100 last:border-b-0">
+      <h3 class="text-gray-500 font-medium">Accoint Settings</h3>
+      <span class="">
+        <img src="{% static 'svgs/chevron-right-black.svg' %}" alt="" class="" />
+      </span>
+    </a>
   </div>
 </main>
 {% endblock content %}
