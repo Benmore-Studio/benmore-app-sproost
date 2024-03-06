@@ -30,7 +30,15 @@ def assignAgent(request):
     return render(request, 'user/assignAgent.html', context)
 
 def propertyList(request):
-    context ={}
+    properties =[
+        {'name':"Daine Homes", 'address':"4600 East Washington Street, Suite 305"},
+        {'name':"Golden Homes", 'address':"No. 17 November Street. 10343 NY"},
+        {'name':"Grand-Stay Homes", 'address':"No. 10 Silints Street. 42333 LA"},
+        {'name':"Safe Homes", 'address':"No. 10 Silints Street. 42333 LA"},
+    ]
+    context ={
+        'properties': properties
+    }
     return render(request, 'user/propertyList.html', context)
 
 def loginUser(request):
