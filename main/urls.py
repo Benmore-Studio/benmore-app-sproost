@@ -7,6 +7,7 @@ from django.contrib.auth import views as auth_views
 app_name = 'main'
 urlpatterns = [
     path('', views.home, name="home"),
+    path('menu/', views.MenuList, name="menu"),
     path('request-quotes/', views.requestQuotes, name="request-quotes"),
     path('quotes-summary/', views.QuotationReturn, name="quotes-summary"),
     path('assign-agent/', views.assignAgent, name="assign-agent"),

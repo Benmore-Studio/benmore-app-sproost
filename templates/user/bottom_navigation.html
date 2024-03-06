@@ -20,9 +20,13 @@
       <img src="{% static 'svgs/Message.svg' %}" alt="" class="" />
       <span class="text-gray-500 text-xs">Messages</span>
     </a>
-    <a href="#" class="inline-flex flex-col gap-1 items-center">
+    <a href="{% url 'main:menu' %}" class="inline-flex flex-col gap-1 items-center">
+      {% if url_name == 'menu' %}
+      <img src="{% static 'svgs/more-horizon-green.svg' %}" alt="" class="" />
+      <span class="text-primary text-xs">Menu</span> {% else %}
       <img src="{% static 'svgs/more-horizon.svg' %}" alt="" class="" />
       <span class="text-gray-500 text-xs">Menu</span>
+      {% endif %}
     </a>
   </div>
   {% endwith %}

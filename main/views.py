@@ -49,6 +49,12 @@ def propertyList(request):
         'properties': properties
     }
     return render(request, 'user/propertyList.html', context)
+
 def QuotationReturn(request):
     context ={}
     return render(request, 'user/quotation_returns.html', context)
+
+def MenuList(request):
+    context ={}
+    return render(request, 'user/menu.html', context)
+ 
