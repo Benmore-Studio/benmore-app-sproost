@@ -1,6 +1,15 @@
 from django.shortcuts import render
+# authentication
 
-# Create your views here.
+def loginUser(request):
+    context = {}
+    return render(request, 'user/auth/login.html', context)
+
+def signUpUser(request):
+    context = {}
+    return render(request, 'user/auth/signup.html', context)
+
+# mains
 def home(request):
     project_feed= [
         {
@@ -40,11 +49,6 @@ def propertyList(request):
         'properties': properties
     }
     return render(request, 'user/propertyList.html', context)
-
-def loginUser(request):
-    context = {}
-    return render(request, 'user/auth/login.html', context)
-
-def signUpUser(request):
-    context = {}
-    return render(request, 'user/auth/signup.html', context)
+def QuotationReturn(request):
+    context ={}
+    return render(request, 'user/quotation_returns.html', context)

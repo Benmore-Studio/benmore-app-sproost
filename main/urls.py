@@ -8,6 +8,7 @@ app_name = 'main'
 urlpatterns = [
     path('', views.home, name="home"),
     path('request-quotes/', views.requestQuotes, name="request-quotes"),
+    path('quotes-summary/', views.QuotationReturn, name="quotes-summary"),
     path('assign-agent/', views.assignAgent, name="assign-agent"),
     path('property-list/', views.propertyList, name="property-list"),
     path('login/', views.loginUser, name="login"),
