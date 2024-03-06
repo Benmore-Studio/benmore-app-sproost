@@ -25,6 +25,10 @@ def requestQuotes(request):
     context ={}
     return render(request, 'user/request_quotes.html', context)
 
+def assignAgent(request):
+    context ={}
+    return render(request, 'user/assignAgent.html', context)
+
 def loginUser(request):
     context = {}
     return render(request, 'user/auth/login.html', context)

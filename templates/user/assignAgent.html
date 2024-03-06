@@ -1,0 +1,64 @@
+{% extends "user/base.html" %} {% load static %} {% block content %}
+<div class="w-full">
+  <!-- header -->
+  <div class="w-full p-4 flex items-center gap-8 mt-4 border-b border-neutral-150">
+    <img onclick="goBack()" src="{% static 'svgs/chevron-left.svg' %}" alt="" class="cursor-pointer" />
+    <h3 class="text-xl text-gray-900 font-medium">Assign Agent</h3>
+  </div>
+
+  <div class="w-full p-4">
+    <form action="" class="w-full mt-4 flex flex-col gap-4">
+      <div class="w-full">
+        <label for="agentName" class="text-gray-700 font-medium text-sm">Agent Name</label>
+        <input
+          type="text"
+          name="agentName"
+          id="agentName"
+          placeholder="Type here"
+          class="w-full p-2 border border-gray-300 rounded-md focus:outline-none mt-1 focus:border-gray-500"
+        />
+      </div>
+      <div class="w-full">
+        <label for="regNumber" class="text-gray-700 font-medium text-sm">Registration Number</label>
+        <input
+          type="text"
+          name="regNumber"
+          id="regNumber"
+          placeholder="Type here"
+          class="w-full p-2 border border-gray-300 rounded-md focus:outline-none mt-1 focus:border-gray-500"
+        />
+      </div>
+      <div class="w-full">
+        <label for="title" class="text-gray-700 font-medium text-sm">Email</label>
+        <div class="group border border-gray-300 rounded-md flex items-center gap-2 p-2 mt-1">
+          <img src="{% static 'svgs/mail.svg' %}" alt="" class="fill-gray-500 w-[20px] h-[20px] text-gray-500" />
+          <input
+            type="text"
+            name="title"
+            id="title"
+            placeholder="Type here"
+            class="w-full h-full outline-none group-focus:outline-none mt-1 focus-visible:border-none border-none"
+          />
+        </div>
+      </div>
+
+      <div class="flex w-full flex-col gap-4 border-t border-neutral-150 pt-5">
+        <button
+          id="nextBtn"
+          onclick="nextPrev(1)"
+          type="button"
+          class="flex items-center w-full justify-center p-3 rounded-lg bg-primary text-white border border-neutral-150 shadow-sm font-semibold"
+        >
+          Request Quote
+        </button>
+        <button
+          type="button"
+          class="flex p-3 w-full rounded-lg items-center justify-center bg-white border border-neutral-150 shadow-sm font-semibold"
+        >
+          Cancel
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

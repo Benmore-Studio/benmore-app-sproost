@@ -49,11 +49,17 @@
     </div>
     {% endfor %}
     <div class="w-full flex items-center gap-4">
-      <button class="flex items-center justify-center gap-2 bg-toneLightGreen p-3 w-full rounded-md shadow-sm">
+      <a
+        href="{% url 'main:assign-agent' %}"
+        class="flex items-center justify-center cursor-pointer gap-2 bg-toneLightGreen p-3 w-full rounded-md shadow-sm"
+      >
         <img src="{% static 'svgs/plus-green.svg' %}" alt="" class="" />
         <span class="text-primary text-sm font-semibold">Assign Agent</span>
-      </button>
-      <a href="{% url 'main:request-quotes' %}" class="flex items-center justify-center gap-2 bg-primary p-3 w-full rounded-md shadow-sm">
+      </a>
+      <a
+        href="{% url 'main:request-quotes' %}"
+        class="flex items-center justify-center gap-2 cursor-pointer bg-primary p-3 w-full rounded-md shadow-sm"
+      >
         <img src="{% static 'svgs/plus.svg' %}" alt="" class="" />
         <span class="text-white text-sm font-semibold">Request Quote</span>
       </a>

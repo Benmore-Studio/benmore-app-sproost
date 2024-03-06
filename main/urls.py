@@ -8,6 +8,7 @@ app_name = 'main'
 urlpatterns = [
     path('', views.home, name="home"),
     path('request-quotes/', views.requestQuotes, name="request-quotes"),
+    path('assign-agent/', views.assignAgent, name="assign-agent"),
     path('login/', views.loginUser, name="login"),
     path('signup/', views.signUpUser, name="signup"),
 ]
