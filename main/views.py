@@ -59,6 +59,24 @@ def MenuList(request):
     return render(request, 'user/menu.html', context)
 
 def contractors(request):
-    context ={}
+    searchResults = [
+        {'name': 'Olivia Rhye', 'profession': 'plumber', 'phone': '+1 834 955 0920', 'email': 'olivia@untitledui.com'},
+        {'name': 'Phoenix Baker', 'profession': 'electrician', 'phone': '+1 834 955 0920', 'email': 'olivia@untitledui.com'},
+        {'name': 'Lana Steiner', 'profession': 'carpenter', 'phone': '+1 834 955 0920', 'email': 'olivia@untitledui.com'},
+        {'name': 'Demi Wilkinson', 'profession': 'interior designer', 'phone': '+1 834 955 0920', 'email': 'olivia@untitledui.com'},
+        {'name': 'Candice Wua', 'profession': 'painter', 'phone': '+1 834 955 0920', 'email': 'olivia@untitledui.com'},
+        {'name': 'Natali Craig', 'profession': 'carpenter', 'phone': '+1 834 955 0920', 'email': 'olivia@untitledui.com'},
+        {'name': 'Drew Cano', 'profession': 'painter', 'phone': '+1 834 955 0920', 'email': 'olivia@untitledui.com'},
+        {'name': 'Phoenix Baker', 'profession': 'electrician', 'phone': '+1 834 955 0920', 'email': 'olivia@untitledui.com'},
+        {'name': 'Lana Steiner', 'profession': 'carpenter', 'phone': '+1 834 955 0920', 'email': 'olivia@untitledui.com'},
+        {'name': 'Demi Wilkinson', 'profession': 'interior designer', 'phone': '+1 834 955 0920', 'email': 'olivia@untitledui.com'},
+        
+    ]
+    context ={
+        'contractors': searchResults
+    }
     return render(request, 'user/contractors.html', context)
  
+def contractorDetail(request, profession):
+    context ={}
+    return render(request, 'user/contractorDetail.html', context)

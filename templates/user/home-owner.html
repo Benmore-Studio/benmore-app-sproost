@@ -6,15 +6,90 @@
     background-position: center;
     background-size: cover;
   }
+
+  #banner2 {
+    border-radius: 10px;
+    background: linear-gradient(90deg, rgba(159, 216, 141, 1) 48%, rgba(159, 216, 141, 0.16) 48%), url("{% static 'images/bannerAfter.png' %}");
+    background-position: center;
+    background-size: cover;
+  }
+
+  .carousel-container {
+    width: 100%;
+    margin: auto;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .carousel-slide {
+    display: flex;
+    transition: transform 0.5s ease;
+  }
+
+  .carousel-item {
+    width: 100%;
+  }
+
+  .carousel-indicators {
+    text-align: center;
+    margin-top: 10px;
+  }
+
+  .indicator {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: #bbb;
+    margin: 0 5px;
+    cursor: pointer;
+  }
+
+  .indicator.active {
+    background-color: #333;
+  }
 </style>
 <div class="w-full p-4 font['Inter'] mt-24">
-  <div id="banner" class="w-full h-[150px] rounded-md">
-    <div class="w-1/2 p-3 flex flex-col gap-6">
-      <p class="text-sm font-bold">Get your renovation process started with a picture upload</p>
-      <button class="inline-flex w-5/6 items-center justify-center gap-2 bg-primary p-2 shadow-md rounded-md">
-        <span class="text-sm text-white">Get a quote</span>
-        <img src="{% static 'svgs/Arrow-Right.svg' %}" alt="" class="" />
-      </button>
+  <div class="carousel-container">
+    <div class="carousel-slide">
+      <div class="carousel-item">
+        <div id="banner" class="w-full h-[150px] rounded-md">
+          <div class="w-1/2 p-3 flex flex-col gap-6">
+            <p class="text-sm font-bold">Get your renovation process started with a picture upload</p>
+            <button class="inline-flex w-5/6 items-center justify-center gap-2 bg-primary p-2 shadow-md rounded-md">
+              <span class="text-sm text-white">Get a quote</span>
+              <img src="{% static 'svgs/Arrow-Right.svg' %}" alt="" class="" />
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="carousel-item">
+        <div id="banner2" class="w-full h-[150px] rounded-md">
+          <div class="w-1/2 p-3 flex flex-col gap-6">
+            <p class="text-sm font-bold">Get your renovation process started with a picture upload</p>
+            <button class="inline-flex w-5/6 items-center justify-center gap-2 bg-primary p-2 shadow-md rounded-md">
+              <span class="text-sm text-white">Get a quote</span>
+              <img src="{% static 'svgs/Arrow-Right.svg' %}" alt="" class="" />
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="carousel-item">
+        <div id="banner" class="w-full h-[150px] rounded-md">
+          <div class="w-1/2 p-3 flex flex-col gap-6">
+            <p class="text-sm font-bold">Get your renovation process started with a picture upload</p>
+            <button class="inline-flex w-5/6 items-center justify-center gap-2 bg-primary p-2 shadow-md rounded-md">
+              <span class="text-sm text-white">Get a quote</span>
+              <img src="{% static 'svgs/Arrow-Right.svg' %}" alt="" class="" />
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="carousel-indicators">
+      <span class="indicator active" onclick="currentSlide(1)"></span>
+      <span class="indicator" onclick="currentSlide(2)"></span>
+      <span class="indicator" onclick="currentSlide(3)"></span>
     </div>
   </div>
   <!-- project list -->
@@ -119,4 +194,6 @@
     </div>
   </div>
 </div>
-{% endblock content %}
+{% endblock content %} {% block extraScripts %}
+<script src="{% static 'js/home_owner.js'%}"></script>
+{% endblock extraScripts %}
