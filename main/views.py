@@ -57,4 +57,8 @@ def QuotationReturn(request):
 def MenuList(request):
     context ={}
     return render(request, 'user/menu.html', context)
+
+def contractors(request):
+    context ={}
+    return render(request, 'user/contractors.html', context)
  

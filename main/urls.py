@@ -12,6 +12,7 @@ urlpatterns = [
     path('quotes-summary/', views.QuotationReturn, name="quotes-summary"),
     path('assign-agent/', views.assignAgent, name="assign-agent"),
     path('property-list/', views.propertyList, name="property-list"),
+    path('contractors/', views.contractors, name="contractors"),
     path('login/', views.loginUser, name="login"),
     path('signup/', views.signUpUser, name="signup"),
 ]
