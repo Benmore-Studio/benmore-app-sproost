@@ -1,0 +1,10 @@
+{% extends "user/base.html" %} {% load static %} {% block topNav %} {% include "user/top-navigation.html" %} {% endblock topNav %} {% block content %}
+<style>
+  #banner {
+    border-radius: 10px;
+    background: linear-gradient(90deg, rgba(159, 216, 141, 1) 48%, rgba(159, 216, 141, 0.16) 48%), url("{% static 'images/bannerBefore.png' %}");
+    background-position: center;
+    background-size: cover;
+  }
+</style>
+{% endblock %}

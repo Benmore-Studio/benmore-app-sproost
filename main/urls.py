@@ -9,6 +9,7 @@ urlpatterns = [
     path('', views.home, name="home"),
     path('request-quotes/', views.requestQuotes, name="request-quotes"),
     path('assign-agent/', views.assignAgent, name="assign-agent"),
+    path('property-list/', views.propertyList, name="property-list"),
     path('login/', views.loginUser, name="login"),
     path('signup/', views.signUpUser, name="signup"),
 ]

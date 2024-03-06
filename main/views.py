@@ -29,6 +29,10 @@ def assignAgent(request):
     context ={}
     return render(request, 'user/assignAgent.html', context)
 
+def propertyList(request):
+    context ={}
+    return render(request, 'user/propertyList.html', context)
+
 def loginUser(request):
     context = {}
     return render(request, 'user/auth/login.html', context)

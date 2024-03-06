@@ -2,28 +2,28 @@
 <div class="w-full fixed bg-white bottom-0 border-t border-neutral-150 p-4 shadow-md z-20">
   {% with url_name=request.resolver_match.url_name %}
   <div class="flex items-center justify-between w-full">
-    <div class="inline-flex flex-col gap-1 items-center">
-      {% if url_name == 'home' %}
+    <a href="{% url 'main:home' %}" class="inline-flex flex-col gap-1 items-center">
+      {% if url_name == 'home' or url_name == 'property-list' %}
       <img src="{% static 'svgs/Home.svg' %}" alt="" class="" /> <span class="text-primary text-xs">My Home</span> {% else %}
       <img src="{% static 'svgs/Home-outline.svg' %}" alt="" class="" />
       <span class="text-gray-500 text-xs">My Home</span> {% endif %}
-    </div>
-    <div class="inline-flex flex-col gap-1 items-center">
+    </a>
+    <a href="#" class="inline-flex flex-col gap-1 items-center">
       <img src="{% static 'svgs/search.svg' %}" alt="" class="" />
       <span class="text-gray-500 text-xs">Search</span>
-    </div>
-    <div class="inline-flex flex-col gap-1 items-center">
+    </a>
+    <a href="#" class="inline-flex flex-col gap-1 items-center">
       <img src="{% static 'svgs/Add-upload.svg' %}" alt="" class="" />
       <span class="text-gray-500 text-xs">Upload</span>
-    </div>
-    <div class="inline-flex flex-col gap-1 items-center">
+    </a>
+    <a href="#" class="inline-flex flex-col gap-1 items-center">
       <img src="{% static 'svgs/Message.svg' %}" alt="" class="" />
       <span class="text-gray-500 text-xs">Messages</span>
-    </div>
-    <div class="inline-flex flex-col gap-1 items-center">
+    </a>
+    <a href="#" class="inline-flex flex-col gap-1 items-center">
       <img src="{% static 'svgs/more-horizon.svg' %}" alt="" class="" />
       <span class="text-gray-500 text-xs">Menu</span>
-    </div>
+    </a>
   </div>
   {% endwith %}
 </div>
