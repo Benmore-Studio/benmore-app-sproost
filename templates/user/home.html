@@ -1,0 +1,195 @@
+{% extends "user/base.html" %} {% load static %} {% block topNav %} {% include "user/top-navigation.html" %} {% endblock topNav %} {% block content %}
+<style>
+    #banner {
+        border-radius: 10px;
+        background: linear-gradient(90deg, rgba(159, 216, 141, 1) 48%, rgba(159, 216, 141, 0.16) 48%),
+        url("{% static 'images/bannerBefore.png' %}");
+        background-position: center;
+        background-size: cover;
+    }
+    
+    #banner2 {
+        border-radius: 10px;
+        background: linear-gradient(90deg,
+        rgba(159, 216, 141, 1) 48%,
+        rgba(159, 216, 141, 0.16) 48%),
+        url("{% static 'images/bannerAfter.png' %}");
+        background-position: center;
+        background-size: cover;
+    }
+    
+    .carousel-container {
+        width: 100%;
+        margin: auto;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .carousel-slide {
+        display: flex;
+        transition: transform 0.5s ease;
+    }
+    
+    .carousel-item {
+        width: 100%;
+    }
+    
+    .carousel-indicators {
+        text-align: center;
+        margin-top: 10px;
+    }
+    
+    .indicator {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background-color: #bbb;
+        margin: 0 5px;
+        cursor: pointer;
+    }
+    
+    .indicator.active {
+        background-color: #333;
+    }
+</style>
+<div class="w-full p-4 font['Inter'] mt-24">
+    <div class="carousel-container">
+        <div class="carousel-slide">
+            <div class="carousel-item">
+                <div id="banner" class="w-full h-[150px] rounded-md">
+                    <div class="w-1/2 p-3 flex flex-col gap-6">
+                        <p class="text-sm font-bold">Get your renovation process started with a picture upload</p>
+                        <button class="inline-flex w-5/6 items-center justify-center gap-2 bg-primary p-2 shadow-md rounded-md">
+              <span class="text-sm text-white">Get a quote</span>
+              <img src="{% static 'svgs/Arrow-Right.svg' %}" alt="" class="" />
+            </button>
+                    </div>
+                </div>
+            </div>
+            <div class="carousel-item">
+                <div id="banner2" class="w-full h-[150px] rounded-md">
+                    <div class="w-1/2 p-3 flex flex-col gap-6">
+                        <p class="text-sm font-bold">Get your renovation process started with a picture upload</p>
+                        <button class="inline-flex w-5/6 items-center justify-center gap-2 bg-primary p-2 shadow-md rounded-md">
+              <span class="text-sm text-white">Get a quote</span>
+              <img src="{% static 'svgs/Arrow-Right.svg' %}" alt="" class="" />
+            </button>
+                    </div>
+                </div>
+            </div>
+            <div class="carousel-item">
+                <div id="banner" class="w-full h-[150px] rounded-md">
+                    <div class="w-1/2 p-3 flex flex-col gap-6">
+                        <p class="text-sm font-bold">Get your renovation process started with a picture upload</p>
+                        <button class="inline-flex w-5/6 items-center justify-center gap-2 bg-primary p-2 shadow-md rounded-md">
+              <span class="text-sm text-white">Get a quote</span>
+              <img src="{% static 'svgs/Arrow-Right.svg' %}" alt="" class="" />
+            </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="carousel-indicators">
+            <span class="indicator active" onclick="currentSlide(1)"></span>
+            <span class="indicator" onclick="currentSlide(2)"></span>
+            <span class="indicator" onclick="currentSlide(3)"></span>
+        </div>
+    </div>
+    <!-- project list -->
+
+    <div class="w-full my-8 flex flex-col gap-5">
+        {% for project in project_feed %}
+        <div class="w-full p-4 bg-white border border-neutral-150 rounded-md shadow-sm">
+            <div class="w-full flex flex-col gap-4">
+                <div class="w-full flex items-center justify-between">
+                    <h3 class="text-gray-900 font-medium">{{project.title}}</h3>
+                    <span class="">
+            <img src="{% static 'svgs/more-vertical.svg' %}" alt="" class="" />
+          </span>
+                </div>
+                <div class="w-full flex items-center justify-between">
+                    <h3 class="text-gray-900 text-2xl font-semibold">{{project.count}}</h3>
+                    {% if project.status == 'uploaded' %}
+                    <span class="">
+            <img src="{% static 'svgs/uploaded-project.svg' %}" alt="" class="" />
+          </span> {% elif project.status == 'quotes' %}
+                    <span class="">
+            <img src="{% static 'svgs/quotes.svg' %}" alt="" class="" />
+          </span> {% elif project.status == 'completed' %}
+                    <span class="">
+            <img src="{% static 'svgs/completed-project.svg' %}" alt="" class="" />
+          </span> {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+        <div class="w-full flex items-center gap-4">
+            <a href="{% url 'main:assign-agent' %}" class="flex items-center justify-center cursor-pointer gap-2 bg-toneLightGreen p-3 w-full rounded-md shadow-sm">
+                <img src="{% static 'svgs/plus-green.svg' %}" alt="" class="" />
+                <span class="text-primary text-sm font-semibold">Assign Agent</span>
+            </a>
+            <a href="{% url 'main:request-quotes' %}" class="flex items-center justify-center gap-2 cursor-pointer bg-primary p-3 w-full rounded-md shadow-sm">
+                <img src="{% static 'svgs/plus.svg' %}" alt="" class="" />
+                <span class="text-white text-sm font-semibold">Request Quote</span>
+            </a>
+        </div>
+    </div>
+    <!-- project request history -->
+    <div class="w-full">
+        <div class="rounded-lg w-full border border-neutral-150 p-4">
+            <!-- header -->
+            <div class="w-full flex items-center justify-between border-b border-neutral-150 pb-4">
+                <h3 class="text-gray-900 font-semibold">Project Request history</h3>
+                <a href="#" class="text-primary bg-toneLightGreen text-center p-2 px-4 rounded-md"> See all </a>
+            </div>
+            <!-- content -->
+            <div class="mt-4 flex flex-col gap-4">
+                {% for project in project_history %}
+                <div class="w-full flex flex-col gap-4 p-4 border text-xs border-neutral-150 rounded-md">
+                    <div class="w-full flex items-center justify-between">
+                        <div class="text-xs flex flex-col gap-2">
+                            <span class="text-gray-500 font-medium">Project Name</span>
+                            <h3 class="text-gray-600 font-semibold">{{project.name}}</h3>
+                        </div>
+                        <span class="">
+              <img src="{% static 'svgs/more-vertical.svg' %}" alt="" class="" />
+            </span>
+                    </div>
+                    <div class="flex items-start gap-8">
+                        <div class="">
+                            <span class="text-gray-500 font-medium">Home Owner</span>
+                            <div class="flex items-center gap-4 mt-2">
+                                <img src="{{project.home_owner.image}}" alt="" class="w-8 h-8 object-contain" />
+                                <span class="text-gray-900 font-medium">{{project.home_owner.name}}</span>
+                                <img src="{% static 'svgs/chat-msg.svg' %}" alt="" />
+                            </div>
+                        </div>
+                        <div class="text-xs flex flex-col gap-2">
+                            <span class="text-gray-500 font-medium">Created Date</span>
+                            <h3 class="text-gray-600 font-semibold mt-2">{{project.created_date}}</h3>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-8">
+                        <div class="text-xs flex flex-col gap-2">
+                            <span class="text-gray-500 font-medium">Location</span>
+                            <h3 class="text-gray-600 font-semibold mt-2">{{project.location}}</h3>
+                        </div>
+                        <div class="text-xs flex flex-col gap-2">
+                            <span class="text-gray-500 font-medium">Quotation Status</span>
+                            <div class="inline-flex p-1 px-2 bg-gray-200 bg-opacity-50 items-center w-fit gap-2 border border-neutral-150 rounded-xl">
+                                <div class="w-2 h-2 bg-blue-600 rounded-full"></div>
+                                <span class="text-[10px]">{{project.quotation_status}}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %} {% block bottomNav %} {% if loggedInUser == 'agent' %} {% include "user/bottom_nav_agent.html" %}{% elif loggedInUser == 'contractor' %}{% include "user/bottom_nav_contractor.html"%}{% else %}{% include "user/bottom_nav.html" %}
+{% endif %} {% endblock bottomNav %} {% block extraScripts %}
+<script src="{% static 'js/home_owner.js'%}"></script>
+{% endblock extraScripts %}

@@ -1,6 +1,10 @@
 from django.shortcuts import render
 # authentication
 
+
+
+# loggedInUser = 'home-owner', 'agent', 'contractor', 'investor', this is used to switch between bottom navigation, default navigation is home-owner, so need to add it.
+loggedInUser = 'agent'
 def loginUser(request):
     context = {}
     return render(request, 'user/auth/login.html', context)
@@ -27,15 +31,19 @@ def home(request):
         {'name':'Bungalow Renovation', 'quotation_status': 'pending', 'home_owner': {'name':'Olivia Rhye', 'image':'/static/images/ownerAvatar.png'}, 'location': 'New Yersey, Newark', 'created_date': 'Jan 28, 2024'},
         {'name':'Bungalow Renovation', 'quotation_status': 'pending', 'home_owner': {'name':'Olivia Rhye', 'image':'/static/images/ownerAvatar.png'}, 'location': 'New Yersey, Newark', 'created_date': 'Jan 28, 2024'},
     ]
-    context = {'project_feed': project_feed, 'project_history': project_history}
-    return render(request, 'user/home-owner.html', context)
+    context = {'project_feed': project_feed, 'project_history': project_history, 'loggedInUser': loggedInUser}
+    return render(request, 'user/home.html', context)
 
 def requestQuotes(request):
-    context ={}
+    context ={
+        'loggedInUser': loggedInUser
+    }
     return render(request, 'user/request_quotes.html', context)
 
 def assignAgent(request):
-    context ={}
+    context ={
+        'loggedInUser': loggedInUser
+    }
     return render(request, 'user/assignAgent.html', context)
 
 def propertyList(request):
@@ -46,16 +54,21 @@ def propertyList(request):
         {'name':"Safe Homes", 'address':"No. 10 Silints Street. 42333 LA"},
     ]
     context ={
-        'properties': properties
+        'properties': properties,
+        'loggedInUser': loggedInUser
     }
     return render(request, 'user/propertyList.html', context)
 
 def QuotationReturn(request):
-    context ={}
+    context ={
+        'loggedInUser': loggedInUser
+    }
     return render(request, 'user/quotation_returns.html', context)
 
 def MenuList(request):
-    context ={}
+    context ={
+        'loggedInUser': loggedInUser
+    }
     return render(request, 'user/menu.html', context)
 
 def contractors(request):
@@ -71,12 +84,16 @@ def contractors(request):
         {'name': 'Lana Steiner', 'profession': 'carpenter', 'phone': '+1 834 955 0920', 'email': 'olivia@untitledui.com'},
         {'name': 'Demi Wilkinson', 'profession': 'interior designer', 'phone': '+1 834 955 0920', 'email': 'olivia@untitledui.com'},
         
+        
     ]
     context ={
-        'contractors': searchResults
+        'contractors': searchResults,
+        'loggedInUser': loggedInUser
     }
     return render(request, 'user/contractors.html', context)
  
 def contractorDetail(request, profession):
-    context ={}
+    context ={
+        'loggedInUser': loggedInUser
+    }
     return render(request, 'user/contractorDetail.html', context)

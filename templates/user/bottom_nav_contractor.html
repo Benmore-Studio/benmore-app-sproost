@@ -1,0 +1,42 @@
+{% load static %}
+<div
+  class="w-full fixed bg-white bottom-0 border-t border-neutral-150 p-4 shadow-md z-20"
+>
+  {% with url_name=request.resolver_match.url_name %}
+  <div class="flex items-center justify-between w-full">
+    <a
+      href="{% url 'main:home' %}"
+      class="inline-flex flex-col gap-1 items-center"
+    >
+      {% if url_name == 'home' or url_name == 'property-list' %}
+      <img src="{% static 'svgs/listing.svg' %}" alt="" class="" />
+      <span class="text-primary text-xs">Projects</span> {% else %}
+      <img src="{% static 'svgs/listing-outline.svg' %}" alt="" class="" />
+      <span class="text-gray-500 text-xs">Projects</span> {% endif %}
+    </a>
+    <a href="#" class="inline-flex flex-col gap-1 items-center">
+      <img src="{% static 'svgs/search.svg' %}" alt="" class="" />
+      <span class="text-gray-500 text-xs">Search</span>
+    </a>
+    <a href="#" class="inline-flex flex-col gap-1 items-center">
+      <img src="{% static 'svgs/Add-upload.svg' %}" alt="" class="" />
+      <span class="text-gray-500 text-xs">Upload</span>
+    </a>
+    <a href="#" class="inline-flex flex-col gap-1 items-center">
+      <img src="{% static 'svgs/Message.svg' %}" alt="" class="" />
+      <span class="text-gray-500 text-xs">Messages</span>
+    </a>
+    <a
+      href="{% url 'main:menu'  %}"
+      class="inline-flex flex-col gap-1 items-center"
+    >
+      {% if url_name == 'menu' or url_name == 'contractors' %}
+      <img src="{% static 'svgs/more-horizon-green.svg' %}" alt="" class="" />
+      <span class="text-primary text-xs">Menu</span> {% else %}
+      <img src="{% static 'svgs/more-horizon.svg' %}" alt="" class="" />
+      <span class="text-gray-500 text-xs">Menu</span>
+      {% endif %}
+    </a>
+  </div>
+  {% endwith %}
+</div>
