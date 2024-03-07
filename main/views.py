@@ -98,3 +98,9 @@ def contractorDetail(request, profession):
         'loggedInUser': loggedInUser
     }
     return render(request, 'user/contractorDetail.html', context)
+
+def addProperty(request):
+    context ={
+        'loggedInUser': loggedInUser
+    }
+    return render(request, 'user/add_property.html', context)

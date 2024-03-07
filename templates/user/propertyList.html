@@ -21,7 +21,7 @@
         </div>
         {% endfor %}
         <div class="flex justify-end">
-            <a href="#" class="inline-flex items-center justify-center gap-2 cursor-pointer bg-primary p-3 rounded-md shadow-sm">
+            <a href="{% url 'main:add-property' %}" class="inline-flex items-center justify-center gap-2 cursor-pointer bg-primary p-3 rounded-md shadow-sm">
                 <img src="{% static 'svgs/plus.svg' %}" alt="" class="" />
                 <span class="text-white text-sm font-semibold">Add Property</span>
             </a>
@@ -34,9 +34,11 @@
     const propertyListItems = document.querySelectorAll("#propItem")
     propertyListItems.forEach((propItem) => {
         propItem.addEventListener("click", () => {
-            propItem.classList.toggle("active")
+            propertyListItems.forEach((prop) => {
+                prop.classList.remove("active")
+            })
+            propItem.classList.add("active")
         })
     })
-    propertyListItems[0].classList.add("active")
 </script>
 {% endblock extraScripts %}
