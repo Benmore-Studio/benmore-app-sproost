@@ -190,6 +190,35 @@
             </div>
         </div>
     </div>
+    <!-- add property -->
+    <div class="mt-5">
+        <div class="flex items-center justify-end">
+            <a href="{% url 'main:request-quotes' %}" class="flex items-center justify-center gap-2 cursor-pointer bg-primary p-3 rounded-md shadow-sm">
+                <img src="{% static 'svgs/plus.svg' %}" alt="" class="" />
+                <span class="text-white text-sm font-semibold">Add Property</span>
+            </a>
+        </div>
+        <div class="w-full mt-4 shadow-md p-4 rounded-md">
+            <div class="h-[200px] w-full rounded-md">
+                <img src="{% static 'images/propItem.jpeg' %}" alt="" class="w-full h-full object-cover rounded-md" />
+            </div>
+            <div class="flex flex-col gap-2 mt-2">
+                <span class="text-gray-500 font-semibold text-sm">No. 17 November Street. 10343 NY</span>
+                <h3 class="text-gray-900 font-semibold text-xl">The Bedroom for Belfas...</h3>
+                <p class="text-gray-600 text-sm">Clients wants a redecoration and renovation that encompasses the the essence of a Belfast hotel room.</p>
+            </div>
+            <div class="flex items-center justify-between mt-6">
+                <div class="flex items-center gap-4 mt-2">
+                    <img src="{% static 'images/ownerAvatar.png' %}" alt="" class="w-8 h-8 object-contain" />
+                    <div class="text-sm flex flex-col">
+                        <span class="text-gray-900 font-semibold">Olivia Rhye</span>
+                        <span class="text-gray-500">20 Jan 2022</span>
+                    </div>
+                </div>
+                <img src="{% static 'svgs/chevron-right.svg' %}" alt="" class="" />
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock content %} {% block bottomNav %} {% if loggedInUser == 'agent' %} {% include "user/bottom_nav_agent.html" %}{% elif loggedInUser == 'contractor' %}{% include "user/bottom_nav_contractor.html"%}{% else %}{% include "user/bottom_nav.html" %}
 {% endif %} {% endblock bottomNav %} {% block extraScripts %}
