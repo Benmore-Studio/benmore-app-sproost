@@ -3,8 +3,9 @@ from django.shortcuts import render
 
 
 
-# loggedInUser = 'home-owner', 'agent', 'contractor', 'investor', this is used to switch between bottom navigation, default navigation is home-owner, so need to add it.
+# loggedInUser = 'home-owner'| 'agent'| 'contractor'| 'investor', this is used to switch between bottom navigation, default navigation is home-owner, so need to add it.
 loggedInUser = 'agent'
+# take a look at each template to know why this loggedInUser is used
 def loginUser(request):
     context = {}
     return render(request, 'user/auth/login.html', context)

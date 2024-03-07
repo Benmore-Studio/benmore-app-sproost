@@ -124,12 +124,14 @@
             </div>
         </div>
         {% endfor %}
-        <div class="w-full flex items-center gap-4">
+        <div class="w-full flex items-center {% if loggedInUser == 'agent' %} justify-end {% endif %} gap-4">
+            {% if loggedInUser == 'home-owner' %}
             <a href="{% url 'main:assign-agent' %}" class="flex items-center justify-center cursor-pointer gap-2 bg-toneLightGreen p-3 w-full rounded-md shadow-sm">
                 <img src="{% static 'svgs/plus-green.svg' %}" alt="" class="" />
                 <span class="text-primary text-sm font-semibold">Assign Agent</span>
             </a>
-            <a href="{% url 'main:request-quotes' %}" class="flex items-center justify-center gap-2 cursor-pointer bg-primary p-3 w-full rounded-md shadow-sm">
+            {% endif %}
+            <a href="{% url 'main:request-quotes' %}" class="{% if loggedInUser == 'home-owner' %} w-full {% endif %} flex items-center justify-center gap-2 cursor-pointer bg-primary p-3 rounded-md shadow-sm">
                 <img src="{% static 'svgs/plus.svg' %}" alt="" class="" />
                 <span class="text-white text-sm font-semibold">Request Quote</span>
             </a>
