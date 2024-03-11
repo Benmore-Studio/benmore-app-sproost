@@ -1,11 +1,13 @@
 from django.shortcuts import render
 # authentication
 
-
-
 # loggedInUser = 'home-owner'| 'agent'| 'contractor'| 'investor', this is used to switch between bottom navigation, default navigation is home-owner, so need to add it.
+
 loggedInUser = 'contractor'
+
 # take a look at each template to know why this loggedInUser is used
+
+
 def loginUser(request):
     context = {}
     return render(request, 'user/auth/login.html', context)
@@ -34,7 +36,6 @@ def home(request):
         {'name':'Bungalow Renovation', 'quotation_status': 'pending', 'home_owner': {'name':'Olivia Rhye', 'image':'/static/images/ownerAvatar.png'}, 'location': 'New Yersey, Newark', 'created_date': 'Jan 28, 2024'},
     ]
     
-    context = {'project_feed': project_feed, 'project_history': project_history, 'loggedInUser': loggedInUser}
     
     if loggedInUser == 'contractor':
         context = {
@@ -42,6 +43,7 @@ def home(request):
     }
         return render(request, 'user/contractor_home.html', context)
     else:
+        context = {'project_feed': project_feed, 'project_history': project_history, 'loggedInUser': loggedInUser}
         return render(request, 'user/home.html', context)
 
 def requestQuotes(request):
@@ -93,8 +95,6 @@ def contractors(request):
         {'name': 'Phoenix Baker', 'profession': 'electrician', 'phone': '+1 834 955 0920', 'email': 'olivia@untitledui.com'},
         {'name': 'Lana Steiner', 'profession': 'carpenter', 'phone': '+1 834 955 0920', 'email': 'olivia@untitledui.com'},
         {'name': 'Demi Wilkinson', 'profession': 'interior designer', 'phone': '+1 834 955 0920', 'email': 'olivia@untitledui.com'},
-        
-        
     ]
     context ={
         'contractors': searchResults,
@@ -113,3 +113,9 @@ def addProperty(request):
         'loggedInUser': loggedInUser
     }
     return render(request, 'user/add_property.html', context)
+
+def editProfile(request):
+    context ={}
+    return render(request, 'user/edit_profile.html', context)
+
+    

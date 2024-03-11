@@ -46,8 +46,8 @@
                             <span class="text-gray-500 text-sm">#23BV42</span>
                         </div>
                     </div>
-                    <div class="w-full flex items-center justify-between">
-                        <div class="flex flex-col gap-2 border-b border-neutral-150 pb-4">
+                    <div class="w-full flex items-center justify-between border-b border-neutral-150 pb-4">
+                        <div class="flex flex-col gap-2 ">
                             <img src="{% static 'svgs/helmet.svg' %}" alt="" class="w-[18px] h-[18px] object-contain" />
                             <div class="flex flex-col gap-3">
                                 <span class="text-primarydark font-bold text-sm">Completed Projects</span>
@@ -55,7 +55,7 @@
                             </div>
                         </div>
 
-                        <button class="bg-[#eaf7e6] p-2 px-4 px-2 text-primary rounded-md text-gray-500 text-sm font-semibold">Edit Profile</button>
+                        <a href="{% url 'main:edit-profile' %}" class="bg-[#eaf7e6] p-2 px-4 px-2 text-primary rounded-md text-gray-500 text-sm font-semibold">Edit Profile</a>
                     </div>
 
 
