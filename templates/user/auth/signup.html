@@ -4,12 +4,12 @@
         display: none;
     }
     
-    #container-check.checked {
-        background-color: #EAF7E6;
-    }
-    
     #container-check input:checked~div .checkmark {
         display: block;
+    }
+    
+    #container-check.active {
+        background-color: #EAF7E6;
     }
 </style>
 
@@ -49,6 +49,9 @@
                   <span class="text-gray-900 font-medium uppercase">Contractor</span>
                 </h3>
                 <input type="radio" name="onboarding" id="onboard-contractor"  class="w-4 h-4 hidden rounded-full border border-neutral-100 checked:bg-primary" />
+                <div class="w-5 h-5 rounded-full border border-neutral-150 flex items-center justify-center">
+                  <img src="{% static 'svgs/tick-circle.svg' %}" alt="" class="checkmark hidden w-full h-full object-contain">
+                </div>
               </div>
             </label>
 
@@ -61,14 +64,11 @@
                   I am an
                   <span class="text-gray-900 font-medium uppercase">Agent</span>
                 </h3>
-                <div class="">
                   <input type="radio" name="onboarding" id="onboard-agent" class="w-4 h-4 hidden rounded-full border border-neutral-100 checked:bg-primary" />
-               <div class="w-5 h-5 rounded-full border border-neutral-150 flex items-center justify-center">
-                <img src="{% static 'svgs/tick-circle.svg' %}" alt="" class="checkmark hidden w-full h-full object-contain">
-
+                  <div class="w-5 h-5 rounded-full border border-neutral-150 flex items-center justify-center">
+                    <img src="{% static 'svgs/tick-circle.svg' %}" alt="" class="checkmark hidden w-full h-full object-contain">
+                  </div>
                </div>
-                </div>
-              </div>
             </label>
 
                         <label for="onboard-investor" class="w-full">
@@ -81,8 +81,9 @@
                   <span class="text-gray-900 font-medium uppercase">Investor</span>
                 </h3>
                 <input type="radio" name="onboarding" id="onboard-investor" class="w-4 h-4 hidden rounded-full border border-neutral-100 checked:bg-primary" />
-                <img src="{% static 'svgs/tick-circle.svg' %}" alt="" class="checkmark">
-
+                <div class="w-5 h-5 rounded-full border border-neutral-150 flex items-center justify-center">
+                  <img src="{% static 'svgs/tick-circle.svg' %}" alt="" class="checkmark hidden w-full h-full object-contain">
+                </div>
               </div>
             </label>
                     </div>
