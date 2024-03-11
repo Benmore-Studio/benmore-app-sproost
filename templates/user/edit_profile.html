@@ -10,7 +10,7 @@
         <!-- header -->
         <div class="w-full p-4 flex items-center gap-8 mt-4 border-b border-neutral-150">
             <img onclick="goBack()" src="{% static 'svgs/chevron-left.svg' %}" alt="" class="cursor-pointer" />
-            <h3 class="text-xl text-gray-900 font-medium">Add Property</h3>
+            <h3 class="text-xl text-gray-900 font-medium">Edit Profile</h3>
         </div>
         <!-- content -->
 
@@ -69,7 +69,7 @@
                 </div>
 
                 <div class="flex w-full flex-col gap-4 border-t border-neutral-150 pt-5">
-                    <button onclick="gotoPropertyList()" type="button" class="flex items-center w-full justify-center p-3 rounded-lg bg-primary text-white border border-neutral-150 shadow-sm font-semibold">
+                    <button type="button" class="flex items-center w-full justify-center p-3 rounded-lg bg-primary text-white border border-neutral-150 shadow-sm font-semibold">
             Save 
           </button>
                 </div>
@@ -84,10 +84,6 @@
 <script>
     function goBack() {
         history.back()
-    }
-
-    function gotoPropertyList() {
-        window.location.href = "/property-list/"
     }
 </script>
 {% endblock extraScripts %}
