@@ -4,7 +4,7 @@ from django.shortcuts import render
 
 
 # loggedInUser = 'home-owner'| 'agent'| 'contractor'| 'investor', this is used to switch between bottom navigation, default navigation is home-owner, so need to add it.
-loggedInUser = 'agent'
+loggedInUser = 'contractor'
 # take a look at each template to know why this loggedInUser is used
 def loginUser(request):
     context = {}
@@ -27,13 +27,22 @@ def home(request):
         'title':'Number of completed projects', 'status': 'completed', 'count': 2, 
         }
     ]
+    
     project_history = [
         {'name':'Bungalow Renovation', 'quotation_status': 'pending', 'home_owner': {'name':'Olivia Rhye', 'image':'/static/images/ownerAvatar.png'}, 'location': 'New Yersey, Newark', 'created_date': 'Jan 28, 2024'},
         {'name':'Bungalow Renovation', 'quotation_status': 'pending', 'home_owner': {'name':'Olivia Rhye', 'image':'/static/images/ownerAvatar.png'}, 'location': 'New Yersey, Newark', 'created_date': 'Jan 28, 2024'},
         {'name':'Bungalow Renovation', 'quotation_status': 'pending', 'home_owner': {'name':'Olivia Rhye', 'image':'/static/images/ownerAvatar.png'}, 'location': 'New Yersey, Newark', 'created_date': 'Jan 28, 2024'},
     ]
+    
     context = {'project_feed': project_feed, 'project_history': project_history, 'loggedInUser': loggedInUser}
-    return render(request, 'user/home.html', context)
+    
+    if loggedInUser == 'contractor':
+        context = {
+        'loggedInUser': loggedInUser
+    }
+        return render(request, 'user/contractor_home.html', context)
+    else:
+        return render(request, 'user/home.html', context)
 
 def requestQuotes(request):
     context ={
