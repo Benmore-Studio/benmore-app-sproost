@@ -35,7 +35,10 @@
                   I am a
                   <span class="text-gray-900 font-medium uppercase">HOME-OWNER</span>
                 </h3>
-                <input type="radio" name="onboarding" id="onboard-owner" class="w-4 h-4 rounded-full border border-neutral-100 selected:bg-primary" />
+                <input type="radio" name="onboarding" id="onboard-owner" class="w-4 h-4 hidden rounded-full border border-neutral-100 selected:bg-primary" />
+                <div class="w-5 h-5 rounded-full border border-neutral-150 flex items-center justify-center">
+                  <img src="{% static 'svgs/tick-circle.svg' %}" alt="" class="checkmark hidden w-full h-full object-contain">
+                </div>
               </div>
             </label>
 
