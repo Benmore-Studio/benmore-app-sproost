@@ -65,13 +65,20 @@
                 <span class="text-sm text-gray-700 font-medium">Upload Pictures & Videos</span>
                 <p class="text-sm text-gray-500">This will be sent to the contractor to create a quotation</p>
             </div>
-            <div class="w-full min-h-[150px] rounded-md border border-neutral-150 shadow-sm mt-4 flex flex-col gap-4 items-center justify-center">
-                <div class="w-12 h-12 flex items-center justify-center rounded-full bg-gray-200 bg-opacity-50 p-2">
+            <label for="upload-quote">
+
+                <div class="w-full min-h-[150px] rounded-md border border-neutral-150 shadow-sm mt-4 flex flex-col gap-4 items-center justify-center">
+                    <div class="w-12 h-12 flex items-center justify-center rounded-full bg-gray-200 bg-opacity-50 p-2">
                     <img src="{% static 'svgs/upload-cloud.svg' %}" alt="" class="" />
                 </div>
                 <p class="text-center text-sm text-gray-500">
                     <span class="text-primary font-semibold">Click to upload</span> or drag and drop <br /> SVG, PNG, JPG or GIF (max. 800x400px)
                 </p>
+            </div>
+            <input type="file" id="upload-quote" class="hidden">
+        </label>
+            <div id="file-container" class="w-full flex items-center my-4 gap-4">
+                <!-- dynamic render -->
             </div>
             <!-- instruction -->
             <div class="border-t border-neutral-150 pt-5 mt-5">

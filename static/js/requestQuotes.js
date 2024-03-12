@@ -71,7 +71,6 @@ function uploadFiles() {
     document.getElementById('upload-quote').addEventListener('change', function() {
         let fileInput = document.getElementById('upload-quote');
         let selectedFiles = fileInput.files
-        let selectedFileNames = '';
         let selectedFileList = [];
         let photos = [];
         let videos = [];
