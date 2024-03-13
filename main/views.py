@@ -119,3 +119,11 @@ def editProfile(request):
     return render(request, 'user/edit_profile.html', context)
 
     
+
+
+# web based admin- applications
+
+
+def loginAdmin(request):
+  context ={}  
+  return render(request, 'admin/login.html', context) 

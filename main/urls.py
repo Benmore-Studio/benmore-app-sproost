@@ -18,6 +18,8 @@ urlpatterns = [
     path('contractors/<str:profession>/', views.contractorDetail, name="contractors"),
     path('login/', views.loginUser, name="login"),
     path('signup/', views.signUpUser, name="signup"),
+    # admin
+    path('login-admin/', views.loginAdmin, name="login-admin"),
 ]
 
 
