@@ -129,5 +129,19 @@ def loginAdmin(request):
   return render(request, 'admin/login.html', context) 
 
 def adminDashboard(request):
-    context ={}  
+    recent_home_owners =[
+        {
+            'name':'Olivia Rhye', 'photo':'/static/images/ownerAvatar.png', 'phone': '+1 834 955 0920', 'email':'olivia@untitledui.com', 'project_name':'Project title', 'quotation_status':"accepted"
+        },
+        {
+            'name':'Olivia Rhye', 'photo':'/static/images/ownerAvatar.png', 'phone': '+1 834 955 0920', 'email':'olivia@untitledui.com', 'project_name':'Project title', 'quotation_status':"rejected"
+        },
+        {
+            'name':'Olivia Rhye', 'photo':'/static/images/ownerAvatar.png', 'phone': '+1 834 955 0920', 'email':'olivia@untitledui.com', 'project_name':'Project title', 'quotation_status':"accepted"
+        },
+        {
+            'name':'Olivia Rhye', 'photo':'/static/images/ownerAvatar.png', 'phone': '+1 834 955 0920', 'email':'olivia@untitledui.com', 'project_name':'Project title', 'quotation_status':"pending"
+        },
+    ]
+    context ={'recent_home_owners': recent_home_owners}  
     return render(request, 'admin/dashboard.html', context)

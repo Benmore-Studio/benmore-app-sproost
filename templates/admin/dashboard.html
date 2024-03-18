@@ -68,20 +68,34 @@
                         </tr>
                     </thead>
                     <tbody class="p-4">
-                        {% for contractor in contractors %}
+                        {% for home_owner in recent_home_owners %}
                         <tr class="border-b border-neutral-100 last:border-0">
                             <td class="w-1/4 p-4">
-                                <a href="{% url 'main:contractors' contractor.profession %}" class="">
-                                    <div class="w-full">
-                                        <h3 class="text-gray-900 font-medium text-sm">{{contractor.name}}</h3>
-                                        <p class="text-gray-500 text-sm capitalize">{{contractor.profession}}</p>
+                                <a href="#" class="">
+                                    <div class="w-full flex items-center gap-2">
+                                        <img src="{{home_owner.photo}}" alt="" class="w-[40px] h-[40px] object-contain">
+                                        <p class="text-gray-900 text-sm font-medium capitalize">{{home_owner.name}}</p>
                                     </div>
                                 </a>
                             </td>
                             <td class="w-1/4 p-4">
                                 <div class="flex flex-col gap-1">
-                                    <span class="text-gray-500 text-sm">{{contractor.phone}}</span>
-                                    <span class="text-gray-500 text-sm">{{contractor.email}}</span>
+                                    <span class="text-gray-500 text-sm">{{home_owner.phone}}</span>
+                                    <span class="text-gray-500 text-sm">{{home_owner.email}}</span>
+                                </div>
+                            </td>
+                            <td class="w-1/4 p-4">
+                                <span class=" font-semibold text-xs rounded-xl p-1 px-2 border border-neutral-150 bg-gray-50 bg-opacity-90 {% if home_owner.quotation_status == 'accepted' %} bg-toneLightGreen text-primary bg-opacity-70 border-primary {% elif home_owner.quotation_status == 'rejected' %} bg-[#B42318] bg-opacity-50 border-red-500 text-[#B42318] {% endif %} "> 
+                                    {{home_owner.project_name}}
+                                </span>
+                            </td>
+
+                            <td class="w-1/4 p-4 ">
+                                <div class="inline-flex items-center gap-2 rounded-xl p-1 px-2 border border-neutral-150">
+                                    <span class="w-2 h-2 bg-[#B42318] rounded-full {% if home_owner.quotation_status == 'accepted' %} bg-primary {% elif home_owner.quotation_status == 'pending' %} bg-gray-800 {% endif %} "></span>
+                                    <span class="font-semibold text-xs capitalize"> 
+                                        {{home_owner.quotation_status}}
+                                    </span>
                                 </div>
                             </td>
                         </tr>
