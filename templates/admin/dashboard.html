@@ -1,5 +1,53 @@
 {% extends "admin/base.html" %} {% load static %} {% block navbar %} {% include "admin/navbar.html" %} {% endblock navbar %} {% block content %}
-<main class="w-full px-[1rem] md:px-[4rem]">
+<main class="w-full px-[1rem] md:px-[4rem] flex flex-col gap-8 mt-8">
+    <h2 class="text-xl text-gray-900 font-semibold">Dashboard</h2>
+    <div class="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <div class="w-full p-4 bg-white border border-neutral-150 rounded-md shadow-sm">
+            <div class="w-full flex flex-col gap-4">
+                <div class="w-full flex items-center justify-between">
+                    <h3 class="text-gray-600 font-medium">Home Owners</h3>
+                    <span class="">
+        <img src="{% static 'svgs/more-vertical.svg' %}" alt="" class="" />
+        </span>
+                </div>
+
+                <div class="w-full flex items-center justify-between">
+                    <h3 class="text-gray-900 text-2xl font-semibold">316</h3>
+                    <div class="flex items-center gap-1 p-2 rounded-xl bg-toneLightGreen ">
+                        <img src="{% static 'svgs/arrow-up.svg' %}" alt="" class="" />
+                        <span class="text-sm text-primary font-medium">20%</span>
+                    </div>
+                </div>
+                <div class="flex justify-end border-t border-neutral-150 items-center p-2">
+                    <a href="#" class="text-primary font-medium ">View owners</a>
+                </div>
+            </div>
+        </div>
+        <!-- column 2 -->
+        <div class="w-full p-4 bg-white border border-neutral-150 rounded-md shadow-sm">
+            <div class="w-full flex flex-col gap-4">
+                <div class="w-full flex items-center justify-between">
+                    <h3 class="text-gray-600 font-medium">Home Owners</h3>
+                    <span class="">
+        <img src="{% static 'svgs/more-vertical.svg' %}" alt="" class="" />
+        </span>
+                </div>
+
+                <div class="w-full flex items-center justify-between">
+                    <h3 class="text-gray-900 text-2xl font-semibold">316</h3>
+                    <div class="flex items-center gap-1 p-2 rounded-xl bg-toneLightGreen ">
+                        <img src="{% static 'svgs/arrow-up.svg' %}" alt="" class="" />
+                        <span class="text-sm text-primary font-medium">20%</span>
+                    </div>
+                </div>
+                <div class="flex justify-end border-t border-neutral-150 items-center p-2">
+                    <a href="#" class="text-primary font-medium ">View owners</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- grid cards -->
     <div class="w-full grid grid-cols-1 md:grid-cols-2 gap-4">
         <!-- column 1 -->
         <div class="rounded-lg w-full border border-neutral-150 p-4">
