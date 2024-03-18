@@ -171,5 +171,19 @@ def adminDashboard(request):
             'name':'Olivia Rhye', 'phone': '+1 834 955 0920', 'email':'olivia@untitledui.com', 'project_name':'Project title', 'quotation_status':"pending", 'rating':4, 'total_project':10       
             },
     ]
-    context ={'recent_home_owners': recent_home_owners, 'recent_agents':recent_agents, 'recent_contractors': recent_contractors}  
+    project_history = [
+        {'name':'Bungalow Renovation', 'quotation_status': 'pending', 'home_owner': {'name':'Olivia Rhye', 'image':'/static/images/ownerAvatar.png'}, 'location': 'New Yersey, Newark', 'created_date': 'Jan 28, 2024'},
+        {'name':'Bungalow Renovation', 'quotation_status': 'pending', 'home_owner': {'name':'Olivia Rhye', 'image':'/static/images/ownerAvatar.png'}, 'location': 'New Yersey, Newark', 'created_date': 'Jan 28, 2024'},
+        {'name':'Bungalow Renovation', 'quotation_status': 'pending', 'home_owner': {'name':'Olivia Rhye', 'image':'/static/images/ownerAvatar.png'}, 'location': 'New Yersey, Newark', 'created_date': 'Jan 28, 2024'},
+        {'name':'Bungalow Renovation', 'quotation_status': 'pending', 'home_owner': {'name':'Olivia Rhye', 'image':'/static/images/ownerAvatar.png'}, 'location': 'New Yersey, Newark', 'created_date': 'Jan 28, 2024'},
+    ]
+    
+    overall_stats = [
+        {'title':'Home Owners', 'project_counts': 316, 'increased_by':'20%', 'action':'View owners'},
+        {'title':'Agents', 'project_counts': 316, 'increased_by':'10%', 'action':'View agents'},
+        {'title':'Contractors', 'project_counts': 316, 'increased_by':'10%', 'action':'View contractors'},
+        {'title':'Active Projects', 'project_counts': 316, 'increased_by':'40%', 'action':'View projects'},
+    ]
+    context ={'recent_home_owners': recent_home_owners, 'recent_agents':recent_agents,
+              'recent_contractors': recent_contractors, 'project_history': project_history, 'overall_stats': overall_stats }  
     return render(request, 'admin/dashboard.html', context)
