@@ -20,6 +20,7 @@ urlpatterns = [
     path('signup/', views.signUpUser, name="signup"),
     # admin
     path('login-admin/', views.loginAdmin, name="login-admin"),
+    path('dashboard/', views.adminDashboard, name="dashboard"),
 ]
 
 

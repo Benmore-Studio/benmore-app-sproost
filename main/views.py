@@ -127,3 +127,7 @@ def editProfile(request):
 def loginAdmin(request):
   context ={}  
   return render(request, 'admin/login.html', context) 
+
+def adminDashboard(request):
+    context ={}  
+    return render(request, 'admin/dashboard.html', context)

@@ -1,0 +1,33 @@
+{% load static %}
+<nav class="w-full px-[1rem] md:px-[4rem] py-2 border-b border-neutral-150 text-gray-700 flex items-center justify-between">
+    <img src="{% static 'svgs/sproost-plus.svg' %}" alt="" class=""> {% with url_name=request.resolver_match.url_name %}
+    <ul class="inline-flex items-center gap-6">
+        <li class="text-gray-700 font-semibold {% if url_name == 'dashboard' %} bg-toneLightgreen text-primary bg-opacity-80 p-2 px-4 w-fit rounded-md {% endif %}">
+            <a href="{% url 'main:dashboard' %}" class="">Dashboard</a>
+        </li>
+        <li class="text-gray-700 font-semibold {% if url_name == 'project-request' %} bg-toneLightgreen text-primary bg-opacity-80 p-2 px-4 w-fit rounded-md {% endif %}">
+            <a href="#" class="">Project Request</a>
+        </li>
+        <li class="text-gray-700 font-semibold {% if url_name == 'active-request' %} bg-toneLightgreen text-primary bg-opacity-80 p-2 px-4 w-fit rounded-md {% endif %}">
+            <a href="#" class="">Active Request</a>
+        </li>
+        <li class="text-gray-700 font-semibold {% if url_name == 'admin-home-owners' %} bg-toneLightgreen text-primary bg-opacity-80 p-2 px-4 w-fit rounded-md {% endif %}">
+            <a href="#" class="">Home Owners</a>
+        </li>
+        <li class="text-gray-700 font-semibold {% if url_name == 'admin-contractors' %} bg-toneLightgreen text-primary bg-opacity-80 p-2 px-4 w-fit rounded-md {% endif %}">
+            <a href="#" class="">Contractors</a>
+        </li>
+        <li class="text-gray-700 font-semibold {% if url_name == 'admin-messages' %} bg-toneLightgreen text-primary bg-opacity-80 p-2 px-4 w-fit rounded-md {% endif %} flex items-center gap-2">
+            <a href="#" class="">Message</a>
+            <span class="bg-[#F9FAFB]">10</span>
+        </li>
+
+    </ul>
+    {% endwith %}
+    <div class="inline-flex items-center gap-6 w-fit">
+        <img src="{% static 'svgs/settings.svg' %}" alt="" class="">
+        <img src="{% static 'svgs/bell-01.svg' %}" alt="" class="">
+        <img src="{% static 'images/ownerAvatar.png' %}" alt="" class="w-[40px] h-[40px] object-contain">
+    </div>
+
+</nav>

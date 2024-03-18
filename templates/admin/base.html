@@ -13,7 +13,7 @@
           extend: {
             colors: {
               primary: "#2FAA07",
-              "toneLightGreen": "#EAF7E6",
+              "toneLightgreen": "#EAF7E6",
             },
             fontFamily: {
               primary: ["Poppins", "sans-serif"],
@@ -25,7 +25,10 @@
   </head>
 
   <body>
-    <div class="">{% block authContent %} {% endblock authContent %}</div>
+    <div class="w-full">
+      {% block navbar %}{% endblock navbar %}
+
+      {% block authContent %} {% endblock authContent %}</div>
     {% block extraScripts %} {% endblock extraScripts %}
   </body>
 </html>
