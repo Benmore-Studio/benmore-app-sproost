@@ -143,5 +143,33 @@ def adminDashboard(request):
             'name':'Olivia Rhye', 'photo':'/static/images/ownerAvatar.png', 'phone': '+1 834 955 0920', 'email':'olivia@untitledui.com', 'project_name':'Project title', 'quotation_status':"pending"
         },
     ]
-    context ={'recent_home_owners': recent_home_owners}  
+    recent_agents =[
+        {
+            'name':'Olivia Rhye', 'phone': '+1 834 955 0920', 'email':'olivia@untitledui.com', 'project_name':'Project title', 'quotation_status':"accepted", 'rating':4, 'total_project':5
+        },
+        {
+            'name':'Olivia Rhye', 'phone': '+1 834 955 0920', 'email':'olivia@untitledui.com', 'project_name':'Project title', 'quotation_status':"rejected", 'total_project':2
+        },
+        {
+            'name':'Olivia Rhye', 'phone': '+1 834 955 0920', 'email':'olivia@untitledui.com', 'project_name':'Project title', 'quotation_status':"accepted", 'total_project':1
+        },
+        {
+            'name':'Olivia Rhye', 'phone': '+1 834 955 0920', 'email':'olivia@untitledui.com', 'project_name':'Project title', 'quotation_status':"pending",'total_project':10       
+            },
+    ]
+    recent_contractors =[
+        {
+            'name':'Olivia Rhye', 'phone': '+1 834 955 0920', 'email':'olivia@untitledui.com', 'project_name':'Project title', 'quotation_status':"accepted", 'rating':4, 'total_project':5
+        },
+        {
+            'name':'Olivia Rhye', 'phone': '+1 834 955 0920', 'email':'olivia@untitledui.com', 'project_name':'Project title', 'quotation_status':"rejected", 'rating':4, 'total_project':2
+        },
+        {
+            'name':'Olivia Rhye', 'phone': '+1 834 955 0920', 'email':'olivia@untitledui.com', 'project_name':'Project title', 'quotation_status':"accepted", 'rating':4, 'total_project':1
+        },
+        {
+            'name':'Olivia Rhye', 'phone': '+1 834 955 0920', 'email':'olivia@untitledui.com', 'project_name':'Project title', 'quotation_status':"pending", 'rating':4, 'total_project':10       
+            },
+    ]
+    context ={'recent_home_owners': recent_home_owners, 'recent_agents':recent_agents, 'recent_contractors': recent_contractors}  
     return render(request, 'admin/dashboard.html', context)
