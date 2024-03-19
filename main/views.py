@@ -187,3 +187,7 @@ def adminDashboard(request):
     context ={'recent_home_owners': recent_home_owners, 'recent_agents':recent_agents,
               'recent_contractors': recent_contractors, 'project_history': project_history, 'overall_stats': overall_stats }  
     return render(request, 'admin/dashboard.html', context)
+
+def projectRequest(request):
+    context ={}  
+    return render(request, 'admin/project_request.html', context)

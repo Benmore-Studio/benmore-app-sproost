@@ -1,0 +1,20 @@
+{% extends "admin/base.html" %} {% load static %} {% block navbar %} {% include "admin/navbar.html" %} {% endblock navbar %} {% block content %}
+<main class="w-full px-[1rem] md:px-[4rem] flex flex-col gap-8 my-8">
+    <div class="">
+        <div class="">
+            <h1 class="text-2xl font-semibold text-gray-700">Project Request</h1>
+            <p class="text-gray-500 text-sm "></p>
+        </div>
+        <div class="w-full flex items-center justify-between">
+            <div class="group border border-gray-300 rounded-md flex items-center gap-2 p-2 mt-1">
+                <img src="{% static 'svgs/search.svg' %}" alt="" class="w-[20px] h-[20px] object-contain" />
+                <input type="text" name="search" id="search" placeholder="Search" class="w-full h-full outline-none group-focus:outline-none mt-1 focus-visible:border-none border-none" />
+            </div>
+            <div class="group border border-gray-300 rounded-md flex items-center justify-center gap-2 p-2 mt-1">
+                <img src="{% static 'svgs/Filterlines.svg' %}" alt="" class="w-[20px] h-[20px] object-contain" />
+                <span class="text-gray-700 font-semibold text-sm">Filters</span>
+            </div>
+        </div>
+    </div>
+    <div class=""></div>
+</main>

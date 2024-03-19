@@ -21,6 +21,7 @@ urlpatterns = [
     # admin
     path('login-admin/', views.loginAdmin, name="login-admin"),
     path('dashboard/', views.adminDashboard, name="dashboard"),
+    path('project-requests/', views.projectRequest, name="project-requests"),
 ]
 
 
