@@ -1,7 +1,7 @@
 {% extends "admin/base.html" %} {% load static %} {% block navbar %} {% include "admin/navbar.html" %} {% endblock navbar %} {% block content %}
 <main class="w-full  flex flex-col gap-8 my-8">
     <div class="flex px-[1rem] md:px-[4rem] items-center gap-4 pb-4 border-b border-neutral-100">
-        <img src="{% static 'svgs/arrow-left.svg' %}" alt="" class="">
+        <img src="{% static 'svgs/arrow-left.svg' %}" alt="" class="cursor-pointer" onclick="goBack()">
         <h3 class="text-gray-900 font-semibold text-xl">Project Request Details</h3>
     </div>
 
@@ -90,4 +90,10 @@
     </div>
 
 </main>
-{% endblock %}
+{% endblock %} {% block extraScripts %}
+<script>
+    function goBack() {
+        history.back();
+    }
+</script>
+{% endblock extraScripts %}
