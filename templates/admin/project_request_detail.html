@@ -8,7 +8,7 @@
     <!-- content -->
     <div class="px-[1rem] md:px-[4rem]">
         <div class="grid grid-cols-2 gap-16">
-            <div class="w-full flex flex-col gap-8">
+            <div class="w-full flex flex-col gap-8 bg-[#FCFCFD] p-4">
                 <div class="grid grid-cols-3 gap-8 w-full">
                     <div class="flex flex-col gap-2">
                         <span class="text-gray-500 text-xs font-medium">Project Name</span>
@@ -67,7 +67,24 @@
                     </div>
                 </div>
             </div>
-            <div class="min-h-[70vh] rounded-md border border-neutral-150"></div>
+            <div class="min-h-[60vh] rounded-md p-4 bg-[#FCFCFD]">
+                <h3 class="text-gray-900 font-semibold text-lg">Quote History</h3>
+                <div class="h-full flex items-center justify-center">
+                    <div class="flex flex-col gap-4 items-center justify-center">
+                        <div class="w-20 h-20 bg-gray-100 bg-opacity-80 rounded-full p-6 flex items-center justify-center">
+                            <img src="{% static 'svgs/file-icon.svg' %}" alt="" class="">
+                        </div>
+                        <div class="flex flex-col gap-2 items-center justify-center">
+                            <h3 class="text-gray-900 font-semibold">No Quotation Added </h3>
+                            <span class="text-gray-500">Create quotation for this project</span>
+                        </div>
+                        <button class="border-none outline-none px-4 py-2 gap-2 flex items-center justify-center font-semibold text-white bg-primary rounded-md shadow-md">
+                            <img src="{% static 'svgs/plus.svg' %}" alt="" class="">
+                            <span class="">Create quotation</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
 
     </div>
