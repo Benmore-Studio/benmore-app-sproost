@@ -89,11 +89,120 @@
 
     </div>
 
+    <!-- modal -->
+    <div id="modal-quotation" class="fixed top-0  right-0 w-screen h-screen bg-opacity-60 bg-[#1E1E1E] flex items-center justify-center">
+        <form class="w-[98%] mx-auto md:w-1/2 2xl:w-1/3 z-10 bg-white p-4 rounded-md">
+            {% csrf_token %}
+            <div class="flex items-center justify-between">
+                <img src="{% static 'svgs/featured-icon.svg' %}" alt="" class="" />
+                <div onclick="closeModal()" class="">
+                    <img src="{% static 'svgs/x-close.svg' %}" alt="" class="cursor-pointer" />
+                </div>
+            </div>
+            <div class="">
+                <h3 class="font-semibold my-2">Create Quotation</h3>
+
+                <div class="w-full mt-5">
+                    <h4 class="mb-2 text-neutral-700">Contractor Name*</h4>
+
+                    <div class="p-2 min-h-[45px] w-full flex items-center bg-white gap-4 border border-neutral-200 rounded-md">
+                        <input id="folder-title" type="email" placeholder="Name of contractor" required class="w-full focus-within:border-none outline-none bg-transparent" />
+                    </div>
+                    <small class="text-gray-500">This will only be seen by the admin</small>
+                </div>
+                <div id="dynamic-box" class="w-full overflow-x-hidden flex flex-col gap-2 max-h-[500px] overflow-y-scroll py-2 hide-scroll">
+                    <div class="w-full grid grid-cols-[60%37%] gap-4">
+                        <div class="w-full mt-5">
+                            <h4 class="mb-2 text-neutral-700">Quotation Item</h4>
+
+                            <div class="p-2 min-h-[45px] w-full flex items-center bg-white gap-4 border border-neutral-200 rounded-md">
+                                <input id="folder-title" type="email" placeholder="Input" required class="w-full focus-within:border-none outline-none bg-transparent" />
+                            </div>
+                        </div>
+                        <div class="w-full mt-5">
+                            <h4 class="mb-2 text-neutral-700">Price</h4>
+
+                            <div class="p-2 min-h-[45px] w-full flex items-center bg-white gap-4 border border-neutral-200 rounded-md">
+                                <input id="folder-title" type="email" placeholder="Input" required class="w-full focus-within:border-none outline-none bg-transparent" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex flex-col gap-2 mt-4">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-gray-900 font-semibold">Total</h3>
+                        <h3 class="text-gray-900 font-semibold">0.00</h3>
+                    </div>
+                    <button onclick="addField()" type="button" class="inline-flex w-fit items-center justify-center cursor-pointer gap-2 bg-toneLightGreen p-3 rounded-md shadow-sm">
+                        <img src="{% static 'svgs/plus-green.svg' %}" alt="" class="" />
+                        <span class="text-primary text-sm font-semibold">Add Another Item</span>
+                    </button>
+                </div>
+
+                <div class="w-full mt-5">
+                    <button id="generate_batch_btn" class="outline-none border disabled:bg-[#EEDDE7] disabled:bg-opacity-70 disabled:cursor-not-allowed border-neutral-100 px-4 py-2 w-full rounded-md shadow-sm bg-primary text-white">
+                    Create Quotation
+          </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
 </main>
 {% endblock %} {% block extraScripts %}
 <script>
     function goBack() {
         history.back();
+    }
+
+    function openQuotation() {
+        const modal = document.getElementById("modal-quotation")
+
+        if (modal) {
+            modal.classList.toggle("open")
+        }
+    }
+
+    function closeModal() {
+        const modal = document.getElementById("modal-quotation")
+
+        if (modal) {
+            modal.classList.remove("open")
+        }
+    }
+
+    let fieldCount = 1;
+
+    function addField() {
+        fieldCount++;
+        const newField = document.createElement('div');
+        newField.innerHTML = `
+        <div class="grid grid-cols-[60%37%] gap-4">
+            <div class="w-full mt-5">
+                <h4 class="mb-2 text-neutral-700">Quotation Item</h4>
+
+                <div class="p-2 min-h-[45px] w-full flex items-center bg-white gap-4 border border-neutral-200 rounded-md">
+                    <input id="folder-title" type="email" placeholder="Input" required class="w-full focus-within:border-none outline-none bg-transparent" />
+                </div>
+            </div>
+            <div class="w-full mt-5">
+                <h4 class="mb-2 text-neutral-700">Price</h4>
+
+                <div class="p-2 min-h-[45px] w-full flex items-center bg-white gap-4 border border-neutral-200 rounded-md">
+                    <input id="folder-title" type="email" placeholder="Input" required class="w-full focus-within:border-none outline-none bg-transparent" />
+                </div>
+            </div>
+        </div>
+      `;
+        document.getElementById('dynamic-box').appendChild(newField);
+    }
+
+    function removeField() {
+        if (fieldCount > 1) {
+            const lastField = document.querySelector('#dynamic-box div:last-child');
+            lastField.parentNode.removeChild(lastField);
+            fieldCount--;
+        }
     }
 </script>
 {% endblock extraScripts %}
