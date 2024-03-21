@@ -221,5 +221,6 @@ def projectRequestDetail(request, id):
         {'date': 'Jan 16, 2024', 'contractor_name':'Olivia Rhye', 'price':'$43,000', 'status':'pending' },
     ]
     quotation_history_length = len(quotation_history)
-    context ={'quotation_items':quotation_items, 'quotation_history_length':quotation_history_length, 'quotation_history':quotation_history}
+    # Quotation history length greater than 0 will change the UI under quotations history, defaulted to 0 at the beginning
+    context ={'quotation_items':quotation_items, 'quotation_history_length':0, 'quotation_history':quotation_history}
     return render(request, 'admin/project_request_detail.html', context)
