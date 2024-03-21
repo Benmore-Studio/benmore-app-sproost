@@ -68,7 +68,25 @@ function closeSendQuoteModal() {
     if (modal) {
         modal.classList.remove("open")
     }
-
-
-
 }
+
+window.addEventListener('DOMContentLoaded', () => {
+    const createQuoteBtn = document.getElementById("create-quote-btn")
+    const sendQuoteBtn = document.getElementById("send-quote-btn")
+    const editQuoteBtn = document.getElementById("edit-quote-btn")
+
+    createQuoteBtn.addEventListener("click", () => {
+        closeModal()
+        openSendQuotation()
+    });
+    sendQuoteBtn.addEventListener("click", () => {
+        // submit logic goes here
+        closeSendQuoteModal()
+    });
+
+    editQuoteBtn.addEventListener("click", () => {
+        closeSendQuoteModal()
+        openQuotation()
+    });
+
+})

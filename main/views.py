@@ -215,5 +215,11 @@ def projectRequestDetail(request, id):
         {'name': 'Cleaning', 'price':'8000'},
         {'name': 'Labour', 'price':'10,000'},
     ]
-    context ={'quotation_items':quotation_items}
+    quotation_history =[
+        {'date': 'Jan 16, 2024', 'contractor_name':'Olivia Rhye', 'price':'$43,000', 'status':'pending' },
+        {'date': 'Jan 16, 2024', 'contractor_name':'Olivia Rhye', 'price':'$43,000', 'status':'pending' },
+        {'date': 'Jan 16, 2024', 'contractor_name':'Olivia Rhye', 'price':'$43,000', 'status':'pending' },
+    ]
+    quotation_history_length = len(quotation_history)
+    context ={'quotation_items':quotation_items, 'quotation_history_length':quotation_history_length, 'quotation_history':quotation_history}
     return render(request, 'admin/project_request_detail.html', context)

@@ -75,6 +75,38 @@
             </div>
             <div class="min-h-[60vh] rounded-md p-4 bg-[#FCFCFD]">
                 <h3 class="text-gray-900 font-semibold text-lg">Quote History</h3>
+                {% if quotation_history_length > 0 %}
+                <div class="w-full mt-4 flex flex-col gap-5">
+                    {% for history in quotation_history %}
+                    <div class="w-full flex flex-col gap-4 p-4 bg-white border border-neutral-150 rounded-md">
+                        <div class="w-full flex items-center justify-between">
+                            <h3 class="text-gray-900 font-medium">{{history.date}}</h3>
+                            <img src="{% static 'svgs/more-vertical.svg' %}" alt="" class="" />
+                        </div>
+                        <div class="grid grid-cols-3 gap-8 w-full">
+                            <div class="flex flex-col gap-2">
+                                <span class="text-gray-500 text-xs font-medium">Contractor Name</span>
+                                <div class="flex items-center gap-4">
+                                    <span class="text-gray-900 font-medium">{{history.contractor_name}}</span>
+                                    <img src="{% static 'svgs/chat-msg.svg' %}" alt="" />
+                                </div>
+                            </div>
+                            <div class="flex flex-col gap-2">
+                                <span class="text-gray-500 text-xs font-medium">Quotation Price</span>
+                                <h3 class="text-gray-600 font-semibold">{{history.price}}</h3>
+                            </div>
+                            <div class=" flex flex-col gap-2">
+                                <span class="text-gray-500 font-medium text-xs">Quotation Status</span>
+                                <div class="inline-flex p-1 px-2 bg-gray-50 bg-opacity-50 items-center w-fit gap-2 border border-neutral-150 rounded-xl">
+                                    <div class="w-2 h-2 bg-blue-600 rounded-full"></div>
+                                    <span class="text-[10px]">{{history.status}}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
                 <div class="h-full flex items-center justify-center">
                     <div class="flex flex-col gap-4 items-center justify-center">
                         <div class="w-20 h-20 bg-gray-100 bg-opacity-80 rounded-full p-6 flex items-center justify-center">
@@ -84,12 +116,13 @@
                             <h3 class="text-gray-900 font-semibold">No Quotation Added </h3>
                             <span class="text-gray-500">Create quotation for this project</span>
                         </div>
-                        <button onclick="openSendQuotation()" class="border-none outline-none px-4 py-2 gap-2 flex items-center justify-center font-semibold text-white bg-primary rounded-md shadow-md">
+                        <button onclick="openQuotation()" class="border-none outline-none px-4 py-2 gap-2 flex items-center justify-center font-semibold text-white bg-primary rounded-md shadow-md">
                             <img src="{% static 'svgs/plus.svg' %}" alt="" class="">
                             <span class="">Create quotation</span>
                         </button>
                     </div>
                 </div>
+                {% endif %}
             </div>
         </div>
 
@@ -153,7 +186,7 @@
                 </div>
 
                 <div class="w-full mt-5">
-                    <button id="generate_batch_btn" class="outline-none border disabled:bg-[#EEDDE7] disabled:bg-opacity-70 disabled:cursor-not-allowed border-neutral-100 px-4 py-2 w-full rounded-md shadow-sm bg-primary text-white">
+                    <button id="create-quote-btn" class="outline-none border disabled:bg-[#EEDDE7] disabled:bg-opacity-70 disabled:cursor-not-allowed border-neutral-100 px-4 py-2 w-full rounded-md shadow-sm bg-primary text-white">
                     Create Quotation
           </button>
                 </div>
@@ -161,7 +194,7 @@
         </form>
     </div>
     <!-- modal send quotation -->
-    <div id="modal-send-quotation" class="fixed top-0   right-0 w-screen h-screen bg-opacity-60 bg-[#1E1E1E] flex items-center justify-center">
+    <div id="modal-send-quotation" class="fixed top-0 hidden  right-0 w-screen h-screen bg-opacity-60 bg-[#1E1E1E] flex items-center justify-center">
         <div class="w-[98%] mx-auto md:w-1/2 2xl:w-1/3 z-10 bg-white  rounded-md">
             <div class="flex flex-col gap-3 border-b border-neutral-150 p-4">
                 <div class="flex items-center justify-between">
@@ -173,7 +206,7 @@
                 <h3 class="font-semibold my-2">Create Quotation</h3>
             </div>
             <div class="p-4">
-                <button type="button" class="inline-flex w-fit items-center justify-center cursor-pointer gap-2 bg-toneLightGreen p-3 rounded-md shadow-sm">
+                <button id="edit-quote-btn" type="button" class="inline-flex w-fit items-center justify-center cursor-pointer gap-2 bg-toneLightGreen p-3 rounded-md shadow-sm">
                     <img src="{% static 'svgs/edit-02.svg' %}" alt="" class="" />
                     <span class="text-primary text-sm font-semibold">Edit Quote</span>
                 </button>
@@ -204,7 +237,7 @@
                         </div>
                     </div>
                     <div class="w-full mt-5">
-                        <button id="generate_batch_btn" class="outline-none border disabled:bg-primary disabled:bg-opacity-70 disabled:cursor-not-allowed border-neutral-100 px-4 py-2 w-full rounded-md shadow-sm bg-primary text-white">
+                        <button id="send-quote-btn" class="outline-none border disabled:bg-primary disabled:bg-opacity-70 disabled:cursor-not-allowed border-neutral-100 px-4 py-2 w-full rounded-md shadow-sm bg-primary text-white">
                         Send Quotation
               </button>
                     </div>
