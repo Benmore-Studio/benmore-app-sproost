@@ -188,14 +188,25 @@
                     </div>
 
                     <div class="">
-                        <div class="flex items-center justify-between border-y border-neutral-100 py-2 last:border-0">
+                        <div class="flex items-center justify-between border-y border-neutral-100 py-3 last:border-0">
                             <h4 class="text-gray-900 font-medium">Quotation Item</h4>
                             <h4 class="text-gray-900 font-medium">Price($)</h4>
                         </div>
-                        <div class="flex items-center justify-between border-y border-neutral-100 py-2 last:border-0">
-                            <h4 class="text-gray-900 font-medium">Quotation Item</h4>
-                            <h4 class="text-gray-900 font-medium">Price($)</h4>
+                        {% for item in quotation_items %}
+                        <div class="flex items-center justify-between border-y border-neutral-100 py-3 last:border-0">
+                            <h4 class="text-gray-600 ">{{item.name}}</h4>
+                            <h4 class="text-gray-600 font-medium">{{item.price}}</h4>
                         </div>
+                        {% endfor %}
+                        <div class="flex items-center justify-between border-y border-neutral-100 py-3 last:border-0">
+                            <h4 class="text-gray-900 font-medium">Total</h4>
+                            <h4 class="text-gray-900 font-medium">$43,000.00</h4>
+                        </div>
+                    </div>
+                    <div class="w-full mt-5">
+                        <button id="generate_batch_btn" class="outline-none border disabled:bg-primary disabled:bg-opacity-70 disabled:cursor-not-allowed border-neutral-100 px-4 py-2 w-full rounded-md shadow-sm bg-primary text-white">
+                        Send Quotation
+              </button>
                     </div>
                 </div>
             </div>

@@ -208,5 +208,12 @@ def projectRequest(request):
 
 
 def projectRequestDetail(request, id):
-    context ={}
+    quotation_items =[
+        {'name': 'Building Material', 'price':'20,000'},
+        {'name': 'Rentals', 'price':'5000'},
+        {'name': 'Cleaning', 'price':'8000'},
+        {'name': 'Cleaning', 'price':'8000'},
+        {'name': 'Labour', 'price':'10,000'},
+    ]
+    context ={'quotation_items':quotation_items}
     return render(request, 'admin/project_request_detail.html', context)
