@@ -74,7 +74,15 @@
                 </div>
             </div>
             <div class="min-h-[60vh] rounded-md p-4 bg-[#FCFCFD]">
-                <h3 class="text-gray-900 font-semibold text-lg">Quote History</h3>
+                <div class="w-full flex items-center justify-between">
+                    <h3 class="text-gray-900 font-semibold text-lg">Quotation History</h3>
+                    {% if quotation_history_length > 0 %}
+                    <button onclick="openQuotation()" class="border-none outline-none px-4 py-2 gap-2 flex items-center justify-center font-semibold text-white bg-primary rounded-md shadow-md">
+                        <img src="{% static 'svgs/plus.svg' %}" alt="" class="">
+                        <span class="">Create quotation</span>
+                    </button> {% endif %}
+                </div>
+
                 {% if quotation_history_length > 0 %}
                 <div class="w-full mt-4 flex flex-col gap-5">
                     {% for history in quotation_history %}

@@ -222,5 +222,35 @@ def projectRequestDetail(request, id):
     ]
     quotation_history_length = len(quotation_history)
     # Quotation history length greater than 0 will change the UI under quotations history, defaulted to 0 at the beginning
-    context ={'quotation_items':quotation_items, 'quotation_history_length':0, 'quotation_history':quotation_history}
+    context ={'quotation_items':quotation_items, 'quotation_history_length': 0, 'quotation_history':quotation_history}
     return render(request, 'admin/project_request_detail.html', context)
+
+def contractorsAdmin(request):
+    contractors_search_result = [
+        {
+            'name':'Olivia Rhye', 'phone': '+1 834 955 0920', 'email':'olivia@untitledui.com', 'projects_handled':5, 'location':"New jersey, Newark", 'rating':4, 'action':'#'
+        },
+        {
+            'name':'Olivia Rhye', 'phone': '+1 834 955 0920', 'email':'olivia@untitledui.com', 'projects_handled':5, 'location':"New jersey, Newark", 'rating':4, 'action':'#'
+        },
+        {
+            'name':'Olivia Rhye', 'phone': '+1 834 955 0920', 'email':'olivia@untitledui.com', 'projects_handled':5, 'location':"New jersey, Newark", 'rating':4, 'action':'#'
+        },
+        {
+            'name':'Olivia Rhye', 'phone': '+1 834 955 0920', 'email':'olivia@untitledui.com', 'projects_handled':5, 'location':"New jersey, Newark", 'rating':4, 'action':'#'     
+            },
+        {
+            'name':'Olivia Rhye', 'phone': '+1 834 955 0920', 'email':'olivia@untitledui.com', 'projects_handled':5, 'location':"New jersey, Newark", 'rating':4, 'action':'#'
+        },
+        {
+            'name':'Olivia Rhye', 'phone': '+1 834 955 0920', 'email':'olivia@untitledui.com', 'projects_handled':5, 'location':"New jersey, Newark", 'rating':4, 'action':'#'
+        },
+        {
+            'name':'Olivia Rhye', 'phone': '+1 834 955 0920', 'email':'olivia@untitledui.com', 'projects_handled':5, 'location':"New jersey, Newark", 'rating':4, 'action':'#'
+        },
+        {
+            'name':'Olivia Rhye', 'phone': '+1 834 955 0920', 'email':'olivia@untitledui.com', 'projects_handled':5, 'location':"New jersey, Newark", 'rating':4, 'action':'#'     
+            },
+    ]
+    context = {'contractors_search_results': contractors_search_result}
+    return render(request, 'admin/contractors.html', context)
