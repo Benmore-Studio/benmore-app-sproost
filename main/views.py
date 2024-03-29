@@ -8,14 +8,6 @@ loggedInUser = 'home-owner'
 # take a look at each template to know why this loggedInUser is used
 
 
-def loginUser(request):
-    context = {}
-    return render(request, 'user/auth/login.html', context)
-
-def signUpUser(request):
-    context = {}
-    return render(request, 'user/auth/signup.html', context)
-
 # mains
 def home(request):
     project_feed= [

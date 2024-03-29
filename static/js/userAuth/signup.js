@@ -32,22 +32,35 @@
          valid = false
      x = document.getElementsByClassName("step")
      y = x[currentStep].getElementsByTagName("input")
-         // A loop that checks every input field in the current tab:
-     for (i = 0; i < y.length; i++) {
-         if (y[i].type === "radio" && y[i].checked) {
-             valid = true
-         } else if (y[i].type !== "radio" && y[i].value !== "") {
-             valid = true
-         }
-     }
-
-     return valid // return the valid status
+    // A loop that checks every input field in the current tab:
+    if (currentStep === 0) {
+        valid = [...y].some((input) => input.checked)
+    }else{
+        valid = [...y].every((input) => input.value !== "")
+    }
+    return valid
  }
 
  function nextPrev(n) {
      // This function will figure out which tab to display
      var x = document.getElementsByClassName("step")
-     if (n == 1 && !validateForm()) return false
+     if (n == 1 && !validateForm()) {
+        // if we get here it means, we are trying to go to the next step, but not all fields are filled
+        let toastMsg = currentStep === 0 ? "please select one of the options before proceeding" : "please make sure all fields are filled before proceeding"
+        Toastify({
+            text: toastMsg,
+            duration: 3000,
+            close: true,
+            gravity: "top",
+            position: "left",
+            stopOnFocus: true,
+            style: {
+                background: "orange",
+                maxWidth: "100%",
+            },
+        }).showToast();
+        return false
+     }
          // Hide the current tab:
      x[currentStep].style.display = "none"
          // Increase or decrease the current tab by 1:

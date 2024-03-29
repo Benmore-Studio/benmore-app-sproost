@@ -16,8 +16,6 @@ urlpatterns = [
     path('edit-profile/', views.editProfile, name="edit-profile"),
     path('contractors/', views.contractors, name="contractors"),
     path('contractors/<str:profession>/', views.contractorDetail, name="contractors"),
-    path('login/', views.loginUser, name="login"),
-    path('signup/', views.signUpUser, name="signup"),
     # admin
     path('login-admin/', views.loginAdmin, name="login-admin"),
     path('dashboard/', views.adminDashboard, name="dashboard"),
@@ -25,7 +23,3 @@ urlpatterns = [
     path('project-requests/<int:id>/', views.projectRequestDetail, name="project-requests"),
     path('contractors-admin/', views.contractorsAdmin, name="contractors-admin"),
 ]
-
-
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

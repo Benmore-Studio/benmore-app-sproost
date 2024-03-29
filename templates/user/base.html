@@ -7,6 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Sproost</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <script src="{% static 'js/index.js' %}"></script>
 
     <script>
@@ -33,7 +34,16 @@
         <div class="mb-20">{% block content %} {% endblock content %}</div>
         {% block bottomNav %} {% endblock bottomNav %}
     </div>
-    {% block extraScripts %} {% endblock extraScripts %}
+    <script>
+        var messages = [
+            {% for message in messages %}
+                {"text": "{{ message }}", "level": "{{ message.tags }}"},
+            {% endfor %}
+        ];
+    </script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script> 
+    <script src = {% static "js/user/base.js" %} ></script>
+{% block extraScripts %} {% endblock extraScripts %}
 </body>
 
 </html>
