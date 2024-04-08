@@ -9,14 +9,14 @@
       <span class="text-gray-500 text-xs">My listing</span> {% endif %}
     </a>
     <a href="#" class="inline-flex flex-col gap-1 items-center">
-      <img src="{% static 'svgs/search.svg' %}" alt="" class="" />
-      <span class="text-gray-500 text-xs">Search</span>
-    </a>
-    <a href="#" class="inline-flex flex-col gap-1 items-center">
       <img src="{% static 'svgs/Add-upload.svg' %}" alt="" class="" />
       <span class="text-gray-500 text-xs">Upload</span>
     </a>
     <a href="#" class="inline-flex flex-col gap-1 items-center">
+      <img src="{% static 'svgs/search.svg' %}" alt="" class="" />
+      <span class="text-gray-500 text-xs">Search</span>
+    </a>
+    {% comment %} <a href="#" class="inline-flex flex-col gap-1 items-center">
       <img src="{% static 'svgs/Message.svg' %}" alt="" class="" />
       <span class="text-gray-500 text-xs">Messages</span>
     </a>
@@ -27,7 +27,7 @@
       <img src="{% static 'svgs/more-horizon.svg' %}" alt="" class="" />
       <span class="text-gray-500 text-xs">Menu</span>
       {% endif %}
-    </a>
+    </a> {% endcomment %}
   </div>
   {% endwith %}
 </div>

@@ -16,7 +16,7 @@
 <div>
     <form id="signupForm" action="" method="POST">
         {% csrf_token %}
-        <div class="step w-full p-4 pt-8" id="step1">
+        <div class="step w-full p-4 pt-8">
             <div class="w-full">
                 <div class="flex flex-col gap-8 items-center justify-center">
                     <img src="{% static 'svgs/sproost.svg' %}" alt="" class="" />
@@ -27,10 +27,10 @@
                     <div class="flex flex-col gap-4 w-full">
 
                         <label for="onboard-owner" class="w-full">
-              <div id="container-check" class="w-full p-2 border border-neutral-150 flex items-center justify-between px-4 gap-10 rounded-md font-semibold focus:outline-none">
-                <div class="w-[48px] h-[48px] rounded-full">
+              <div id="container-check" class="w-full p-2 py-5 border border-neutral-150 flex items-center justify-between px-4 gap-10 rounded-md font-semibold focus:outline-none">
+                <!-- <div class="w-[48px] h-[48px] rounded-full">
                   <img src="{% static 'images/owner.jpeg' %}" alt="" class="w-full h-full object-cover rounded-full" />
-                </div>
+                </div> -->
                 <h3 class="text-gray-600 text-sm">
                   I am a
                   <span class="text-gray-900 font-medium uppercase">HOME-OWNER</span>
@@ -43,10 +43,10 @@
             </label>
 
                         <label for="onboard-contractor" class="w-full">
-              <div id="container-check" class="w-full p-2 border border-neutral-150 flex items-center justify-between px-4 gap-10 rounded-md font-semibold focus:outline-none">
-                <div class="w-[48px] h-[48px] rounded-full">
+              <div id="container-check" class="w-full p-2 py-5 border border-neutral-150 flex items-center justify-between px-4 gap-10 rounded-md font-semibold focus:outline-none">
+                <!-- <div class="w-[48px] h-[48px] rounded-full">
                   <img src="{% static 'images/contractor.jpeg' %}" alt="" class="w-full h-full object-cover rounded-full" />
-                </div>
+                </div> -->
                 <h3 class="text-gray-600 text-sm">
                   I am a
                   <span class="text-gray-900 font-medium uppercase">Contractor</span>
@@ -59,10 +59,10 @@
             </label>
 
                         <label for="onboard-agent" class="w-full">
-              <div id="container-check" class="w-full p-2 border border-neutral-150 flex items-center justify-between px-4 gap-10 rounded-md font-semibold focus:outline-none">
-                <div class="w-[48px] h-[48px] rounded-full">
+              <div id="container-check" class="w-full p-2 py-5 border border-neutral-150 flex items-center justify-between px-4 gap-10 rounded-md font-semibold focus:outline-none">
+                <!-- <div class="w-[48px] h-[48px] rounded-full">
                   <img src="{% static 'images/agent.png' %}" alt="" class="w-full h-full object-cover rounded-full" />
-                </div>
+                </div> -->
                 <h3 class="text-gray-600 text-sm">
                   I am an
                   <span class="text-gray-900 font-medium uppercase">Agent</span>
@@ -75,10 +75,10 @@
             </label>
 
                         <label for="onboard-investor" class="w-full">
-              <div id="container-check" class="w-full p-2 border border-neutral-150 flex items-center justify-between px-4 gap-10 rounded-md font-semibold focus:outline-none">
-                <div class="w-[48px] h-[48px] rounded-full">
+              <div id="container-check" class="w-full p-2 py-5 border border-neutral-150 flex items-center justify-between px-4 gap-10 rounded-md font-semibold focus:outline-none">
+                <!-- <div class="w-[48px] h-[48px] rounded-full">
                   <img src="{% static 'images/agent.png' %}" alt="" class="w-full h-full object-cover rounded-full" />
-                </div>
+                </div> -->
                 <h3 class="text-gray-600 text-sm">
                   I am an
                   <span class="text-gray-900 font-medium uppercase">Investor</span>
@@ -95,7 +95,7 @@
         </div>
 
         <!-- Step 2 -->
-        <div class="step p-4 pt-8" id="step2">
+        <div class="step p-4 pt-8">
             <div class="w-full flex items-center justify-center mb-8">
                 <div class="w-[200px] flex items-center gap-2 justify-center">
                     <div class="w-3 h-3 rounded-full bg-primary"></div>
@@ -137,8 +137,9 @@
                 </div>
             </div>
         </div>
-        <!-- Step 3 -->
-        <div class="step p-4 pt-8" id="step3">
+
+        {% if loggedInUser != 'agent' %}
+        <div class="step p-4 pt-8">
             <div class="w-full flex items-center justify-center mb-8">
                 <div class="w-[200px] flex items-center gap-2 justify-center">
                     <div class="w-3 h-3 rounded-full bg-primary"></div>
@@ -177,9 +178,10 @@
                 </div>
             </div>
         </div>
+        {% endif %}
 
         <!-- Step 4 -->
-        <div class="step p-4 pt-8" id="step4">
+        <div class="step p-4 pt-8">
             <div class="w-full flex items-center justify-center mb-8">
                 <div class="w-[200px] flex items-center gap-2 justify-center">
                     <div class="w-3 h-3 rounded-full bg-primary"></div>
