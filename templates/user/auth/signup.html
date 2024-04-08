@@ -1,36 +1,224 @@
-{% extends "user/auth/base.html" %} {% load static %} {% block authContent %}
+{% extends "user/auth/base.html" %} {% load static %} {% block title %} Sproost - Sign Up {% endblock title %} {% block authContent %}
 <style>
-  .step {
-    display: none;
-  }
+    .step {
+        display: none;
+    }
+    
+    #container-check input:checked~div .checkmark {
+        display: block;
+    }
+    
+    #container-check.active {
+        background-color: #EAF7E6;
+    }
 </style>
 
 <div>
-  <h3 class="">Hello signup</h3>
-  <form id="multiStepForm" action=" " method="POST">
-    <!-- {% csrf_token %} -->
-    <!-- Step 1 -->
-    <div class="step" id="step1">
-      <h2>Step 1</h2>
-      <input type="text" name="name" placeholder="Name" />
-    </div>
+    <form id="signupForm" action="" method="POST">
+        {% csrf_token %}
+        <div class="step w-full p-4 pt-8" id="step1">
+            <div class="w-full">
+                <div class="flex flex-col gap-8 items-center justify-center">
+                    <img src="{% static 'svgs/sproost.svg' %}" alt="" class="" />
+                    <div class="flex flex-col items-center justify-center">
+                        <h3 class="text-gray-900 font-semibold text-xl">Create an account</h3>
+                        <p class="text-gray-600 text-center text-base">Provide some basic information to set up your account.</p>
+                    </div>
+                    <div class="flex flex-col gap-4 w-full">
 
-    <!-- Step 2 -->
-    <div class="step" id="step2">
-      <h2>Step 2</h2>
-      <input type="email" name="email" placeholder="Email" />
-    </div>
+                        <label for="onboard-owner" class="w-full">
+              <div id="container-check" class="w-full p-2 border border-neutral-150 flex items-center justify-between px-4 gap-10 rounded-md font-semibold focus:outline-none">
+                <div class="w-[48px] h-[48px] rounded-full">
+                  <img src="{% static 'images/owner.jpeg' %}" alt="" class="w-full h-full object-cover rounded-full" />
+                </div>
+                <h3 class="text-gray-600 text-sm">
+                  I am a
+                  <span class="text-gray-900 font-medium uppercase">HOME-OWNER</span>
+                </h3>
+                <input type="radio" name="onboarding" id="onboard-owner" class="w-4 h-4 hidden rounded-full border border-neutral-100 selected:bg-primary" />
+                <div class="w-5 h-5 rounded-full border border-neutral-150 flex items-center justify-center">
+                  <img src="{% static 'svgs/tick-circle.svg' %}" alt="" class="checkmark hidden w-full h-full object-contain">
+                </div>
+              </div>
+            </label>
 
-    <!-- Step 3 -->
-    <div class="step" id="step3">
-      <h2>Step 3</h2>
-      <input type="password" name="password" placeholder="Password" />
-    </div>
+                        <label for="onboard-contractor" class="w-full">
+              <div id="container-check" class="w-full p-2 border border-neutral-150 flex items-center justify-between px-4 gap-10 rounded-md font-semibold focus:outline-none">
+                <div class="w-[48px] h-[48px] rounded-full">
+                  <img src="{% static 'images/contractor.jpeg' %}" alt="" class="w-full h-full object-cover rounded-full" />
+                </div>
+                <h3 class="text-gray-600 text-sm">
+                  I am a
+                  <span class="text-gray-900 font-medium uppercase">Contractor</span>
+                </h3>
+                <input type="radio" name="onboarding" id="onboard-contractor"  class="w-4 h-4 hidden rounded-full border border-neutral-100 checked:bg-primary" />
+                <div class="w-5 h-5 rounded-full border border-neutral-150 flex items-center justify-center">
+                  <img src="{% static 'svgs/tick-circle.svg' %}" alt="" class="checkmark hidden w-full h-full object-contain">
+                </div>
+              </div>
+            </label>
 
-    <div class="">
-      <button type="button" id="prevBtn" onclick="nextPrev(-1)">Previous</button>
-      <button type="button" id="nextBtn" onclick="nextPrev(1)">Next</button>
-    </div>
-  </form>
+                        <label for="onboard-agent" class="w-full">
+              <div id="container-check" class="w-full p-2 border border-neutral-150 flex items-center justify-between px-4 gap-10 rounded-md font-semibold focus:outline-none">
+                <div class="w-[48px] h-[48px] rounded-full">
+                  <img src="{% static 'images/agent.png' %}" alt="" class="w-full h-full object-cover rounded-full" />
+                </div>
+                <h3 class="text-gray-600 text-sm">
+                  I am an
+                  <span class="text-gray-900 font-medium uppercase">Agent</span>
+                </h3>
+                  <input type="radio" name="onboarding" id="onboard-agent" class="w-4 h-4 hidden rounded-full border border-neutral-100 checked:bg-primary" />
+                  <div class="w-5 h-5 rounded-full border border-neutral-150 flex items-center justify-center">
+                    <img src="{% static 'svgs/tick-circle.svg' %}" alt="" class="checkmark hidden w-full h-full object-contain">
+                  </div>
+               </div>
+            </label>
+
+                        <label for="onboard-investor" class="w-full">
+              <div id="container-check" class="w-full p-2 border border-neutral-150 flex items-center justify-between px-4 gap-10 rounded-md font-semibold focus:outline-none">
+                <div class="w-[48px] h-[48px] rounded-full">
+                  <img src="{% static 'images/agent.png' %}" alt="" class="w-full h-full object-cover rounded-full" />
+                </div>
+                <h3 class="text-gray-600 text-sm">
+                  I am an
+                  <span class="text-gray-900 font-medium uppercase">Investor</span>
+                </h3>
+                <input type="radio" name="onboarding" id="onboard-investor" class="w-4 h-4 hidden rounded-full border border-neutral-100 checked:bg-primary" />
+                <div class="w-5 h-5 rounded-full border border-neutral-150 flex items-center justify-center">
+                  <img src="{% static 'svgs/tick-circle.svg' %}" alt="" class="checkmark hidden w-full h-full object-contain">
+                </div>
+              </div>
+            </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="step p-4 pt-8" id="step2">
+            <div class="w-full flex items-center justify-center mb-8">
+                <div class="w-[200px] flex items-center gap-2 justify-center">
+                    <div class="w-3 h-3 rounded-full bg-primary"></div>
+                    <div class="line w-12 bg-neutral-200 h-[2px]"></div>
+                    <div class="w-3 h-3 rounded-full bg-transparent border border-neutral-300"></div>
+                    <div class="line w-12 bg-neutral-200 h-[2px]"></div>
+                    <div class="w-3 h-3 rounded-full bg-transparent border border-neutral-300"></div>
+                </div>
+            </div>
+            <div class="flex flex-col items-center justify-center mb-5">
+                <h3 class="text-gray-900 font-semibold text-xl">Create an account</h3>
+                <p class="text-gray-600 text-center text-base">Provide some basic information to set up your account.</p>
+            </div>
+            <div class="flex flex-col gap-4 w-full">
+                <div class="w-full">
+                    <label for="firstName" class="text-gray-700 font-medium text-sm">First Name</label>
+                    <input type="text" name="firstName" id="firstName" placeholder="Enter your first name" class="w-full p-2 border border-gray-300 rounded-md focus:outline-none mt-1 focus:border-gray-500" required />
+                </div>
+                <div class="w-full">
+                    <label for="lastName" class="text-gray-700 font-medium text-sm">Last Name</label>
+                    <input type="text" name="lastName" id="lastName" placeholder="Enter your last name" class="w-full p-2 border border-gray-300 rounded-md focus:outline-none mt-1 focus:border-gray-500" required />
+                </div>
+                <div class="w-full">
+                    <label for="email" class="text-gray-700 font-medium text-sm">Email</label>
+                    <input type="email" name="email" id="email" placeholder="Enter your email" class="w-full p-2 border border-gray-300 rounded-md focus:outline-none mt-1 focus:border-gray-500" required />
+                </div>
+                <div class="w-full">
+                    <label for="email" class="text-gray-700 font-medium text-sm">Phone number</label>
+                    <div class="flex gap-2 p-2 border border-gray-300 p-2 border border-gray-300 rounded-md">
+                        <select name="country" id="country" class="w-2/12 rounded-md focus:outline-none mt-1 disabled:bg-transparent bg-transparent outline-none border-none focus:border-gray-500">
+              <option value="" disabled selected>US</option>
+              <option value="USA">US</option>
+              <option value="Canada">Canada</option>
+              <option value="UK">UK</option>
+              <!-- Add more country options here -->
+            </select>
+                        <input type="tel" name="phone" id="phone" placeholder="+1 (555) 000-0000" class="w-10/12 rounded-md focus:outline-none mt-1 focus:border-gray-500" />
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Step 3 -->
+        <div class="step p-4 pt-8" id="step3">
+            <div class="w-full flex items-center justify-center mb-8">
+                <div class="w-[200px] flex items-center gap-2 justify-center">
+                    <div class="w-3 h-3 rounded-full bg-primary"></div>
+                    <div class="line w-12 bg-neutral-200 h-[2px]"></div>
+                    <div class="w-3 h-3 rounded-full bg-primary"></div>
+                    <div class="line w-12 bg-neutral-200 h-[2px]"></div>
+                    <div class="w-3 h-3 rounded-full bg-transparent border border-neutral-300"></div>
+                </div>
+            </div>
+            <div class="flex flex-col items-center justify-center mb-5">
+                <h3 class="text-gray-900 font-semibold text-xl">Create an account</h3>
+                <p class="text-gray-600 text-center text-base">Provide some basic information to set up your account.</p>
+            </div>
+            <div class="flex flex-col gap-4 w-full">
+                <div class="w-full">
+                    <label for="homeAddress" class="text-gray-700 font-medium text-sm">Home Address</label>
+                    <input type="text" name="homeAddress" id="homeAddress" placeholder="Enter home address" class="w-full p-2 border border-gray-300 rounded-md focus:outline-none mt-1 focus:border-gray-500" />
+                </div>
+                <div class="w-full">
+                    <label for="lastName" class="text-gray-700 font-medium text-sm">City</label>
+                    <select name="city" id="city" class="w-full p-2 border border-gray-300 bg-transparent outline-none min-h-[45px] text-gray-700 text-sm rounded-md focus:outline-none mt-1 focus:border-gray-500" required>
+            <option value="" disabled selected>Select City</option>
+            <option value="arizona">Arizona</option>
+            <option value="arizona">Arizona</option>
+            <option value="arizona">Arizona</option>
+          </select>
+                </div>
+                <div class="w-full">
+                    <label for="lastName" class="text-gray-700 font-medium text-sm">State/Province</label>
+                    <select name="province/state" id="province/state" class="w-full p-2 border border-gray-300 bg-transparent outline-none min-h-[45px] text-gray-700 text-sm rounded-md focus:outline-none mt-1 focus:border-gray-500" required>
+            <option value="" disabled selected>Select state/province</option>
+            <option value="arizona">Arizona</option>
+            <option value="arizona">Arizona</option>
+            <option value="arizona">Arizona</option>
+          </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 4 -->
+        <div class="step p-4 pt-8" id="step4">
+            <div class="w-full flex items-center justify-center mb-8">
+                <div class="w-[200px] flex items-center gap-2 justify-center">
+                    <div class="w-3 h-3 rounded-full bg-primary"></div>
+                    <div class="line w-12 bg-neutral-200 h-[2px]"></div>
+                    <div class="w-3 h-3 rounded-full bg-primary"></div>
+                    <div class="line w-12 bg-neutral-200 h-[2px]"></div>
+                    <div class="w-3 h-3 rounded-full bg-primary"></div>
+                </div>
+            </div>
+            <div class="flex flex-col items-center justify-center mb-5">
+                <h3 class="text-gray-900 font-semibold text-xl">Create an account</h3>
+                <p class="text-gray-600 text-center text-base">Provide some basic information to set up your account.</p>
+            </div>
+            <div class="flex flex-col gap-4 w-full">
+                <div class="w-full">
+                    <label for="password" class="text-gray-700 font-medium text-sm">Password</label>
+                    <input type="password" name="password" id="password" placeholder="Enter password" class="w-full p-2 border border-gray-300 rounded-md focus:outline-none mt-1 focus:border-gray-500" />
+                </div>
+                <div class="w-full">
+                    <label for="ConfirmPassword" class="text-gray-700 font-medium text-sm">Confirm Password</label>
+                    <input type="password" name="confirmPassword" id="ConfirmPassword" placeholder="Confirm your password" class="w-full p-2 border border-gray-300 rounded-md focus:outline-none mt-1 focus:border-gray-500" />
+                </div>
+            </div>
+        </div>
+
+        <div class="p-4 pt-8">
+            <div class="flex flex-col gap-4 w-full">
+                <button id="nextBtn" onclick="nextPrev(1)" type="button" class="w-full p-3 bg-primary shadow-sm text-white rounded-md font-semibold focus:outline-none focus:bg-primary"></button>
+                <button id="prevBtn" onclick="nextPrev(-1)" type="button" class="w-full p-3 bg-transparent shadow-sm rounded-md font-semibold focus:outline-none border border-neutral-150">
+          Back
+        </button>
+            </div>
+            <div class="flex items-center justify-center text-sm gap-2 mt-4">
+                <span class="text-gray-600">Already have an account?</span>
+                <a href="{% url 'main:login' %}" class="text-primary font-semibold">Log in</a>
+            </div>
+        </div>
+    </form>
 </div>
-{% endblock authContent %}
+{% endblock authContent %} {% block extraScripts %}
+<script src="{% static 'js/signup.js' %}"></script>
+{% endblock %}

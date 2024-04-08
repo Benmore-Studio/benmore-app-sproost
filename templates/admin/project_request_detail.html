@@ -1,0 +1,260 @@
+{% extends "admin/base.html" %} {% load static %} {% block navbar %} {% include "admin/navbar.html" %} {% endblock navbar %} {% block content %}
+<style>
+    #modal-quotation.open,
+    #modal-send-quotation.open {
+        display: flex;
+    }
+</style>
+<main class="w-full  flex flex-col gap-8 my-8">
+    <div class="flex px-[1rem] md:px-[4rem] items-center gap-4 pb-4 border-b border-neutral-100">
+        <img src="{% static 'svgs/arrow-left.svg' %}" alt="" class="cursor-pointer" onclick="goBack()">
+        <h3 class="text-gray-900 font-semibold text-xl">Project Request Details</h3>
+    </div>
+
+    <!-- content -->
+    <div class="px-[1rem] md:px-[4rem]">
+        <div class="grid grid-cols-2 gap-16">
+            <div class="w-full flex flex-col gap-8 bg-[#FCFCFD] p-4">
+                <div class="grid grid-cols-3 gap-8 w-full">
+                    <div class="flex flex-col gap-2">
+                        <span class="text-gray-500 text-xs font-medium">Project Name</span>
+                        <h3 class="text-gray-600 font-semibold">Bungalow Renovation</h3>
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <span class="text-gray-500 text-xs font-medium">Home Owner</span>
+                        <div class="flex items-center gap-4">
+                            <img src="{% static 'images/ownerAvatar.png' %}" alt="" class="w-6 h-6 object-contain" />
+                            <span class="text-gray-900 font-medium">Olivia Rhye</span>
+                            <img src="{% static 'svgs/chat-msg.svg' %}" alt="" />
+                        </div>
+                    </div>
+                    <div class=" flex flex-col gap-2">
+                        <span class="text-gray-500 font-medium text-xs">Created Date</span>
+                        <h3 class="text-gray-600 font-semibold">New Jersey, Newark</h3>
+                    </div>
+                </div>
+                <div class="grid grid-cols-3 gap-8 w-full">
+                    <div class="flex flex-col gap-2">
+                        <span class="text-gray-500 text-xs font-medium">Created Date</span>
+                        <h3 class="text-gray-600 font-semibold">Jan 28, 2024</h3>
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <span class="text-gray-500 text-xs font-medium">Project Timeline</span>
+                        <h3 class="text-gray-600 font-semibold">1 month</h3>
+                    </div>
+
+                    <div class=" flex flex-col gap-2">
+                        <span class="text-gray-500 font-medium text-xs">Quotation Status </span>
+                        <div class="inline-flex p-1 px-2 bg-gray-50 bg-opacity-50 items-center w-fit gap-2 border border-neutral-150 rounded-xl">
+                            <div class="w-2 h-2 bg-blue-600 rounded-full"></div>
+                            <span class="text-[10px]">pending</span>
+                        </div>
+                    </div>
+                </div>
+                <!--  -->
+                <div class="flex flex-col gap-2">
+                    <span class="text-gray-500 font-medium text-xs">Project description </span>
+                    <p class="text-gray-600 font-medium">
+                        Lorem ipsum dolor sit amet consectetur. Morbi risus tellus nisl ultricies adipiscing purus condimentum. Elementum lacus id at viverra. Lorem ipsum dolor sit amet consectetur. Morbi risus tellus nisl ultricies adipiscing purus condimentum. Elementum lacus
+                        id at viverra.
+                    </p>
+                </div>
+                <!--  -->
+                <div class="flex flex-col gap-4">
+                    <span class="text-gray-500 font-medium text-xs">Project Media </span>
+                    <div class="grid grid-cols-2 gap-2">
+                        <img src="{% static 'images/img-detail.png' %}" alt="" class="w-full object-cover">
+                        <img src="{% static 'images/img-detail.png' %}" alt="" class="w-full object-cover">
+                    </div>
+                    <div class="w-full relative">
+                        <img src="{% static 'images/img-detail-xl.png' %}" alt="" class="w-full object-cover">
+                        <img src="{% static 'svgs/Play-button.svg' %}" alt="" class=" w-[58px] h-[58px] object-contain absolute top-[45%] left-[49%]">
+
+                    </div>
+                </div>
+            </div>
+            <div class="min-h-[60vh] rounded-md p-4 bg-[#FCFCFD]">
+                <div class="w-full flex items-center justify-between">
+                    <h3 class="text-gray-900 font-semibold text-lg">Quotation History</h3>
+                    {% if quotation_history_length > 0 %}
+                    <button onclick="openQuotation()" class="border-none outline-none px-4 py-2 gap-2 flex items-center justify-center font-semibold text-white bg-primary rounded-md shadow-md">
+                        <img src="{% static 'svgs/plus.svg' %}" alt="" class="">
+                        <span class="">Create quotation</span>
+                    </button> {% endif %}
+                </div>
+
+                {% if quotation_history_length > 0 %}
+                <div class="w-full mt-4 flex flex-col gap-5">
+                    {% for history in quotation_history %}
+                    <div class="w-full flex flex-col gap-4 p-4 bg-white border border-neutral-150 rounded-md">
+                        <div class="w-full flex items-center justify-between">
+                            <h3 class="text-gray-900 font-medium">{{history.date}}</h3>
+                            <img src="{% static 'svgs/more-vertical.svg' %}" alt="" class="" />
+                        </div>
+                        <div class="grid grid-cols-3 gap-8 w-full">
+                            <div class="flex flex-col gap-2">
+                                <span class="text-gray-500 text-xs font-medium">Contractor Name</span>
+                                <div class="flex items-center gap-4">
+                                    <span class="text-gray-900 font-medium">{{history.contractor_name}}</span>
+                                    <img src="{% static 'svgs/chat-msg.svg' %}" alt="" />
+                                </div>
+                            </div>
+                            <div class="flex flex-col gap-2">
+                                <span class="text-gray-500 text-xs font-medium">Quotation Price</span>
+                                <h3 class="text-gray-600 font-semibold">{{history.price}}</h3>
+                            </div>
+                            <div class=" flex flex-col gap-2">
+                                <span class="text-gray-500 font-medium text-xs">Quotation Status</span>
+                                <div class="inline-flex p-1 px-2 bg-gray-50 bg-opacity-50 items-center w-fit gap-2 border border-neutral-150 rounded-xl">
+                                    <div class="w-2 h-2 bg-blue-600 rounded-full"></div>
+                                    <span class="text-[10px]">{{history.status}}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="h-full flex items-center justify-center">
+                    <div class="flex flex-col gap-4 items-center justify-center">
+                        <div class="w-20 h-20 bg-gray-100 bg-opacity-80 rounded-full p-6 flex items-center justify-center">
+                            <img src="{% static 'svgs/file-icon.svg' %}" alt="" class="">
+                        </div>
+                        <div class="flex flex-col gap-2 items-center justify-center">
+                            <h3 class="text-gray-900 font-semibold">No Quotation Added </h3>
+                            <span class="text-gray-500">Create quotation for this project</span>
+                        </div>
+                        <button onclick="openQuotation()" class="border-none outline-none px-4 py-2 gap-2 flex items-center justify-center font-semibold text-white bg-primary rounded-md shadow-md">
+                            <img src="{% static 'svgs/plus.svg' %}" alt="" class="">
+                            <span class="">Create quotation</span>
+                        </button>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+    </div>
+
+    <!-- modal open quotation -->
+    <div id="modal-quotation" class="fixed top-0 hidden  right-0 w-screen h-screen bg-opacity-60 bg-[#1E1E1E] flex items-center justify-center">
+        <form class="w-[98%] mx-auto md:w-1/2 2xl:w-1/3 z-10 bg-white p-4 rounded-md">
+            {% csrf_token %}
+            <div class="flex items-center justify-between">
+                <img src="{% static 'svgs/featured-icon.svg' %}" alt="" class="" />
+                <div onclick="closeModal()" class="">
+                    <img src="{% static 'svgs/x-close.svg' %}" alt="" class="cursor-pointer" />
+                </div>
+            </div>
+            <div class="">
+                <h3 class="font-semibold my-2">Create Quotation</h3>
+
+                <div class="w-full mt-5">
+                    <h4 class="mb-2 text-neutral-700">Contractor Name*</h4>
+
+                    <div class="p-2 min-h-[45px] w-full flex items-center bg-white gap-4 border border-neutral-200 rounded-md">
+                        <input id="folder-title" type="email" placeholder="Name of contractor" required class="w-full focus-within:border-none outline-none bg-transparent" />
+                    </div>
+                    <small class="text-gray-500">This will only be seen by the admin</small>
+                </div>
+                <div class="w-full mt-5">
+                    <h4 class="mb-2 text-neutral-700">Note</h4>
+
+                    <div class="p-2 min-h-[45px] w-full flex items-center bg-white gap-4 border border-neutral-200 rounded-md">
+                        <input id="folder-title" type="email" placeholder="" required class="w-full focus-within:border-none outline-none bg-transparent" />
+                    </div>
+                </div>
+                <div id="dynamic-box" class="w-full overflow-x-hidden flex flex-col gap-2 max-h-[400px] overflow-y-scroll py-2 hide-scroll">
+                    <div class="w-full grid grid-cols-[60%37%] gap-4">
+                        <div class="w-full mt-5">
+                            <h4 class="mb-2 text-neutral-700">Quotation Item</h4>
+
+                            <div class="p-2 min-h-[45px] w-full flex items-center bg-white gap-4 border border-neutral-200 rounded-md">
+                                <input id="folder-title" type="email" placeholder="Input" required class="w-full focus-within:border-none outline-none bg-transparent" />
+                            </div>
+                        </div>
+                        <div class="w-full mt-5">
+                            <h4 class="mb-2 text-neutral-700">Price($)</h4>
+
+                            <div class="p-2 min-h-[45px] w-full flex items-center bg-white gap-4 border border-neutral-200 rounded-md">
+                                <input id="folder-title" type="email" placeholder="Input" required class="w-full focus-within:border-none outline-none bg-transparent" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex flex-col gap-2 mt-4">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-gray-900 font-semibold">Total</h3>
+                        <h3 class="text-gray-900 font-semibold">0.00</h3>
+                    </div>
+                    <button onclick="addField()" type="button" class="inline-flex w-fit items-center justify-center cursor-pointer gap-2 bg-toneLightGreen p-3 rounded-md shadow-sm">
+                        <img src="{% static 'svgs/plus-green.svg' %}" alt="" class="" />
+                        <span class="text-primary text-sm font-semibold">Add Another Item</span>
+                    </button>
+                </div>
+
+                <div class="w-full mt-5">
+                    <button id="create-quote-btn" class="outline-none border disabled:bg-[#EEDDE7] disabled:bg-opacity-70 disabled:cursor-not-allowed border-neutral-100 px-4 py-2 w-full rounded-md shadow-sm bg-primary text-white">
+                    Create Quotation
+          </button>
+                </div>
+            </div>
+        </form>
+    </div>
+    <!-- modal send quotation -->
+    <div id="modal-send-quotation" class="fixed top-0 hidden  right-0 w-screen h-screen bg-opacity-60 bg-[#1E1E1E] flex items-center justify-center">
+        <div class="w-[98%] mx-auto md:w-1/2 2xl:w-1/3 z-10 bg-white  rounded-md">
+            <div class="flex flex-col gap-3 border-b border-neutral-150 p-4">
+                <div class="flex items-center justify-between">
+                    <img src="{% static 'svgs/featured-icon.svg' %}" alt="" class="" />
+                    <div onclick="closeSendQuoteModal()" class="">
+                        <img src="{% static 'svgs/x-close.svg' %}" alt="" class="cursor-pointer" />
+                    </div>
+                </div>
+                <h3 class="font-semibold my-2">Create Quotation</h3>
+            </div>
+            <div class="p-4">
+                <button id="edit-quote-btn" type="button" class="inline-flex w-fit items-center justify-center cursor-pointer gap-2 bg-toneLightGreen p-3 rounded-md shadow-sm">
+                    <img src="{% static 'svgs/edit-02.svg' %}" alt="" class="" />
+                    <span class="text-primary text-sm font-semibold">Edit Quote</span>
+                </button>
+                <div class=" mt-5 flex flex-col gap-4">
+                    <div class="flex flex-col gap-2 text-sm">
+                        <span class="text-gray-700">Contractor Name</span>
+                        <h3 class="text-gray-900 font-medium">Olivia Rhye</h3>
+                    </div>
+                    <div class="flex flex-col gap-2 text-sm">
+                        <span class="text-gray-900 font-medium">Note</span>
+                        <span class="text-gray-600">Lorem ipsum dolor sit amet consectetur. Morbi risus tellus nisl ultricies adipiscing purus condimentum. Elementum lacus id at viverra.</span>
+                    </div>
+
+                    <div class="">
+                        <div class="flex items-center justify-between border-y border-neutral-100 py-3 last:border-0">
+                            <h4 class="text-gray-900 font-medium">Quotation Item</h4>
+                            <h4 class="text-gray-900 font-medium">Price($)</h4>
+                        </div>
+                        {% for item in quotation_items %}
+                        <div class="flex items-center justify-between border-y border-neutral-100 py-3 last:border-0">
+                            <h4 class="text-gray-600 ">{{item.name}}</h4>
+                            <h4 class="text-gray-600 font-medium">{{item.price}}</h4>
+                        </div>
+                        {% endfor %}
+                        <div class="flex items-center justify-between border-y border-neutral-100 py-3 last:border-0">
+                            <h4 class="text-gray-900 font-medium">Total</h4>
+                            <h4 class="text-gray-900 font-medium">$43,000.00</h4>
+                        </div>
+                    </div>
+                    <div class="w-full mt-5">
+                        <button id="send-quote-btn" class="outline-none border disabled:bg-primary disabled:bg-opacity-70 disabled:cursor-not-allowed border-neutral-100 px-4 py-2 w-full rounded-md shadow-sm bg-primary text-white">
+                        Send Quotation
+              </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</main>
+{% endblock %} {% block extraScripts %}
+<script src="{% static 'js/requestDetails.js' %}"></script>
+{% endblock extraScripts %}
