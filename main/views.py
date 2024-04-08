@@ -3,7 +3,7 @@ from django.shortcuts import render
 
 # loggedInUser = 'home-owner'| 'agent'| 'contractor'| 'investor', this is used to switch between bottom navigation, default navigation is home-owner, so need to add it.
 
-loggedInUser = 'agent'
+loggedInUser = 'contractor'
 
 # take a look at each template to know why this loggedInUser is used
 
