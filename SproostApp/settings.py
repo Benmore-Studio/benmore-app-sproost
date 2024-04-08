@@ -25,6 +25,8 @@ INSTALLED_APPS = [
     'main', 
     'userAuth',
     
+    'address',
+    
     "phonenumber_field",
     'allauth',
     'allauth.account',
@@ -166,3 +168,8 @@ SOCIALACCOUNT_PROVIDERS = {
         },
     }
 }
+
+
+AUTH_USER_MODEL = 'userAuth.User'
+
+GOOGLE_API_KEY = "random" # to be set when provided
