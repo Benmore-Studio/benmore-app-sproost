@@ -1,8 +1,9 @@
 var currentStep = 0 // Current tab is set to be the first tab (0)
 window.addEventListener("DOMContentLoaded", () => {
-    showStep(currentStep)
-    selectUserType()
-    validateEmail()
+    showStep(currentStep);
+    selectUserType();
+    validateEmail();
+    validatePhoneNumber();
 })
 
 function validateEmail() {
@@ -28,6 +29,53 @@ function validateEmail() {
         }
     });
 
+}
+
+async function checkPhoneNumber(phone, location) {
+    const phoneError = document.getElementById('phone-error')
+    const phoneField = document.getElementById('phone-field')
+
+    phoneField.classList.remove('border-gray-300');
+    try {
+        const response = await fetch(`/accounts/validate-phone?phone=${phone}&location=${location}`)
+        const data = await response.json()
+        if (!response.ok || phone === ""){
+            const message = data?.message || "please provide a valid phone number"
+            phoneError.style.display = "block"
+            phoneError.textContent = message
+            phoneField.classList.add('border-red-500');
+            phoneField.classList.remove('border-green-500');
+        }else{
+            phoneError.style.display = "none"
+            phoneField.classList.remove('border-red-500');
+            phoneField.classList.add('border-green-500');
+        }
+    } catch (error) {
+        console.log(error)
+        phoneField.classList.add('border-red-500');
+        phoneField.classList.remove('border-green-500');
+        phoneError.textContent = "An error occurred while validating phone number"
+    }
+}
+
+function validatePhoneNumber() {
+    const phoneInput1 = document.getElementById('id_phone_number_1')
+    const phonelocation = document.getElementById('id_phone_number_0')
+
+    phoneInput1.addEventListener('input', async function (e) {
+        // make ajax request to validate phone number
+        const phone = e.target.value;
+        const location = phonelocation.value;
+        checkPhoneNumber(phone, location)
+    })
+    phonelocation.addEventListener('change', async function (e) {
+        const phone = phoneInput1.value;
+        const location = e.target.value;
+        if (phone === "") {
+            return
+        }
+        checkPhoneNumber(phone, location)
+    })
 }
 
 function showStep(n) {

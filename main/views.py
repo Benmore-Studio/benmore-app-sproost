@@ -30,13 +30,7 @@ def homeOwners(request):
 
 def home(request):
     
-    if loggedInUser == 'contractor':
-        context = {
-        'loggedInUser': loggedInUser
-    }
-        return render(request, 'user/contractor_home.html', context)
-    
-    elif loggedInUser == 'agent':
+    if loggedInUser == 'agent':
         context = {
         'loggedInUser': loggedInUser
     }
