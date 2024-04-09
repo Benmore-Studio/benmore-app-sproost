@@ -7,6 +7,8 @@
     <title>{% block title %} {% endblock title %}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="{% static 'js/index.js' %}"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <link rel="stylesheet" href="{% static 'css/index.css' %}" />
     <script>
       tailwind.config = {
         theme: {
@@ -25,7 +27,18 @@
   </head>
 
   <body>
-    <div class="">{% block authContent %} {% endblock authContent %}</div>
+    <div class="">
+      {% block authContent %} {% endblock authContent %}
+    </div>
     {% block extraScripts %} {% endblock extraScripts %}
+    <script>
+      var messages = [
+        {% for message in messages %}
+            {"text": "{{ message }}", "level": "{{ message.tags }}"},
+        {% endfor %}
+    ];
+    </script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script> 
+    <script src="{% static 'js/accounts/base.js' %}"></script>
   </body>
 </html>

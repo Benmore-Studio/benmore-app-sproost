@@ -1,17 +1,12 @@
 from django.shortcuts import render
-# authentication
+from allauth.account.views import LoginView
+from django.contrib.auth import get_user_model
 
-# loggedInUser = 'home-owner'| 'agent'| 'contractor'| 'investor', this is used to switch between bottom navigation, default navigation is home-owner, so need to add it.
-
-loggedInUser = 'home-owner'
-
-# take a look at each template to know why this loggedInUser is used
-
-
-def loginUser(request):
-    context = {}
-    return render(request, 'user/auth/login.html', context)
-
-def signUpUser(request):
-    context = {}
-    return render(request, 'user/auth/signup.html', context)
+class CustomLoginView(LoginView):
+    def form_valid(self, form):
+        remember = self.request.POST.get('remember', None)
+        if remember:
+            self.request.session.set_expiry(30 * 24 * 60 * 60)  # 30 days
+        else:
+            self.request.session.set_expiry(0)  # Browser close
+        return super().form_valid(form)

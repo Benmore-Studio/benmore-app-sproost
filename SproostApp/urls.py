@@ -7,10 +7,11 @@ from django.conf import settings
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('main.urls', namespace='main')),
-    path('auth/', include('accounts.urls', namespace='accounts')),
-    path('profiles/', include('profiles.urls', namespace='profiles')),
-    path('quotes/', include('quotes.urls', namespace='quotes')),
-    path('admin/', include('admins.urls', namespace='admins')),
+    path('accounts/', include('accounts.urls')),
+    path('accounts/', include('allauth.urls')),
+    # path('profiles/', include('profiles.urls', namespace='profiles')),
+    # path('quotes/', include('quotes.urls', namespace='quotes')),
+    # path('admin/', include('admins.urls', namespace='admins')),
     
 ]
 

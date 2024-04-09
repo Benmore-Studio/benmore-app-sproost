@@ -13,8 +13,6 @@ urlpatterns = [
     path('edit-profile/', views.editProfile, name="edit-profile"),
     path('contractors/', views.contractors, name="contractors"),
     path('contractors/<str:profession>/', views.contractorDetail, name="contractors"),
-    path('login/', views.loginUser, name="login"),
-    path('signup/', views.signUpUser, name="signup"),
     # admin
     path('login-admin/', views.loginAdmin, name="login-admin"),
     path('dashboard/', views.adminDashboard, name="dashboard"),
