@@ -31,27 +31,27 @@
     <!-- grid cards -->
     <div class="w-full grid grid-cols-1 md:grid-cols-2 gap-4">
         <!-- column 1 -->
-        <div class="rounded-lg w-full border border-neutral-150 p-4">
+        <div class="rounded-lg w-full border border-neutral-150 p-4 overflow-x-scroll">
             <!-- header -->
-            <div class="w-full flex items-center justify-between border-b border-neutral-150 pb-4">
+            <div class="w-full flex items-center justify-between border-b border-neutral-150 pb-4 min-w-[580px]">
                 <h3 class="text-gray-900 font-semibold">Recent Home Owners</h3>
                 <a href="#" class="text-primary bg-toneLightGreen text-center p-2 px-4 rounded-md"> See all </a>
             </div>
             <!-- table search result -->
             <div class="w-full my-2">
-                <table class="w-full">
-                    <thead class="h-10 bg-gray-200 bg-opacity-80">
+                <table class="w-full  min-w-[580px]">
+                    <thead class="h-10 w-full bg-gray-200 bg-opacity-80">
                         <tr class="text-gray-600 text-xs font-medium">
-                            <th class="w-1/4 text-start p-4">Name</th>
-                            <th class="w-1/4 text-start p-4">Contact</th>
-                            <th class="w-1/4 text-start p-4">Recent Project</th>
-                            <th class="w-1/4 text-start p-4">Quotation Status</th>
+                            <th class="text-start p-4">Name</th>
+                            <th class="text-start p-4">Contact</th>
+                            <th class="text-start p-4">Recent Project</th>
+                            <th class="text-start p-4">Quotation Status</th>
                         </tr>
                     </thead>
-                    <tbody class="p-4">
+                    <tbody class="p-4 w-full ">
                         {% for home_owner in recent_home_owners %}
-                        <tr class="border-b border-neutral-100 last:border-0">
-                            <td class="w-1/4 p-4">
+                        <tr class="border-b w-full border-neutral-100 last:border-0">
+                            <td class="p-4">
                                 <a href="#" class="">
                                     <div class="w-full flex items-center gap-2">
                                         <img src="{{home_owner.photo}}" alt="" class="w-[40px] h-[40px] object-contain">
@@ -59,19 +59,19 @@
                                     </div>
                                 </a>
                             </td>
-                            <td class="w-1/4 p-4">
+                            <td class="p-4">
                                 <div class="flex flex-col gap-1">
                                     <span class="text-gray-500 text-sm">{{home_owner.phone}}</span>
                                     <span class="text-gray-500 text-sm">{{home_owner.email}}</span>
                                 </div>
                             </td>
-                            <td class="w-1/4 p-4">
+                            <td class="p-4">
                                 <span class=" font-semibold text-xs rounded-xl p-1 px-2 border border-neutral-150 bg-gray-50 bg-opacity-90 {% if home_owner.quotation_status == 'accepted' %} bg-toneLightGreen text-primary bg-opacity-70 border-primary {% elif home_owner.quotation_status == 'rejected' %} bg-[#B42318] bg-opacity-50 border-red-500 text-[#B42318] {% endif %} "> 
                                     {{home_owner.project_name}}
                                 </span>
                             </td>
 
-                            <td class="w-1/4 p-4 ">
+                            <td class="p-4 ">
                                 <div class="inline-flex items-center gap-2 rounded-xl p-1 px-2 border border-neutral-150">
                                     <span class="w-2 h-2 bg-[#B42318] rounded-full {% if home_owner.quotation_status == 'accepted' %} bg-primary {% elif home_owner.quotation_status == 'pending' %} bg-gray-800 {% endif %} "></span>
                                     <span class="font-semibold text-xs capitalize"> 
@@ -86,15 +86,15 @@
             </div>
         </div>
         <!-- column 2 -->
-        <div class="rounded-lg w-full border border-neutral-150 p-4">
+        <div class="rounded-lg w-full border border-neutral-150 p-4 overflow-x-scroll">
             <!-- header -->
-            <div class="w-full flex items-center justify-between border-b border-neutral-150 pb-4">
+            <div class="w-full flex items-center justify-between border-b border-neutral-150 pb-4 min-w-[580px]">
                 <h3 class="text-gray-900 font-semibold">Recent Agents</h3>
                 <a href="#" class="text-primary bg-toneLightGreen text-center p-2 px-4 rounded-md"> See all </a>
             </div>
             <!-- table search result -->
             <div class="w-full my-2">
-                <table class="w-full">
+                <table class="w-full min-w-[580px]">
                     <thead class="h-10 bg-gray-200 bg-opacity-80">
                         <tr class="text-gray-600 text-xs font-medium">
                             <th class="w-1/4 text-start p-4">Name</th>
@@ -135,15 +135,15 @@
             </div>
         </div>
         <!-- column 3 -->
-        <div class="rounded-lg w-full border border-neutral-150 p-4">
+        <div class="rounded-lg w-full border border-neutral-150 p-4 overflow-x-scroll">
             <!-- header -->
-            <div class="w-full flex items-center justify-between border-b border-neutral-150 pb-4">
+            <div class="w-full flex items-center justify-between border-b border-neutral-150 pb-4 min-w-[580px]">
                 <h3 class="text-gray-900 font-semibold">Recent Contractors</h3>
                 <a href="#" class="text-primary bg-toneLightGreen text-center p-2 px-4 rounded-md"> See all </a>
             </div>
             <!-- table search result -->
             <div class="w-full my-2">
-                <table class="w-full">
+                <table class="w-full min-w-[580px]">
                     <thead class="h-10 bg-gray-200 bg-opacity-80">
                         <tr class="text-gray-600 text-xs font-medium">
                             <th class="w-1/4 text-start p-4">Name</th>
