@@ -45,10 +45,13 @@ function validateForm() {
     }
 
     y = x[currentStep].getElementsByTagName("input")
+    console.log(y, "all the inputs")
     // A loop that checks every input field in the current tab:
     if (currentStep === 0) {
         valid = [...y].some((input) => input.checked)
-    } else {
+    } else if (currentStep === 1) {
+        valid = [...y].some((input) => input.value !== "")
+    }else{
         valid = [...y].every((input) => input.value !== "")
     }
     return valid
@@ -65,7 +68,7 @@ function nextPrev(n) {
     
     if (n == 1 && !validateForm()) {
         // if we get here it means, we are trying to go to the next step, but not all fields are filled
-        let toastMsg = currentStep === 0 ? "please select one of the options before proceeding" : "please make sure all fields are filled before proceeding"
+        let toastMsg = currentStep === 0 ? "please select one of the options before proceeding" : "please make sure required fields are filled out before proceeding"
         Toastify({
             text: toastMsg,
             duration: 3000,

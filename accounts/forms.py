@@ -6,20 +6,26 @@ from .models import USER_TYPE_CHOICES
 from profiles.models import UserProfile, ContractorProfile
 from phonenumber_field.widgets import PhoneNumberPrefixWidget
 from django.contrib import messages
-
-
+from address.forms import AddressField, AddressWidget
+        
 class CustomSignupForm(SignupForm):
     first_name = forms.CharField(max_length=30, required=False, widget=forms.TextInput(attrs={'placeholder': 'First Name'}))
     last_name = forms.CharField(max_length=30,required=False, widget=forms.TextInput(attrs={'placeholder': 'Last Name'}))
     phone_number = PhoneNumberField(required=False, widget=PhoneNumberPrefixWidget(initial='US'))
-    address = forms.CharField(max_length=100, required=False, widget=forms.TextInput(attrs={'placeholder': 'Enter home address'}))
+    address = AddressField(
+        required=False,
+        widget=AddressWidget(attrs={'placeholder': 'Enter Address', 'class': 'w-full p-2 border border-gray-300 rounded-md focus:outline-none mt-1 focus:border-gray-500'})
+    )
     city = forms.CharField(max_length=100, required=False, widget=forms.TextInput(attrs={'placeholder': 'Select City'}))
     state = forms.CharField(max_length=100, required=False, widget=forms.TextInput(attrs={'placeholder': 'Select State'}))
     user_type = forms.ChoiceField(choices=USER_TYPE_CHOICES, widget=forms.RadioSelect)
     company_name = forms.CharField(max_length=255, required=False, widget=forms.TextInput(attrs={'placeholder': 'Enter Company Name'}))
     registration_number = forms.CharField(max_length=225, required=False, widget=forms.TextInput(attrs={'placeholder': 'Enter Registration Number'}))
     specialization = forms.CharField(max_length=225, required=False, widget=forms.TextInput(attrs={'placeholder': 'Enter Specialization'}))
-    company_address = forms.CharField(max_length=100, required=False, widget=forms.TextInput(attrs={'placeholder': 'Enter Company Address'}))
+    company_address = AddressField(
+        required=False,
+        widget=AddressWidget(attrs={'placeholder': 'Enter Address', 'class': 'w-full p-2 border border-gray-300 rounded-md focus:outline-none mt-1 focus:border-gray-500'})
+    )
     def save(self, request):
         user = super(CustomSignupForm, self).save(request)
         user.user_type = self.cleaned_data['user_type']

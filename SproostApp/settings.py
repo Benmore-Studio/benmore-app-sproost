@@ -196,4 +196,4 @@ SOCIALACCOUNT_PROVIDERS = {
 
 AUTH_USER_MODEL = 'accounts.User'
 
-GOOGLE_API_KEY = "random" # to be set when provided
+GOOGLE_API_KEY = "AIzaSyBIMv62jBi-MjrYXsARUfy8S5xZwKqeGqc"
