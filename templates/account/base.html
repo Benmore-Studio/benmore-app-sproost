@@ -1,7 +1,8 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{% block title %} {% endblock title %}</title>
@@ -10,21 +11,21 @@
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <link rel="stylesheet" href="{% static 'css/index.css' %}" />
     <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              primary: "#2FAA07",
-              "toneLightGreen": "#EAF7E6",
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#2FAA07",
+                        "toneLightGreen": "#EAF7E6",
+                    },
+                    fontFamily: {
+                        primary: ["Poppins", "sans-serif"],
+                    },
+                },
             },
-            fontFamily: {
-              primary: ["Poppins", "sans-serif"],
-            },
-          },
-        },
-      }
+        }
     </script>
-  </head>
+</head>
 
   <body>
     <div class="">
