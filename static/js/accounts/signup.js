@@ -2,7 +2,33 @@ var currentStep = 0 // Current tab is set to be the first tab (0)
 window.addEventListener("DOMContentLoaded", () => {
     showStep(currentStep)
     selectUserType()
+    validateEmail()
 })
+
+function validateEmail() {
+    const emailError = document.getElementById('email-error')
+    const emailInput = document.getElementById('id_email')
+    emailInput.addEventListener('input', function (e) {
+        var email = e.target.value;
+        var pattern = /^[^ ]+@[^ ]+\.[a-z]{2,3}$/;
+        e.target.classList.remove('focus:border-gray-500');
+
+
+        if (email.match(pattern)) {
+            console.log("green")
+            e.target.classList.remove('focus:border-red-500');
+            e.target.classList.add('focus:border-green-500');
+            emailError.style.display = "none"
+        } else {
+            console.log("red")
+            e.target.classList.remove('focus:border-green-500');
+            e.target.classList.add('focus:border-red-500');
+            emailError.textContent = "Please enter a valid email address"
+            emailError.style.display = "block"
+        }
+    });
+
+}
 
 function showStep(n) {
     //  check if the radio btn with name user_type has the value CO 
@@ -45,7 +71,6 @@ function validateForm() {
     }
 
     y = x[currentStep].getElementsByTagName("input")
-    console.log(y, "all the inputs")
     // A loop that checks every input field in the current tab:
     if (currentStep === 0) {
         valid = [...y].some((input) => input.checked)
@@ -103,7 +128,6 @@ function selectUserType() {
     const inputs = document.getElementsByTagName('input');
     const parentDivs = document.querySelectorAll('#container-check');
     const radioBoxes = Array.from(inputs).filter(input => input.type === 'radio');
-    console.log({ radioBoxes });
 
     radioBoxes.forEach((radio, idx) => {
         radio.addEventListener('change', function () {
