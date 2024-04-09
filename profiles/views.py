@@ -1,3 +1,5 @@
 from django.shortcuts import render
 
-# Create your views here.
+
+def contractor_profile_view(request):
+    return render(request, 'user/contractor_home.html', {'loggedInUser' : 'contractor'})
