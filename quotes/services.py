@@ -22,23 +22,22 @@ class QuoteService(CustomRequestUtil):
 
             if error:
                 return None, error
-            
-            payload.pop("user")
 
             for file in media:
-                extension = file.name[1].lower()
-                media_type = MediaTypes.image
+                media_file, media_image = None, None
+
+                extension = file.name.split('.')[-1].lower()
 
                 if extension in file_types:
-                    media_type = MediaTypes.file
+                    media_file = file
+                elif extension in image_types:
+                    media_image = file
 
-                quote_media = Media(
+                quote.media_paths.create(
                     content_object=quote,
-                    media_type=media_type,
-                    file_path=file,
+                    image=media_image,
+                    file=media_file
                 )
-
-                quote_media.save()
 
             return "Quote Request saved successfully", None
 

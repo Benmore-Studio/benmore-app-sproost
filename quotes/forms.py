@@ -1,6 +1,5 @@
 from django import forms
 from quotes.models import QuoteRequests
-from main.models import Media
 
 class MultipleFileInput(forms.ClearableFileInput):
     allow_multiple_selected = True

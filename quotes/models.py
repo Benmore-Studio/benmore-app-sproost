@@ -1,5 +1,6 @@
 from django.db import models
 from phonenumber_field.modelfields import PhoneNumberField
+from django.contrib.contenttypes.fields import GenericRelation
 
 class QuoteRequestsStatus(models.TextChoices):
     pending = "Pending"
@@ -15,7 +16,7 @@ class QuoteRequests(models.Model):
     contact_email = models.EmailField(max_length=255, null=False)
     property_address = models.CharField(max_length=255, null=False)
     upload_date = models.DateTimeField(auto_now_add=True, null=False)
-    media_paths = models.ForeignKey("main.Media", on_delete=models.SET_NULL, null=True)
+    media_paths = GenericRelation("main.Media")
 
 
 class Projects(models.Model):
