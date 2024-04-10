@@ -1,19 +1,41 @@
 from django.shortcuts import render, redirect
 from profiles.models import ContractorProfile
-from django.shortcuts import get_object_or_404
+from django.urls import reverse
 # from django.contrib import messages
 from django.db.models import Q
 from .forms import ContractorProfileForm
+from django.views.generic.edit import UpdateView
+from django.contrib.auth.decorators import login_required
+
 
 def contractor_profile_view(request):
-    return render(request, 'user/contractor_home.html', {'loggedInUser' : 'contractor'})
+    if request.user.user_type != 'CO':
+        return redirect('main:dashboard')
+    
+    # TODO add try and except to catch possible errors
+    profile = ContractorProfile.objects.get(user = request.user)
+    context = {
+        'profile' : profile, 
+        'loggedInUser' : 'contractor'
+    }
+    return render(request, 'user/contractor_home.html', context)
 
-
+@login_required
 def editProfile(request):
-    context ={}
-    return render(request, 'user/edit_profile.html', context)
+    if request.user.user_type != 'CO':
+        return redirect('main:dashboard')
+    
+    return render(request, 'user/edit_profile.html', {})
 
 # views.py
+class EditProfileView(UpdateView):
+    model = ContractorProfile
+    form_class = ContractorProfileForm
+    template_name = 'user/edit_profile.html'
+    
+    def get_success_url(self):
+        return reverse('profile:contractor_profile')
+
 def editProfileRequest(request):
     user = request.user
     try:
@@ -46,7 +68,7 @@ def search_view(request):
 
 def search_view_results(request):
     if request.method == 'GET':
-        query = request.GET.get('search')
+        query = request.GET.get('query')
         results = []
 
         if query:
@@ -56,8 +78,7 @@ def search_view_results(request):
                 Q(specialization__icontains=query) |
                 Q(user__phone_number__icontains=query)|
                 Q(user__email__icontains=query) 
-            )
-            num_results = len(results)   
+            )   
                 
-        return render(request, 'user/search_results.html', {'results': results, 'num_results': num_results})
+        return render(request, 'user/search_results.html', {'results': results})
 

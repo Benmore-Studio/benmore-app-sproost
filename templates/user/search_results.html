@@ -1,38 +1,42 @@
 {% extends "user/base.html" %} {% load static %} {% block content %}
 
-<div class="w-full flex flex-col items-center justify-center">
-    <form action="{% url 'profile:search-view-results' %}" class="w-full text-center mt-4 flex flex-col gap-4" method="GET">
-        {% csrf_token %}
-        <div class="w-[80%] relative">
-            <input type="text" name="search" id="search" placeholder="Search..." class="w-full p-2 text-gray-500 border border-gray-300 rounded-md focus:outline-none mt-1 focus:border-gray-500" />
-            <div class=" absolute flex-col right-1 top-1 items-center cursor-pointer">
-                <img src="{% static 'svgs/search.svg' %}" alt="" class="w-[20px] h-[20px]" />
-                <input class="text-gray-500 text-xs" type="submit" value="Search">
+<div class="w-full px-4  mt-4">
+    <h3 class = "font-semibold text-xl">Contractors<h3/>
+    <form action="{% url 'profile:search-view-results' %}" class="w-full text-center flex flex-col gap-4" method="GET">
+        <div class="w-full  relative">
+            <input type="text" name="query" id="search" placeholder="Search" class="w-full p-2 text-gray-500 border border-gray-300 rounded-md focus:outline-none mt-1 focus:border-gray-500" />
+            <div class="absolute right-3 top-0 h-full flex items-center justify-center items-center cursor-pointer">
+                <button type = "submit">
+                    <img src="{% static 'svgs/search.svg' %}" alt="" class="w-[20px] h-[20px]" />
+                </button>
             </div>
         </div>
     </form>
 </div>
 
 {% if results %}
-    <div class="w-[90%] mt-6">
-        <p class="w-full ml-4">{{num_results}} found</p>
-        <div class="w-full flex justify-between mx-4">
-            <p>Name</p>
-            <p>Contact</p>
+    <div class="mx-3 mt-6">
+        <div class = "grid grid-cols-2">
+            <p class = "text-sm font-medium text-gray-400"> Name </p>
+            <p class = "text-sm font-medium text-gray-400"> Contact </p>
         </div>
         {% for result in results %}
-            <a href="" class="w-full flex justify-between mx-4 cursor-pointer">
+            <a href="" class="w-full flex justify-between cursor-pointer grid grid-cols-2 mt-4">
                 <div>
-                    <p>{{result.user.username}}</p>    
-                    <p>{{result.specialization}}</p>
+                    <p class = "font-semibold text-black">{{result.user.username}}</p>    
+                    <p class = "text-gray-500">{{result.specialization}}</p>
                 </div>
-                <div class="mt-2">
-                    <p>{{result.user.phone_number}}</p>    
+                <div class="">
+                    <p class = "font-medium">{{result.user.phone_number}}</p>    
                     <p>{{result.user.email}}</p>    
                 </div>
             </a>
         {% endfor %}
     </div>  
+{% else %}
+    <div class = "flex items-center justify-center text-gray-600 font-semibold mt-3">
+        No results
+    </div>
 {% endif %}
     
 {% endblock %}{% block bottomNav %}{% if loggedInUser == 'agent' %}{% include "user/bottom_nav_agent.html" %}{% elif loggedInUser == 'contractor' %}{% include "user/bottom_nav_contractor.html"%}{% else %}{% include "user/bottom_nav.html" %} {% endif %}
