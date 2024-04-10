@@ -108,6 +108,7 @@ ENV/
 env.bak/ 
 venv.bak/
 eap/
+myvenv/
 
 # mkdocs documentation 
 /site 

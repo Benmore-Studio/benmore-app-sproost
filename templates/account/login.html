@@ -1,0 +1,67 @@
+{% extends 'account/base.html'%}
+{% load static %} 
+{% load socialaccount %}
+{% load form_tags %}
+{% block title %} 
+  Login 
+{% endblock %}  
+{% block authContent %}
+<div class="w-full p-4 pt-8">
+  <div class="flex flex-col gap-8 items-center justify-center">
+    <img src="{% static 'svgs/sproost.svg' %}" alt="" class="" />
+    <div class="flex flex-col items-center justify-center">
+      <h3 class="text-gray-900 font-semibold text-xl">Log in to your account</h3>
+      <p class="text-gray-600 text-base">Welcome back! Please enter your details.</p>
+    </div>
+    <form action="" method="post" class="flex flex-col gap-4 w-full">
+      {% if form.non_field_errors %}
+            <div class="bg-red-400 rounded-md text-center border border-red-700 text-white p-2 my-1">
+                {% for error in form.non_field_errors %}
+                    <p>{{ error }}</p>
+                {% endfor %}
+            </div>
+      {% endif %}
+      {% csrf_token %}
+      <div class="flex flex-col gap-2 w-full">
+        <label for="email" class="text-gray-600 text-sm">Email</label>
+        {{form.login|addattrs:"class=w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:border-gray-500,placeholder=Enter your email"}}
+        {% if form.login.errors %}
+          <div class = "w-full p-3 bg-red-300 border border-red-600 rounded text-white text-center">
+            {{form.login.errors}}
+          </div>
+        {% endif %}
+      </div>
+      <div class="flex flex-col gap-2 w-full">
+        <label for="password" class="text-gray-600 text-sm">Password</label>
+        {{form.password|addattrs:"class=w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:border-gray-500,placeholder=Enter your email"}}
+        {% if form.password.errors %}
+          <div class = "w-full p-3 bg-red-300 border border-red-600 rounded text-white text-center">
+            {{form.password.errors}}
+          </div>
+        {% endif %}
+      </div>
+      <div class="flex items-center justify-between gap-2 w-full">
+        <label for="remember" class="flex items-center">
+          {{form.remember|addattrs:"class=mr-2"}}
+          <span class="text-gray-600 text-sm">Remember for 30 days</span>
+        </label>
+        <a href="{% url 'account_reset_password' %}" class="text-primary font-semibold text-sm">Forgot password?</a>
+      </div>
+
+      <div class="flex flex-col gap-4 mt-5 w-full">
+        <button type="submit" class="w-full p-3 shadow-sm bg-primary text-white rounded-md font-semibold focus:outline-none focus:bg-primary">Sign in</button>
+      </div>
+      <div class="flex flex-col gap-2 w-full">
+        <a href="{% provider_login_url 'google' %}" class="w-full p-3 shadow-sm border border-neutral-100 flex items-center justify-center gap-2 rounded-md font-semibold focus:outline-none">
+          <img src="{% static 'svgs/google.svg' %}" alt="" class="" />
+          <span class="text-gray-900 text-sm">Sign in with Google</span>
+        </a>
+      </div>
+      <div class="flex items-center justify-center text-sm gap-2">
+        <span class="text-gray-600">Don’t have an account?</span>
+        <a href="{% url 'account_signup' %}" class="text-primary">Sign up</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock authContent %}
