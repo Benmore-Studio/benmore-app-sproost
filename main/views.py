@@ -1,5 +1,6 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 
+from quotes.models import QuoteRequest, Project
 
 
 
@@ -14,13 +15,13 @@ loggedInUser = 'contractor'
 def homeOwners(request):
     project_feed= [
         {
-          'title':'Number of Uploaded projects',  'status': 'uploaded',  'count': 3, 
+            'title':'Number of Uploaded projects',  'status': 'uploaded',  'count': 3, 
         },
         {
-          'title': 'Number of Quotes Requested',  'status': 'quotes', 'count': 3, 
+            'title': 'Number of Quotes Requested',  'status': 'quotes', 'count': 3, 
         },
         {
-        'title':'Number of completed projects', 'status': 'completed', 'count': 2, 
+            'title':'Number of completed projects', 'status': 'completed', 'count': 0, 
         }
     ]
     
@@ -33,15 +34,39 @@ def homeOwners(request):
     context = {'project_feed': project_feed, 'project_history': project_history, 'loggedInUser': loggedInUser}
     return render(request, 'user/home.html', context)
 
+
+
 def home(request):
+    if not request.user.is_authenticated:
+        return redirect('account_login')
     
-    if loggedInUser == 'agent':
-        context = {
-        'loggedInUser': loggedInUser
-    }
-        return render(request, 'user/agent_home.html', context)
     else:
-        return homeOwners(request)
+        if request.user.user_type == "HO":
+            quotes = QuoteRequest.objects.filter(user=request.user, is_quote=True)
+            projects = Project.objects.filter(quote_request__user=request.user)
+            context = {
+                "quotes": quotes,
+                "projects": projects,
+                "quote_count": quotes.count(),
+                "projects_count": projects.count()
+            }
+            return render(request, "user/home.html", context)
+        elif request.user.user_type == "CO":
+            return render(request, "user/contractor_home.html")
+        elif request.user.user_type == "AG":
+            return render(request, "user/agent_home.html")
+        else:
+            return render(request, "user_admin/dashboard.html")
+    
+# def home(request):
+    
+#     if loggedInUser == 'agent':
+#         context = {
+#         'loggedInUser': loggedInUser
+#     }
+#         return render(request, 'user/agent_home.html', context)
+#     else:
+#         return homeOwners(request)
 
 
 def requestQuotes(request):

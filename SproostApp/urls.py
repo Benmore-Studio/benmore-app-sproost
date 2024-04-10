@@ -10,7 +10,7 @@ urlpatterns = [
     path('accounts/', include('accounts.urls')),
     path('accounts/', include('allauth.urls')),
     path('profiles/', include('profiles.urls', namespace='profile')),
-    # path('quotes/', include('quotes.urls', namespace='quotes')),
+    path('quotes/', include('quotes.urls', namespace='quotes')),
     # path('admin/', include('admins.urls', namespace='admins')),
     
 ]

@@ -1,131 +1,210 @@
 {% extends "user/base.html" %} {% load static %} {% block content %}
 
 <style>
-    #step {
-        display: none;
-    }
+  #step {
+    display: none;
+  }
 </style>
 <div class="w-full">
-    <!-- content -->
-    <div id="step" class="w-full">
-        <!-- header -->
-        <div class="w-full p-4 flex items-center gap-8 mt-4 border-b border-neutral-150">
-            <img onclick="goBack()" src="{% static 'svgs/chevron-left.svg' %}" alt="" class="cursor-pointer" />
-            <h3 class="text-xl text-gray-900 font-medium">Request Quote</h3>
-        </div>
-
-        <div class="w-full p-4">
-            <div class="w-full">
-                <span class="text-sm text-gray-700 font-medium">Upload Pictures & Videos</span>
-                <p class="text-sm text-gray-500">This will be sent to the contractor to create a quotation</p>
-            </div>
-            <label for="upload-quote">
-                <div class="w-full min-h-[150px] rounded-md border border-neutral-150 shadow-sm mt-4 flex flex-col gap-4 items-center justify-center">
-                    <div class="w-12 h-12 flex items-center justify-center rounded-full bg-gray-200 bg-opacity-50 p-2">
-                        <img src="{% static 'svgs/upload-cloud.svg' %}" alt="" class="" />
-                    </div>
-                    <p class="text-center text-sm text-gray-500">
-                        <span class="text-primary font-semibold">Click to upload</span> or drag and drop <br /> SVG, PNG, JPG or GIF (max. 800x400px)
-                    </p>
-                </div>
-                <input type="file" id="upload-quote" multiple name="upload-quote" class="hidden">
-            </label>
-            <div id="file-container" class="w-full flex items-center my-4 gap-4">
-                <!-- dynamic render -->
-            </div>
-            <!-- instruction -->
-            <div class="border-t border-neutral-150 pt-5 mt-5">
-                <div class="w-full">
-                    <span class="text-sm text-gray-700 font-medium">Instruction</span>
-                    <p class="text-sm text-gray-500">Write a short instruction</p>
-                </div>
-
-                <form action="" class="w-full mt-4 flex flex-col gap-4">
-                    <div class="w-full">
-                        <label for="title" class="text-gray-700 font-medium text-sm">Title</label>
-                        <input type="text" name="title" id="title" placeholder="Type here" class="w-full p-2 border border-gray-300 rounded-md focus:outline-none mt-1 focus:border-gray-500" />
-                    </div>
-                    <div class="w-full">
-                        <label for="Summary" class="text-gray-700 font-medium text-sm">Summary</label>
-                        <textarea type="text" name="Summary" id="Summary" placeholder="Type here" class="w-full p-2 border min-h-[120px] border-gray-300 rounded-md focus:outline-none mt-1 focus:border-gray-500"></textarea>
-                        <small class="text-gray-500">257 characters left</small>
-                    </div>
-                    <div class="w-full">
-                        <span class="text-sm text-gray-700 font-medium">Contact Info</span>
-                        <p class="text-sm text-gray-500">Provide your contact details</p>
-                    </div>
-                    <div class="w-full">
-                        <label for="email" class="text-gray-700 font-medium text-sm">Phone number</label>
-                        <div class="flex gap-2 p-2 border border-gray-300 p-2 mt-1 border border-gray-300 rounded-md">
-                            <select name="country" id="country" class="w-2/12 rounded-md focus:outline-none mt-1 disabled:bg-transparent bg-transparent outline-none border-none focus:border-gray-500">
-                <option value="" disabled selected>US</option>
-                <option value="USA">US</option>
-                <option value="Canada">Canada</option>
-                <option value="UK">UK</option>
-                <!-- Add more country options here -->
-              </select>
-                            <input type="tel" name="phone" id="phone" placeholder="+1 (555) 000-0000" class="w-10/12 rounded-md focus:outline-none mt-1 focus:border-gray-500" />
-                        </div>
-                    </div>
-                    <div class="w-full">
-                        <label for="title" class="text-gray-700 font-medium text-sm">Email</label>
-                        <div class="group border border-gray-300 rounded-md flex items-center gap-2 p-2 mt-1">
-                            <img src="{% static 'svgs/mail.svg' %}" alt="" class="w-[20px] h-[20px] object-contain" />
-                            <input type="text" name="title" id="title" placeholder="Type here" class="w-full h-full outline-none group-focus:outline-none mt-1 focus-visible:border-none border-none" />
-                        </div>
-                    </div>
-                    <div class="w-full">
-                        <label for="house-address" class="text-gray-700 font-medium text-sm">House Address</label>
-                        <input type="text" name="house-address" id="house-address" placeholder="Type here" class="w-full p-2 border border-gray-300 rounded-md focus:outline-none mt-1 focus:border-gray-500" />
-                    </div>
-                    <div class="flex justify-end gap-4 border-t border-neutral-150 pt-5">
-                        <button type="button" onclick="goBack()" class="inline-flex p-3 rounded-lg items-center justify-center bg-white border border-neutral-150 shadow-sm font-semibold">Cancel</button>
-                        <button id="nextBtn" onclick="nextPrev(1)" type="button" class="inline-flex items-center justify-center p-3 rounded-lg bg-primary text-white border border-neutral-150 shadow-sm font-semibold">
-              Request Quote
-            </button>
-                    </div>
-                </form>
-            </div>
-        </div>
+  <!-- content -->
+  <div id="step" class="w-full">
+    <!-- header -->
+    <div
+      class="w-full p-4 flex items-center gap-8 mt-4 border-b border-neutral-150"
+    >
+      <img
+        onclick="goBack()"
+        src="{% static 'svgs/chevron-left.svg' %}"
+        alt=""
+        class="cursor-pointer"
+      />
+      <h3 class="text-xl text-gray-900 font-medium">Request Quote</h3>
     </div>
-    <!-- step 2 -->
-    <div id="step" class="w-full">
-        <div class="w-full p-4 flex items-center justify-center h-screen">
-            <div class="w-full flex flex-col gap-10 items-center justify-center">
-                <div class="bg-[#FEF0C7] bg-opacity-80 p-2 rounded-full w-12 h-12 flex items-center justify-center">
-                    <img src="{% static 'svgs/alert-triangle.svg' %}" alt="" class="" />
-                </div>
-                <div class="w-full">
-                    <span class="text-lg mb-2 text-gray-900 font-semibold">Request Quotes</span>
-                    <p class="text-sm text-gray-500">Please make sure that there are two angles of each room.</p>
-                </div>
-                <div class="w-full flex flex-col gap-3">
-                    <button id="nextBtn" onclick="nextPrev(1)" type="button" class="items-center w-full justify-center p-3 rounded-lg bg-primary text-white border border-neutral-150 shadow-sm font-semibold">
+
+    <div class="w-full p-4">
+      <form method="post" enctype="multipart/form-data" id="quoteRequestForm" class="w-full mt-4 flex flex-col gap-4">
+        {% csrf_token %}
+        <div class="w-full">
+          <span class="text-sm text-gray-700 font-medium"
+            >Upload Pictures & Videos</span
+          >
+          <p class="text-sm text-gray-500">
+            This will be sent to the contractor to create a quotation
+          </p>
+        </div>
+        <label for="upload-quote">
+          <div
+            class="w-full min-h-[150px] rounded-md border border-neutral-150 shadow-sm mt-4 flex flex-col gap-4 items-center justify-center"
+          >
+            <div
+              class="w-12 h-12 flex items-center justify-center rounded-full bg-gray-200 bg-opacity-50 p-2"
+            >
+              <img src="{% static 'svgs/upload-cloud.svg' %}" alt="" class="" />
+            </div>
+            <p class="text-center text-sm text-gray-500">
+              <span class="text-primary font-semibold">Click to upload</span> or
+              drag and drop <br />
+              SVG, PNG, JPG or GIF (max. 800x400px)
+            </p>
+          </div>
+          <input
+            type="file"
+            id="upload-quote"
+            multiple
+            name="upload-quote"
+            class="hidden"
+          />
+        </label>
+      
+        <div id="file-container" class="w-full flex items-center my-4 gap-4">
+          <!-- dynamic render -->
+        </div>
+
+        <!-- instruction -->
+        <div class="border-t border-neutral-150 pt-5 mt-5 flex flex-col gap-4">
+          <div class="w-full">
+            <span class="text-sm text-gray-700 font-medium">Instruction</span>
+            <p class="text-sm text-gray-500">Write a short instruction</p>
+          </div>
+            <div class="w-full">
+              <label for="title" class="text-gray-700 font-medium text-sm">Title</label>
+              {{ form.title }}
+            </div>
+
+            <div class="w-full">
+              <label for="Summary" class="text-gray-700 font-medium text-sm">Summary</label>
+              {{ form.summary }}
+              <small class="text-gray-500">257 characters left</small>
+            </div>
+
+            <div class="w-full">
+              <span class="text-sm text-gray-700 font-medium">Contact Info</span>
+              <p class="text-sm text-gray-500">Provide your contact details</p>
+            </div>
+
+            <div class="w-full">
+              <label for="email" class="text-gray-700 font-medium text-sm">Phone number</label>
+              <div class="flex gap-2 p-2 border border-gray-300 p-2 mt-1 border border-gray-300 rounded-md">
+                <select
+                  name="country"
+                  id="country"
+                  class="w-2/12 rounded-md focus:outline-none mt-1 disabled:bg-transparent bg-transparent outline-none border-none focus:border-gray-500"
+                >
+                  <option value="" disabled selected>US</option>
+                  <option value="USA">US</option>
+                  <option value="Canada">Canada</option>
+                  <option value="UK">UK</option>
+                  <!-- Add more country options here -->
+                </select>
+                {{ form.contact_phone }}
+              </div>
+            </div>
+            <div class="w-full">
+              <label for="title" class="text-gray-700 font-medium text-sm">Email</label>
+              <div class="group border border-gray-300 rounded-md flex items-center gap-2 p-2 mt-1">
+                <img
+                  src="{% static 'svgs/mail.svg' %}"
+                  alt=""
+                  class="w-[20px] h-[20px] object-contain"
+                />
+                {{ form.contact_email }}
+              </div>
+            </div>
+
+            <div class="w-full">
+              <label for="house-address" class="text-gray-700 font-medium text-sm">House Address</label>
+              {{ form.property_address }}
+            </div>
+
+            <div class="flex justify-end gap-4 border-t border-neutral-150 pt-5">
+              <button
+                type="button"
+                onclick="goBack()"
+                class="inline-flex p-3 rounded-lg items-center justify-center bg-white border border-neutral-150 shadow-sm font-semibold"
+              >
+                Cancel
+              </button>
+              <button
+                id="nextBtn"
+                onclick="nextPrev(1)"
+                type="button"
+                class="inline-flex items-center justify-center p-3 rounded-lg bg-primary text-white border border-neutral-150 shadow-sm font-semibold"
+              >
+                Request Quote
+              </button>
+            </div>
+        </div>
+      </form>
+    </div>
+  </div>
+  <!-- step 2 -->
+  <div id="step" class="w-full">
+    <div class="w-full p-4 flex items-center justify-center h-screen">
+      <div class="w-full flex flex-col gap-10 items-center justify-center">
+        <div
+          class="bg-[#FEF0C7] bg-opacity-80 p-2 rounded-full w-12 h-12 flex items-center justify-center"
+        >
+          <img src="{% static 'svgs/alert-triangle.svg' %}" alt="" class="" />
+        </div>
+        <div class="w-full">
+          <span class="text-lg mb-2 text-gray-900 font-semibold"
+            >Request Quotes</span
+          >
+          <p class="text-sm text-gray-500">
+            Please make sure that there are two angles of each room.
+          </p>
+        </div>
+        <div class="w-full flex flex-col gap-3">
+          <button
+            id="nextBtn"
+            onclick="submitQuote()"
+            type="button"
+            class="items-center w-full justify-center p-3 rounded-lg bg-primary text-white border border-neutral-150 shadow-sm font-semibold"
+          >
             Confirm
           </button>
-                    <button type="button" id="prevBtn" onclick="nextPrev(-1)" class="p-3 rounded-lg w-full items-center justify-center bg-white border border-neutral-150 shadow-sm font-semibold">Back</button>
-                </div>
-            </div>
+          <button
+            type="button"
+            id="prevBtn"
+            onclick="nextPrev(-1)"
+            class="p-3 rounded-lg w-full items-center justify-center bg-white border border-neutral-150 shadow-sm font-semibold"
+          >
+            Back
+          </button>
         </div>
+      </div>
     </div>
-    <!-- step 3 -->
-    <div id="step" class="w-full">
-        <div class="w-full p-4 flex items-center justify-center h-screen">
-            <div class="w-full flex flex-col gap-10 items-center justify-center">
-                <div class="rounded-full flex items-center justify-center">
-                    <img src="{% static 'svgs/success-tada.svg' %}" alt="" class="" />
-                </div>
-                <div class="w-full text-center">
-                    <span class="text-xl mb-2 text-gray-900 font-bold">Thank you for your submission</span>
-                    <p class="text-sm text-gray-700">Our team will be in contact with you within 24-48hrs.</p>
-                </div>
-            </div>
+  </div>
+  <!-- step 3 -->
+  <div id="step" class="w-full">
+    <div class="w-full p-4 flex items-center justify-center h-screen">
+      <div class="w-full flex flex-col gap-10 items-center justify-center">
+        <div class="rounded-full flex items-center justify-center">
+          <img src="{% static 'svgs/success-tada.svg' %}" alt="" class="" />
         </div>
+        <div class="w-full text-center">
+          <span class="text-xl mb-2 text-gray-900 font-bold"
+            >Thank you for your submission</span
+          >
+          <p class="text-sm text-gray-700">
+            Our team will be in contact with you within 24-48hrs.
+          </p>
+        </div>
+      </div>
     </div>
+  </div>
 </div>
 
-{% endblock %}{% block bottomNav %}{% if loggedInUser == 'agent' %}{% include "user/bottom_nav_agent.html" %}{% elif loggedInUser == 'contractor' %}{% include "user/bottom_nav_contractor.html"%}{% else %}{% include "user/bottom_nav.html" %} {% endif %}
-{% endblock bottomNav %} {% block extraScripts %}
-<script src="{% static 'js/requestQuotes.js' %}"></script>
-
+{% endblock %}
+{% block bottomNav %}
+    {% if request.user.user_type == 'AG' %}
+        {% include "user/bottom_nav_agent.html" %}
+    {% elif request.user.user_type == 'CO' %}
+        {% include "user/bottom_nav_contractor.html" %}
+    {% else %}
+        {% include "user/bottom_nav.html"%} 
+    {% endif %}
+{% endblock bottomNav %} 
+{% block extraScripts %}
+    <script src="{% static 'js/requestQuotes.js' %}"></script>
 {% endblock extraScripts %}

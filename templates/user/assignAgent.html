@@ -1,4 +1,7 @@
-{% extends "user/base.html" %} {% load static %} {% block bottomNav %} {% include "user/bottom_navigation.html" %} {% endblock bottomNav %} {% block content %}
+{% extends "user/base.html" %} {% load static %} 
+{% include "user/bottom_navigation.html" %}
+
+{% block content %}
 <div class="w-full">
     <!-- header -->
     <div class="w-full p-4 flex items-center gap-8 mt-4 border-b border-neutral-150">
@@ -10,19 +13,26 @@
         <form action="" class="w-full mt-4 flex flex-col gap-4">
             <div class="w-full">
                 <label for="agentName" class="text-gray-700 font-medium text-sm">Agent Name</label>
-                <input type="text" name="agentName" id="agentName" placeholder="Type here" class="w-full p-2 border border-gray-300 rounded-md focus:outline-none mt-1 focus:border-gray-500" />
+                <select name="agentName" id="agentName" class="w-full p-2 border border-gray-300 rounded-md focus:outline-none mt-1 focus:border-gray-500">
+                    <option value="">Select an Agent</option>
+                    <option value="agent1">Agent 1</option>
+                    <option value="agent2">Agent 2</option>
+                    <option value="agent3">Agent 3</option>
+                    <!-- Add more <option> tags as needed for each agent -->
+                </select>
             </div>
+            
             <div class="w-full">
                 <label for="regNumber" class="text-gray-700 font-medium text-sm">Registration Number</label>
                 <input type="text" name="regNumber" id="regNumber" placeholder="Type here" class="w-full p-2 border border-gray-300 rounded-md focus:outline-none mt-1 focus:border-gray-500" />
             </div>
-            <div class="w-full">
+            {% comment %} <div class="w-full">
                 <label for="title" class="text-gray-700 font-medium text-sm">Email</label>
                 <div class="group border border-gray-300 rounded-md flex items-center gap-2 p-2 mt-1">
                     <img src="{% static 'svgs/mail.svg' %}" alt="" class="fill-gray-500 w-[20px] h-[20px] text-gray-500" />
                     <input type="text" name="title" id="title" placeholder="Type here" class="w-full h-full outline-none group-focus:outline-none mt-1 focus-visible:border-none border-none" />
                 </div>
-            </div>
+            </div> {% endcomment %}
 
             <div class="flex w-full flex-col gap-4 border-t border-neutral-150 pt-5">
                 <button onclick="gotoPropertyList()" type="button" class="flex items-center w-full justify-center p-3 rounded-lg bg-primary text-white border border-neutral-150 shadow-sm font-semibold">
@@ -33,7 +43,9 @@
         </form>
     </div>
 </div>
-{% endblock %}{% block bottomNav %}{% if loggedInUser == 'agent' %}{% include "user/bottom_nav_agent.html" %}{% elif loggedInUser == 'contractor' %}{% include "user/bottom_nav_contractor.html"%}{% else %}{% include "user/bottom_nav.html" %} {% endif %}
+{% endblock %}
+
+{% block bottomNav %}{% if request.user == 'AG' %}{% include "user/bottom_nav_agent.html" %}{% elif request.user == 'CO' %}{% include "user/bottom_nav_contractor.html"%}{% else %}{% include "user/bottom_nav.html" %} {% endif %}
 {% endblock bottomNav %} {% block extraScripts %}
 <script>
     function goBack() {
