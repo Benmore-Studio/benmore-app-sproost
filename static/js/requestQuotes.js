@@ -47,13 +47,20 @@ function nextPrev(n) {
     x[currentStep].style.display = "none"
         // Increase or decrease the current tab by 1:
     currentStep = currentStep + n
+    console.log("x&n: ", x, n, currentStep)
         // if you have reached the end of the form...
     if (currentStep >= x.length) {
         // ... the form gets submitted:
-        document.getElementById("signupForm").submit()
+        console.log(document.getElementById("quoteRequestForm"))
+        document.getElementById("quoteRequestForm").submit()
         return false
     }
     showStep(currentStep)
+}
+
+function submitQuote() {
+    document.getElementById("quoteRequestForm").submit()
+    return false
 }
 
 function goBack() {
