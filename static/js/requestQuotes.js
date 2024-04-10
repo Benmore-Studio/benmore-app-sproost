@@ -105,7 +105,6 @@ function uploadFiles() {
             });
 
             videos.forEach(function(video) {
-
                 fileContainer.innerHTML += `
                 <div class="w-[74px] h-[74px] rounded-md relative">
                     <img src="/static/images/vid-play-bg.jpg" alt="" class="w-full h-full object-cover rounded-md">
@@ -115,25 +114,20 @@ function uploadFiles() {
                     <img src="/static/images/remove.png" alt="" class="w-[16px] h-[16px] -top-2 -right-2 absolute object-cover rounded-full" onclick="removeFile(this)">
                 </div>
                `
+            })
 
             pdfs.forEach(function(pdf) {
-                fileContainer.innerHTML +=
-                    `
-               <div class="w-[74px] h-[74px] rounded-md relative">
+                fileContainer.innerHTML += `
+                <div class="w-[74px] h-[74px] rounded-md relative">
                     <img src="/static/images/pdf-icon.png" alt="" class="w-full h-full object-cover rounded-md">
-                    <a href='${URL.createObjectURL(pdf)}' class="absolute top-5 left-5 right-5" download >                
-                        PDF
-                    </a>
+                    <a href='${URL.createObjectURL(pdf)}' class="absolute top-5 left-5 right-5" download >PDF</a>
                     <img src="/static/images/remove.png" alt="" class="w-[16px] h-[16px] -top-2 -right-2 absolute object-cover rounded-full" onclick="removeFile(this)">
-
-               </div>
-               `;
+                </div>
+               `
             });
-
-            });
-        }
-    });
-}
+        };
+    })
+};
 
 function removeFile(removeIcon) {
     // Get the parent container of the remove image
