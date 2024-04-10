@@ -41,7 +41,10 @@ class CustomSignupForm(SignupForm):
             )
         else:
             ContractorProfile.objects.create(
-                user = user,
+                user = user, 
+                company_name = self.cleaned_data['company_name'],
+                specialization = self.cleaned_data['specialization'],
+                company_address = self.cleaned_data['company_address'],
                 city = self.cleaned_data['city'],
             )
         messages.success(request, 'Account created successfully')
