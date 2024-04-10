@@ -1,9 +1,8 @@
-from django.urls import path
-from . import views
+from django.urls import path, include
+from .views import CustomLoginView, validate_phone_numbers
 
-app_name = 'accounts'
 urlpatterns = [
-    path('login/', views.loginUser, name="login"),
-    path('signup/', views.signUpUser, name="signup"),
+    path('login/', CustomLoginView.as_view(), name='account_login'),
+    path('validate-phone', validate_phone_numbers , name='validate_number'),
+    # other urls...
 ]
-

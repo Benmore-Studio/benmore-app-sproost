@@ -3,11 +3,10 @@ from django.shortcuts import render
 
 # loggedInUser = 'home-owner'| 'agent'| 'contractor'| 'investor', this is used to switch between bottom navigation, default navigation is home-owner, so need to add it.
 
-loggedInUser = 'home-owner'
-
+loggedInUser = 'contractor'
 
 # mains
-def home(request):
+def homeOwners(request):
     project_feed= [
         {
           'title':'Number of Uploaded projects',  'status': 'uploaded',  'count': 3, 
@@ -26,15 +25,19 @@ def home(request):
         {'name':'Bungalow Renovation', 'quotation_status': 'pending', 'home_owner': {'name':'Olivia Rhye', 'image':'/static/images/ownerAvatar.png'}, 'location': 'New Yersey, Newark', 'created_date': 'Jan 28, 2024'},
     ]
     
+    context = {'project_feed': project_feed, 'project_history': project_history, 'loggedInUser': loggedInUser}
+    return render(request, 'user/home.html', context)
+
+def home(request):
     
-    if loggedInUser == 'contractor':
+    if loggedInUser == 'agent':
         context = {
         'loggedInUser': loggedInUser
     }
-        return render(request, 'user/contractor_home.html', context)
+        return render(request, 'user/agent_home.html', context)
     else:
-        context = {'project_feed': project_feed, 'project_history': project_history, 'loggedInUser': loggedInUser}
-        return render(request, 'user/home.html', context)
+        return homeOwners(request)
+
 
 def requestQuotes(request):
     context ={
