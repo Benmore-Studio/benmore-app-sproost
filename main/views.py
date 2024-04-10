@@ -9,13 +9,13 @@ loggedInUser = 'contractor'
 def homeOwners(request):
     project_feed= [
         {
-          'title':'Number of Uploaded projects',  'status': 'uploaded',  'count': 3, 
+            'title':'Number of Uploaded projects',  'status': 'uploaded',  'count': 3, 
         },
         {
-          'title': 'Number of Quotes Requested',  'status': 'quotes', 'count': 3, 
+            'title': 'Number of Quotes Requested',  'status': 'quotes', 'count': 3, 
         },
         {
-        'title':'Number of completed projects', 'status': 'completed', 'count': 2, 
+            'title':'Number of completed projects', 'status': 'completed', 'count': 0, 
         }
     ]
     

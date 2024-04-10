@@ -1,11 +1,10 @@
 from django.db import models
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
-# from versatileimagefield.fields import VersatileImageField
 
 def file_upload_location(instance, filename):
     
-    return f'file/{instance.object_id}/{filename}'
+    return f'files/{instance.object_id}/{filename}'
 
 def image_upload_location(instance, filename):
     
@@ -15,7 +14,6 @@ def image_upload_location(instance, filename):
 class MediaTypes(models.TextChoices):
     image = "Image"
     file = "File"
-
 
 
 class Media(models.Model):

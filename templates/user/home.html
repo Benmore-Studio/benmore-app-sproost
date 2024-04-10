@@ -1,4 +1,9 @@
-{% extends "user/base.html" %} {% load static %} {% block topNav %} {% include "user/top-navigation.html" %} {% endblock topNav %} {% block content %}
+{% extends "user/base.html" %} 
+{% load static %} 
+{% block topNav %} 
+{% include "user/top-navigation.html" %} 
+{% endblock topNav %} 
+{% block content %}
  <div class="w-full p-4 font['Inter'] mt-14">
     <div class="w-full my-8 flex flex-col gap-5">
         {% for project in project_feed %}

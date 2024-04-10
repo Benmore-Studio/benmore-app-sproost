@@ -15,9 +15,14 @@ class Quotes(LoginRequiredMixin, View, CustomRequestUtil):
     form_class = QuoteRequestsForm
 
     def get(self, request, *args, **kwargs):
+        form = self.form_class(initial={
+            'contact_email': request.user.email,
+            'contact_phone': request.user.phone_number
+            })
+
         self.extra_context_data = {
             "loggedInUser": f"{UserTypes.contractor}",
-            "form": self.form_class
+            "form": form
         }
         
         return self.process_request(request)

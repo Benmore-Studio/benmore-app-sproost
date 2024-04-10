@@ -1,22 +1,5 @@
 from django import forms
 from quotes.models import QuoteRequests
-
-class MultipleFileInput(forms.ClearableFileInput):
-    allow_multiple_selected = True
-
-
-class MultipleFileField(forms.FileField):
-    def __init__(self, *args, **kwargs):
-        kwargs.setdefault("widget", MultipleFileInput())
-        super().__init__(*args, **kwargs)
-
-    def clean(self, data, initial=None):
-        single_file_clean = super().clean
-        if isinstance(data, (list, tuple)):
-            result = [single_file_clean(d, initial) for d in data]
-        else:
-            result = [single_file_clean(data, initial)]
-        return result
     
 
 class QuoteRequestsForm(forms.ModelForm):
@@ -50,4 +33,4 @@ class QuoteRequestsForm(forms.ModelForm):
 
         self.fields['contact_email'].widget.attrs.update({
             'class': 'w-full h-full outline-none group-focus:outline-none mt-1 focus-visible:border-none border-none',
-        })
+        }) 
