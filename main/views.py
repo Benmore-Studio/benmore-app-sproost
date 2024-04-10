@@ -1,4 +1,9 @@
 from django.shortcuts import render
+
+
+
+
+
 # authentication
 
 # loggedInUser = 'home-owner'| 'agent'| 'contractor'| 'investor', this is used to switch between bottom navigation, default navigation is home-owner, so need to add it.
@@ -107,15 +112,9 @@ def addProperty(request):
     }
     return render(request, 'user/add_property.html', context)
 
-def editProfile(request):
-    context ={}
-    return render(request, 'user/edit_profile.html', context)
-
-    
 
 
 # web based admin- applications
-
 
 def loginAdmin(request):
   context ={}  
