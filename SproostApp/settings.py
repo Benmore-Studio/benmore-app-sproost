@@ -34,6 +34,7 @@ INSTALLED_APPS = [
     'utils',
     'profiles',
     'admins',
+    'property',
     
     'address',
     

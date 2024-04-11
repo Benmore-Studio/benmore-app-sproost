@@ -6,8 +6,9 @@ from django.db.models import Q
 from .forms import ContractorProfileForm
 from django.views.generic.edit import UpdateView
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 
-
+@login_required
 def contractor_profile_view(request):
     if request.user.user_type != 'CO':
         return redirect('main:dashboard')
@@ -28,7 +29,7 @@ def editProfile(request):
     return render(request, 'user/edit_profile.html', {})
 
 # views.py
-class EditProfileView(UpdateView):
+class EditProfileView(LoginRequiredMixin, UpdateView):
     model = ContractorProfile
     form_class = ContractorProfileForm
     template_name = 'user/edit_profile.html'
@@ -62,10 +63,12 @@ def editProfileRequest(request):
     return render(request, 'user/edit_profile.html', {'profile_form': profile_form})
 
 
+@login_required
 def search_view(request):
     context ={}
     return render(request, 'user/search_results.html', context)
 
+@login_required
 def search_view_results(request):
     if request.method == 'GET':
         query = request.GET.get('query')
