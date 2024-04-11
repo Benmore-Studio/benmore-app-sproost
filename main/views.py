@@ -1,9 +1,6 @@
-from django.shortcuts import render, redirect
-from profiles.models import ContractorProfile
-from accounts.models import User
-from django.shortcuts import get_object_or_404
-from django.contrib import messages
-from django.db.models import Q
+from django.shortcuts import render
+
+
 
 
 
@@ -115,69 +112,6 @@ def addProperty(request):
     }
     return render(request, 'user/add_property.html', context)
 
-def editProfile(request):
-    context ={}
-    return render(request, 'user/edit_profile.html', context)
-
-
-def editProfileRequest(request):
-    if request.method == 'POST':
-
-        # user = ContractorProfile.objects.get(id = 1)
-        # user_user = User.objects.get(id = user.id)
-
-         # Fetch the ContractorProfile associated with the user, or create a new one if it doesn't exist
-        user_id= User.objects.get(id = 2)
-        contractor_profile = get_object_or_404(ContractorProfile, user=user_id)
-
-        print(user_id)
-
-        # Getting the form fields from POST request
-        company_name = request.POST.get('companyName', '')
-        registration_number = request.POST.get('house_address', '')
-        # email = request.POST.get('email', '')
-        # phone = request.POST.get('phone', '')
-        specialization = request.POST.get('Specialization', '')
-        company_address = request.POST.get('companyAddress', '')
-        city = request.POST.get('City', '')
-
-        contractor_profile.company_name = company_name
-        contractor_profile.registration_number = registration_number
-        contractor_profile.specialization = specialization
-        contractor_profile.company_address = company_address
-        contractor_profile.city = city
-
-        # Save the updated ContractorProfile
-        contractor_profile.save()
-        messages.success(request, 'Successful')
-        return redirect('profile:contractor_profile')
-    else:
-        print("failed")
-        return redirect('editprofilesuccess.html')
-
-def search_view(request):
-    context ={}
-    return render(request, 'user/search_results.html', context)
-
-
-def search_view_results(request):
-    if request.method == 'GET':
-        query = request.GET.get('search')
-        results = []
-        found = False
-
-        if query:
-            # Perform search based on Title, Speciality, Email, and Phone number
-            results = ContractorProfile.objects.filter(
-                Q(user__username__icontains=query) |
-                Q(specialization__icontains=query) 
-                # Q(email__icontains=query) |
-                # Q(phone_number__icontains=query)
-            )
-            num_results = len(results)
-            print(num_results)
-            
-        return render(request, 'user/search_results.html', {'results': results, 'num_results': num_results})
 
 
 # web based admin- applications

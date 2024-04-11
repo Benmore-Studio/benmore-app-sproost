@@ -11,8 +11,6 @@ urlpatterns = [
     path('assign-agent/', views.assignAgent, name="assign-agent"),
     path('property-list/', views.propertyList, name="property-list"),
     path('add-property/', views.addProperty, name="add-property"),
-    path('edit-profile/', views.editProfile, name="edit-profile"),
-    path('edit-profile-request/', views.editProfileRequest, name="edit-profile-request"),
     path('contractors/', views.contractors, name="contractors"),
     path('contractors/<str:profession>/', views.contractorDetail, name="contractors"),
     # admin

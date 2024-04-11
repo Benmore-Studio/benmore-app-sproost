@@ -1,0 +1,39 @@
+{% extends "user/base.html" %} {% load static %} {% block content %}
+
+<div class="w-full flex flex-col items-center justify-center">
+    <form action="{% url 'profile:search-view-results' %}" class="w-full text-center mt-4 flex flex-col gap-4" method="GET">
+        {% csrf_token %}
+        <div class="w-[80%] relative">
+            <input type="text" name="search" id="search" placeholder="Search..." class="w-full p-2 text-gray-500 border border-gray-300 rounded-md focus:outline-none mt-1 focus:border-gray-500" />
+            <div class=" absolute flex-col right-1 top-1 items-center cursor-pointer">
+                <img src="{% static 'svgs/search.svg' %}" alt="" class="w-[20px] h-[20px]" />
+                <input class="text-gray-500 text-xs" type="submit" value="Search">
+            </div>
+        </div>
+    </form>
+</div>
+
+{% if results %}
+    <div class="w-[90%] mt-6">
+        <p class="w-full ml-4">{{num_results}} found</p>
+        <div class="w-full flex justify-between mx-4">
+            <p>Name</p>
+            <p>Contact</p>
+        </div>
+        {% for result in results %}
+            <a href="" class="w-full flex justify-between mx-4 cursor-pointer">
+                <div>
+                    <p>{{result.user.username}}</p>    
+                    <p>{{result.specialization}}</p>
+                </div>
+                <div class="mt-2">
+                    <p>{{result.user.phone_number}}</p>    
+                    <p>{{result.user.email}}</p>    
+                </div>
+            </a>
+        {% endfor %}
+    </div>  
+{% endif %}
+    
+{% endblock %}{% block bottomNav %}{% if loggedInUser == 'agent' %}{% include "user/bottom_nav_agent.html" %}{% elif loggedInUser == 'contractor' %}{% include "user/bottom_nav_contractor.html"%}{% else %}{% include "user/bottom_nav.html" %} {% endif %}
+{% endblock bottomNav %} 

@@ -5,7 +5,7 @@
         display: none;
     }
 </style>
-
+hetetetet
 <div class="w-full">
     <div class="w-full">
         <!-- header -->
@@ -19,7 +19,7 @@
             <div class="w-full">
                 <h3 class="text-base text-gray-600"> Provide some basic information to set up your account.</h3>
             </div>
-            <form action="{% url 'main:edit-profile-request' %}" class="w-full mt-4 flex flex-col gap-4" method="POST">
+            <form action="{% url 'profile:edit-profile-request' %}" class="w-full mt-4 flex flex-col gap-4" method="POST">
                 {% csrf_token %}
                 <div class="w-full">
                     <label for="companyName" class="text-gray-700 font-medium text-sm">Company Name</label>
