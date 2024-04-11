@@ -15,11 +15,11 @@ class PropertyListView(ListView):
         return Property.objects.all().order_by('-id')
 
 
-class AddProperty(LoginRequiredMixin, CreateView):
-    form_class = forms.ProperyForm
-    template_name = 'property/add_property.html'
-    success_url = reverse_lazy('property:property-list')
+# class AddProperty(LoginRequiredMixin, CreateView):
+#     form_class = forms.ProperyForm
+#     template_name = 'property/add_property.html'
+#     success_url = reverse_lazy('property:property-list')
     
-    def form_valid(self, form):
-        messages.success(self.request, "Property added successfully")
-        return super().form_valid(form)
+#     def form_valid(self, form):
+#         messages.success(self.request, "Property added successfully")
+#         return super().form_valid(form)

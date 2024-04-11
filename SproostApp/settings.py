@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'property',
     
     'address',
+    'mail_templated',
     
     "phonenumber_field",
     'allauth',

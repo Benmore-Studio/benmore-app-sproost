@@ -12,25 +12,28 @@
             <span class="text-white text-sm font-semibold">Add Property</span>
         </a>
     </div>
-    <a href="{% url 'main:home-owner' %}" class="w-full mt-4 shadow-md p-4 rounded-md block">
+
+    {% for property in properties %}
+    <a href="" class="w-full mt-4 shadow-md p-4 rounded-md block">
         <div class="h-[200px] w-full rounded-md">
             <img src="{% static 'images/propItem.jpeg' %}" alt="" class="w-full h-full object-cover rounded-md" />
         </div>
         <div class="flex flex-col gap-2 mt-2">
-            <span class="text-gray-500 font-semibold text-sm">No. 17 November Street. 10343 NY</span>
-            <h3 class="text-gray-900 font-semibold text-xl">The Bedroom for Belfas...</h3>
-            <p class="text-gray-600 text-sm">Clients wants a redecoration and renovation that encompasses the the essence of a Belfast hotel room.</p>
+            <span class="text-gray-500 font-semibold text-sm"> </span>
+            <h3 class="text-gray-900 font-semibold text-xl">{{property.project.quote_request.title}} </h3>
+            <p class="text-gray-600 text-sm">{{property.project.quote_request.summary}} </p>
         </div>
         <div class="flex items-center justify-between mt-6">
             <div class="flex items-center gap-4 mt-2">
                 <div class="text-sm flex flex-col">
-                    <span class="text-gray-900 font-semibold">Olivia Rhye</span>
-                    <span class="text-gray-500">20 Jan 2022</span>
+                    <span class="text-gray-900 font-semibold">{{property.project.quote_request.user.first_name}} {{property.project.quote_request.user.last_name}} </span>
+                    <span class="text-gray-500">{{property.project.quote_request.upload_date }}</span>
                 </div>
             </div>
             <img src="{% static 'svgs/chevron-right.svg' %}" alt="" class="" />
         </div>
     </a>
+    {% endfor %}
 </div>
 <div id="modal-account-id" class="fixed top-0 hidden right-0 w-screen h-screen bg-opacity-60 bg-[#1E1E1E] flex items-center justify-center">
     <form class="w-[97.5%] mx-auto md:w-1/2 2xl:w-1/3 z-10 bg-white p-4 rounded-md">

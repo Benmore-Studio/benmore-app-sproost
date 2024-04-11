@@ -24,11 +24,15 @@ class QuoteRequest(models.Model):
     def __str__(self) -> str:
         return self.title
 
+def upload_location(instance, filename):
+    # file will be uploaded to MEDIA_ROOT/projects/<project_id>/<filename>
+    return 'projects/{0}/{1}'.format(instance.project_id, filename)
+
 
 class Project(models.Model):
     admin = models.ForeignKey("accounts.User", on_delete=models.SET_NULL, null=True)
     quote_request = models.ForeignKey(QuoteRequest, on_delete=models.CASCADE, null=False, related_name='quote_project')
-    file = models.FileField(upload_to="projects/", null=False)
+    file = models.FileField(upload_to=upload_location, null=True, blank=True)
     is_approved = models.BooleanField(default=False)
     
     def save(self, *args, **kwargs):
