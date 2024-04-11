@@ -47,13 +47,20 @@ function nextPrev(n) {
     x[currentStep].style.display = "none"
         // Increase or decrease the current tab by 1:
     currentStep = currentStep + n
+    console.log("x&n: ", x, n, currentStep)
         // if you have reached the end of the form...
     if (currentStep >= x.length) {
         // ... the form gets submitted:
-        document.getElementById("signupForm").submit()
+        console.log(document.getElementById("quoteRequestForm"))
+        document.getElementById("quoteRequestForm").submit()
         return false
     }
     showStep(currentStep)
+}
+
+function submitQuote() {
+    document.getElementById("quoteRequestForm").submit()
+    return false
 }
 
 function goBack() {
@@ -74,6 +81,7 @@ function uploadFiles() {
         let selectedFileList = [];
         let photos = [];
         let videos = [];
+        let pdfs = [];
         for (var i = 0; i < selectedFiles.length; i++) {
             selectedFileList.push(selectedFiles[i])
         }
@@ -82,31 +90,49 @@ function uploadFiles() {
 
         if (selectedFileList.length > 0) {
             photos = selectedFileList.filter((file) => file.type.startsWith('image/'))
-            console.log({ photos });
             videos = selectedFileList.filter((file) => file.type.startsWith('video/'))
-            console.log({ videos });
+            pdfs = selectedFileList.filter((file) => file.type.startsWith('application/pdf'))
 
             photos.forEach(function(photo) {
                 fileContainer.innerHTML += `
-                <a href='${URL.createObjectURL(photo)}' class="w-[74px] h-[74px] rounded-md" download>
+                <div class="w-[74px] h-[74px] relative rounded-md">
+                <a href='${URL.createObjectURL(photo)}' download>
                     <img src="${URL.createObjectURL(photo)}" alt="" class="w-full h-full object-cover rounded-md">
                 </a>
+                <img src="/static/images/remove.png" alt="" class="w-[16px] h-[16px] -top-2 -right-2 absolute object-cover rounded-full" onclick="removeFile(this)">
+                </div>
                 `
             });
 
             videos.forEach(function(video) {
-
-                fileContainer.innerHTML +=
-                    `
-               <div class="w-[74px] h-[74px] rounded-md relative">
-                <img src="/static/images/vid-play-bg.jpg" alt="" class="w-full h-full object-cover rounded-md">
-              <a href='${URL.createObjectURL(video)}' class="absolute top-5 left-5 right-5" download >                
-              <img src="/static/svgs/Play-button.svg" alt="">
-              </a>
-           </div>
+                fileContainer.innerHTML += `
+                <div class="w-[74px] h-[74px] rounded-md relative">
+                    <img src="/static/images/vid-play-bg.jpg" alt="" class="w-full h-full object-cover rounded-md">
+                    <a href='${URL.createObjectURL(video)}' class="absolute top-5 left-5 right-5" download >                
+                    <img src="/static/svgs/Play-button.svg" alt="">
+                    </a>
+                    <img src="/static/images/remove.png" alt="" class="w-[16px] h-[16px] -top-2 -right-2 absolute object-cover rounded-full" onclick="removeFile(this)">
+                </div>
                `
+            })
 
+            pdfs.forEach(function(pdf) {
+                fileContainer.innerHTML += `
+                <div class="w-[74px] h-[74px] rounded-md relative">
+                    <img src="/static/images/pdf-icon.png" alt="" class="w-full h-full object-cover rounded-md">
+                    <a href='${URL.createObjectURL(pdf)}' class="absolute top-5 left-5 right-5" download >PDF</a>
+                    <img src="/static/images/remove.png" alt="" class="w-[16px] h-[16px] -top-2 -right-2 absolute object-cover rounded-full" onclick="removeFile(this)">
+                </div>
+               `
             });
-        }
-    });
+        };
+    })
+};
+
+function removeFile(removeIcon) {
+    // Get the parent container of the remove image
+    var container = removeIcon.parentElement;
+
+    // Remove the parent container
+    container.remove();
 }

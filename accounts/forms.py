@@ -47,6 +47,7 @@ class CustomSignupForm(SignupForm):
                 company_address = self.cleaned_data['company_address'],
                 city = self.cleaned_data['city'],
             )
+
         messages.success(request, 'Account created successfully')
         return user
     
