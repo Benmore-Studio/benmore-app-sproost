@@ -23,13 +23,20 @@
         </div>
     </div> -->
     <div class="min-h-[750px] mt-[-8rem]">
-        <div class="w-[120px] h-[120px] relative rounded-full border border-enutral-150 mx-auto mt-[-1rem]">
+        <div class="w-[120px] h-[120px] relative z-10 rounded-full border border-enutral-150 mx-auto mt-[-1rem]">
             <img src="{% static 'images/truck.jpeg' %}" alt="" class="w-full h-full object-cover rounded-full" />
             <div class="w-[33px] h-[33px] rounded-full bg-white flex items-center justify-center absolute bottom-0 right-0 shadow-sm">
                 <img src="{% static 'svgs/sproost.svg' %}" alt="" class="w-[26px] h-[12px] object-contain" />
             </div>
         </div>
-        <div class="w-11/12 mx-auto bg-white min-h-[700px] shadow-md mt-[-4rem]">
+        <div class="w-11/12 mx-auto bg-white min-h-[700px] shadow-md mt-[-4rem] relative">
+            <form class = "absolute right-4 top-4" action = "{% url 'account_logout' %}" method = "POST">
+                {% csrf_token %}
+                <button type = "submit" class = "border border-gray-300 p-2 cursor-pointer ">
+                    <img src = {% static 'svgs/logout.svg' %} class = "w-4 h-4" />
+                </button>
+            </form>
+
             <div class="pt-20">
                 <!-- header -->
                 <div class="flex flex-col items-center justify-center mb-4">
@@ -63,7 +70,7 @@
                             </div>
                         </div>
 
-                        <a href="{% url 'profile:edit-profile' profile.pk %}" class="bg-[#eaf7e6] p-2 px-4 px-2 text-primary rounded-md text-gray-500 text-sm font-semibold">Edit Profile</a>
+                        <a href = {% url "profile:edit-profile" profile.pk %} class="bg-[#eaf7e6] p-2 px-4 px-2 text-primary rounded-md text-gray-500 text-sm font-semibold">Edit Profile</a>
                     </div>
 
 
@@ -108,8 +115,14 @@
     </div>
 </main>
 
-{% endblock %}{% block bottomNav %}{% if loggedInUser == 'agent' %}{% include "user/bottom_nav_agent.html" %}{% elif loggedInUser == 'contractor' %}{% include "user/bottom_nav_contractor.html"%}{% else %}{% include "user/bottom_nav.html" %} {% endif %}
-{% endblock bottomNav %} {% block extraScripts %}
-<script src="{% static 'js/contractorDetail.js' %}"></script>
+{% endblock %}
+{% block bottomNav %}
+    {% include "user/bottom_nav_contractor.html"%}
+{% endblock bottomNav %}
 
+{% block extraScripts %}
+    <script>
+        var csrf_token = '{{csrf_token}}';
+    </script>
+    <script src="{% static 'js/contractorDetail.js' %}"></script>
 {% endblock extraScripts %}

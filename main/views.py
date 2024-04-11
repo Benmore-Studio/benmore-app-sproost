@@ -1,6 +1,13 @@
 from django.shortcuts import render, redirect
-
+from django.views import View
 from quotes.models import QuoteRequest, Project
+from django.contrib.auth import get_user_model
+from property.models import Property
+from django.contrib import messages
+
+
+
+User = get_user_model()
 
 
 
@@ -76,24 +83,41 @@ def requestQuotes(request):
     }
     return render(request, 'user/request_quotes.html', context)
 
-def assignAgent(request):
-    context ={
-        'loggedInUser': loggedInUser
-    }
-    return render(request, 'user/assignAgent.html', context)
 
-def propertyList(request):
-    properties =[
-        {'name':"Daine Homes", 'address':"4600 East Washington Street, Suite 305"},
-        {'name':"Golden Homes", 'address':"No. 17 November Street. 10343 NY"},
-        {'name':"Grand-Stay Homes", 'address':"No. 10 Silints Street. 42333 LA"},
-        {'name':"Safe Homes", 'address':"No. 10 Silints Street. 42333 LA"},
-    ]
-    context ={
-        'properties': properties,
-        'loggedInUser': loggedInUser
-    }
-    return render(request, 'user/propertyList.html', context)
+class AssignAgentView(View):
+    template_name = 'user/assignAgent.html'
+    def get(self, request):
+        agents = User.objects.filter(user_type='AG')
+        properties = Property.objects.filter( is_assigned=False )
+        
+        context = {
+            'agents' : agents,
+            'properties': properties,
+        }
+        return render(request, self.template_name, context)
+    
+    def post(self, request):
+        agent_id = request.POST.get('agent')
+        property_id = request.POST.get('property')
+        print(agent_id, property_id)
+        try:
+            agent = User.objects.get(id=agent_id)
+            property = Property.objects.get(id=property_id)
+            if not agent.user_type in ['HO', 'AG']:
+                messages.error(request, 'Only Home Owners and Agents can be assigned properties')
+                return redirect('main:assign-agent')    
+                
+            property.assigned_by = agent
+            property.is_assigned = True
+            property.save()
+            messages.success(request, 'Agent assigned successfully')
+            
+        except Exception as e:
+            print(e)
+            messages.error(request, 'An error occured')
+        
+        return redirect('main:home')
+
 
 def QuotationReturn(request):
     context ={
@@ -132,19 +156,13 @@ def contractorDetail(request, profession):
     }
     return render(request, 'user/contractorDetail.html', context)
 
-def addProperty(request):
-    context ={
-        'loggedInUser': loggedInUser
-    }
-    return render(request, 'user/add_property.html', context)
-
 
 
 # web based admin- applications
 
 def loginAdmin(request):
   context ={}  
-  return render(request, 'admin/login.html', context) 
+  return render(request, 'user_admin/login.html', context) 
 
 def adminDashboard(request):
     recent_home_owners =[
@@ -204,7 +222,7 @@ def adminDashboard(request):
     ]
     context ={'recent_home_owners': recent_home_owners, 'recent_agents':recent_agents,
               'recent_contractors': recent_contractors, 'project_history': project_history, 'overall_stats': overall_stats }  
-    return render(request, 'admin/dashboard.html', context)
+    return render(request, 'user_admin/dashboard.html', context)
 
 def projectRequest(request):
     project_history = [

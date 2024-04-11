@@ -85,3 +85,9 @@ def search_view_results(request):
                 
         return render(request, 'user/search_results.html', {'results': results})
 
+
+
+@login_required
+def upload_image(request):
+    print(request.FILES)
+    return redirect('profile:contractor_profile')

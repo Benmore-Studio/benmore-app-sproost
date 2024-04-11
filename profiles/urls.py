@@ -9,4 +9,6 @@ urlpatterns = [
     path('search-view/', views.search_view, name="search-view"),
     path('search-view-results/', views.search_view_results, name="search-view-results"),
     path('edit-profile-request/', views.editProfileRequest, name="edit-profile-request"),
+    
+    path('upload-image/', views.upload_image, name='upload-image')
 ]

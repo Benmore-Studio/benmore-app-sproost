@@ -13,15 +13,15 @@
                 <div class="w-full flex items-center justify-between">
                     <h3 class="text-gray-900 font-semibold">{{property.name}}</h3>
                     <span class="">
-            <img src="{% static 'svgs/chevron-right.svg' %}" alt="" class="w-[32px] h-[32px] object-contain" />
-          </span>
+                     <img src="{% static 'svgs/chevron-right.svg' %}" alt="" class="w-[32px] h-[32px] object-contain" />
+                    </span>
                 </div>
                 <p class="text-gray-900 text-sm font-medium">{{property.address}}</p>
             </div>
         </div>
         {% endfor %}
         <div class="flex justify-end">
-            <a href="{% url 'main:add-property' %}" class="inline-flex items-center justify-center gap-2 cursor-pointer bg-primary p-3 rounded-md shadow-sm">
+            <a href="{% url 'property:add-property' %}" class="inline-flex items-center justify-center gap-2 cursor-pointer bg-primary p-3 rounded-md shadow-sm">
                 <img src="{% static 'svgs/plus.svg' %}" alt="" class="" />
                 <span class="text-white text-sm font-semibold">Add Property</span>
             </a>

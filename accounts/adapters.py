@@ -5,7 +5,7 @@ from django.urls import reverse
 class CustomAccountAdapter(DefaultAccountAdapter):
     def get_login_redirect_url(self, request):
         if request.user.user_type == 'HO':
-            return reverse("main:dashboard")
+            return reverse("main:home")
         elif request.user.user_type == 'CO':
             return reverse("profile:contractor_profile")
         
