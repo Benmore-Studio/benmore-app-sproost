@@ -3,7 +3,9 @@ from profiles.models import ContractorProfile, UserProfile
 from django.urls import reverse
 from django.contrib import messages
 from django.db.models import Q
-from .forms import ContractorProfileForm, HomeOwnersEditForm
+
+from profiles.services.contractor import ContractorService
+from .forms import ContractorProfileForm
 from django.views.generic.edit import UpdateView
 from django.views.generic import DetailView
 from django.contrib.auth.decorators import login_required
@@ -15,8 +17,28 @@ def contractor_profile_view(request):
     if request.user.user_type != 'CO':
         return redirect('main:dashboard')
     
-    profile = ContractorProfile.objects.get_or_create(user = request.user)[0]
+    if request.method == "POST":
+        if request.FILES:
+            media = request.FILES.getlist("upload-media")
+            data = {
+                "media": media
+            }
+            contractor_service = ContractorService(request=request)
+            add_media, error = contractor_service.add_media(data)
+
+            if error:
+                messages.error(request, error)
+            else:
+                messages.success(request, add_media)
+        else:
+            messages.error(request, "No file found!")
+        
+        return redirect("profile:contractor_profile")
     
+    
+    # TODO add try and except to catch possible errors
+    profile = ContractorProfile.objects.get(user = request.user)
+
     context = {
         'profile' : profile,
     }
