@@ -73,7 +73,7 @@ def home(request):
             return redirect("profile:contractor_profile")
         elif request.user.user_type == "AG":
             addPropertyForm = AddPropertyByUUIDForm()
-            properties = Property.objects.filter(assigned_to=request.user).order_by('-id')
+            properties = Property.objects.filter(assigned_to=request.user).order_by('-id').select_related("project__quote_request").prefetch_related("project__quote_request__media_paths")
             context = {
                 "properties": properties, 
                 "addPropertyForm" : addPropertyForm
