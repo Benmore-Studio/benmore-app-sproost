@@ -10,6 +10,7 @@
         padding: 8px 16px;
         color: #217905;
     }
+    
 </style>
 
   
@@ -82,7 +83,10 @@
                     <div class="flex flex-row">
                         <button class="tablinks p-2 text-gray-500 text-sm font-medium" onclick="openTab(event, 'tab1')">All media</button>
                         {% if request.user == profile.user %}
-                            <button class="tablinks p-2 text-gray-500 text-sm font-medium" onclick="openTab(event, 'tab4')">Add media</button>
+                        <button class="tablinks p-2 text-gray-500 text-sm font-medium" onclick="openTab(event, 'tab4')">
+                            <i class="fa fa-plus"></i>
+                        </button>
+                        
                         {% endif %}
                     </div>
                     <button class="tablinks p-2 text-gray-500 text-sm font-medium" onclick="openTab(event, 'tab2')">On the job</button>

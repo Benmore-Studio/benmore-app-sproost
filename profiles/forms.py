@@ -16,10 +16,16 @@ class ContractorProfileForm(forms.ModelForm):
             required=False,
             widget=AddressWidget(attrs={'placeholder': 'Enter Address', 'class': 'w-full p-2 border border-gray-300 rounded-md focus:outline-none mt-1 focus:border-gray-500'})
         )    
+    
+    registration_number = forms.CharField(
+        max_length=225,
+        widget=forms.TextInput(attrs={'class': 'w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:border-gray-500'})
+    )
+    
     email = forms.EmailField()
     class Meta:
         model = ContractorProfile
-        fields = ['company_name', 'specialization', 'city', 'company_address', 'phone_number']
+        fields = ['company_name', 'specialization', 'city', 'company_address', 'phone_number', 'registration_number']
 
 
 class HomeOwnersEditForm(forms.ModelForm):

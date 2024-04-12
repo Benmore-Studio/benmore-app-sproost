@@ -78,7 +78,9 @@ def editProfile(request):
 
     # render HO edit page if user type is HO
     elif request.user.user_type == 'HO': 
-        user_objects = UserProfile.objects.get(user = user.id)
+        user_objects = ""
+        
+        print("UserProfile.objects.get(user = user) == ", UserProfile.objects.get(user = user))
         return render(request, 'user/editprofiles/home_owners_edit_profile.html', {"details":user_objects})
     else:
         return redirect('main:dashboard')
