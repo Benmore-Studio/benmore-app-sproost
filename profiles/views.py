@@ -45,8 +45,10 @@ def editProfile(request):
    
     # render CO edit page if user type is CO
     if request.user.user_type == 'CO': 
-        user_objects = ContractorProfile.objects.get(user = user.id)   
-        return render(request, 'user/editprofiles/contractor_edit_profile.html', {})
+        contractorProfile = ContractorProfile.objects.get(user = user.id)   
+        email = request.user.email
+        form = ContractorProfileForm(instance = contractorProfile, initial={'email' : email})
+        return render(request, 'user/editprofiles/contractor_edit_profile.html', {'form' :form})
     
     elif request.user.user_type == 'AG':
         # user_objects = UserProfile.objects.get(user = user.id)    
@@ -91,7 +93,7 @@ class EditProfileView(LoginRequiredMixin, UpdateView):
         return reverse('profile:contractor_profile')
 
 
-def editProfileRequest(request):
+def ContractorProfileEditView(request):
     user = request.user
     try:
         contractor_profile = ContractorProfile.objects.get(user=user.id)
@@ -113,7 +115,7 @@ def editProfileRequest(request):
         # Redirect to profile creation page if profile doesn't exist
         return redirect('profile:edit-profile')
 
-    return render(request, 'user/contractor_edit_profile.html', {'form': profile_form})
+    return render(request, 'user/editprofiles/contractor_edit_profile.html', {'form': profile_form})
 
 
 @login_required
