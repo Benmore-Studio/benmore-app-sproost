@@ -69,8 +69,10 @@
                                 <span class="text-gray-500 text-sm">24</span>
                             </div>
                         </div>
-
-                        <a href ="" class="bg-[#eaf7e6] p-2 px-4 px-2 text-primary rounded-md text-gray-500 text-sm font-semibold">Edit Profile</a>
+                        
+                        {% if request.user == profile.user %}
+                            <a  class="bg-[#eaf7e6] p-2 px-4 px-2 text-primary rounded-md text-gray-500 text-sm font-semibold">Edit Profile</a>
+                        {% endif %}
                     </div>
 
 

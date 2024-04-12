@@ -5,21 +5,37 @@ from django.contrib import messages
 from django.db.models import Q
 from .forms import ContractorProfileForm, HomeOwnersEditForm
 from django.views.generic.edit import UpdateView
+from django.views.generic import DetailView
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
+
 
 @login_required
 def contractor_profile_view(request):
     if request.user.user_type != 'CO':
         return redirect('main:dashboard')
     
-    # TODO add try and except to catch possible errors
-    profile = ContractorProfile.objects.get(user = request.user)
+    profile = ContractorProfile.objects.get_or_create(user = request.user)[0]
+    
     context = {
-        'profile' : profile, 
-        'loggedInUser' : 'contractor'
+        'profile' : profile,
     }
     return render(request, 'user/contractor_home.html', context)
+
+
+class contractorDetails(DetailView):
+    """ for viewing contractor profile details"""
+    model = ContractorProfile
+    template_name = 'user/contractor_home.html'
+    context_object_name = 'profile'
+
+    def get_object(self):
+        try:
+            return ContractorProfile.objects.get(pk=self.kwargs['pk'])
+        except ContractorProfile.DoesNotExist:
+            # return to page user came from if profile doesn't exist
+            print('Profile does not exist')
+            return redirect('profile:contractor_profile')
 
 
 # refactored this view so that only one view handles all the edit profile for differennt users
@@ -63,8 +79,6 @@ def editHomeOwnerProfileRequest(request):
     return render(request, 'profile/edit_profile.html', {'form': form})
 
 
-
-# views.py
 class EditProfileView(LoginRequiredMixin, UpdateView):
     model = ContractorProfile
     form_class = ContractorProfileForm
@@ -100,27 +114,19 @@ def editProfileRequest(request):
 
 @login_required
 def search_view(request):
-    context ={}
+    query = request.GET.get('query')
+    results = []
+    if query:
+        # Perform search based on Title, Speciality, Email, and Phone number
+        results = ContractorProfile.objects.filter(
+            Q(company_name__icontains=query) |
+            Q(specialization__icontains=query) |
+            Q(user__phone_number__icontains=query)|
+            Q(user__email__icontains=query) 
+        )   
+    context = {'results': results}
+    
     return render(request, 'user/search_results.html', context)
-
-@login_required
-def search_view_results(request):
-    if request.method == 'GET':
-        query = request.GET.get('query')
-        results = []
-
-        if query:
-            # Perform search based on Title, Speciality, Email, and Phone number
-            results = ContractorProfile.objects.filter(
-                Q(user__username__icontains=query) |
-                Q(specialization__icontains=query) |
-                Q(user__phone_number__icontains=query)|
-                Q(user__email__icontains=query) 
-            )   
-                
-        return render(request, 'user/search_results.html', {'results': results})
-
-
 
 @login_required
 def upload_image(request):

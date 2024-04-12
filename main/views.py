@@ -6,7 +6,7 @@ from django.contrib import messages
 from django.contrib.sites.shortcuts import get_current_site
 
 from mail_templated import send_mail
-
+from property.forms import AddPropertyByUUIDForm
 from quotes.models import QuoteRequest, Project
 from property.models import Property
 
@@ -70,11 +70,13 @@ def home(request):
             }
             return render(request, "user/home.html", context)
         elif request.user.user_type == "CO":
-            return render(request, "user/contractor_home.html")
+            return redirect("profile:contractor_profile")
         elif request.user.user_type == "AG":
-            properties = Property.objects.filter(assigned_to=request.user)
+            addPropertyForm = AddPropertyByUUIDForm()
+            properties = Property.objects.filter(assigned_to=request.user).order_by('-id')
             context = {
-                "properties": properties
+                "properties": properties, 
+                "addPropertyForm" : addPropertyForm
              }
             return render(request, "user/agent_home.html", context)
         else:

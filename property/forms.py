@@ -13,3 +13,8 @@ from phonenumber_field.formfields import PhoneNumberField
 #     class Meta:
 #         model = Property
 #         fields = ['name', 'address', 'phone_number', 'email']
+
+
+class AddPropertyByUUIDForm(forms.Form):
+    uuid = forms.UUIDField()
+         
