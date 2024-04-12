@@ -81,7 +81,9 @@
                 <div class="tab flex flex-items-center justify-between p-4">
                     <div class="flex flex-row">
                         <button class="tablinks p-2 text-gray-500 text-sm font-medium" onclick="openTab(event, 'tab1')">All media</button>
-                        <button class="tablinks p-2 text-gray-500 text-sm font-medium" onclick="openTab(event, 'tab4')">Add media</button>
+                        {% if request.user == profile.user %}
+                            <button class="tablinks p-2 text-gray-500 text-sm font-medium" onclick="openTab(event, 'tab4')">Add media</button>
+                        {% endif %}
                     </div>
                     <button class="tablinks p-2 text-gray-500 text-sm font-medium" onclick="openTab(event, 'tab2')">On the job</button>
                     <button class="tablinks p-2 text-gray-500 text-sm font-medium" onclick="openTab(event, 'tab3')">Other jobs</button>
@@ -113,54 +115,55 @@
                         <h3 class="text-gray-900 font-semibold">Coming soon</h3>
                     </div>
                 </div>
-
-                <div id="tab4" class="tabcontent">
-                    <div class="w-full min-h-24 flex items-center justify-center">
-                        <div class="w-full p-4">
-                            <form method="post" enctype="multipart/form-data" id="contractorMediaForm" class="w-full mt-4 flex flex-col gap-4">
-                              {% csrf_token %}
-                              <div class="w-full">
-                                <span class="text-sm text-gray-700 font-medium"
-                                  >Upload Pictures & Videos</span
-                                >
-                              </div>
-                              <label for="upload-media">
-                                <div
-                                  class="w-full min-h-[150px] rounded-md border border-neutral-150 shadow-sm mt-4 flex flex-col gap-4 items-center justify-center"
-                                >
-                                  <div
-                                    class="w-12 h-12 flex items-center justify-center rounded-full bg-gray-200 bg-opacity-50 p-2"
-                                  >
-                                    <img src="{% static 'svgs/upload-cloud.svg' %}" alt="" class="" />
-                                  </div>
-                                  <p class="text-center text-sm text-gray-500">
-                                    <span class="text-primary font-semibold">Click to upload</span> or
-                                    drag and drop <br />
-                                    SVG, PNG, JPG or GIF (max. 800x400px)
-                                  </p>
+                {% if request.user == profile.user %}
+                    <div id="tab4" class="tabcontent">
+                        <div class="w-full min-h-24 flex items-center justify-center">
+                            <div class="w-full p-4">
+                                <form method="post" enctype="multipart/form-data" id="contractorMediaForm" class="w-full mt-4 flex flex-col gap-4">
+                                {% csrf_token %}
+                                <div class="w-full">
+                                    <span class="text-sm text-gray-700 font-medium"
+                                    >Upload Pictures & Videos</span
+                                    >
                                 </div>
-                                <input
-                                  type="file"
-                                  id="upload-media"
-                                  multiple
-                                  name="upload-media"
-                                  class="hidden"
-                                />
-                              </label>
-                            
-                              <div id="file-container" class="w-full flex items-center my-4 gap-4">
-                                <!-- dynamic render -->
-                              </div>
-                              <div class="w-full flex items-center justify-center">
-                                <button type="submit" class="p-3 w-1/4 rounded-lg bg-primary text-white border border-neutral-150 shadow-sm font-semibold">
-                                    Submit
-                                </button>
+                                <label for="upload-media">
+                                    <div
+                                    class="w-full min-h-[150px] rounded-md border border-neutral-150 shadow-sm mt-4 flex flex-col gap-4 items-center justify-center"
+                                    >
+                                    <div
+                                        class="w-12 h-12 flex items-center justify-center rounded-full bg-gray-200 bg-opacity-50 p-2"
+                                    >
+                                        <img src="{% static 'svgs/upload-cloud.svg' %}" alt="" class="" />
+                                    </div>
+                                    <p class="text-center text-sm text-gray-500">
+                                        <span class="text-primary font-semibold">Click to upload</span> or
+                                        drag and drop <br />
+                                        SVG, PNG, JPG or GIF (max. 800x400px)
+                                    </p>
+                                    </div>
+                                    <input
+                                    type="file"
+                                    id="upload-media"
+                                    multiple
+                                    name="upload-media"
+                                    class="hidden"
+                                    />
+                                </label>
+                                
+                                <div id="file-container" class="w-full flex items-center my-4 gap-4">
+                                    <!-- dynamic render -->
+                                </div>
+                                <div class="w-full flex items-center justify-center">
+                                    <button type="submit" class="p-3 w-1/4 rounded-lg bg-primary text-white border border-neutral-150 shadow-sm font-semibold">
+                                        Submit
+                                    </button>
+                                </div>
+                                
+                                </form>
                             </div>
-                            
-                            </form>
                         </div>
                     </div>
-                </div>
+                {% endif %}
             </div>
         </div>
     </div>
