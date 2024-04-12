@@ -26,10 +26,6 @@ def get_base_url(request):
 
 
 
-# authentication
-
-# loggedInUser = 'home-owner'| 'agent'| 'contractor'| 'investor', this is used to switch between bottom navigation, default navigation is home-owner, so need to add it.
-
 loggedInUser = 'contractor'
 
 # mains
