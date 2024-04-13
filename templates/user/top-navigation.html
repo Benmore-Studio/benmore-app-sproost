@@ -1,15 +1,16 @@
 {% load static %}
     <!-- the display modal -->
-    <div id="modal" class="relative w-full hidden">
+    <div id="modal" class="relative hidden w-full">
         <div class="fixed inset-0 flex items-center justify-center z-50">
             <div class="fixed inset-0 bg-black/75"></div>
-            <div class="bg-white w-[70%] md:w-[30%] rounded-lg z-50 absolute">
+            <div class="bg-white w-[70%] md:w-[30%] rounded-lg z-50 absolute pb-3">
                 <button id="close-modal-button" class="float-right cursor-pointer text-xl mb-2 ml-4">
-                   <img src="{% static 'images/cancel.svg' %}" alt="" class="w-4 h-4 mr-3 mt-3 text-red-600 hover:text-red-500">
-                </button>
+                    <i class="fa fa-times mr-3 mt-3 text-red-700 hover:text-red-500" aria-hidden="true"></i>
+                 </button>
                 <div class="w-full flex flex-col items-center justify-center gap-9 mt-6 pb-3 "> 
-                    <a href="{% url 'profile:edit-profile'%}" class="hover:bg-gray-300 py-3 text-center w-full rounded-lg">Edit profile</a>
-                    <a href="{% url 'logout' %}" class="hover:bg-gray-300 py-3 text-center w-full rounded-lg">Logout</a>
+                    <a href="{% url 'profile:edit-profile'%}" class="hover:bg-gray-300 py-3 text-center w-full rounded-lg">Edit profile <span><i class="fa fa-pencil ml-3" aria-hidden="true"></i>
+                    </span></a>
+                    <a href="{% url 'logout' %}" class="hover:bg-gray-300 py-3 text-center w-full rounded-lg">Logout <span><i class="fa fa-sign-out ml-3" aria-hidden="true"></i>                    </span></a>
                 </div>                      
   
             </div>
@@ -19,10 +20,7 @@
 
     <div class="w-full fixed top-0 border-b border-primary z-20 rounded-bl-lg rounded-br-lg shadow-sm bg-primary flex items-center py-4 pl-7">
         <div id="profile-pic-navbar" class="w-[60px] h-[60px] cursor-pointer">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-12 h-12 mr-3 mt-2 text-white hover:text-white">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-              </svg>
-              
+            <img src="{% static 'images/home-owner.png' %}" alt="" class="w-full h-full object-contain" />
         </div>
         <div class="w-full flex flex-grow justify-center mr-8">
             <img src="{% static 'svgs/sproost-white.svg' %}" alt="" class="" />

@@ -8,7 +8,6 @@ from phonenumber_field.formfields import PhoneNumberField
 from phonenumber_field.widgets import PhoneNumberPrefixWidget
 from address.forms import AddressField, AddressWidget
 
-
 class ContractorProfileForm(forms.ModelForm):
     # Defined phone_number and company_address fields as Django form fields
     phone_number = PhoneNumberField(required=False, widget=PhoneNumberPrefixWidget(initial='US'))

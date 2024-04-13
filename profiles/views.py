@@ -1,3 +1,4 @@
+
 from django.shortcuts import render, redirect
 from profiles.models import ContractorProfile, UserProfile
 from django.urls import reverse
@@ -43,7 +44,6 @@ def contractor_profile_view(request):
         'profile' : profile,
     }
     return render(request, 'user/contractor_home.html', context)
-
 
 class contractorDetails(DetailView):
     """ for viewing contractor profile details"""
