@@ -1,18 +1,17 @@
 {% load static %}
     <!-- the display modal -->
-    <div id="modal" class="relative hidden w-full">
+    <div id="modal" class="relative w-full">
         <div class="fixed inset-0 flex items-center justify-center z-50">
             <div class="fixed inset-0 bg-black/75"></div>
             <div class="bg-white w-[70%] md:w-[30%] rounded-lg z-50 absolute">
+                <button id="close-modal-button" class="w-6 h-6 float-right cursor-pointer text-xl mb-2 ml-4">
+                   <img src="{% static 'images/cancel.svg' %}" alt="" class="text-red-600 hover:text-red-500">
+                </button>
                 <div class="w-full flex flex-col items-center justify-center gap-9 mt-6 pb-3 "> 
                     <a href="{% url 'profile:edit-profile'%}" class="hover:bg-gray-300 py-3 text-center w-full rounded-lg">Edit profile</a>
                     <a href="{% url 'logout' %}" class="hover:bg-gray-300 py-3 text-center w-full rounded-lg">Logout</a>
                 </div>                      
-                <div class="w-full flex justify-center gap-9 mt-6 pb-3">                       
-                    <button id="close-modal-button" class="bg-green-600 hover:bg-green-500 text-white font-bold py-2 px-4 rounded">
-                        Close Modal
-                    </button>
-                </div>
+  
             </div>
         </div>
     </div>  

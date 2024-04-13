@@ -44,11 +44,13 @@ def editProfile(request):
     user = request.user
    
     # render CO edit page if user type is CO
-    if request.user.user_type == 'CO':    
-        return render(request, 'user/editprofiles/edit_profile.html', {})
+    if request.user.user_type == 'CO': 
+        user_objects = ContractorProfile.objects.get(user = user.id)   
+        return render(request, 'user/editprofiles/contractor_edit_profile.html', {})
     
-    # elif request.user.user_type == 'AG':    
-    #     return render(request, 'user/editprofiles/edit_profile.html', {})
+    elif request.user.user_type == 'AG':
+        # user_objects = UserProfile.objects.get(user = user.id)    
+        return render(request, 'user/editprofiles/home_owners_edit_profile.html', {})
 
     # render HO edit page if user type is HO
     elif request.user.user_type == 'HO': 
@@ -72,6 +74,7 @@ def editHomeOwnerProfileRequest(request):
             messages.success(request, 'Profile updated successfully!')
             return redirect('main:home')
         else:
+            print(form.errors)
             messages.error(request, 'Profile update failed. Please correct the errors below.')
             return redirect('profile:edit-profile-request')
     else:
@@ -86,6 +89,7 @@ class EditProfileView(LoginRequiredMixin, UpdateView):
     
     def get_success_url(self):
         return reverse('profile:contractor_profile')
+
 
 def editProfileRequest(request):
     user = request.user
@@ -109,7 +113,7 @@ def editProfileRequest(request):
         # Redirect to profile creation page if profile doesn't exist
         return redirect('profile:edit-profile')
 
-    return render(request, 'user/edit_profile.html', {'profile_form': profile_form})
+    return render(request, 'user/contractor_edit_profile.html', {'form': profile_form})
 
 
 @login_required
