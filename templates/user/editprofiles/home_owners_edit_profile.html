@@ -5,8 +5,6 @@
         display: none;
     }
 </style>
-hyyy
-{{form}}
 <div class="w-full">
     <div class="w-full">
         <!-- header -->
@@ -41,25 +39,10 @@ hyyy
                     {% endif %}
                 </div>
                 <div class="w-full">
-                    <label for="phone" class="text-gray-700 font-medium text-sm">Phone number</label>
-                    <div class="flex gap-2 p-2 border border-gray-300 p-2 mt-1 border border-gray-300 rounded-md">
-                        <select name="country" id="country" class="w-2/12 rounded-md focus:outline-none mt-1 disabled:bg-transparent bg-transparent outline-none border-none focus:border-gray-500">
-                            <option value="" disabled selected>US</option>
-                            <option value="USA">US</option>
-                            <option value="Canada">Canada</option>
-                            <option value="UK">UK</option>
-                            <!-- Add more country options here -->
-                        </select>
-                        <div id ="phone-field" class="flex gap-2 p-2 border border-gray-300 p-2 border border-gray-300 rounded-md">
-                            {{form.phone_number}}
-                          </div>                       
-                           {% if form.phone_number.errors %}
-                        <div class="w-full p-3 bg-red-300 border border-red-600 rounded text-white">
-                            {{form.phone_number.errors}}
-                        </div>
-                        {% endif %}
+                    <label for="{{form.phone_number.auto_id}}" class="text-gray-700 font-medium text-sm">Phone number</label>
+                    <div id = "phone-field" class="flex gap-2 p-2 border border-gray-300 p-2 border border-gray-300 rounded-md">
+                      {{form.phone_number|addattrs:"class=w-full p-2 border border-gray-300 rounded-md focus:outline-none mt-1 focus:border-gray-500,placeholder=Enter your number"}}
                     </div>
-                </div>
                 <div class="w-full">
                     <label for="{{form.address.auto_id}}" class="text-gray-700 font-medium text-sm">Home Address</label>
                     {{form.address}}
@@ -96,7 +79,6 @@ hyyy
                     </button>
                 </div>
             </form>
-            
         </div>
     </div>
 </div>

@@ -18,39 +18,69 @@
             <div class="w-full">
                 <h3 class="text-base text-gray-600"> Provide some basic information to set up your account.</h3>
             </div>
-            <form class="w-full mt-4 flex flex-col gap-4" method="POST">
+            <form action="{% url 'profile:edit-homeowners-profile-request' %}" class="w-full mt-4 flex flex-col gap-4" method="POST">
                 {% csrf_token %}
-                <div class="w-full">
-                    <label for="companyName" class="text-gray-700 font-medium text-sm">Company Name</label>
-                    {{ form.company_name}}
-                </div>
+                {% if form.non_field_errors %}
+                    <div class="bg-red-400 rounded-md text-center border border-red-700">
+
+                    {% for error in form.non_field_errors %}
+                        <p>{{ error }}</p>
+                    {% endfor %}
+
+                    </div>
+                {% endif %}
                 <div class="w-full">
                     <label for="email" class="text-gray-700 font-medium text-sm">Email</label>
-                    <input type="email" name="email" id="email" value="{{ details.user.email }}" class="w-full p-2 text-gray-500 border border-gray-300 rounded-md px-4 focus:outline-none mt-1 focus:border-gray-500" required />
+                    <input type="email" name="email" id="email" value="{{details.user.email}}" class="w-full p-2 text-gray-500 border border-gray-300 rounded-md px-4 focus:outline-none mt-1 focus:border-gray-500" required />
+                    {% if form.email.errors %}
+                    <div class="w-full p-3 bg-red-300 border border-red-600 rounded text-white">
+                        {{form.email.errors}}
+                    </div>
+                    {% endif %}
                 </div>
                 <div class="w-full">
-                    <label for="phone_number" class="text-gray-700 font-medium text-sm">Phone number</label>
-                    <!-- Render phone_number field using Django template tag -->
-                    {{form.phone_number}}
-                </div>
-                <div class="w-full">
-                    <label for="Specialization" class="text-gray-700 font-medium text-sm">Specialization</label>
-                    <input type="text" name="Specialization" id="Specialization" value="{{details.Specialization}}" class="w-full p-2 text-gray-500 border border-gray-300 rounded-md focus:outline-none mt-1 focus:border-gray-500">
-                </div>
-                <div class="w-full">
+                    <label for="{{form.phone_number.auto_id}}" class="text-gray-700 font-medium text-sm">Phone number</label>
+                    <div id = "phone-field" class="flex gap-2 p-2 border border-gray-300 p-2 border border-gray-300 rounded-md">
+                      {{form.phone_number|addattrs:"class=w-full p-2 border border-gray-300 rounded-md focus:outline-none mt-1 focus:border-gray-500,placeholder=Enter your number"}}
+                    </div>
+                    <p class = "text-red-500 p-2" id = "phone-error"></p>
+                  </div>
+                  <div class="w-full flex flex-col">
                     <label for="{{form.company_address.auto_id}}" class="text-gray-700 font-medium text-sm">Company Address</label>
-                    <!-- Render company_address field using Django template tag -->
-                    {{ form.company_address }}
+                    {{form.company_address}}
                 </div>
                 <div class="w-full">
-                    <label for="City" class="text-gray-700 font-medium text-sm">City</label>
-                    <input type="text" name="city" id="city" value="{{details.city}}" class="w-full p-2 text-gray-500 border border-gray-300 rounded-md focus:outline-none mt-1 focus:border-gray-500">
+                    <label for="city" class="text-gray-700 font-medium text-sm">City</label>
+                    <input type="text" name="city" id="city" value="{{details.city}}" class="w-full p-2 text-gray-500 border border-gray-300 rounded-md px-4 focus:outline-none mt-1 focus:border-gray-500" required />
+                    {% if form.city.errors %}
+                    <div class="w-full p-3 bg-red-300 border border-red-600 rounded text-white">
+                        {{form.city.errors}}
+                    </div>
+                    {% endif %}
                 </div>
+               
+                {% if details.state_province is None %}
+                <div class="w-full">
+                    <label for="state_province" class="text-gray-700 font-medium text-sm">State province</label>
+                    <input type="text" name="state_province" id="state_province" class="w-full p-2 text-gray-500 border border-gray-300 rounded-md px-4 focus:outline-none mt-1 focus:border-gray-500" />
+                </div>
+                {% else %}
+                <div class="w-full">
+                    <label for="state_province" class="text-gray-700 font-medium text-sm">State province</label>
+                    <input type="text" name="state_province" id="state_province" value="{{details.state_province}}" class="w-full p-2 text-gray-500 border border-gray-300 rounded-md px-4 focus:outline-none mt-1 focus:border-gray-500" required />
+                    {% if form.state_province.errors %}
+                    <div class="w-full p-3 bg-red-300 border border-red-600 rounded text-white">
+                        {{form.state_province.errors}}
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
                 <div class="flex w-full flex-col gap-4 border-t border-neutral-150 pt-5">
-                    <button type="submit" class="flex items-center w-full justify-center p-3 rounded-lg bg-primary text-white border border-neutral-150 shadow-sm font-semibold">Save</button>
+                    <button type="submit" class="flex items-center w-full justify-center p-3 rounded-lg bg-primary text-white border border-neutral-150 shadow-sm font-semibold">
+                        Save 
+                    </button>
                 </div>
             </form>
-            
         </div>
     </div>
 </div>

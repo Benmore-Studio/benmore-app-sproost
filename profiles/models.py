@@ -4,7 +4,7 @@ from address.models import AddressField
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name = 'user_profile')
-    address = models.CharField(max_length = 50, null = True, blank = True)
+    address = AddressField()
     city = models.CharField(max_length = 50, null = True, blank = True)
     state_province = models.CharField(max_length = 50, null = True, blank = True)    
     

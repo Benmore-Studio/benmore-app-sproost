@@ -5,6 +5,8 @@
         display: none;
     }
 </style>
+hyyy
+{{form}}
 <div class="w-full">
     <div class="w-full">
         <!-- header -->
@@ -48,13 +50,19 @@
                             <option value="UK">UK</option>
                             <!-- Add more country options here -->
                         </select>
-                        <input type="tel" name="phone_number" id="phone" value="{{details.user.phone_number}}" class="w-10/12 rounded-md text-gray-500 focus:outline-none mt-1 focus:border-gray-500" />
-                        {% if form.phone_number.errors %}
+                        <div id ="phone-field" class="flex gap-2 p-2 border border-gray-300 p-2 border border-gray-300 rounded-md">
+                            {{form.phone_number}}
+                          </div>                       
+                           {% if form.phone_number.errors %}
                         <div class="w-full p-3 bg-red-300 border border-red-600 rounded text-white">
                             {{form.phone_number.errors}}
                         </div>
                         {% endif %}
                     </div>
+                </div>
+                <div class="w-full">
+                    <label for="{{form.address.auto_id}}" class="text-gray-700 font-medium text-sm">Home Address</label>
+                    {{form.address}}
                 </div>
                 <div class="w-full">
                     <label for="city" class="text-gray-700 font-medium text-sm">City</label>
@@ -65,15 +73,7 @@
                     </div>
                     {% endif %}
                 </div>
-                <div class="w-full">
-                    <label for="address" class="text-gray-700 font-medium text-sm">Home Address</label>
-                    <input type="text" name="address" id="address" value="{{details.address}}" class="w-full p-2 text-gray-500 border border-gray-300 rounded-md px-4 focus:outline-none mt-1 focus:border-gray-500" required />
-                    {% if form.address.errors %}
-                    <div class="w-full p-3 bg-red-300 border border-red-600 rounded text-white">
-                        {{form.address.errors}}
-                    </div>
-                    {% endif %}
-                </div>
+               
                 {% if details.state_province is None %}
                 <div class="w-full">
                     <label for="state_province" class="text-gray-700 font-medium text-sm">State province</label>
