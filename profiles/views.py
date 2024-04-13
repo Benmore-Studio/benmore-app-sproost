@@ -5,7 +5,7 @@ from django.contrib import messages
 from django.db.models import Q
 
 from profiles.services.contractor import ContractorService
-from .forms import ContractorProfileForm
+from .forms import ContractorProfileForm, HomeOwnersEditForm
 from django.views.generic.edit import UpdateView
 from django.views.generic import DetailView
 from django.contrib.auth.decorators import login_required
@@ -73,12 +73,12 @@ def editProfile(request):
         return render(request, 'user/editprofiles/contractor_edit_profile.html', {'form' :form})
     
     elif request.user.user_type == 'AG':
-        # user_objects = UserProfile.objects.get(user = user.id)    
-        return render(request, 'user/editprofiles/home_owners_edit_profile.html', {})
+        user_objects = UserProfile.objects.get(user = user.id)    
+        return render(request, 'user/editprofiles/home_owners_edit_profile.html', {"details":user_objects})
 
     # render HO edit page if user type is HO
     elif request.user.user_type == 'HO': 
-        user_objects = ""
+        user_objects = UserProfile.objects.get(user = user.id)
         
         print("UserProfile.objects.get(user = user) == ", UserProfile.objects.get(user = user))
         return render(request, 'user/editprofiles/home_owners_edit_profile.html', {"details":user_objects})
