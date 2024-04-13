@@ -25,13 +25,10 @@ class QuoteRequest(models.Model):
     def __str__(self) -> str:
         return self.title
     
-    def upload_location(instance, filename):
-        # file will be uploaded to MEDIA_ROOT/projects/<project_id>/<filename>
-        return 'projects/{0}/{1}'.format(instance.project_id, filename)
 
 def upload_location(instance, filename):
     # file will be uploaded to MEDIA_ROOT/projects/<project_id>/<filename>
-    return 'projects/{0}/{1}'.format(instance.project_id, filename)
+    return 'projects/{0}/{1}'.format(instance.id, filename)
 
 
 class Project(models.Model):
@@ -39,6 +36,12 @@ class Project(models.Model):
     quote_request = models.ForeignKey(QuoteRequest, on_delete=models.CASCADE, null=False, related_name='quote_project')
     file = models.FileField(upload_to=upload_location, null=True, blank=True)
     is_approved = models.BooleanField(default=False)
+    
+    @property
+    def admin_pdf(self):
+        if self.file:
+            return self.file.url
+        return ""
     
     def save(self, *args, **kwargs):
         if self.is_approved: 
