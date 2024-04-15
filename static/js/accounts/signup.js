@@ -4,11 +4,34 @@ window.addEventListener("DOMContentLoaded", () => {
     selectUserType();
     validateEmail();
     validatePhoneNumber();
+    validatePassword();
 })
+
+function validatePassword() {
+    password1 = document.getElementById('id_password1')
+    password2 = document.getElementById('id_password2')
+    passwordError = document.getElementById('password-error')
+    passwordError.style.display = "none"
+
+    password2.addEventListener('input', function (e) {
+        password2.classList.remove('focus:border-gray-500');
+        if (password1.value !== password2.value) {
+            passwordError.textContent = "Passwords do not match"
+            passwordError.style.display = "block"
+            password2.classList.add('focus:border-red-500');
+            password2.classList.remove('focus:border-green-500');
+        } else {
+            passwordError.style.display = "none"
+            password2.classList.remove('focus:border-red-500');
+            password2.classList.add('focus:border-green-500');
+        }
+    })
+}
 
 function validateEmail() {
     const emailError = document.getElementById('email-error')
     const emailInput = document.getElementById('id_email')
+    emailError.style.display = "none"
     emailInput.addEventListener('input', function (e) {
         var email = e.target.value;
         var pattern = /^[^ ]+@[^ ]+\.[a-z]{2,3}$/;

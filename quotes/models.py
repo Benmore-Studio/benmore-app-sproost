@@ -21,15 +21,27 @@ class QuoteRequest(models.Model):
     media_paths = GenericRelation("main.Media")
     is_quote = models.BooleanField(default=True)
     
+    
     def __str__(self) -> str:
         return self.title
+    
+
+def upload_location(instance, filename):
+    # file will be uploaded to MEDIA_ROOT/projects/<project_id>/<filename>
+    return 'projects/{0}/{1}'.format(instance.id, filename)
 
 
 class Project(models.Model):
     admin = models.ForeignKey("accounts.User", on_delete=models.SET_NULL, null=True)
     quote_request = models.ForeignKey(QuoteRequest, on_delete=models.CASCADE, null=False, related_name='quote_project')
-    file = models.FileField(upload_to="projects/", null=False)
+    file = models.FileField(upload_to=upload_location, null=True, blank=True)
     is_approved = models.BooleanField(default=False)
+    
+    @property
+    def admin_pdf(self):
+        if self.file:
+            return self.file.url
+        return ""
     
     def save(self, *args, **kwargs):
         if self.is_approved: 

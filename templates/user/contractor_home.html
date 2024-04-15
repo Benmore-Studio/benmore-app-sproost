@@ -10,6 +10,7 @@
         padding: 8px 16px;
         color: #217905;
     }
+    
 </style>
 
   
@@ -23,13 +24,20 @@
         </div>
     </div> -->
     <div class="min-h-[750px] mt-[-8rem]">
-        <div class="w-[120px] h-[120px] relative rounded-full border border-enutral-150 mx-auto mt-[-1rem]">
+        <div class="w-[120px] h-[120px] relative z-10 rounded-full border border-enutral-150 mx-auto mt-[-1rem]">
             <img src="{% static 'images/truck.jpeg' %}" alt="" class="w-full h-full object-cover rounded-full" />
             <div class="w-[33px] h-[33px] rounded-full bg-white flex items-center justify-center absolute bottom-0 right-0 shadow-sm">
                 <img src="{% static 'svgs/sproost.svg' %}" alt="" class="w-[26px] h-[12px] object-contain" />
             </div>
         </div>
-        <div class="w-11/12 mx-auto bg-white min-h-[700px] shadow-md mt-[-4rem]">
+        <div class="w-11/12 mx-auto bg-white min-h-[700px] shadow-md mt-[-4rem] relative">
+            <form class = "absolute right-4 top-4" action = "{% url 'account_logout' %}" method = "POST">
+                {% csrf_token %}
+                <button type = "submit" class = "border border-gray-300 p-2 cursor-pointer ">
+                    <img src = {% static 'svgs/logout.svg' %} class = "w-4 h-4" />
+                </button>
+            </form>
+
             <div class="pt-20">
                 <!-- header -->
                 <div class="flex flex-col items-center justify-center mb-4">
@@ -62,8 +70,10 @@
                                 <span class="text-gray-500 text-sm">24</span>
                             </div>
                         </div>
-
-                        <a href="{% url 'profile:edit-profile' profile.pk %}" class="bg-[#eaf7e6] p-2 px-4 px-2 text-primary rounded-md text-gray-500 text-sm font-semibold">Edit Profile</a>
+                        
+                        {% if request.user == profile.user %}
+                            <a  class="bg-[#eaf7e6] p-2 px-4 px-2 text-primary rounded-md text-gray-500 text-sm font-semibold">Edit Profile</a>
+                        {% endif %}
                     </div>
 
 
@@ -72,7 +82,12 @@
                 <div class="tab flex flex-items-center justify-between p-4">
                     <div class="flex flex-row">
                         <button class="tablinks p-2 text-gray-500 text-sm font-medium" onclick="openTab(event, 'tab1')">All media</button>
-                        <button class="tablinks p-2 text-gray-500 text-sm font-medium" onclick="openTab(event, 'tab4')">Add media</button>
+                        {% if request.user == profile.user %}
+                        <button class="tablinks p-2 text-gray-500 text-sm font-medium" onclick="openTab(event, 'tab4')">
+                            <i class="fa fa-plus"></i>
+                        </button>
+                        
+                        {% endif %}
                     </div>
                     <button class="tablinks p-2 text-gray-500 text-sm font-medium" onclick="openTab(event, 'tab2')">On the job</button>
                     <button class="tablinks p-2 text-gray-500 text-sm font-medium" onclick="openTab(event, 'tab3')">Other jobs</button>
@@ -87,6 +102,7 @@
                                 <video class="w-full h-[81px] border border-neutral-150 object-cover" controls>
                                     <source src="/media/{{media.file}}" type="video/mp4">
                                 </video>
+                                <!-- <img src="/media/{{image.file }}" alt="" class="w-full h-[81px] border border-neutral-150 object-cover" /> -->
                             {% endif %}
                         {% endfor %}
                     </div>
@@ -103,61 +119,68 @@
                         <h3 class="text-gray-900 font-semibold">Coming soon</h3>
                     </div>
                 </div>
-
-                <div id="tab4" class="tabcontent">
-                    <div class="w-full min-h-24 flex items-center justify-center">
-                        <div class="w-full p-4">
-                            <form method="post" enctype="multipart/form-data" id="contractorMediaForm" class="w-full mt-4 flex flex-col gap-4">
-                              {% csrf_token %}
-                              <div class="w-full">
-                                <span class="text-sm text-gray-700 font-medium"
-                                  >Upload Pictures & Videos</span
-                                >
-                              </div>
-                              <label for="upload-media">
-                                <div
-                                  class="w-full min-h-[150px] rounded-md border border-neutral-150 shadow-sm mt-4 flex flex-col gap-4 items-center justify-center"
-                                >
-                                  <div
-                                    class="w-12 h-12 flex items-center justify-center rounded-full bg-gray-200 bg-opacity-50 p-2"
-                                  >
-                                    <img src="{% static 'svgs/upload-cloud.svg' %}" alt="" class="" />
-                                  </div>
-                                  <p class="text-center text-sm text-gray-500">
-                                    <span class="text-primary font-semibold">Click to upload</span> or
-                                    drag and drop <br />
-                                    SVG, PNG, JPG or GIF (max. 800x400px)
-                                  </p>
+                {% if request.user == profile.user %}
+                    <div id="tab4" class="tabcontent">
+                        <div class="w-full min-h-24 flex items-center justify-center">
+                            <div class="w-full p-4">
+                                <form method="post" enctype="multipart/form-data" id="contractorMediaForm" class="w-full mt-4 flex flex-col gap-4">
+                                {% csrf_token %}
+                                <div class="w-full">
+                                    <span class="text-sm text-gray-700 font-medium"
+                                    >Upload Pictures & Videos</span
+                                    >
                                 </div>
-                                <input
-                                  type="file"
-                                  id="upload-media"
-                                  multiple
-                                  name="upload-media"
-                                  class="hidden"
-                                />
-                              </label>
-                            
-                              <div id="file-container" class="w-full flex items-center my-4 gap-4">
-                                <!-- dynamic render -->
-                              </div>
-                              <div class="w-full flex items-center justify-center">
-                                <button type="submit" class="p-3 w-1/4 rounded-lg bg-primary text-white border border-neutral-150 shadow-sm font-semibold">
-                                    Submit
-                                </button>
+                                <label for="upload-media">
+                                    <div
+                                    class="w-full min-h-[150px] rounded-md border border-neutral-150 shadow-sm mt-4 flex flex-col gap-4 items-center justify-center"
+                                    >
+                                    <div
+                                        class="w-12 h-12 flex items-center justify-center rounded-full bg-gray-200 bg-opacity-50 p-2"
+                                    >
+                                        <img src="{% static 'svgs/upload-cloud.svg' %}" alt="" class="" />
+                                    </div>
+                                    <p class="text-center text-sm text-gray-500">
+                                        <span class="text-primary font-semibold">Click to upload</span> or
+                                        drag and drop <br />
+                                        SVG, PNG, JPG or GIF (max. 800x400px)
+                                    </p>
+                                    </div>
+                                    <input
+                                    type="file"
+                                    id="upload-media"
+                                    multiple
+                                    name="upload-media"
+                                    class="hidden"
+                                    />
+                                </label>
+                                
+                                <div id="file-container" class="w-full flex items-center my-4 gap-4">
+                                    <!-- dynamic render -->
+                                </div>
+                                <div class="w-full flex items-center justify-center">
+                                    <button type="submit" class="p-3 w-1/4 rounded-lg bg-primary text-white border border-neutral-150 shadow-sm font-semibold">
+                                        Submit
+                                    </button>
+                                </div>
+                                
+                                </form>
                             </div>
-                            
-                            </form>
                         </div>
                     </div>
-                </div>
+                {% endif %}
             </div>
         </div>
     </div>
 </main>
 
-{% endblock %}{% block bottomNav %}{% if loggedInUser == 'agent' %}{% include "user/bottom_nav_agent.html" %}{% elif loggedInUser == 'contractor' %}{% include "user/bottom_nav_contractor.html"%}{% else %}{% include "user/bottom_nav.html" %} {% endif %}
-{% endblock bottomNav %} {% block extraScripts %}
-<script src="{% static 'js/contractorDetail.js' %}"></script>
+{% endblock %}
+{% block bottomNav %}
+    {% include "user/bottom_nav_contractor.html"%}
+{% endblock bottomNav %}
 
+{% block extraScripts %}
+    <script>
+        var csrf_token = '{{csrf_token}}';
+    </script>
+    <script src="{% static 'js/contractorDetail.js' %}"></script>
 {% endblock extraScripts %}

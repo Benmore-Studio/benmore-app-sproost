@@ -18,19 +18,11 @@
             <div class="w-full">
                 <h3 class="text-base text-gray-600"> Provide some basic information to set up your account.</h3>
             </div>
-            <form  class="w-full mt-4 flex flex-col gap-4" method="POST">
+            <form action="{% url 'profile:edit-homeowners-profile-request' %}" class="w-full mt-4 flex flex-col gap-4" method="POST">
                 {% csrf_token %}
                 <div class="w-full">
-                    <label for="companyName" class="text-gray-700 font-medium text-sm">Company Name</label>
-                    {{ form.company_name|addattrs:"class=w-full p-2 text-gray-500 border border-gray-300 rounded-md focus:outline-none mt-1 focus:border-gray-500"}}
-                </div>
-                <div class="w-full">
-                    <label for="house_address" class="text-gray-700 font-medium text-sm">Registration Number</label>
-                    <input type="text" name="house_address" id="house_address" value="#23BV42" class="w-full p-2 text-gray-500 border border-gray-300 rounded-md focus:outline-none mt-1 focus:border-gray-500" />
-                </div>
-                <div class="w-full">
                     <label for="email" class="text-gray-700 font-medium text-sm">Email</label>
-                    <input type="email" name="email" id="email" value="bob@email.com" class="w-full p-2 text-gray-500 border border-gray-300 rounded-md px-4 focus:outline-none mt-1 focus:border-gray-500" required />
+                    <input type="email" name="email" id="email" value="{{details.user.email}}" class="w-full p-2 text-gray-500 border border-gray-300 rounded-md px-4 focus:outline-none mt-1 focus:border-gray-500" required />
                 </div>
                 <div class="w-full">
                     <label for="email" class="text-gray-700 font-medium text-sm">Phone number</label>
@@ -42,27 +34,35 @@
               <option value="UK">UK</option>
               <!-- Add more country options here -->
             </select>
-                        <input type="tel" name="phone" id="phone" value="+1 (555) 000-0000" class="w-10/12 rounded-md text-gray-500 focus:outline-none mt-1 focus:border-gray-500" />
+                        <input type="tel" name="phone_number" id="phone" value="{{details.user.phone_number}}" class="w-10/12 rounded-md text-gray-500 focus:outline-none mt-1 focus:border-gray-500" />
                     </div>
                 </div>
                 <div class="w-full">
-                    <label for="Specialization" class="text-gray-700 font-medium text-sm">Specialization</label>
-                    {{ form.specialization|addattrs:"class=w-full p-2 text-gray-500 border border-gray-300 rounded-md focus:outline-none mt-1 focus:border-gray-500"}}
-                </div>
-                <div class="w-full">
-                    <label for="companyAddress" class="text-gray-700 font-medium text-sm">Company Address</label>
-                    {{ form.company_address|addattrs:"class=w-full p-2 text-gray-500 border border-gray-300 rounded-md focus:outline-none mt-1 focus:border-gray-500"}}
-                </div>
-
-                <div class="w-full">
                     <label for="City" class="text-gray-700 font-medium text-sm">City</label>
-                    {{ form.city|addattrs:"class=w-full p-2 text-gray-500 border border-gray-300 rounded-md focus:outline-none mt-1 focus:border-gray-500"}}
+                    <input type="text" name="city" id="city" value="{{details.city}}" class="w-full p-2 text-gray-500 border border-gray-300 rounded-md px-4 focus:outline-none mt-1 focus:border-gray-500" required />
                 </div>
-
+                <div class="w-full">
+                    <label for="address" class="text-gray-700 font-medium text-sm">Home Address</label>
+                    <input type="text" name="address" id="address" value="{{details.address}}" class="w-full p-2 text-gray-500 border border-gray-300 rounded-md px-4 focus:outline-none mt-1 focus:border-gray-500" required />
+                </div>
+                
+                {% if details.state_province is None %}
+                <div class="w-full">
+                    <label for="state_province" class="text-gray-700 font-medium text-sm">State province</label>
+                    <input type="text" name="state_province" id="state_province"  class="w-full p-2 text-gray-500 border border-gray-300 rounded-md px-4 focus:outline-none mt-1 focus:border-gray-500"/>
+                </div>
+                {% else %}
+                <div class="w-full">
+                    <label for="state_province" class="text-gray-700 font-medium text-sm">State province</label>
+                    <input type="text" name="state_province" id="state_province" value="{{details.state_province}}" class="w-full p-2 text-gray-500 border border-gray-300 rounded-md px-4 focus:outline-none mt-1 focus:border-gray-500" required />
+                </div> 
+                {% endif %}
+                    
+                
                 <div class="flex w-full flex-col gap-4 border-t border-neutral-150 pt-5">
                     <button type="submit" class="flex items-center w-full justify-center p-3 rounded-lg bg-primary text-white border border-neutral-150 shadow-sm font-semibold">
-            Save 
-          </button>
+                        Save 
+                    </button>
                 </div>
             </form>
         </div>

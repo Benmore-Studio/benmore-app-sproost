@@ -230,12 +230,13 @@
           <div class="flex flex-col gap-4 w-full">
               <div class="w-full">
                   <label for = "{{form.password1.auto_id}}" class="text-gray-700 font-medium text-sm">Password</label>
-                  {{form.password1|addattrs:"class=w-full p-2 border border-gray-300 rounded-md focus:outline-none mt-1 focus:border-gray-500,placeholder=Enter your password,id=passwordContract"}}
+                  {{form.password1|addattrs:"class=w-full p-2 border border-gray-300 rounded-md focus:outline-none mt-1 focus:border-gray-500,placeholder=Enter your password"}}
               </div>
               <div class="w-full">
                   <label for = "{{form.password2.auto_id}}" class="text-gray-700 font-medium text-sm">Confirm Password</label>
-                  {{form.password2|addattrs:"class=w-full p-2 border border-gray-300 rounded-md focus:outline-none mt-1 focus:border-gray-500,placeholder=Confirm password,id=passwordContractConfirm"}}
+                  {{form.password2|addattrs:"class=w-full p-2 border border-gray-300 rounded-md focus:outline-none mt-1 focus:border-gray-500,placeholder=Confirm password"}}
               </div>
+              <p id = "password-error" class = "text-red-500 font-medium text-sm mx-2"></p>
           </div>
         </div>
 

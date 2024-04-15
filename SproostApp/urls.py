@@ -11,6 +11,7 @@ urlpatterns = [
     path('accounts/', include('allauth.urls')),
     path('profiles/', include('profiles.urls', namespace='profile')),
     path('quotes/', include('quotes.urls', namespace='quotes')),
+    path('property/', include('property.urls', namespace='property')),
     # path('admin/', include('admins.urls', namespace='admins')),
     
 ]

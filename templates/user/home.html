@@ -80,10 +80,11 @@
             <!-- content -->
             <div class="mt-4 flex flex-col gap-4">
                 {% for quote in quotes %}
-                <div class="w-full flex flex-col gap-4 p-4 border text-xs border-neutral-150 rounded-md">
+                <a href="{{quote.quote_project.first.admin_pdf}}" class="w-full flex flex-col gap-4 p-4 border text-xs border-neutral-150 rounded-md">
                     <div class="w-full flex items-center justify-between">
                         <div class="text-xs flex flex-col gap-2">
                             <span class="text-gray-500 font-medium">quote Name</span>
+                
                             <h3 class="text-gray-600 font-semibold">{{quote.title}}</h3>
                         </div>
                         <span class="">
@@ -111,12 +112,17 @@
                         <div class="text-xs flex flex-col gap-2">
                             <span class="text-gray-500 font-medium">Quotation Status</span>
                             <div class="inline-flex p-1 px-2 bg-gray-200 bg-opacity-50 items-center w-fit gap-2 border border-neutral-150 rounded-xl">
+                                {% if  quote.is_quote %}
                                 <div class="w-2 h-2 bg-blue-600 rounded-full"></div>
                                 <span class="text-[10px]">Pending</span>
+                                {% else %}
+                                <div class="w-2 h-2 bg-green-600 rounded-full"></div>
+                                <span class="text-[10px]">Approved</span>
+                                {% endif %}
                             </div>
                         </div>
                     </div>
-                </div>
+                </a>
                 {% endfor %}
             </div>
         </div>
