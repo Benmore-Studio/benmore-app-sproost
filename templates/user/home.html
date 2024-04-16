@@ -129,8 +129,10 @@
     </div>
   </div>
 </div>
-{% endblock content %} {% block bottomNav %} {% if loggedInUser == 'agent' %} {% include "user/bottom_nav_agent.html" %}{% elif loggedInUser ==
-'contractor' %}{% include "user/bottom_nav_contractor.html"%}{% else %}{% include "user/bottom_nav.html" %} {% endif %} {% endblock bottomNav %} {% block
-extraScripts %}
+{% endblock content %} 
+{% block bottomNav %} 
+  {% include "user/bottom_nav.html" %}
+{% endblock bottomNav %} 
+{% block extraScripts %}
 <script src="{% static 'js/home_owner.js'%}"></script>
 {% endblock extraScripts %}

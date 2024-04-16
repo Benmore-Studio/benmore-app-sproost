@@ -6,9 +6,10 @@ from django.contrib import messages
 from django.contrib.sites.shortcuts import get_current_site
 
 from mail_templated import send_mail
-from property.forms import AddPropertyByUUIDForm
 from quotes.models import QuoteRequest, Project
-from property.models import Property
+from property.models import AssignedAccount
+from django.contrib.auth.mixins import LoginRequiredMixin
+
 
 
 User = get_user_model()
@@ -72,11 +73,9 @@ def home(request):
         elif request.user.user_type == "CO":
             return redirect("profile:contractor_profile")
         elif request.user.user_type == "AG":
-            addPropertyForm = AddPropertyByUUIDForm()
-            properties = Property.objects.filter(assigned_to=request.user).order_by('-id').select_related("project__quote_request").prefetch_related("project__quote_request__media_paths")
+            accounts = AssignedAccount.objects.filter(assigned_to=request.user).order_by('-id').select_related("assigned_by", "assigned_to", "assigned_by__user_profile")
             context = {
-                "properties": properties, 
-                "addPropertyForm" : addPropertyForm
+                "accounts": accounts,
              }
             return render(request, "user/agent_home.html", context)
         else:
@@ -100,32 +99,31 @@ def requestQuotes(request):
     return render(request, 'user/request_quotes.html', context)
 
 
-class AssignAgentView(View):
+class AssignAgentView(LoginRequiredMixin,  View):
     template_name = 'user/assignAgent.html'
     def get(self, request):
         agents = User.objects.filter(user_type='AG')
-        properties = Project.objects.filter( is_approved=True )
-        
         context = {
             'agents' : agents,
-            'properties': properties,
         }
         return render(request, self.template_name, context)
     
     def post(self, request):
         agent_id = request.POST.get('agent')
-        project_id = request.POST.get('project_id')
-        print(agent_id, project_id)
         try:
             agent = User.objects.get(id=agent_id)
-            project = Project.objects.get(id=project_id)
+            AssignedAccount.objects.get_or_create(
+                assigned_to=agent, 
+                assigned_by=request.user,
+                is_approved=True
+            )
             if not agent.user_type in ['HO', 'AG']:
                 messages.error(request, 'Only Home Owners can assign properties')
                 return redirect('main:assign-agent') 
             
             send_mail(
                 'mail/assign_agent.tpl',
-                {'first_name': agent.first_name, "uuid": project.quote_request.uuid, "base_url": get_base_url(request)},
+                {'first_name': agent.first_name, "base_url": get_base_url(request)},
                 settings.EMAIL_HOST_USER,
                 [agent.email]
             )

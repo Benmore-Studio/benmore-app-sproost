@@ -1,4 +1,6 @@
-{% extends "user/base.html" %} {% load static %} {% block content %}
+{% extends "user/base.html" %} 
+{% load static %} 
+{% block content %}
 
 <style>
   #step {
@@ -151,8 +153,16 @@
   </div>
 </div>
 
-{% endblock %} {% block bottomNav %} {% if request.user.user_type == 'AG' %} {% include "user/bottom_nav_agent.html" %} {% elif request.user.user_type ==
-'CO' %} {% include "user/bottom_nav_contractor.html" %} {% else %} {% include "user/bottom_nav.html"%} {% endif %} {% endblock bottomNav %} {% block
-extraScripts %}
+{% endblock %} 
+{% block bottomNav %} 
+{% if request.user.user_type == 'AG' %} 
+{% include "user/bottom_nav_agent.html" %} 
+{% elif request.user.user_type == 'CO' %} 
+{% include "user/bottom_nav_contractor.html" %} 
+{% else %} 
+{% include "user/bottom_nav.html"%} 
+{% endif %} 
+{% endblock bottomNav %} 
+{% block extraScripts %}
 <script src="{% static 'js/requestQuotes.js' %}"></script>
 {% endblock extraScripts %}

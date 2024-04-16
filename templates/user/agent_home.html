@@ -1,129 +1,43 @@
-{% extends "user/base.html" %} {% load static %} {% load form_tags %} {% block topNav %} {% include "user/top-navigation.html" %} {% endblock topNav %} {% block content %}
+{% extends "user/base.html" %} 
+{% load static %} 
+{% load form_tags %} 
+{% block topNav %} 
+    {% include "user/top-navigation.html" %} 
+{% endblock topNav %} 
+{% block content %}
 
 <style>
 
 </style>
 <div class="w-full p-4 font['Inter'] mt-24 flex flex-col gap-5">
-    <!-- changes made -->
     <!-- client -->
-    <a href="#" class="w-full block p-4 bg-white border border-neutral-150 rounded-md shadow-sm">
-        <div class="w-full flex flex-col gap-8">
-            <div class="w-full flex items-center justify-between">
-                <div class="">
-                    <h3 class="text-gray-900 font-semibold">Olivia Rhye</h3>
-                    <small class="text-gray-600">oliviarhye@gmail.com</small>
+    {% for account in accounts%}
+        <a href="{% url "property:agent-homeowner-dashboard" account.assigned_by.pk %}" class="w-full block p-4 bg-white border border-neutral-150 rounded-md shadow-sm">
+            <div class="w-full flex flex-col gap-8">
+                <div class="w-full flex items-center justify-between">
+                    <div class="">
+                        <h3 class="text-gray-900 font-semibold">{{account.assigned_by.first_name}} {{account.assigned_by.last_name}}</h3>
+                        <small class="text-gray-600">{{account.assigned_by.email}}</small>
+                    </div>
+                    <span class="">
+            <img src="{% static 'svgs/chevron-right.svg' %}" alt="" class="w-[32px] h-[32px] object-contain" />
+        </span>
                 </div>
-                <span class="">
-        <img src="{% static 'svgs/chevron-right.svg' %}" alt="" class="w-[32px] h-[32px] object-contain" />
-      </span>
-            </div>
-            <div class="flex items-center justify-between">
-                <p class="text-gray-900 text-sm font-medium">123 Fake Street, Anytown, USA</p>
-                <img src="{% static 'svgs/address.svg' %}" alt="" class="w-[32px] h-[32px] object-contain">
-
-            </div>
-        </div>
-    </a>
-    <!-- client  -->
-    <a href="#" class="w-full block p-4 bg-white border border-neutral-150 rounded-md shadow-sm">
-        <div class="w-full flex flex-col gap-8">
-            <div class="w-full flex items-center justify-between">
-                <div class="">
-                    <h3 class="text-gray-900 font-semibold">Olivia Rhye</h3>
-                    <small class="text-gray-600">oliviarhye@gmail.com</small>
+                <div class="flex items-center justify-between">
+                    <p class="text-gray-900 text-sm font-medium">{{account.assigned_by.user_profile.address}}</p>
+                    <img src="{% static 'svgs/address.svg' %}" alt="" class="w-[32px] h-[32px] object-contain">
                 </div>
-                <span class="">
-        <img src="{% static 'svgs/chevron-right.svg' %}" alt="" class="w-[32px] h-[32px] object-contain" />
-      </span>
             </div>
-            <div class="flex items-center justify-between">
-                <p class="text-gray-900 text-sm font-medium">123 Fake Street, Anytown, USA</p>
-                <img src="{% static 'svgs/address.svg' %}" alt="" class="w-[32px] h-[32px] object-contain">
-
-            </div>
-        </div>
-    </a>
-    <!-- client  -->
-    <a href="#" class="w-full block p-4 bg-white border border-neutral-150 rounded-md shadow-sm">
-        <div class="w-full flex flex-col gap-8">
-            <div class="w-full flex items-center justify-between">
-                <div class="">
-                    <h3 class="text-gray-900 font-semibold">Olivia Rhye</h3>
-                    <small class="text-gray-600">oliviarhye@gmail.com</small>
-                </div>
-                <span class="">
-        <img src="{% static 'svgs/chevron-right.svg' %}" alt="" class="w-[32px] h-[32px] object-contain" />
-      </span>
-            </div>
-            <div class="flex items-center justify-between">
-                <p class="text-gray-900 text-sm font-medium">123 Fake Street, Anytown, USA</p>
-                <img src="{% static 'svgs/address.svg' %}" alt="" class="w-[32px] h-[32px] object-contain">
-
-            </div>
-        </div>
-    </a>
-    <!-- client  -->
-    <a href="#" class="w-full block p-4 bg-white border border-neutral-150 rounded-md shadow-sm">
-        <div class="w-full flex flex-col gap-8">
-            <div class="w-full flex items-center justify-between">
-                <div class="">
-                    <h3 class="text-gray-900 font-semibold">Olivia Rhye</h3>
-                    <small class="text-gray-600">oliviarhye@gmail.com</small>
-                </div>
-                <span class="">
-        <img src="{% static 'svgs/chevron-right.svg' %}" alt="" class="w-[32px] h-[32px] object-contain" />
-      </span>
-            </div>
-            <div class="flex items-center justify-between">
-                <p class="text-gray-900 text-sm font-medium">123 Fake Street, Anytown, USA</p>
-                <img src="{% static 'svgs/address.svg' %}" alt="" class="w-[32px] h-[32px] object-contain">
-
-            </div>
-        </div>
-    </a>
-    <!-- client  -->
-    <a href="#" class="w-full block p-4 bg-white border border-neutral-150 rounded-md shadow-sm">
-        <div class="w-full flex flex-col gap-8">
-            <div class="w-full flex items-center justify-between">
-                <div class="">
-                    <h3 class="text-gray-900 font-semibold">Olivia Rhye</h3>
-                    <small class="text-gray-600">oliviarhye@gmail.com</small>
-                </div>
-                <span class="">
-        <img src="{% static 'svgs/chevron-right.svg' %}" alt="" class="w-[32px] h-[32px] object-contain" />
-      </span>
-            </div>
-            <div class="flex items-center justify-between">
-                <p class="text-gray-900 text-sm font-medium">123 Fake Street, Anytown, USA</p>
-                <img src="{% static 'svgs/address.svg' %}" alt="" class="w-[32px] h-[32px] object-contain">
-
-            </div>
-        </div>
-    </a>
-    <!-- client  -->
-    <a href="#" class="w-full block p-4 bg-white border border-neutral-150 rounded-md shadow-sm">
-        <div class="w-full flex flex-col gap-8">
-            <div class="w-full flex items-center justify-between">
-                <div class="">
-                    <h3 class="text-gray-900 font-semibold">Olivia Rhye</h3>
-                    <small class="text-gray-600">oliviarhye@gmail.com</small>
-                </div>
-                <span class="">
-        <img src="{% static 'svgs/chevron-right.svg' %}" alt="" class="w-[32px] h-[32px] object-contain" />
-      </span>
-            </div>
-            <div class="flex items-center justify-between">
-                <p class="text-gray-900 text-sm font-medium">123 Fake Street, Anytown, USA</p>
-                <img src="{% static 'svgs/address.svg' %}" alt="" class="w-[32px] h-[32px] object-contain">
-
-            </div>
-        </div>
-    </a>
-    <!-- client  -->
+        </a>
+    {% endfor %}
+    
 </div>
 
 
-{% endblock %}{% block bottomNav %} {% include "user/bottom_nav_agent.html" %} {% endblock bottomNav %} {% block extraScripts %}
-<script src="{% static 'js/agent.js' %}"></script>
-
+{% endblock %}
+{% block bottomNav %}
+{% include "user/bottom_nav_agent.html" %} 
+    {% endblock bottomNav %} 
+{% block extraScripts %}
+    <script src="{% static 'js/agent.js' %}"></script>
 {% endblock extraScripts %}
