@@ -61,7 +61,10 @@ class CustomRequestUtil:
         if error_detail:
             messages.error(self.request, error_detail)
             if self.template_on_error:
-                return redirect(self.template_on_error)
+                if isinstance(self.template_on_error, str):
+                    return redirect(self.template_on_error)
+                elif isinstance(self.template_on_error, tuple):
+                    return redirect(self.template_on_error[0], self.template_on_error[1])
         else:
             if isinstance(response, str):
                 messages.success(self.request, response)

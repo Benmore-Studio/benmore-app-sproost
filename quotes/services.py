@@ -1,3 +1,4 @@
+from accounts.services.user import UserService
 from main.models import Media, MediaTypes
 from quotes.models import QuoteRequest
 from services.model_actions import ModelAction
@@ -10,8 +11,19 @@ class QuoteService(CustomRequestUtil):
 
     def create(self, payload):
         media = payload.pop("media")
+        home_owner_id = payload.pop("home_owner_id")
 
         payload['user'] = self.request.user
+
+        if home_owner_id:
+            user_service = UserService(self.request)
+            user, error = user_service.fetch_single_by_pk(id=home_owner_id)
+
+            if error:
+                return None, error
+            
+            payload['user'] = user
+
 
         image_types = {'jpg', 'png', 'svg', 'jpeg'}
         file_types = {'pdf'}
@@ -40,7 +52,6 @@ class QuoteService(CustomRequestUtil):
                 )
 
             return "Quote Request saved successfully", None
-
 
         except Exception as e:
             return None, self.make_error("An error occurred!", error=e)

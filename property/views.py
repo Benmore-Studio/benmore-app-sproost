@@ -19,7 +19,8 @@ def agents_home_owner_account(request, pk):
             "quotes": quotes,
             "projects": projects,
             "quote_count": quotes.count(),
-            "projects_count": projects.count()
+            "projects_count": projects.count(),
+            "home_owner_id": pk
         }
         return render(request, 'user/home.html', context)
     except User.DoesNotExist:
