@@ -1,0 +1,86 @@
+{% load static %} {% with url_name=request.resolver_match.url_name %}
+<style>
+    #mobileNav.active {
+        display: flex;
+    }
+</style>
+<nav class="w-full px-[1rem] xl:px-[3rem] py-2 border-b border-neutral-150 text-gray-700 flex items-center justify-between">
+    <img src="{% static 'svgs/sproost-plus.svg' %}" alt="" class="">
+    <ul class="inline-flex items-center gap-6 hidden lg:flex">
+        <li class="text-gray-700 font-semibold cursor-pointer text-sm xl:text-base {% if url_name == 'dashboard' %} bg-toneLightGreen   text-primary bg-opacity-80 p-2 px-4 w-fit rounded-md {% endif %}">
+            <a href="{% url 'main:dashboard' %}" class="">Dashboard</a>
+        </li>
+        <li class="text-gray-700 font-semibold cursor-pointer text-sm xl:text-base {% if url_name == 'project-requests' %} bg-toneLightGreen  text-primary bg-opacity-80 p-2 px-4 w-fit rounded-md {% endif %}">
+            <a href="{% url 'main:project-requests' %}" class="">Project Requests</a>
+        </li>
+        <li class="text-gray-700 font-semibold cursor-pointer text-sm xl:text-base {% if url_name == 'active-request' %} bg-toneLightGreen  text-primary bg-opacity-80 p-2 px-4 w-fit rounded-md {% endif %}">
+            <a href="#" class="">Active Request</a>
+        </li>
+        <li class="text-gray-700 font-semibold cursor-pointer text-sm xl:text-base {% if url_name == 'admin-home-owners' %} bg-toneLightGreen  text-primary bg-opacity-80 p-2 px-4 w-fit rounded-md {% endif %}">
+            <a href="#" class="">Home Owners</a>
+        </li>
+        <li class="text-gray-700 font-semibold cursor-pointer text-sm xl:text-base {% if url_name == 'contractors-admin' %} bg-toneLightGreen  text-primary bg-opacity-80 p-2 px-4 w-fit rounded-md {% endif %}">
+            <a href="{% url 'main:contractors-admin' %}" class="">Contractors</a>
+        </li>
+        <li class="text-gray-700 font-semibold cursor-pointer text-sm xl:text-base {% if url_name == 'admin-messages' %} bg-toneLightGreen  text-primary bg-opacity-80 p-2 px-4 w-fit rounded-md {% endif %} flex items-center gap-2">
+            <a href="#" class="">Message</a>
+            <span class="bg-[#F9FAFB]">10</span>
+        </li>
+
+    </ul>
+    <div class="inline-flex items-center gap-6 w-fit hidden lg:flex">
+        <img src="{% static 'svgs/settings.svg' %}" alt="" class="">
+        <img src="{% static 'svgs/bell-01.svg' %}" alt="" class="">
+        <img src="{% static 'images/ownerAvatar.png' %}" alt="" class="w-[40px] h-[40px] object-contain">
+    </div>
+    <img onclick="toggleMobileNavbar()" src="{% static 'svgs/listing.svg' %}" alt="" class="object-contain w-12 cursor-pointer h-10 lg:hidden">
+</nav>
+
+<nav id="mobileNav" class="fixed top-0 right-0 hidden left-0 z-10 w-screen h-screen bg-opacity-60 bg-[#1E1E1E] flex items-start justify-start">
+    <div class="bg-white w-5/6 md:w-2/3 h-full">
+        <div class="flex items-center p-2 justify-between border-b border-neutral-150">
+            <h2 class="font-bold text-xl md:text-2xl text-slate-700 flex gap-3 items-center">
+                <img src="{% static 'svgs/sproost-plus.svg' %}" alt="" class="">
+            </h2>
+            <div onclick="toggleMobileNavbar()" class="">
+                <img src="{% static 'svgs/x-close.svg' %}" alt="" class="cursor-pointer" />
+            </div>
+        </div>
+        <div class="w-full p-4">
+            <div class="flex items-center">
+                <div class="w-full flex items-center gap-6 border-b border-neutral-50 py-2">
+                    <img src="{% static 'images/ownerAvatar.png' %}" alt="" class="w-[40px] h-[40px] object-contain">
+                    <div class="text-sm">
+                        <h3 class="">Username</h3>
+                        <h3 class="">Email</h3>
+                    </div>
+                </div>
+            </div>
+            <ul class="flex flex-col gap-6 mt-5">
+                <li id="mobile_navItem" class="text-gray-700 font-semibold cursor-pointer  {% if url_name == 'dashboard' %} bg-toneLightGreen   text-primary bg-opacity-80 p-2 px-4 w-full rounded-md {% endif %}">
+                    <a href="{% url 'main:dashboard' %}" class="">
+                        Dashboard
+                    </a>
+                </li>
+                <li id="mobile_navItem" class="text-gray-700 font-semibold cursor-pointer  {% if url_name == 'project-requests' %} bg-toneLightGreen  text-primary bg-opacity-80 p-2 px-4 w-full rounded-md {% endif %}">
+                    <a href="{% url 'main:project-requests' %}" class="">Project Requests</a>
+                </li>
+                <li id="mobile_navItem" class="text-gray-700 font-semibold cursor-pointer  {% if url_name == 'active-request' %} bg-toneLightGreen  text-primary bg-opacity-80 p-2 px-4 w-full rounded-md {% endif %}">
+                    <a href="#" class="">Active Request</a>
+                </li>
+                <li id="mobile_navItem" class="text-gray-700 font-semibold cursor-pointer  {% if url_name == 'admin-home-owners' %} bg-toneLightGreen  text-primary bg-opacity-80 p-2 px-4 w-full rounded-md {% endif %}">
+                    <a href="#" class="">Home Owners</a>
+                </li>
+                <li id="mobile_navItem" class="text-gray-700 font-semibold cursor-pointer  {% if url_name == 'contractors-admin' %} bg-toneLightGreen  text-primary bg-opacity-80 p-2 px-4 w-full rounded-md {% endif %}">
+                    <a href="{% url 'main:contractors-admin' %}" class="">Contractors</a>
+                </li>
+                <li id="mobile_navItem" class="text-gray-700 font-semibold cursor-pointer  {% if url_name == 'admin-messages' %} bg-toneLightGreen  text-primary bg-opacity-80 p-2 px-4 w-full rounded-md {% endif %} flex items-center gap-2">
+                    <a href="#" class="">Message</a>
+                    <span class="bg-[#F9FAFB]">10</span>
+                </li>
+
+            </ul>
+        </div>
+    </div>
+</nav>
+{% endwith %}

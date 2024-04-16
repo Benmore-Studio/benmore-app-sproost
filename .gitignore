@@ -3,12 +3,13 @@
 *.pot
 *.pyc
 __pycache__
+*/__pycache__
 db9.sqlite3
-db.sqlite3
 db.sqlite3
 virtualenv/ 
 media
-*migrations
+media_cdn
+*/migrations
 
 # Backup files # 
 *.bak 

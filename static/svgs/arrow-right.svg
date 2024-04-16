@@ -1,5 +1,11 @@
+<<<<<<< HEAD
+<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="arrow-right">
+<path id="Icon" d="M4.1665 10H15.8332M15.8332 10L9.99984 4.16669M15.8332 10L9.99984 15.8334" stroke="#344054" stroke-width="1.67" stroke-linecap="round" stroke-linejoin="round"/>
+=======
 <svg width="13" height="13" viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg">
 <g id="Arrow-Right">
 <path id="Vector" d="M11.1312 6.63794L7.88125 11.1379H6.13125L8.88125 7.38794H1.03125V5.88794H8.88125L6.13125 2.13794H7.88125L11.1312 6.63794Z" fill="white"/>
+>>>>>>> a570b8f7b2e63196a7fb2c8682e46087be5d855a
 </g>
 </svg>

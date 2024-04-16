@@ -1,20 +1,30 @@
 from django.shortcuts import render, redirect
 from django.views import View
-from quotes.models import QuoteRequest, Project
 from django.contrib.auth import get_user_model
-from property.models import Property
+from django.conf import settings
 from django.contrib import messages
+from django.contrib.sites.shortcuts import get_current_site
 
+from mail_templated import send_mail
+from property.forms import AddPropertyByUUIDForm
+from quotes.models import QuoteRequest, Project
+from property.models import Property
 
 
 User = get_user_model()
 
 
 
+def get_base_url(request):
+    # Use 'get_current_site' to get the domain
+    domain = get_current_site(request).domain
+    # Use 'request.is_secure' to determine the scheme (http or https)
+    scheme = 'https' if request.is_secure() else 'http'
+    # Construct the base URL
+    base_url = f"{scheme}://{domain}"
+    return base_url
 
-# authentication
 
-# loggedInUser = 'home-owner'| 'agent'| 'contractor'| 'investor', this is used to switch between bottom navigation, default navigation is home-owner, so need to add it.
 
 loggedInUser = 'contractor'
 
@@ -50,7 +60,7 @@ def home(request):
     else:
         print("user type === ", request.user.user_type)
         if request.user.user_type == "HO":
-            quotes = QuoteRequest.objects.filter(user=request.user, is_quote=True)
+            quotes = QuoteRequest.objects.filter(user=request.user)
             projects = Project.objects.filter(quote_request__user=request.user)
             context = {
                 "quotes": quotes,
@@ -60,9 +70,15 @@ def home(request):
             }
             return render(request, "user/home.html", context)
         elif request.user.user_type == "CO":
-            return render(request, "user/contractor_home.html")
+            return redirect("profile:contractor_profile")
         elif request.user.user_type == "AG":
-            return render(request, "user/agent_home.html")
+            addPropertyForm = AddPropertyByUUIDForm()
+            properties = Property.objects.filter(assigned_to=request.user).order_by('-id').select_related("project__quote_request").prefetch_related("project__quote_request__media_paths")
+            context = {
+                "properties": properties, 
+                "addPropertyForm" : addPropertyForm
+             }
+            return render(request, "user/agent_home.html", context)
         else:
             return render(request, "user_admin/dashboard.html")
     
@@ -88,7 +104,7 @@ class AssignAgentView(View):
     template_name = 'user/assignAgent.html'
     def get(self, request):
         agents = User.objects.filter(user_type='AG')
-        properties = Property.objects.filter( is_assigned=False )
+        properties = Project.objects.filter( is_approved=True )
         
         context = {
             'agents' : agents,
@@ -98,19 +114,23 @@ class AssignAgentView(View):
     
     def post(self, request):
         agent_id = request.POST.get('agent')
-        property_id = request.POST.get('property')
-        print(agent_id, property_id)
+        project_id = request.POST.get('project_id')
+        print(agent_id, project_id)
         try:
             agent = User.objects.get(id=agent_id)
-            property = Property.objects.get(id=property_id)
+            project = Project.objects.get(id=project_id)
             if not agent.user_type in ['HO', 'AG']:
-                messages.error(request, 'Only Home Owners and Agents can be assigned properties')
-                return redirect('main:assign-agent')    
-                
-            property.assigned_by = agent
-            property.is_assigned = True
-            property.save()
-            messages.success(request, 'Agent assigned successfully')
+                messages.error(request, 'Only Home Owners can assign properties')
+                return redirect('main:assign-agent') 
+            
+            send_mail(
+                'mail/assign_agent.tpl',
+                {'first_name': agent.first_name, "uuid": project.quote_request.uuid, "base_url": get_base_url(request)},
+                settings.EMAIL_HOST_USER,
+                [agent.email]
+            )
+            
+            messages.success(request, 'Agent assigned successfully. Awaiting agent confirmation')
             
         except Exception as e:
             print(e)

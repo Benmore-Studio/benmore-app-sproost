@@ -52,7 +52,6 @@ class CustomSignupForm(SignupForm):
         return user
     
 
-
 class ValidatePhoneNumberForm(forms.Form):
     phone_number = PhoneNumberField(required=False, widget=PhoneNumberPrefixWidget(initial='US'))
     
