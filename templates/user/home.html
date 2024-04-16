@@ -56,15 +56,17 @@
     </div>
 
     <div class="w-full flex items-center justify-end gap-4">
-      <a
-        href="{% url 'main:assign-agent' %}"
-        class="flex items-center justify-center cursor-pointer gap-2 bg-toneLightGreen p-3 w-full rounded-md shadow-sm"
-      >
-        <img src="{% static 'svgs/plus-green.svg' %}" alt="" class="" />
-        <span class="text-primary text-sm font-semibold">Assign Agent</span>
-      </a>
+      {% if request.user.user_type == "HO" %}
+        <a
+          href="{% url 'main:assign-agent' %}"
+          class="flex items-center justify-center cursor-pointer gap-2 bg-toneLightGreen p-3 w-[50%] rounded-md shadow-sm"
+        >
+          <img src="{% static 'svgs/plus-green.svg' %}" alt="" class="" />
+          <span class="text-primary text-sm font-semibold">Assign Agent</span>
+        </a>
+      {% endif %}
 
-      <a href="{% url 'quotes:request-quotes' %}" class="w-full flex items-center justify-center gap-2 cursor-pointer bg-primary p-3 rounded-md shadow-sm">
+      <a href="{% url 'quotes:request-quotes' %}" class="w-[50%] flex items-center justify-center gap-2 cursor-pointer bg-primary p-3 rounded-md shadow-sm">
         <img src="{% static 'svgs/plus.svg' %}" alt="" class="" />
         <span class="text-white text-sm font-semibold">Request Quote</span>
       </a>
