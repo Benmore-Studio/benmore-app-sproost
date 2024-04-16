@@ -1,0 +1,92 @@
+{% extends "user/base.html" %}
+{% load form_tags %} 
+{% load static %} 
+{% block content %}
+
+<style>
+    #step {
+        display: none;
+    }
+</style>
+<div class="w-full">
+    <div class="w-full">
+        <!-- header -->
+        <div class="w-full p-4 flex items-center gap-8 mt-4 border-b border-neutral-150">
+            <img onclick="goBack()" src="{% static 'svgs/chevron-left.svg' %}" alt="" class="cursor-pointer" />
+            <h3 class="text-xl text-gray-900 font-medium">Add Property</h3>
+        </div>
+        <!-- content -->
+
+        <div class="w-full p-4">
+            {{form.media}}
+            <form method = "POST" class="w-full mt-4 flex flex-col gap-4">
+                {% csrf_token %}
+                {% if form.non_field_errors %}
+                        <div class="bg-red-400 rounded-md text-center border border-red-700 text-white p-2 my-1">
+                            {% for error in form.non_field_errors %}
+                                <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                {% endif %}
+                <div class="w-full">
+                    <label for="{{form.name.auto_id}}" class="text-gray-700 font-medium text-sm">Property Name</label>
+                    {{form.name|addattrs:"class=w-full p-2 border border-gray-300 rounded-md focus:outline-none mt-1 focus:border-gray-500,placeholder=Enter name"}}
+                    {% if form.name.errors %}
+                        <div class = "w-full p-3 bg-red-300 border border-red-600 rounded text-white text-center">
+                            {{form.name.errors}}
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="w-full">
+                    <label for="{{form.address.auto_id}}" class="text-gray-700 font-medium text-sm">House Address</label>
+                    {{form.address}}
+                    {% if form.address.errors %}
+                        <div class = "w-full p-3 bg-red-300 border border-red-600 rounded text-white text-center">
+                            {{form.address.errors}}
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="w-full">
+                    <label for="{{form.phone_number.auto_id}}" class="text-gray-700 font-medium text-sm">House Owner Phone number</label>
+                    <div class="flex gap-2 p-2 border border-gray-300 p-2 mt-1 border border-gray-300 rounded-md">
+                        {{form.phone_number|addattrs:"class=w-full p-2 border border-gray-300 rounded-md focus:outline-none mt-1 focus:border-gray-500,placeholder=Enter Phone number"}}
+                    </div>
+                    {% if form.phone_number.errors %}
+                        <div class = "w-full mt-1 p-3 bg-red-300 border border-red-600 rounded text-white text-center">
+                            {{form.phone_number.errors}}
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="w-full">
+                    <label for="{{form.email.auto_id}}" class="text-gray-700 font-medium text-sm">House Owner Email address</label>
+                    <div class="group border border-gray-300 rounded-md flex items-center gap-2 p-2 mt-1">
+                        <img src="{% static 'svgs/mail.svg' %}" alt="" class="fill-gray-500 w-[20px] h-[20px] text-gray-500" />
+                        {{form.email|addattrs:"class=w-full h-full outline-none group-focus:outline-none focus-visible:border-none border-none,placeholder=Enter email"}}
+                    </div>
+                    {% if form.email.errors %}
+                        <div class = "w-full mt-1 p-3 bg-red-300 border border-red-600 rounded text-white text-center">
+                            {{form.email.errors}}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="flex w-full flex-col gap-4 border-t border-neutral-150 pt-5">
+                    <button  type="submit" class="flex items-center w-full justify-center p-3 rounded-lg bg-primary text-white border border-neutral-150 shadow-sm font-semibold">
+                        Add Property
+                    </button>
+                    <div type="button" onclick="goBack()" class="flex p-3 w-full rounded-lg items-center justify-center bg-white border border-neutral-150 shadow-sm font-semibold">Cancel</div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}{% block bottomNav %}{% if loggedInUser == 'agent' %}{% include "user/bottom_nav_agent.html" %}{% elif loggedInUser == 'contractor' %}{% include "user/bottom_nav_contractor.html"%}{% else %}{% include "user/bottom_nav.html" %} {% endif %}
+{% endblock bottomNav %} {% block extraScripts %}
+
+<script>
+    function goBack() {
+        history.back()
+    }
+</script>
+{% endblock extraScripts %}

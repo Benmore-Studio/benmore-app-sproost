@@ -1,4 +1,4 @@
-{% extends "user/base.html" %} {% load static %} {% block bottomNav %} {% include "user/bottom_navigation.html" %} {% endblock bottomNav %} {% block content %}
+{% extends "user/base.html" %} {% load static %} {% include "user/bottom_navigation.html" %} {% block content %}
 <div class="w-full">
     <!-- header -->
     <div class="w-full p-4 flex items-center gap-8 mt-4 border-b border-neutral-150">
@@ -7,34 +7,40 @@
     </div>
 
     <div class="w-full p-4">
-        <form action="" class="w-full mt-4 flex flex-col gap-4">
+        <form method="POST" class="w-full mt-4 flex flex-col gap-4">
+            {% csrf_token %}
             <div class="w-full">
                 <label for="agentName" class="text-gray-700 font-medium text-sm">Agent Name</label>
-                <input type="text" name="agentName" id="agentName" placeholder="Type here" class="w-full p-2 border border-gray-300 rounded-md focus:outline-none mt-1 focus:border-gray-500" />
+                <select required name="agent" id="agentName" class="w-full p-2 border border-gray-300 rounded-md focus:outline-none mt-1 focus:border-gray-500">
+                    <option value="">Select an Agent</option>
+                    {% for agent in agents %}
+                        <option value="{{agent.id}}">{{agent.first_name}} {{agent.last_name}} @ {{ agent.email }}</option>
+                    {% endfor %}
+                </select>
             </div>
             <div class="w-full">
-                <label for="regNumber" class="text-gray-700 font-medium text-sm">Registration Number</label>
-                <input type="text" name="regNumber" id="regNumber" placeholder="Type here" class="w-full p-2 border border-gray-300 rounded-md focus:outline-none mt-1 focus:border-gray-500" />
+                <label for="agentName" class="text-gray-700 font-medium text-sm">Properties</label>
+                <select required name="project_id" id="agentName" class="w-full p-2 border border-gray-300 rounded-md focus:outline-none mt-1 focus:border-gray-500">
+                        <option value="">Select a Property</option>
+                        {% for property in properties %}
+                            <option value="{{property.id}}">{{property.quote_request}}</option>
+                        {% endfor %}
+                    </select>
             </div>
-            <div class="w-full">
-                <label for="title" class="text-gray-700 font-medium text-sm">Email</label>
-                <div class="group border border-gray-300 rounded-md flex items-center gap-2 p-2 mt-1">
-                    <img src="{% static 'svgs/mail.svg' %}" alt="" class="fill-gray-500 w-[20px] h-[20px] text-gray-500" />
-                    <input type="text" name="title" id="title" placeholder="Type here" class="w-full h-full outline-none group-focus:outline-none mt-1 focus-visible:border-none border-none" />
-                </div>
-            </div>
-
-            <div class="flex w-full flex-col gap-4 border-t border-neutral-150 pt-5">
-                <button onclick="gotoPropertyList()" type="button" class="flex items-center w-full justify-center p-3 rounded-lg bg-primary text-white border border-neutral-150 shadow-sm font-semibold">
-          Assign Agent
-        </button>
-                <button type="button" onclick="goBack()" class="flex p-3 w-full rounded-lg items-center justify-center bg-white border border-neutral-150 shadow-sm font-semibold">Cancel</button>
-            </div>
-        </form>
     </div>
+
+
+    <div class="flex w-full flex-col gap-4 border-t border-neutral-150 pt-5">
+        <button type="submit" class="flex items-center w-full justify-center p-3 rounded-lg bg-primary text-white border border-neutral-150 shadow-sm font-semibold">
+                    Assign Agent
+                </button>
+        <div onclick="goBack()" class="flex p-3 w-full rounded-lg items-center justify-center bg-white border border-neutral-150 shadow-sm font-semibold">Cancel</div>
+    </div>
+    </form>
 </div>
-{% endblock %}{% block bottomNav %}{% if loggedInUser == 'agent' %}{% include "user/bottom_nav_agent.html" %}{% elif loggedInUser == 'contractor' %}{% include "user/bottom_nav_contractor.html"%}{% else %}{% include "user/bottom_nav.html" %} {% endif %}
-{% endblock bottomNav %} {% block extraScripts %}
+</div>
+{% endblock %} {% block bottomNav %}{% if request.user == 'AG' %}{% include "user/bottom_nav_agent.html" %}{% elif request.user == 'CO' %}{% include "user/bottom_nav_contractor.html"%}{% else %}{% include "user/bottom_nav.html" %} {% endif %} {% endblock
+bottomNav %} {% block extraScripts %}
 <script>
     function goBack() {
         history.back()

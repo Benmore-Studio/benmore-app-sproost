@@ -1,0 +1,40 @@
+{% extends 'account/base.html'%}
+{% load i18n %}
+{% load account %}
+{% load allauth %}
+{% block title %}
+    {% trans "Confirm Email Address" %}
+{% endblock title %}
+{% block authContent %}
+    <main class = "h-screen flex flex-col items-center justify-center px-4">
+        <h1 class = "text-center font-semibold text-2xl"> 
+            {% trans "Confirm Email Address" %}
+        </h1>
+        {% if confirmation %}
+            {% user_display confirmation.email_address.user as user_display %}
+            {% if can_confirm %}
+                <p class = "text-center">
+                    {% blocktrans with confirmation.email_address.email as email %}Please confirm the email address <a class = "text-primary text-semiblold" href="mailto:{{ email }}">{{ email }}</a> for your Easy Apply account.{% endblocktrans %}
+                </p>
+                {% url 'account_confirm_email' confirmation.key as action_url %}
+                {% element form method="post" action=action_url %}
+                    {% slot actions %}
+                        {% csrf_token %}
+                        <button type="submit" class = "rounded-md font-semiblod text-white bg-primary py-2 px-4 mt-4 m-auto flex w-fit text-center hover:bg-primary-dark transition-all delay-75" >
+                            {% trans 'Confirm' %}
+                        </button>
+                    {% endslot %}
+                {% endelement %}
+            {% else %}
+                <p class = "text-center" >
+                    {% blocktrans %}Unable to confirm {{ email }} because it is already confirmed by a different account.{% endblocktrans %}
+                </p>
+            {% endif %}
+        {% else %}
+            {% url 'account_email' as email_url %}
+            <p class = "text-center" >
+                {% blocktrans %}This email confirmation link expired or is invalid. Please <a href="{{ email_url }}">issue a new email confirmation request</a>.{% endblocktrans %}
+            </p>
+        {% endif %}
+    </main>
+{% endblock authContent %}

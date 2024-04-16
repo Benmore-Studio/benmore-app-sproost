@@ -1,0 +1,111 @@
+{% extends "user/base.html" %} {% load static %} {% block content %}
+{% load form_tags %}
+<style>
+    #step {
+        display: none;
+    }
+</style>
+<div class="w-full">
+    <div class="w-full">
+        <!-- header -->
+        <div class="w-full p-4 flex items-center gap-8 mt-4 border-b border-neutral-150">
+            <img onclick="goBack()" src="{% static 'svgs/chevron-left.svg' %}" alt="" class="cursor-pointer" />
+            <h3 class="text-xl text-gray-900 font-medium">Edit Profile</h3>
+        </div>
+        <!-- content -->
+
+        <div class="w-full p-4">
+            <div class="w-full">
+                <h3 class="text-base text-gray-600"> Provide some basic information to set up your account.</h3>
+            </div>
+            {{form.media}}
+            <form class="w-full mt-4 flex flex-col gap-4" action = "{% url 'profile:edit-profile-request' %}" method="POST">
+                {% csrf_token %}
+                <div class="w-full">
+                    <label for="companyName" class="text-gray-700 font-medium text-sm">Company Name</label>
+                    {{ form.company_name|addattrs:"class=w-full p-2 text-gray-500 border border-gray-300 rounded-md focus:outline-none mt-1 focus:border-gray-500,placeholder=Company Name"}}
+                    {% if form.company_name.errors %}
+                        <div class = "w-full py-1 rounded text-red-500">
+                            {{form.company_name.errors}}
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="w-full">
+                    <label for="email" class="text-gray-700 font-medium text-sm">Email</label>
+                    {{ form.email|addattrs:"class=w-full p-2 text-gray-500 border border-gray-300 rounded-md focus:outline-none mt-1 focus:border-gray-500"}}
+                    {% if form.email.errors %}
+                        <div class = "w-full py-1 rounded text-red-500">
+                            {{form.email.errors}}
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="w-full">
+                    <label for="phone_number" class="text-gray-700 font-medium text-sm">Phone number</label>
+                    <!-- Render phone_number field using Django template tag -->
+                    <div class = "flex">
+                        {{form.phone_number|addattrs:"class=w-full p-2 text-gray-500 border border-gray-300 rounded-md focus:outline-none mt-1 focus:border-gray-500,placeholder=Phone number"}}
+                        {% if form.phone_number.errors %}
+                            <div class = "w-full py-1 rounded text-red-500">
+                                {{form.phone_number.errors}}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="w-full">
+                    <label for="Specialization" class="text-gray-700 font-medium text-sm">Specialization</label>
+                    {{form.specialization|addattrs:"class=w-full p-2 text-gray-500 border border-gray-300 rounded-md focus:outline-none mt-1 focus:border-gray-500,placeholder=Specialization"}}
+                    {% if form.specialization.errors %}
+                        <div class = "w-full py-1 rounded text-red-500">
+                            {{form.specialization.errors}}
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="w-full">
+                    <label for="{{ form.registration_number.auto_id }}" class="text-gray-700 font-medium text-sm">Registration Number</label>
+                    {{ form.registration_number|addattrs:"class=w-full p-2 text-gray-500 border border-gray-300 rounded-md focus:outline-none mt-1 focus:border-gray-500,placeholder=Enter registration number" }}
+                    {% if form.registration_number.errors %}
+                        <div class="w-full py-1 rounded text-red-500">
+                            {{ form.registration_number.errors }}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="w-full">
+                    <label for="{{form.company_address.auto_id}}" class="text-gray-700 font-medium text-sm">Company Address</label>
+                    {{ form.company_address }}
+                    {% if form.company_address.errors %}
+                        <div class = "w-full py-1 rounded text-red-500">
+                            {{form.company_address.errors}}
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="w-full">
+                    <label for="City" class="text-gray-700 font-medium text-sm">City</label>
+                    {{form.city|addattrs:"class=w-full p-2 text-gray-500 border border-gray-300 rounded-md focus:outline-none mt-1 focus:border-gray-500,placeholder=City"}}
+                    {% if form.city.errors %}
+                        <div class = "w-full py-1 rounded text-red-500">
+                            {{form.city.errors}}
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="flex w-full flex-col gap-4 border-t border-neutral-150 pt-5">
+                    <button type="submit" class="flex items-center w-full justify-center p-3 rounded-lg bg-primary text-white border border-neutral-150 shadow-sm font-semibold">Save</button>
+                </div>
+            </form> 
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+{% block bottomNav %}
+    {% include "user/bottom_nav_contractor.html"%}
+{% endblock bottomNav %} 
+
+{% block extraScripts %}
+
+<script>
+    function goBack() {
+        history.back()
+    }
+</script>
+{% endblock extraScripts %}

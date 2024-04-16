@@ -1,0 +1,261 @@
+{% extends 'account/base.html'%} 
+{% load static %} 
+{% load socialaccount %}
+{% load form_tags %}
+{% block title %} Sign Up {% endblock %}
+ {% block authContent %}
+  <style>
+    .step {
+        display: none;
+    }
+    
+    .step-contractor {
+        display: none;
+    }
+    
+    #container-check input:checked~div .checkmark {
+        display: block;
+    }
+    
+    #container-check.active {
+        background-color: #EAF7E6;
+    }
+  </style>
+
+  <div>
+    {{form.media}}
+    {% comment %} {{form}} {% endcomment %}
+    <form id="signupForm"  method="POST">
+        {% csrf_token %}
+        <div class="step step-contractor w-full p-4 pt-8" id="step1">
+            <div class="w-full">
+                <div class="flex flex-col gap-8 items-center justify-center">
+                    <img src="{% static 'svgs/sproost.svg' %}" alt="" class="" />
+                    <div class="flex flex-col items-center justify-center">
+                        <h3 class="text-gray-900 font-semibold text-xl">Create an account</h3>
+                        <p class="text-gray-600 text-center text-base">Provide some basic information to set up your account.</p>
+                    </div>
+                    {% include 'account/partials/sign_up_errors.html' %}
+                    <div class="flex flex-col gap-4 w-full">
+                        <label for="onboard-owner" class="w-full">
+                          <div id="container-check" class="w-full p-2 border border-neutral-150 flex items-center justify-between px-4 gap-10 rounded-md font-semibold focus:outline-none">
+                            <div class="w-[48px] h-[48px] rounded-full">
+                              {% comment %} <img src="{% static 'images/owner.jpeg' %}" alt="" class="w-full h-full object-cover rounded-full" /> {% endcomment %}
+                            </div>
+                            <h3 class="text-gray-600 text-sm">
+                              I am a
+                              <span class="text-gray-900 font-medium uppercase">HOME-OWNER</span>
+                            </h3>
+                            <input type="radio" name="user_type" value = "HO" id="onboard-owner" class="w-4 h-4 hidden rounded-full border border-neutral-100 selected:bg-primary" />
+                            <div class="w-5 h-5 rounded-full border border-neutral-150 flex items-center justify-center">
+                              <img src="{% static 'svgs/tick-circle.svg' %}" alt="" class="checkmark hidden w-full h-full object-contain">
+                            </div>
+                          </div>
+                        </label>
+
+                        <label for="onboard-contractor" class="w-full">
+                          <div id="container-check" class="w-full p-2 border border-neutral-150 flex items-center justify-between px-4 gap-10 rounded-md font-semibold focus:outline-none">
+                            <div class="w-[48px] h-[48px] rounded-full">
+                              {% comment %} <img src="{% static 'images/contractor.jpeg' %}" alt="" class="w-full h-full object-cover rounded-full" /> {% endcomment %}
+                            </div>
+                            <h3 class="text-gray-600 text-sm">
+                              I am a
+                              <span class="text-gray-900 font-medium uppercase">Contractor</span>
+                            </h3>
+                            <input type="radio" value = "CO" name="user_type" id="onboard-contractor"  class="w-4 h-4 hidden rounded-full border border-neutral-100 checked:bg-primary" />
+                            <div class="w-5 h-5 rounded-full border border-neutral-150 flex items-center justify-center">
+                              <img src="{% static 'svgs/tick-circle.svg' %}" alt="" class="checkmark hidden w-full h-full object-contain">
+                            </div>
+                          </div>
+                        </label>
+
+                        <label for="onboard-agent" class="w-full">
+                          <div id="container-check" class="w-full p-2 border border-neutral-150 flex items-center justify-between px-4 gap-10 rounded-md font-semibold focus:outline-none">
+                            <div class="w-[48px] h-[48px] rounded-full">
+                              {% comment %} <img src="{% static 'images/agent.png' %}" alt="" class="w-full h-full object-cover rounded-full" /> {% endcomment %}
+                            </div>
+                            <h3 class="text-gray-600 text-sm">
+                              I am an
+                              <span class="text-gray-900 font-medium uppercase">Agent</span>
+                            </h3>
+                              <input value = "AG" type="radio" name="user_type" id="onboard-agent" class="w-4 h-4 hidden rounded-full border border-neutral-100 checked:bg-primary" />
+                              <div class="w-5 h-5 rounded-full border border-neutral-150 flex items-center justify-center">
+                                <img src="{% static 'svgs/tick-circle.svg' %}" alt="" class="checkmark hidden w-full h-full object-contain">
+                              </div>
+                          </div>
+                        </label>
+
+                        <label for="onboard-investor" class="w-full">
+                          <div id="container-check" class="w-full p-2 border border-neutral-150 flex items-center justify-between px-4 gap-10 rounded-md font-semibold focus:outline-none">
+                            <div class="w-[48px] h-[48px] rounded-full">
+                              {% comment %} <img src="{% static 'images/agent.png' %}" alt="" class="w-full h-full object-cover rounded-full" /> {% endcomment %}
+                            </div>
+                            <h3 class="text-gray-600 text-sm">
+                              I am an
+                              <span class="text-gray-900 font-medium uppercase">Investor</span>
+                            </h3>
+                            <input value = "IV" type="radio" name="user_type" id="onboard-investor" class="w-4 h-4 hidden rounded-full border border-neutral-100 checked:bg-primary" />
+                            <div class="w-5 h-5 rounded-full border border-neutral-150 flex items-center justify-center">
+                              <img src="{% static 'svgs/tick-circle.svg' %}" alt="" class="checkmark hidden w-full h-full object-contain">
+                            </div>
+                          </div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        
+        <!-- Step 2 -->
+        <div class="step p-4 pt-8" id = "step2-others">
+            <div class="w-full flex items-center justify-center mb-8">
+                <div class="w-[200px] flex items-center gap-2 justify-center">
+                    <div class="w-3 h-3 rounded-full bg-primary"></div>
+                    <div class="line w-12 bg-neutral-200 h-[2px]"></div>
+                    <div class="w-3 h-3 rounded-full bg-transparent border border-neutral-300"></div>
+                    <div class="line w-12 bg-neutral-200 h-[2px]"></div>
+                    <div class="w-3 h-3 rounded-full bg-transparent border border-neutral-300"></div>
+                </div>
+            </div>
+            <div class="flex flex-col items-center justify-center mb-5">
+                <h3 class="text-gray-900 font-semibold text-xl">Create an account</h3>
+                <p class="text-gray-600 text-center text-base">Provide some basic information to set up your account.</p>
+            </div>
+            {% include 'account/partials/sign_up_errors.html' %}
+            <div class="flex flex-col gap-4 w-full">
+                <div class="w-full">
+                    <label for="{{form.first_name.auto_id}}" class="text-gray-700 font-medium text-sm">First Name</label>
+                    {{form.first_name|addattrs:"class=w-full p-2 border border-gray-300 rounded-md focus:outline-none mt-1 focus:border-gray-500,placeholder=Enter your first name"}}
+                </div>
+                <div class="w-full">
+                    <label for="{{form.last_name.auto_id}}" class="text-gray-700 font-medium text-sm">Last Name</label>
+                    {{form.last_name|addattrs:"class=w-full p-2 border border-gray-300 rounded-md focus:outline-none mt-1 focus:border-gray-500,placeholder=Enter your Last name"}}
+                </div>
+                <div class="w-full flex flex-col">
+                    <label for="{{form.address.auto_id}}" class="text-gray-700 font-medium text-sm">Home Address</label>
+                    {{form.address}}
+                </div>
+            </div>
+        </div>
+        
+        
+        <!-- Step 2 for contractor -->
+        <div class="step-contractor p-4 pt-8" id = "step2-contractor">
+          <div class="w-full flex items-center justify-center mb-8">
+              <div class="w-[200px] flex items-center gap-2 justify-center">
+                  <div class="w-3 h-3 rounded-full bg-primary"></div>
+                  <div class="line w-12 bg-neutral-200 h-[2px]"></div>
+                  <div class="w-3 h-3 rounded-full bg-transparent border border-neutral-300"></div>
+                  <div class="line w-12 bg-neutral-200 h-[2px]"></div>
+                  <div class="w-3 h-3 rounded-full bg-transparent border border-neutral-300"></div>
+              </div>
+          </div>
+          <div class="flex flex-col items-center justify-center mb-5">
+              <h3 class="text-gray-900 font-semibold text-xl">Create an account</h3>
+              <p class="text-gray-600 text-center text-base">Provide some basic information to set up your account.</p>
+          </div>
+          {% include 'account/partials/sign_up_errors.html' %}
+          <div class="flex flex-col gap-4 w-full">
+            <div class="w-full">
+                <label  for = "{{form.company_name.auto_id}}" class="text-gray-700 font-medium text-sm">Company Name</label>
+                {{form.company_name|addattrs:"class=w-full p-2 border border-gray-300 rounded-md focus:outline-none mt-1 focus:border-gray-500,placeholder=Enter your Company name"}}
+            </div>
+            <div class="w-full">
+                <label  for = "{{form.company_address.auto_id}}" class="text-gray-700 font-medium text-sm">Company Address</label>
+                {{form.company_address}}
+            </div>
+            <div class="w-full">
+                <label for = "{{form.specialization.auto_id}}" class="text-gray-700 font-medium text-sm">Specialization</label>
+                {{form.specialization|addattrs:"class=w-full p-2 border border-gray-300 rounded-md focus:outline-none mt-1 focus:border-gray-500,placeholder=Enter specialization"}}
+            </div>
+          </div>
+        </div>
+        
+        <!-- Step 3 -->
+        <div class="step step-contractor p-4 pt-8">
+          <div class="w-full flex items-center justify-center mb-8">
+              <div class="w-[200px] flex items-center gap-2 justify-center">
+                  <div class="w-3 h-3 rounded-full bg-primary"></div>
+                  <div class="line w-12 bg-neutral-200 h-[2px]"></div>
+                  <div class="w-3 h-3 rounded-full bg-primary"></div>
+                  <div class="line w-12 bg-neutral-200 h-[2px]"></div>
+                  <div class="w-3 h-3 rounded-full bg-transparent border border-neutral-300"></div>
+              </div>
+          </div>
+          <div class="flex flex-col items-center justify-center mb-5">
+              <h3 class="text-gray-900 font-semibold text-xl">Create an account</h3>
+              <p class="text-gray-600 text-center text-base">Provide some basic information to set up your account.</p>
+          </div>
+          {% include 'account/partials/sign_up_errors.html' %}
+          <div class="flex flex-col gap-4 w-full">
+              <div class="w-full">
+                <label for = "{{form.email.auto_id}}"  class="text-gray-700 font-medium text-sm">Email Address</label>
+                {{form.email|addattrs:"class=w-full p-2 border border-gray-300 rounded-md focus:outline-none mt-1 focus:border-gray-500,placeholder=Enter your email"}}
+                <p class = "text-red-500 p-2" id = "email-error"></p>
+              </div>
+              <div class="w-full">
+                  <label for="{{form.city.auto_id}}" class="text-gray-700 font-medium text-sm">City</label>
+                  {{form.city|addattrs:"class=w-full p-2 border border-gray-300 rounded-md focus:outline-none mt-1 focus:border-gray-500,placeholder=Enter your city"}}
+              </div>
+              <div class="w-full">
+                  <label for="{{form.state.auto_id}}" class="text-gray-700 font-medium text-sm">State/Province</label>
+                  {{form.state|addattrs:"class=w-full p-2 border border-gray-300 rounded-md focus:outline-none mt-1 focus:border-gray-500,placeholder=Enter your state"}}
+              </div>
+              <div class="w-full">
+                <label for="{{form.phone_number.auto_id}}" class="text-gray-700 font-medium text-sm">Phone number</label>
+                <div id = "phone-field" class="flex gap-2 p-2 border border-gray-300 p-2 border border-gray-300 rounded-md">
+                  {{form.phone_number|addattrs:"class=w-full p-2 border border-gray-300 rounded-md focus:outline-none mt-1 focus:border-gray-500,placeholder=Enter your number"}}
+                </div>
+                <p class = "text-red-500 p-2" id = "phone-error"></p>
+              </div>
+          </div>
+        </div>
+
+        <!-- Step 4 -->
+        <div class="step step-contractor p-4 pt-8">
+          <div class="w-full flex items-center justify-center mb-8">
+              <div class="w-[200px] flex items-center gap-2 justify-center">
+                  <div class="w-3 h-3 rounded-full bg-primary"></div>
+                  <div class="line w-12 bg-neutral-200 h-[2px]"></div>
+                  <div class="w-3 h-3 rounded-full bg-primary"></div>
+                  <div class="line w-12 bg-neutral-200 h-[2px]"></div>
+                  <div class="w-3 h-3 rounded-full bg-primary"></div>
+              </div>
+          </div>
+          <div class="flex flex-col items-center justify-center mb-5">
+              <h3 class="text-gray-900 font-semibold text-xl">Create an account</h3>
+              <p class="text-gray-600 text-center text-base">Provide some basic information to set up your account.</p>
+          </div>
+          {% include 'account/partials/sign_up_errors.html' %}
+          <div class="flex flex-col gap-4 w-full">
+              <div class="w-full">
+                  <label for = "{{form.password1.auto_id}}" class="text-gray-700 font-medium text-sm">Password</label>
+                  {{form.password1|addattrs:"class=w-full p-2 border border-gray-300 rounded-md focus:outline-none mt-1 focus:border-gray-500,placeholder=Enter your password"}}
+              </div>
+              <div class="w-full">
+                  <label for = "{{form.password2.auto_id}}" class="text-gray-700 font-medium text-sm">Confirm Password</label>
+                  {{form.password2|addattrs:"class=w-full p-2 border border-gray-300 rounded-md focus:outline-none mt-1 focus:border-gray-500,placeholder=Confirm password"}}
+              </div>
+              <p id = "password-error" class = "text-red-500 font-medium text-sm mx-2"></p>
+          </div>
+        </div>
+
+        <div class="p-4 pt-8">
+            <div class="flex flex-col gap-4 w-full">
+                <button id="nextBtn" onclick="nextPrev(1)" type="button" class="w-full p-3 bg-primary shadow-sm text-white rounded-md font-semibold focus:outline-none focus:bg-primary"></button>
+                <button id="prevBtn" onclick="nextPrev(-1)" type="button" class="w-full p-3 bg-transparent shadow-sm rounded-md font-semibold focus:outline-none border border-neutral-150">
+          Back
+        </button>
+            </div>
+            <div class="flex items-center justify-center text-sm gap-2 mt-4">
+                <span class="text-gray-600">Already have an account?</span>
+                <a href="{% url 'account_login' %}" class="text-primary font-semibold">Log in</a>
+            </div>
+        </div>
+    </form>
+  </div>
+
+{% endblock %} 
+{% block extraScripts %}
+  <script src="{% static 'js/accounts/signup.js' %}"></script>
+{% endblock %}

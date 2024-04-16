@@ -48,9 +48,13 @@
         <a href="#" class="w-full flex items-center justify-between py-2 border-b border-neutral-100 last:border-b-0">
             <h3 class="text-gray-500 font-medium">Account Settings</h3>
             <span class="">
-        <img src="{% static 'svgs/chevron-right-black.svg' %}" alt="" class="" />
-      </span>
+            <img src="{% static 'svgs/chevron-right-black.svg' %}" alt="" class="" />
+          </span>
         </a>
+        <form method="post" action={ % url "account_logout" %} class="w-full flex items-center justify-between py-2 border-b border-neutral-100 last:border-b-0">
+            {% csrf_token %}
+            <button type="submit" class="text-gray-500 font-medium">Logout</button>
+        </form>
         {% if loggedInUser == 'contractor' %}
         <a href="#" class="w-full flex items-center justify-between py-2 border-b border-neutral-100 last:border-b-0">
             <h3 class="text-gray-500 font-medium">Neighbourhood Search</h3>

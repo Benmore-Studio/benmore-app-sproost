@@ -1,0 +1,43 @@
+{% extends "user/base.html" %} {% load static %} {% block content %}
+
+<div class="w-full px-4  mt-4">
+    <h3 class = "font-semibold text-xl">Contractors<h3/>
+    <form  class="w-full text-center flex flex-col gap-4">
+        <div class="w-full  relative">
+            <input type="text" name="query" id="search" placeholder="Search" class="w-full p-2 text-gray-500 border border-gray-300 rounded-md focus:outline-none mt-1 focus:border-gray-500" />
+            <div class="absolute right-3 top-0 h-full flex items-center justify-center items-center cursor-pointer">
+                <button type = "submit">
+                    <img src="{% static 'svgs/search.svg' %}" alt="" class="w-[20px] h-[20px]" />
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+{% if results %}
+    <div class="mx-3 mt-6">
+        <div class = "grid grid-cols-2">
+            <p class = "text-sm font-medium text-gray-400"> Name </p>
+            <p class = "text-sm font-medium text-gray-400"> Contact </p>
+        </div>
+        {% for result in results %}
+            <a href="{% url "profile:contractor_details" result.pk %}" class="w-full flex justify-between cursor-pointer grid grid-cols-2 mt-4">
+                <div>
+                    <p class = "font-semibold text-black">{{result.company_name}}</p>    
+                    <p class = "text-gray-500">{{result.specialization}}</p>
+                </div>
+                <div class="">
+                    <p class = "font-medium">{{result.user.phone_number}}</p>    
+                    <p>{{result.user.email}}</p>    
+                </div>
+            </a>
+        {% endfor %}
+    </div>  
+{% else %}
+    <div class = "flex items-center justify-center text-gray-600 font-semibold mt-3">
+        No results
+    </div>
+{% endif %}
+    
+{% endblock %}{% block bottomNav %}{% if loggedInUser == 'agent' %}{% include "user/bottom_nav_agent.html" %}{% elif loggedInUser == 'contractor' %}{% include "user/bottom_nav_contractor.html"%}{% else %}{% include "user/bottom_nav.html" %} {% endif %}
+{% endblock bottomNav %} 

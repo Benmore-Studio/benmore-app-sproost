@@ -1,34 +1,44 @@
-from django.shortcuts import render
-# authentication
+from django.shortcuts import render, redirect
+from django.views import View
+from django.contrib.auth import get_user_model
+from django.conf import settings
+from django.contrib import messages
+from django.contrib.sites.shortcuts import get_current_site
 
-# loggedInUser = 'home-owner'| 'agent'| 'contractor'| 'investor', this is used to switch between bottom navigation, default navigation is home-owner, so need to add it.
+from mail_templated import send_mail
+from property.forms import AddPropertyByUUIDForm
+from quotes.models import QuoteRequest, Project
+from property.models import Property
+
+
+User = get_user_model()
+
+
+
+def get_base_url(request):
+    # Use 'get_current_site' to get the domain
+    domain = get_current_site(request).domain
+    # Use 'request.is_secure' to determine the scheme (http or https)
+    scheme = 'https' if request.is_secure() else 'http'
+    # Construct the base URL
+    base_url = f"{scheme}://{domain}"
+    return base_url
+
+
 
 loggedInUser = 'contractor'
-
-# take a look at each template to know why this loggedInUser is used
-
-
-def loginUser(request):
-    context = {}
-    return render(request, 'user/auth/login.html', context)
-
-def signUpUser(request):
-    context = {
-    'loggedInUser': loggedInUser
-    }
-    return render(request, 'user/auth/signup.html', context)
 
 # mains
 def homeOwners(request):
     project_feed= [
         {
-          'title':'Number of Uploaded projects',  'status': 'uploaded',  'count': 3, 
+            'title':'Number of Uploaded projects',  'status': 'uploaded',  'count': 3, 
         },
         {
-          'title': 'Number of Quotes Requested',  'status': 'quotes', 'count': 3, 
+            'title': 'Number of Quotes Requested',  'status': 'quotes', 'count': 3, 
         },
         {
-        'title':'Number of completed projects', 'status': 'completed', 'count': 2, 
+            'title':'Number of completed projects', 'status': 'completed', 'count': 0, 
         }
     ]
     
@@ -41,21 +51,46 @@ def homeOwners(request):
     context = {'project_feed': project_feed, 'project_history': project_history, 'loggedInUser': loggedInUser}
     return render(request, 'user/home.html', context)
 
+
+
 def home(request):
+    if not request.user.is_authenticated:
+        return redirect('account_login')
     
-    if loggedInUser == 'contractor':
-        context = {
-        'loggedInUser': loggedInUser
-    }
-        return render(request, 'user/contractor_home.html', context)
-    
-    elif loggedInUser == 'agent':
-        context = {
-        'loggedInUser': loggedInUser
-    }
-        return render(request, 'user/agent_home.html', context)
     else:
-        return homeOwners(request)
+        print("user type === ", request.user.user_type)
+        if request.user.user_type == "HO":
+            quotes = QuoteRequest.objects.filter(user=request.user)
+            projects = Project.objects.filter(quote_request__user=request.user)
+            context = {
+                "quotes": quotes,
+                "projects": projects,
+                "quote_count": quotes.count(),
+                "projects_count": projects.count()
+            }
+            return render(request, "user/home.html", context)
+        elif request.user.user_type == "CO":
+            return redirect("profile:contractor_profile")
+        elif request.user.user_type == "AG":
+            addPropertyForm = AddPropertyByUUIDForm()
+            properties = Property.objects.filter(assigned_to=request.user).order_by('-id').select_related("project__quote_request").prefetch_related("project__quote_request__media_paths")
+            context = {
+                "properties": properties, 
+                "addPropertyForm" : addPropertyForm
+             }
+            return render(request, "user/agent_home.html", context)
+        else:
+            return render(request, "user_admin/dashboard.html")
+    
+# def home(request):
+    
+#     if loggedInUser == 'agent':
+#         context = {
+#         'loggedInUser': loggedInUser
+#     }
+#         return render(request, 'user/agent_home.html', context)
+#     else:
+#         return homeOwners(request)
 
 
 def requestQuotes(request):
@@ -64,24 +99,45 @@ def requestQuotes(request):
     }
     return render(request, 'user/request_quotes.html', context)
 
-def assignAgent(request):
-    context ={
-        'loggedInUser': loggedInUser
-    }
-    return render(request, 'user/assignAgent.html', context)
 
-def propertyList(request):
-    properties =[
-        {'name':"Daine Homes", 'address':"4600 East Washington Street, Suite 305"},
-        {'name':"Golden Homes", 'address':"No. 17 November Street. 10343 NY"},
-        {'name':"Grand-Stay Homes", 'address':"No. 10 Silints Street. 42333 LA"},
-        {'name':"Safe Homes", 'address':"No. 10 Silints Street. 42333 LA"},
-    ]
-    context ={
-        'properties': properties,
-        'loggedInUser': loggedInUser
-    }
-    return render(request, 'user/propertyList.html', context)
+class AssignAgentView(View):
+    template_name = 'user/assignAgent.html'
+    def get(self, request):
+        agents = User.objects.filter(user_type='AG')
+        properties = Project.objects.filter( is_approved=True )
+        
+        context = {
+            'agents' : agents,
+            'properties': properties,
+        }
+        return render(request, self.template_name, context)
+    
+    def post(self, request):
+        agent_id = request.POST.get('agent')
+        project_id = request.POST.get('project_id')
+        print(agent_id, project_id)
+        try:
+            agent = User.objects.get(id=agent_id)
+            project = Project.objects.get(id=project_id)
+            if not agent.user_type in ['HO', 'AG']:
+                messages.error(request, 'Only Home Owners can assign properties')
+                return redirect('main:assign-agent') 
+            
+            send_mail(
+                'mail/assign_agent.tpl',
+                {'first_name': agent.first_name, "uuid": project.quote_request.uuid, "base_url": get_base_url(request)},
+                settings.EMAIL_HOST_USER,
+                [agent.email]
+            )
+            
+            messages.success(request, 'Agent assigned successfully. Awaiting agent confirmation')
+            
+        except Exception as e:
+            print(e)
+            messages.error(request, 'An error occured')
+        
+        return redirect('main:home')
+
 
 def QuotationReturn(request):
     context ={
@@ -120,25 +176,13 @@ def contractorDetail(request, profession):
     }
     return render(request, 'user/contractorDetail.html', context)
 
-def addProperty(request):
-    context ={
-        'loggedInUser': loggedInUser
-    }
-    return render(request, 'user/add_property.html', context)
-
-def editProfile(request):
-    context ={}
-    return render(request, 'user/edit_profile.html', context)
-
-    
 
 
 # web based admin- applications
 
-
 def loginAdmin(request):
   context ={}  
-  return render(request, 'admin/login.html', context) 
+  return render(request, 'user_admin/login.html', context) 
 
 def adminDashboard(request):
     recent_home_owners =[
@@ -198,7 +242,7 @@ def adminDashboard(request):
     ]
     context ={'recent_home_owners': recent_home_owners, 'recent_agents':recent_agents,
               'recent_contractors': recent_contractors, 'project_history': project_history, 'overall_stats': overall_stats }  
-    return render(request, 'admin/dashboard.html', context)
+    return render(request, 'user_admin/dashboard.html', context)
 
 def projectRequest(request):
     project_history = [
