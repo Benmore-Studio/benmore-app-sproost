@@ -21,8 +21,13 @@ class QuoteRequest(models.Model):
     media_paths = GenericRelation("main.Media")
     is_quote = models.BooleanField(default=True)
     
+    
     def __str__(self) -> str:
         return self.title
+    
+    def upload_location(instance, filename):
+        # file will be uploaded to MEDIA_ROOT/projects/<project_id>/<filename>
+        return 'projects/{0}/{1}'.format(instance.project_id, filename)
 
 
 class Project(models.Model):
