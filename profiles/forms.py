@@ -14,7 +14,7 @@ class ContractorProfileForm(forms.ModelForm):
     email = forms.EmailField()
     class Meta:
         model = ContractorProfile
-        fields = ['company_name', 'specialization', 'city', 'company_address', 'phone_number']
+        fields = ['company_name', 'specialization', 'city', 'registration_number',  'company_address', 'phone_number']
 
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user', None)  # Extract the user object from kwargs

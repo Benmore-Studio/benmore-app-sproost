@@ -5,8 +5,7 @@
         display: none;
     }
 </style>
-hyyy
-{{form}}
+{{form.media}}
 <div class="w-full">
     <div class="w-full">
         <!-- header -->
@@ -63,6 +62,11 @@ hyyy
                 <div class="w-full">
                     <label for="{{form.address.auto_id}}" class="text-gray-700 font-medium text-sm">Home Address</label>
                     {{form.address}}
+                    {% if form.address.errors %}
+                    <div class="w-full p-3 bg-red-300 border border-red-600 rounded text-white">
+                        {{form.address.errors}}
+                    </div>
+                    {% endif %}
                 </div>
                 <div class="w-full">
                     <label for="city" class="text-gray-700 font-medium text-sm">City</label>
@@ -78,6 +82,11 @@ hyyy
                 <div class="w-full">
                     <label for="state_province" class="text-gray-700 font-medium text-sm">State province</label>
                     <input type="text" name="state_province" id="state_province" class="w-full p-2 text-gray-500 border border-gray-300 rounded-md px-4 focus:outline-none mt-1 focus:border-gray-500" />
+                    {% if form.state_province.errors %}
+                    <div class="w-full p-3 bg-red-300 border border-red-600 rounded text-white">
+                        {{form.state_province.errors}}
+                    </div>
+                    {% endif %}
                 </div>
                 {% else %}
                 <div class="w-full">

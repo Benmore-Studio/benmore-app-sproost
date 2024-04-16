@@ -66,18 +66,11 @@ def editProfile(request):
         contractorProfile = ContractorProfile.objects.get(user = user.id)   
         email = user.email
         form = ContractorProfileForm(instance = contractorProfile, user=user, initial={'email' : email})
-        return render(request, 'user/editprofiles/contractor_edit_profile.html', {'form' :form})
+        return render(request, 'user/editprofiles/contractor_edit_profile.html', {"details":contractorProfile,'form' :form})
     
-    elif request.user.user_type == 'AG':
+    elif request.user.user_type == 'AG' or  request.user.user_type == 'HO':
         user_profile = UserProfile.objects.get(user = user.id)    
-        email = request.user.email
-        form = HomeOwnersEditForm(instance = user_profile, user=user, initial={'email' : email})
-        return render(request, 'user/editprofiles/home_owners_edit_profile.html', {"details":user_profile, 'form' :form})
-
-    # render HO edit page if user type is HO
-    elif request.user.user_type == 'HO': 
-        user_profile = UserProfile.objects.get(user = user.id)
-        email = request.user.email
+        email = user.email
         form = HomeOwnersEditForm(instance = user_profile, user=user, initial={'email' : email})
         return render(request, 'user/editprofiles/home_owners_edit_profile.html', {"details":user_profile, 'form' :form})
     else:
@@ -88,7 +81,6 @@ def editHomeOwnerProfileRequest(request):
     try:
         user_profile = request.user.user_profile
     except UserProfile.DoesNotExist:
-        # If the user profile doesn't exist, create a new one
         user_profile = UserProfile(user=request.user)
 
     if request.method == 'POST':
@@ -98,13 +90,11 @@ def editHomeOwnerProfileRequest(request):
             messages.success(request, 'Profile updated successfully!')
             return redirect('main:home')
         else:
-            print(form.errors)
             messages.error(request, 'Profile update failed. Please correct the errors below.')
-            return redirect('profile:edit-profile-request')
     else:
-        form = HomeOwnersEditForm(instance=user_profile)    
-    return render(request, 'profile/edit_profile.html', {'form': form})
+        form = HomeOwnersEditForm(instance=user_profile)
 
+    return render(request, 'profile/edit_profile.html', {'form': form})
 
 class EditProfileView(LoginRequiredMixin, UpdateView):
     model = ContractorProfile
@@ -114,13 +104,14 @@ class EditProfileView(LoginRequiredMixin, UpdateView):
     def get_success_url(self):
         return reverse('profile:contractor_profile')
 
-
 def ContractorProfileEditView(request):
     user = request.user
     try:
         contractor_profile = ContractorProfile.objects.get(user=user.id)
-    
+        print("requ.POT1")
         if request.method == 'POST':
+            print(request.POST)
+            print("request.POT")
             profile_form = ContractorProfileForm(request.POST, instance=contractor_profile)
             if profile_form.is_valid():
                 profile_form.save()
@@ -128,12 +119,17 @@ def ContractorProfileEditView(request):
                 user.phone_number = profile_form.cleaned_data['phone_number']
                 user.email = profile_form.cleaned_data['email']
                 user.save()
+                messages.success(request, 'Profile edit successful.')
+
                 return redirect('profile:contractor_profile')
             else:
                 print(profile_form.errors)
+                messages.error(request, 'Profile update failed. Please correct the errors below.')
         else:
+            print("request.POT3")
             profile_form = ContractorProfileForm(instance=contractor_profile)
     except ContractorProfile.DoesNotExist:
+        print("request.POT4")
         # Redirect to profile creation page if profile doesn't exist
         return redirect('profile:edit-profile')
 
