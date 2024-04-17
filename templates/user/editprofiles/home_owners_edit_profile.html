@@ -5,8 +5,6 @@
         display: none;
     }
 </style>
-{{form.media}}
-
 <div class="w-full">
     <div class="w-full">
         <!-- header -->
@@ -20,15 +18,14 @@
             <div class="w-full">
                 <h3 class="text-base text-gray-600"> Provide some basic information to set up your account.</h3>
             </div>
+            {{form.media}}
             <form action="{% url 'profile:edit-homeowners-profile-request' %}" class="w-full mt-4 flex flex-col gap-4" method="POST">
                 {% csrf_token %}
                 {% if form.non_field_errors %}
                     <div class="bg-red-400 rounded-md text-center border border-red-700">
-
-                    {% for error in form.non_field_errors %}
-                        <p>{{ error }}</p>
-                    {% endfor %}
-
+                        {% for error in form.non_field_errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
                     </div>
                 {% endif %}
                 <div class="w-full">
@@ -54,7 +51,7 @@
                 </div>
                 <div class="w-full">
                     <label for="address" class="text-gray-700 font-medium text-sm">Address</label>
-                    {{form.address|addattrs:"class=w-full p-2 text-gray-500 border border-gray-300 rounded-md focus:outline-none mt-1 focus:border-gray-500,placeholder=City"}}
+                    {{form.address}}
                     {% if form.address.errors %}
                         <div class = "w-full py-1 rounded text-red-500">
                             {{form.address.errors}}

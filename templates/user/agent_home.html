@@ -11,25 +11,31 @@
 </style>
 <div class="w-full p-4 font['Inter'] mt-24 flex flex-col gap-5">
     <!-- client -->
-    {% for account in accounts%}
-        <a href="{% url "property:agent-homeowner-dashboard" account.assigned_by.pk %}" class="w-full block p-4 bg-white border border-neutral-150 rounded-md shadow-sm">
-            <div class="w-full flex flex-col gap-8">
-                <div class="w-full flex items-center justify-between">
-                    <div class="">
-                        <h3 class="text-gray-900 font-semibold">{{account.assigned_by.first_name}} {{account.assigned_by.last_name}}</h3>
-                        <small class="text-gray-600">{{account.assigned_by.email}}</small>
+    {% if accounts %}
+        {% for account in accounts%}
+            <a href="{% url "property:agent-homeowner-dashboard" account.assigned_by.pk %}" class="w-full block p-4 bg-white border border-neutral-150 rounded-md shadow-sm">
+                <div class="w-full flex flex-col gap-8">
+                    <div class="w-full flex items-center justify-between">
+                        <div class="">
+                            <h3 class="text-gray-900 font-semibold">{{account.assigned_by.first_name}} {{account.assigned_by.last_name}}</h3>
+                            <small class="text-gray-600">{{account.assigned_by.email}}</small>
+                        </div>
+                        <span class="">
+                <img src="{% static 'svgs/chevron-right.svg' %}" alt="" class="w-[32px] h-[32px] object-contain" />
+            </span>
                     </div>
-                    <span class="">
-            <img src="{% static 'svgs/chevron-right.svg' %}" alt="" class="w-[32px] h-[32px] object-contain" />
-        </span>
+                    <div class="flex items-center justify-between">
+                        <p class="text-gray-900 text-sm font-medium">{{account.assigned_by.user_profile.address}}</p>
+                        <img src="{% static 'svgs/address.svg' %}" alt="" class="w-[32px] h-[32px] object-contain">
+                    </div>
                 </div>
-                <div class="flex items-center justify-between">
-                    <p class="text-gray-900 text-sm font-medium">{{account.assigned_by.user_profile.address}}</p>
-                    <img src="{% static 'svgs/address.svg' %}" alt="" class="w-[32px] h-[32px] object-contain">
-                </div>
-            </div>
-        </a>
-    {% endfor %}
+            </a>
+        {% endfor %}
+    {%else%}
+        <div class="w-full flex flex-col items-center justify-center gap-4">
+            <h3 class="text-gray-900 font-semibold text-center">No clients assigned to you yet</h3>
+        </div>
+    {% endif %}
     
 </div>
 
