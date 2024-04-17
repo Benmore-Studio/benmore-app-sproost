@@ -1,5 +1,7 @@
-{% extends "user/base.html" %} {% load static %} {% block content %}
+{% extends "user/base.html" %} 
+{% load static %} 
 {% load form_tags %}
+{% block content %}
 <style>
     #step {
         display: none;
@@ -28,7 +30,7 @@
                         <p>{{ error }}</p>
                     {% endfor %}
                 </div>
-            {% endif %}
+                {% endif %}
                 <div class="w-full">
                     <label for="companyName" class="text-gray-700 font-medium text-sm">Company Name</label>
                     {{ form.company_name|addattrs:"class=w-full p-2 text-gray-500 border border-gray-300 rounded-md focus:outline-none mt-1 focus:border-gray-500,placeholder=Company Name"}}

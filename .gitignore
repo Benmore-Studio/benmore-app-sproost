@@ -9,7 +9,6 @@ db.sqlite3
 virtualenv/ 
 media
 media_cdn
-*/migrations
 
 # Backup files # 
 *.bak 
