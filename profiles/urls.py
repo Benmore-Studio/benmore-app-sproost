@@ -12,5 +12,6 @@ urlpatterns = [
     # path('edit-profile/<int:pk>', views.EditProfileView.as_view(), name="edit-profile"),
     # path('search-view-results/', views.search_view_results, name="search-view-results"),
     path('edit-profile-request/', views.ContractorProfileEditView, name="edit-profile-request"),
+    path('contractor-edit-profile-request/', views.ContractorProfileEditView, name="contractor-edit-profile-request"),
     path('edit-homeowners-profile-request/', views.editHomeOwnerProfileRequest, name="edit-homeowners-profile-request"),
 ]

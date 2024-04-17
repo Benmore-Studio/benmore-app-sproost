@@ -64,24 +64,18 @@ class contractorDetails(DetailView):
 @login_required
 def editProfile(request):
     user = request.user
-   
     # render CO edit page if user type is CO
     if request.user.user_type == 'CO': 
         contractorProfile = ContractorProfile.objects.get(user = user.id)   
-        email = request.user.email
-        form = ContractorProfileForm(instance = contractorProfile, initial={'email' : email})
-        return render(request, 'user/editprofiles/contractor_edit_profile.html', {'form' :form})
+        email = user.email
+        form = ContractorProfileForm(instance = contractorProfile, user=user, initial={'email' : email})
+        return render(request, 'user/editprofiles/contractor_edit_profile.html', {"details":contractorProfile,'form' :form})
     
-    elif request.user.user_type == 'AG':
-        user_objects = UserProfile.objects.get(user = user.id)    
-        return render(request, 'user/editprofiles/home_owners_edit_profile.html', {"details":user_objects})
-
-    # render HO edit page if user type is HO
-    elif request.user.user_type == 'HO': 
-        user_objects = UserProfile.objects.get(user = user.id)
-        
-        print("UserProfile.objects.get(user = user) == ", UserProfile.objects.get(user = user))
-        return render(request, 'user/editprofiles/home_owners_edit_profile.html', {"details":user_objects})
+    elif request.user.user_type == 'AG' or  request.user.user_type == 'HO':
+        user_profile = UserProfile.objects.get(user = user.id)    
+        email = user.email
+        form = HomeOwnersEditForm(instance = user_profile, user=user, initial={'email' : email})
+        return render(request, 'user/editprofiles/home_owners_edit_profile.html', {"details":user_profile, 'form' :form})
     else:
         return redirect('main:dashboard')
 
