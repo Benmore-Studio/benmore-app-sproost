@@ -25,41 +25,13 @@ def get_base_url(request):
     base_url = f"{scheme}://{domain}"
     return base_url
 
-
-
 loggedInUser = 'contractor'
-
-# mains
-def homeOwners(request):
-    project_feed= [
-        {
-            'title':'Number of Uploaded projects',  'status': 'uploaded',  'count': 3, 
-        },
-        {
-            'title': 'Number of Quotes Requested',  'status': 'quotes', 'count': 3, 
-        },
-        {
-            'title':'Number of completed projects', 'status': 'completed', 'count': 0, 
-        }
-    ]
-    
-    project_history = [
-        {'name':'Bungalow Renovation', 'quotation_status': 'pending', 'home_owner': {'name':'Olivia Rhye', 'image':'/static/images/ownerAvatar.png'}, 'location': 'New Yersey, Newark', 'created_date': 'Jan 28, 2024'},
-        {'name':'Bungalow Renovation', 'quotation_status': 'pending', 'home_owner': {'name':'Olivia Rhye', 'image':'/static/images/ownerAvatar.png'}, 'location': 'New Yersey, Newark', 'created_date': 'Jan 28, 2024'},
-        {'name':'Bungalow Renovation', 'quotation_status': 'pending', 'home_owner': {'name':'Olivia Rhye', 'image':'/static/images/ownerAvatar.png'}, 'location': 'New Yersey, Newark', 'created_date': 'Jan 28, 2024'},
-    ]
-    
-    context = {'project_feed': project_feed, 'project_history': project_history, 'loggedInUser': loggedInUser}
-    return render(request, 'user/home.html', context)
-
-
 
 def home(request):
     if not request.user.is_authenticated:
         return redirect('account_login')
     
     else:
-        print("user type === ", request.user.user_type)
         if request.user.user_type == "HO":
             quotes = QuoteRequest.objects.filter(user=request.user)
             projects = Project.objects.filter(quote_request__user=request.user)
@@ -81,24 +53,6 @@ def home(request):
         else:
             return render(request, "user_admin/dashboard.html")
     
-# def home(request):
-    
-#     if loggedInUser == 'agent':
-#         context = {
-#         'loggedInUser': loggedInUser
-#     }
-#         return render(request, 'user/agent_home.html', context)
-#     else:
-#         return homeOwners(request)
-
-
-def requestQuotes(request):
-    context ={
-        'loggedInUser': loggedInUser
-    }
-    return render(request, 'user/request_quotes.html', context)
-
-
 class AssignAgentView(LoginRequiredMixin,  View):
     template_name = 'user/assignAgent.html'
     def get(self, request):
@@ -111,16 +65,12 @@ class AssignAgentView(LoginRequiredMixin,  View):
     def post(self, request):
         agent_id = request.POST.get('agent')
         try:
-            agent = User.objects.get(id=agent_id)
+            agent = User.objects.get(id=agent_id, user_type = 'AG')
             AssignedAccount.objects.get_or_create(
                 assigned_to=agent, 
                 assigned_by=request.user,
                 is_approved=True
             )
-            if not agent.user_type in ['HO', 'AG']:
-                messages.error(request, 'Only Home Owners can assign properties')
-                return redirect('main:assign-agent') 
-            
             send_mail(
                 'mail/assign_agent.tpl',
                 {'first_name': agent.first_name, "base_url": get_base_url(request)},
@@ -131,11 +81,16 @@ class AssignAgentView(LoginRequiredMixin,  View):
             messages.success(request, 'Agent assigned successfully. Awaiting agent confirmation')
             
         except Exception as e:
-            print(e)
-            messages.error(request, 'An error occured')
+            messages.error(request, 'An error occurred while assigning agent. Please try again.')
+            return redirect('main:assign-agent')
         
         return redirect('main:home')
 
+
+
+
+
+# unused functions
 
 def QuotationReturn(request):
     context ={

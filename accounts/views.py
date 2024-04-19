@@ -23,7 +23,6 @@ class CustomLoginView(LoginView):
 def validate_phone_numbers(request):
     phone_number = request.GET.get('phone')
     location = request.GET.get('location')
-    print(phone_number, location)
     form = ValidatePhoneNumberForm({'phone_number_1': phone_number, 'phone_number_0': location})
     if form.is_valid():
         return JsonResponse({'valid': form.is_valid()}, status=200)
