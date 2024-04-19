@@ -10,46 +10,46 @@ class QuoteService(CustomRequestUtil):
         super().__init__(request)
 
     def create(self, payload):
-        media = payload.pop("media")
-        home_owner_id = payload.pop("home_owner_id")
-
-        payload['user'] = self.request.user
-
-        if home_owner_id:
-            user_service = UserService(self.request)
-            user, error = user_service.fetch_single_by_pk(id=home_owner_id)
-
-            if error:
-                return None, error
-            
-            payload['user'] = user
-
-
-        image_types = {'jpg', 'png', 'svg', 'jpeg'}
-        file_types = {'pdf'}
-
         try:
+            media = payload.pop("media")
+            home_owner_id = payload.pop("home_owner_id")
+
+            payload['user'] = self.request.user
+
+            if home_owner_id:
+                user_service = UserService(self.request)
+                user, error = user_service.fetch_single_by_pk(id=home_owner_id)
+
+                if error:
+                    return None, error
+
+                payload['user'] = user
+
+            image_types = {'jpg', 'png', 'svg', 'jpeg'}
+            file_types = {'pdf'}
+
             model_action_service = ModelAction(self.request)
             quote, error = model_action_service.create_model_instance(model=QuoteRequest, payload=payload)
 
             if error:
                 return None, error
 
-            for file in media:
-                media_file, media_image = None, None
+            if media:
+                for file in media:
+                    media_file, media_image = None, None
 
-                extension = file.name.split('.')[-1].lower()
+                    extension = file.name.split('.')[-1].lower()
 
-                if extension in file_types:
-                    media_file = file
-                elif extension in image_types:
-                    media_image = file
+                    if extension in file_types:
+                        media_file = file
+                    elif extension in image_types:
+                        media_image = file
 
-                quote.media_paths.create(
-                    content_object=quote,
-                    image=media_image,
-                    file=media_file
-                )
+                    quote.media_paths.create(
+                        content_object=quote,
+                        image=media_image,
+                        file=media_file
+                    )
 
             return "Quote Request saved successfully", None
 
