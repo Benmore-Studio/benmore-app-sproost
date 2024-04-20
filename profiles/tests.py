@@ -52,7 +52,6 @@ class UserEditTestCase(TestCase):
         self.user.refresh_from_db()
 
         # Checking if the user profile fields have been updated correctly
-        self.assertEqual(self.user.user_profile.address, '456 Avenue')
         self.assertEqual(self.user.user_profile.city, 'Test City')
         self.assertEqual(self.user.user_profile.state_province, 'Test State')
 

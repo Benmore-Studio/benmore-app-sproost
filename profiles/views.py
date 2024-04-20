@@ -79,56 +79,45 @@ def editProfile(request):
     else:
         return redirect('main:dashboard')
 
-
+@login_required
 def editHomeOwnerProfileRequest(request):
     user = request.user
-    try:
-        user_profile = UserProfile.objects.get(user=user.id)
-    
-        if request.method == 'POST':
-            profile_form = HomeOwnersEditForm(request.POST, instance=user_profile)
-            if profile_form.is_valid():
-                profile_form.save()
-
-                user.phone_number = profile_form.cleaned_data['phone_number']
-                user.email = profile_form.cleaned_data['email']
-                user.save()
-                messages.success(request, 'Profile updated successfully!')
-                return redirect('main:home')
-            else:
-                print(profile_form.errors)
+    user_profile = UserProfile.objects.get_or_create(user=request.user)[0]
+    if request.method == 'POST':
+        form = HomeOwnersEditForm(request.POST, instance=user_profile)
+        if form.is_valid():
+            form.save()
+            user.phone_number = form.cleaned_data['phone_number']
+            user.email = form.cleaned_data['email']
+            user.save()
+            messages.success(request, 'Profile updated successfully!')
+            return redirect('main:home')
         else:
-            profile_form = HomeOwnersEditForm(instance=user_profile)
-    except UserProfile.DoesNotExist:
-        # Redirect to profile creation page if profile doesn't exist
-        return redirect('profile:edit-profile')
-
-    return render(request, 'user/editprofiles/home_owners_edit_profile.html', {'form': profile_form})
+            return render(request, 'user/editprofiles/home_owners_edit_profile.html', {'form': form})
+    return redirect('profile:edit-profile')
 
 
+@login_required
 def ContractorProfileEditView(request):
     user = request.user
-    try:
-        contractor_profile = ContractorProfile.objects.get(user=user.id)
-    
-        if request.method == 'POST':
-            profile_form = ContractorProfileForm(request.POST, instance=contractor_profile)
-            if profile_form.is_valid():
-                profile_form.save()
+    contractor_profile = ContractorProfile.objects.get_or_create(user=user)[0]
 
-                user.phone_number = profile_form.cleaned_data['phone_number']
-                user.email = profile_form.cleaned_data['email']
-                user.save()
-                return redirect('profile:contractor_profile')
-            else:
-                print(profile_form.errors)
+    if request.method == 'POST':
+        profile_form = ContractorProfileForm(request.POST, instance=contractor_profile)
+        if profile_form.is_valid():
+            profile_form.save()
+
+            user.phone_number = profile_form.cleaned_data['phone_number']
+            user.email = profile_form.cleaned_data['email']
+            user.save()
+            messages.success(request, 'Profile updated successfully!')
+            return redirect('profile:contractor_profile')
         else:
-            profile_form = ContractorProfileForm(instance=contractor_profile)
-    except ContractorProfile.DoesNotExist:
-        # Redirect to profile creation page if profile doesn't exist
-        return redirect('profile:edit-profile')
+            return render(request, 'user/editprofiles/contractor_edit_profile.html', {'form': profile_form})
+    
+    return redirect('profile:contractor_profile')
 
-    return render(request, 'user/editprofiles/contractor_edit_profile.html', {'form': profile_form})
+    
 
 
 @login_required

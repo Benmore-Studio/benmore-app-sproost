@@ -54,9 +54,9 @@ class HomeOwnersEditForm(forms.ModelForm):
             self.fields['address'].initial = user_profile.address
             self.fields['phone_number'].initial = user_profile.user.phone_number
 
-    # def clean_email(self):
-    #     email = self.cleaned_data.get('email')
-    #     user_id = self.instance.user.id if self.instance.user else None
-    #     if User.objects.exclude(id=user_id).filter(email=email).exists():
-    #         raise forms.ValidationError('This email address is already in use.')
-    #     return email
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        user_id = self.instance.user.id if self.instance.user else None
+        if User.objects.exclude(id=user_id).filter(email=email).exists():
+            raise forms.ValidationError('This email address is already in use.')
+        return email

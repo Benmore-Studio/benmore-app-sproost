@@ -50,7 +50,15 @@
                         {% endif %}
                     </div>
                 </div>
-               
+                <div class="w-full">
+                    <label for="address" class="text-gray-700 font-medium text-sm">Address</label>
+                    {{form.address}}
+                    {% if form.address.errors %}
+                        <div class = "w-full py-1 rounded text-red-500">
+                            {{form.address.errors}}
+                        </div>
+                    {% endif %}
+                </div>
                 
                 <div class="w-full">
                     <label for="City" class="text-gray-700 font-medium text-sm">City</label>

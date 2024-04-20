@@ -65,7 +65,7 @@
             </div>
 
             {% if request.user == profile.user %}
-            <a href = '{% url "profile:edit-profile"  %}' class="bg-[#eaf7e6] p-2 px-4 px-2 text-primary rounded-md text-gray-500 text-sm font-semibold">Edit Profile</a> 
+            <a href = {% url "profile:edit-profile" %} class="bg-[#eaf7e6] p-2 px-4 px-2 text-primary rounded-md text-gray-500 text-sm font-semibold">Edit Profile</a> 
             {% endif %}
           </div>
         </div>
