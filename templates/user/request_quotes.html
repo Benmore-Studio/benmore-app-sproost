@@ -12,7 +12,7 @@ video {
   top: 0;
   left: 0;
   width: 100%;
-  height: 100%;
+  height: 88%;
   object-fit: cover;
 }
 </style>
@@ -42,22 +42,27 @@ video {
               SVG, PNG, JPG or GIF (max. 800x400px)
             </p>
           </div>
-          <input type="file" id="upload-quote" multiple name="upload-quote" class="hidden" />
+          <input type="file" id="upload-quote" accept="image/*" multiple name="upload-quote" class="hidden" />
         </label>
+        <input type="file" id="upload-capture" accept="image/*" multiple name="upload-capture" capture="environment"/ class="hidden">
 
-        <input type="hidden" name="captured-image" id="captured-image-input" />
+        <button
+        type="button"
+        id="captureButton"
+        class="p-3 rounded-lg w-full items-center justify-center bg-primary border border-neutral-150 shadow-sm font-semibold text-white"
+        >
+        Take picture
+      </button>
 
-         <button
-            type="button"
-            id="captureButton"
-            class="p-3 rounded-lg w-full items-center justify-center bg-primary border border-neutral-150 shadow-sm font-semibold"
-          >
-            Snap
-         </button>
-
-        <div id="file-container" class="w-full flex items-center my-4 gap-4">
+      <div class="w-full flex flex-row gap-4">
+        <div id="file-container" class="flex flex-row items-center my-4 gap-4">
           <!-- dynamic render -->
         </div>
+        <div id="file-container-capture" class="flex flex-row items-center my-4 gap-4">
+
+        </div>
+      </div>
+        
 
         <!-- instruction -->
         <div class="border-t border-neutral-150 pt-5 mt-5 flex flex-col gap-4">

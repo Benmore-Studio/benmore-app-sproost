@@ -74,26 +74,54 @@ function clearSuccessMsg() {
   }, 2000)
 }
 
+let selectedFileList = [];
+
+
 function uploadFiles() {
-  const fileContainer = document.getElementById("file-container")
-  var selectedFileList = [];
-  var selectedFiles = [];
+  const fileContainer = document.getElementById("file-container") 
+  const fileContainerCapture = document.getElementById("file-container-capture") 
+  
+  // Function to handle camera capture
+  document.getElementById('captureButton').addEventListener('click', function() {
+    // Trigger the file input click event
+    document.getElementById('upload-capture').click();
+  });
+  
+  // // Event listener for file input change
+  document.getElementById('upload-capture').addEventListener('change', function(event) {
+    const newFiles = event.target.files;
+
+    if (newFiles && newFiles.length > 0) {
+      let photo = newFiles[0]
+
+      fileContainerCapture.innerHTML += `
+        <div class="w-[74px] h-[74px] relative rounded-md">
+        <a href='${URL.createObjectURL(photo)}' download>
+            <img src="${URL.createObjectURL(photo)}" alt="" class="w-full h-full object-cover rounded-md">
+        </a>
+        <img src="/static/images/remove.png" alt="" class="w-[16px] h-[16px] -top-2 -right-2 absolute object-cover rounded-full" onclick="removeFile(this)">
+        </div>
+        `
+      }
+    })
+
   document.getElementById("upload-quote").addEventListener("change", function () {
     let fileInput = document.getElementById("upload-quote")
-    selectedFiles.push(...fileInput.files)
-//    let selectedFileList = []
+    let selectedFiles = fileInput.files
+
     let photos = []
     let videos = []
     let pdfs = []
+
+    // Clear the fileContainer before adding new files
+    fileContainer.innerHTML = '';
+
     for (var i = 0; i < selectedFiles.length; i++) {
       selectedFileList.push(selectedFiles[i])
     }
+
     console.log({selectedFiles})
-//    console.log({selectedFileList})
-
-
-        console.log({selectedFileList});
-
+    console.log({selectedFileList});
 
     if (selectedFileList.length > 0) {
       photos = selectedFileList.filter((file) => file.type.startsWith("image/"))
@@ -133,135 +161,8 @@ function uploadFiles() {
                `
       })
     }
+    selectedFileList = []
   })
-
-
-// Function to handle camera capture
-
-
-document.getElementById("captureButton").addEventListener("click", function () {
-    const constraints = {
-      video: true,
-    };
-
-    navigator.mediaDevices.getUserMedia(constraints)
-      .then(function (stream) {
-        const video = document.createElement("video");
-        video.srcObject = stream;
-        video.onloadedmetadata = function (e) {
-          video.play();
-        };
-        video.addEventListener("click", function () {
-          const canvas = document.createElement("canvas");
-          canvas.width = video.videoWidth;
-          canvas.height = video.videoHeight;
-          const context = canvas.getContext("2d");
-          context.drawImage(video, 0, 0, canvas.width, canvas.height);
-          const imageUrl = canvas.toDataURL("image/jpeg");
-
-          // Display the captured photo
-          fileContainer.innerHTML += `
-            <div class="w-[74px] h-[74px] relative rounded-md">
-              <img src="${imageUrl}" alt="" class="w-full h-full object-cover rounded-md">
-              <img src="/static/images/remove.png" alt="" class="w-[16px] h-[16px] -top-2 -right-2 absolute object-cover rounded-full" onclick="removeFile(this)">
-            </div>
-          `;
-
-          // Stop the stream
-          stream.getTracks().forEach(function (track) {
-            track.stop();
-          });
-
-          // Remove the video element from the DOM
-          video.remove();
-        });
-        document.body.appendChild(video);
-      })
-      .catch(function (err) {
-        console.error("Error accessing camera: " + err);
-      });
-  });
-
-//document.getElementById("captureButton").addEventListener("click", function () {
-//  const constraints = {
-//    video: true,
-//  };
-//
-//  navigator.mediaDevices.getUserMedia(constraints)
-//    .then(function (stream) {
-//      const video = document.createElement("video");
-//      video.srcObject = stream;
-//      video.onloadedmetadata = function (e) {
-//        video.play();
-//      };
-//      video.addEventListener("click", function () {
-//        const canvas = document.createElement("canvas");
-//        canvas.width = video.videoWidth;
-//        canvas.height = video.videoHeight;
-//        const context = canvas.getContext("2d");
-//        context.drawImage(video, 0, 0, canvas.width, canvas.height);
-//        const imageUrl = canvas.toDataURL("image/jpeg");
-//
-//        // Create a File object from the captured image data
-//        const blob = dataURItoBlob(imageUrl);
-//        let capturedImageFile = new File([blob], "captured_image_001.jpeg", { type: "image/jpeg" });
-////        video.name = "uploaded-video";
-//
-//        // Append the video element to the form
-//        const form = document.getElementById("quoteRequestForm");
-//        form.appendChild(video);
-//
-//
-//        // Display the captured photo
-//        fileContainer.innerHTML += `
-//          <div class="w-[74px] h-[74px] relative rounded-md">
-//            <img src="${imageUrl}" alt="" class="w-full h-full object-cover rounded-md">
-//            <img src="/static/images/remove.png" alt="" class="w-[16px] h-[16px] -top-2 -right-2 absolute object-cover rounded-full" onclick="removeFile(this)">
-//          </div>
-//        `;
-//
-//
-//        // Create a hidden input field
-//        const hiddenInput = document.getElementById("captured-image-input");
-//        hiddenInput.type = "file";
-//        hiddenInput.name = "captured-image"; // Set the name attribute as needed
-//        hiddenInput.value = capturedImageFile; // Set the value to the captured image URL or Base64 data
-//        hiddenInput.class = "hidden";
-//        hiddenInput.files = capturedImageFile;
-//        console.log(hiddenInput.files)
-//
-//
-//        // Stop the stream
-//        stream.getTracks().forEach(function (track) {
-//          track.stop();
-//        });
-//
-//        // Remove the video element from the DOM
-//        video.remove();
-//      });
-//      document.body.appendChild(video);
-//    })
-//    .catch(function (err) {
-//      console.error("Error accessing camera: " + err);
-//    });
-//});
-
-// Function to convert data URI to Blob
-function dataURItoBlob(dataURI) {
-  const byteString = atob(dataURI.split(",")[1]);
-  const mimeString = dataURI.split(",")[0].split(":")[1].split(";")[0];
-  const ab = new ArrayBuffer(byteString.length);
-  const ia = new Uint8Array(ab);
-  for (let i = 0; i < byteString.length; i++) {
-    ia[i] = byteString.charCodeAt(i);
-  }
-  return new Blob([ab], { type: mimeString });
-}
-
-
-
-
-
 }
 
 function removeFile(removeIcon) {
