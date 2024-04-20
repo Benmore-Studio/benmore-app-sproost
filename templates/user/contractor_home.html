@@ -1,4 +1,6 @@
-{% extends "user/base.html" %} {% load static %} {% block content %}
+{% extends "user/base.html" %} 
+{% load static %} 
+{% block content %}
 <style>
   .tabcontent {
     display: none;
@@ -63,14 +65,15 @@
             </div>
 
             {% if request.user == profile.user %}
-            <a class="bg-[#eaf7e6] p-2 px-4 px-2 text-primary rounded-md text-gray-500 text-sm font-semibold">Edit Profile</a> {% endif %}
+            <a href = '{% url "profile:edit-profile"  %}' class="bg-[#eaf7e6] p-2 px-4 px-2 text-primary rounded-md text-gray-500 text-sm font-semibold">Edit Profile</a> 
+            {% endif %}
           </div>
         </div>
         <!-- tabs -->
         <div class="tab flex flex-items-center justify-between p-4">
           <div class="flex flex-row">
-            <button class="tablinks p-2 text-gray-500 text-sm font-medium" onclick="openTab(event, 'tab1')">All media</button> {% if request.user ==
-            profile.user %}
+            <button class="tablinks p-2 text-gray-500 text-sm font-medium" onclick="openTab(event, 'tab1')">All media</button> 
+            {% if request.user == profile.user %}
             <button class="tablinks p-2 text-gray-500 text-sm font-medium" onclick="openTab(event, 'tab4')">
               <i class="fa fa-plus"></i>
             </button>
@@ -88,7 +91,8 @@
               <source src="/media/{{media.file}}" type="video/mp4" />
             </video>
             <!-- <img src="/media/{{image.file }}" alt="" class="w-full h-[81px] border border-neutral-150 object-cover" /> -->
-            {% endif %} {% endfor %}
+            {% endif %} 
+            {% endfor %}
           </div>
         </div>
 
@@ -143,7 +147,11 @@
   </div>
 </main>
 
-{% endblock %} {% block bottomNav %} {% include "user/bottom_nav_contractor.html"%} {% endblock bottomNav %} {% block extraScripts %}
+{% endblock %} 
+{% block bottomNav %} 
+{% include "user/bottom_nav_contractor.html"%} 
+{% endblock bottomNav %} 
+{% block extraScripts %}
 <script>
   var csrf_token = "{{csrf_token}}"
 </script>

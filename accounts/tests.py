@@ -2,6 +2,7 @@ from django.test import TestCase, Client
 from profiles.models import ContractorProfile, User, UserProfile
 
 class CustomSignupFormTest(TestCase):
+
     def setUp(self):
         self.client = Client()
         
@@ -18,10 +19,12 @@ class CustomSignupFormTest(TestCase):
             'password1' : '123pass?%@',
             'password2' : '123pass?%@',
         })
+       
         self.assertEqual(response.status_code, 302)  # assuming it redirects after successful submission
         user = User.objects.first()
         self.assertEqual(user.user_type, 'CO')
         self.assertTrue(ContractorProfile.objects.filter(user=user).exists())
+        
         
     def test_form_save_user_type_ho(self):
         response = self.client.post('/accounts/signup/', data={

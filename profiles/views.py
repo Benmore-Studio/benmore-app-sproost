@@ -81,34 +81,29 @@ def editProfile(request):
 
 
 def editHomeOwnerProfileRequest(request):
+    user = request.user
     try:
-        user_profile = request.user.user_profile
-    except UserProfile.DoesNotExist:
-        # If the user profile doesn't exist, create a new one
-        user_profile = UserProfile(user=request.user)
-
-    if request.method == 'POST':
-        form = HomeOwnersEditForm(request.POST, instance=user_profile)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'Profile updated successfully!')
-            return redirect('main:home')
-        else:
-            print(form.errors)
-            messages.error(request, 'Profile update failed. Please correct the errors below.')
-            return redirect('profile:edit-profile-request')
-    else:
-        form = HomeOwnersEditForm(instance=user_profile)    
-    return render(request, 'profile/edit_profile.html', {'form': form})
-
-
-class EditProfileView(LoginRequiredMixin, UpdateView):
-    model = ContractorProfile
-    form_class = ContractorProfileForm
-    template_name = 'user/home_owners_edit_profile.html'
+        user_profile = UserProfile.objects.get(user=user.id)
     
-    def get_success_url(self):
-        return reverse('profile:contractor_profile')
+        if request.method == 'POST':
+            profile_form = HomeOwnersEditForm(request.POST, instance=user_profile)
+            if profile_form.is_valid():
+                profile_form.save()
+
+                user.phone_number = profile_form.cleaned_data['phone_number']
+                user.email = profile_form.cleaned_data['email']
+                user.save()
+                messages.success(request, 'Profile updated successfully!')
+                return redirect('main:home')
+            else:
+                print(profile_form.errors)
+        else:
+            profile_form = HomeOwnersEditForm(instance=user_profile)
+    except UserProfile.DoesNotExist:
+        # Redirect to profile creation page if profile doesn't exist
+        return redirect('profile:edit-profile')
+
+    return render(request, 'user/editprofiles/home_owners_edit_profile.html', {'form': profile_form})
 
 
 def ContractorProfileEditView(request):
@@ -149,7 +144,8 @@ def search_view(request):
             Q(user__email__icontains=query) 
         )   
     context = {'results': results}
-    
+    if not query or not results:
+        context['no_results'] = True
     return render(request, 'user/search_results.html', context)
 
 @login_required

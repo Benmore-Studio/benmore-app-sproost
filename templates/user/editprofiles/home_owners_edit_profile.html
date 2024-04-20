@@ -1,3 +1,4 @@
+
 {% extends "user/base.html" %} {% load static %} {% block content %}
 {% load form_tags %}
 <style>
@@ -5,8 +6,6 @@
         display: none;
     }
 </style>
-{{form.media}}
-
 <div class="w-full">
     <div class="w-full">
         <!-- header -->
@@ -20,15 +19,14 @@
             <div class="w-full">
                 <h3 class="text-base text-gray-600"> Provide some basic information to set up your account.</h3>
             </div>
+            {{form.media}}
             <form action="{% url 'profile:edit-homeowners-profile-request' %}" class="w-full mt-4 flex flex-col gap-4" method="POST">
                 {% csrf_token %}
                 {% if form.non_field_errors %}
                     <div class="bg-red-400 rounded-md text-center border border-red-700">
-
-                    {% for error in form.non_field_errors %}
-                        <p>{{ error }}</p>
-                    {% endfor %}
-
+                        {% for error in form.non_field_errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
                     </div>
                 {% endif %}
                 <div class="w-full">
@@ -52,15 +50,7 @@
                         {% endif %}
                     </div>
                 </div>
-                <div class="w-full">
-                    <label for="address" class="text-gray-700 font-medium text-sm">Address</label>
-                    {{form.address|addattrs:"class=w-full p-2 text-gray-500 border border-gray-300 rounded-md focus:outline-none mt-1 focus:border-gray-500,placeholder=City"}}
-                    {% if form.address.errors %}
-                        <div class = "w-full py-1 rounded text-red-500">
-                            {{form.address.errors}}
-                        </div>
-                    {% endif %}
-                </div>
+               
                 
                 <div class="w-full">
                     <label for="City" class="text-gray-700 font-medium text-sm">City</label>
@@ -75,7 +65,7 @@
                 {% if details.state_province is None %}
                 <div class="w-full">
                     <label for="state_province" class="text-gray-700 font-medium text-sm">State Province</label>
-                    {{form.state_province|addattrs:"class=w-full p-2 text-gray-500 border border-gray-300 rounded-md focus:outline-none mt-1 focus:border-gray-500,placeholder=City"}}
+                    {{form.state_province|addattrs:"class=w-full p-2 text-gray-500 border border-gray-300 rounded-md focus:outline-none mt-1 focus:border-gray-500,placeholder=State province"}}
                     {% if form.state_province.errors %}
                         <div class = "w-full py-1 rounded text-red-500">
                             {{form.state_province.errors}}
@@ -85,7 +75,7 @@
                 {% else %}
                 <div class="w-full">
                     <label for="state_province" class="text-gray-700 font-medium text-sm">State Province</label>
-                    {{form.state_province|addattrs:"class=w-full p-2 text-gray-500 border border-gray-300 rounded-md focus:outline-none mt-1 focus:border-gray-500,placeholder=City"}}
+                    {{form.state_province|addattrs:"class=w-full p-2 text-gray-500 border border-gray-300 rounded-md focus:outline-none mt-1 focus:border-gray-500,placeholder=State province"}}
                     {% if form.state_province.errors %}
                         <div class = "w-full py-1 rounded text-red-500">
                             {{form.state_province.errors}}
