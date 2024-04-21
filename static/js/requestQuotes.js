@@ -74,21 +74,37 @@ function clearSuccessMsg() {
   }, 2000)
 }
 
-let selectedFileList = [];
-
+let selectedFileList = []
 
 function uploadFiles() {
   const fileContainer = document.getElementById("file-container") 
   const fileContainerCapture = document.getElementById("file-container-capture") 
-  
+  const quoteRequestForm = document.getElementById("quoteRequestForm")
+
+  let captureInputId = 1
+
   // Function to handle camera capture
   document.getElementById('captureButton').addEventListener('click', function() {
     // Trigger the file input click event
-    document.getElementById('upload-capture').click();
-  });
-  
-  // // Event listener for file input change
-  document.getElementById('upload-capture').addEventListener('change', function(event) {
+
+    // Create the capture input element
+    var captureInput = document.createElement('input');
+    captureInput.setAttribute('type', 'file');
+    captureInput.setAttribute('id', `upload-capture-${captureInputId}`);
+    captureInput.setAttribute('accept', 'image/*');
+    captureInput.setAttribute('multiple', 'multiple');
+    captureInput.setAttribute('name', 'upload-capture');
+    captureInput.setAttribute('capture', 'environment');
+    captureInput.classList.add('hidden');
+
+    // Append the file input element to the form
+    quoteRequestForm.appendChild(captureInput);
+
+    captureInputId += 1
+
+    captureInput.click();
+
+  captureInput.addEventListener('change', function(event) {
     const newFiles = event.target.files;
 
     if (newFiles && newFiles.length > 0) {
@@ -103,7 +119,9 @@ function uploadFiles() {
         </div>
         `
       }
+
     })
+  });
 
   document.getElementById("upload-quote").addEventListener("change", function () {
     let fileInput = document.getElementById("upload-quote")

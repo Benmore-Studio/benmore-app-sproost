@@ -13,7 +13,6 @@ class QuoteService(CustomRequestUtil):
         try:
             media = payload.pop("media")
             home_owner_id = payload.pop("home_owner_id")
-            print("media: ", media)
 
             payload['user'] = self.request.user
 
