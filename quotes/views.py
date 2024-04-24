@@ -58,10 +58,13 @@ class Quotes(LoginRequiredMixin, View, CustomRequestUtil):
             form_data = form.cleaned_data
 
             form_data["home_owner_id"] = home_owner_id
+            form_data['media'] = None
 
             if request.FILES:
                 uploaded_files = request.FILES.getlist("upload-quote")
-                form_data["media"] = uploaded_files
+                uploaded_captures = request.FILES.getlist("upload-capture")
+
+                form_data["media"] = uploaded_files + uploaded_captures
 
             quote_service = QuoteService(request)
 

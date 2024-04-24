@@ -74,20 +74,72 @@ function clearSuccessMsg() {
   }, 2000)
 }
 
+let selectedFileList = []
+
 function uploadFiles() {
-  const fileContainer = document.getElementById("file-container")
+  const fileContainer = document.getElementById("file-container") 
+  const fileContainerCapture = document.getElementById("file-container-capture") 
+  const quoteRequestForm = document.getElementById("quoteRequestForm")
+
+  let captureInputId = 1
+
+  // Function to handle camera capture
+  document.getElementById('captureButton').addEventListener('click', function() {
+    // Trigger the file input click event
+
+    // Create the capture input element
+    var captureInput = document.createElement('input');
+    captureInput.setAttribute('type', 'file');
+    captureInput.setAttribute('id', `upload-capture-${captureInputId}`);
+    captureInput.setAttribute('accept', 'image/*');
+    captureInput.setAttribute('multiple', 'multiple');
+    captureInput.setAttribute('name', 'upload-capture');
+    captureInput.setAttribute('capture', 'environment');
+    captureInput.classList.add('hidden');
+
+    // Append the file input element to the form
+    quoteRequestForm.appendChild(captureInput);
+
+    captureInputId += 1
+
+    captureInput.click();
+
+  captureInput.addEventListener('change', function(event) {
+    const newFiles = event.target.files;
+
+    if (newFiles && newFiles.length > 0) {
+      let photo = newFiles[0]
+
+      fileContainerCapture.innerHTML += `
+        <div class="w-[74px] h-[74px] relative rounded-md">
+        <a href='${URL.createObjectURL(photo)}' download>
+            <img src="${URL.createObjectURL(photo)}" alt="" class="w-full h-full object-cover rounded-md">
+        </a>
+        <img src="/static/images/remove.png" alt="" class="w-[16px] h-[16px] -top-2 -right-2 absolute object-cover rounded-full" onclick="removeFile(this)">
+        </div>
+        `
+      }
+
+    })
+  });
+
   document.getElementById("upload-quote").addEventListener("change", function () {
     let fileInput = document.getElementById("upload-quote")
     let selectedFiles = fileInput.files
-    let selectedFileList = []
+
     let photos = []
     let videos = []
     let pdfs = []
+
+    // Clear the fileContainer before adding new files
+    fileContainer.innerHTML = '';
+
     for (var i = 0; i < selectedFiles.length; i++) {
       selectedFileList.push(selectedFiles[i])
     }
+
     console.log({selectedFiles})
-    console.log({selectedFileList})
+    console.log({selectedFileList});
 
     if (selectedFileList.length > 0) {
       photos = selectedFileList.filter((file) => file.type.startsWith("image/"))
@@ -109,7 +161,7 @@ function uploadFiles() {
         fileContainer.innerHTML += `
                 <div class="w-[74px] h-[74px] rounded-md relative">
                     <img src="/static/images/vid-play-bg.jpg" alt="" class="w-full h-full object-cover rounded-md">
-                    <a href='${URL.createObjectURL(video)}' class="absolute top-5 left-5 right-5" download >                
+                    <a href='${URL.createObjectURL(video)}' class="absolute top-5 left-5 right-5" download >
                     <img src="/static/svgs/Play-button.svg" alt="">
                     </a>
                     <img src="/static/images/remove.png" alt="" class="w-[16px] h-[16px] -top-2 -right-2 absolute object-cover rounded-full" onclick="removeFile(this)">
@@ -127,6 +179,7 @@ function uploadFiles() {
                `
       })
     }
+    selectedFileList = []
   })
 }
 
