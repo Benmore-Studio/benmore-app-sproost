@@ -10,10 +10,7 @@ from quotes.models import QuoteRequest, Project
 from property.models import AssignedAccount
 from django.contrib.auth.mixins import LoginRequiredMixin
 
-
-
 User = get_user_model()
-
 
 
 def get_base_url(request):
@@ -26,38 +23,43 @@ def get_base_url(request):
     return base_url
 
 
-
 loggedInUser = 'contractor'
+
 
 # mains
 def homeOwners(request):
-    project_feed= [
+    project_feed = [
         {
-            'title':'Number of Uploaded projects',  'status': 'uploaded',  'count': 3, 
+            'title': 'Number of Uploaded projects', 'status': 'uploaded', 'count': 3,
         },
         {
-            'title': 'Number of Quotes Requested',  'status': 'quotes', 'count': 3, 
+            'title': 'Number of Quotes Requested', 'status': 'quotes', 'count': 3,
         },
         {
-            'title':'Number of completed projects', 'status': 'completed', 'count': 0, 
+            'title': 'Number of completed projects', 'status': 'completed', 'count': 0,
         }
     ]
-    
+
     project_history = [
-        {'name':'Bungalow Renovation', 'quotation_status': 'pending', 'home_owner': {'name':'Olivia Rhye', 'image':'/static/images/ownerAvatar.png'}, 'location': 'New Yersey, Newark', 'created_date': 'Jan 28, 2024'},
-        {'name':'Bungalow Renovation', 'quotation_status': 'pending', 'home_owner': {'name':'Olivia Rhye', 'image':'/static/images/ownerAvatar.png'}, 'location': 'New Yersey, Newark', 'created_date': 'Jan 28, 2024'},
-        {'name':'Bungalow Renovation', 'quotation_status': 'pending', 'home_owner': {'name':'Olivia Rhye', 'image':'/static/images/ownerAvatar.png'}, 'location': 'New Yersey, Newark', 'created_date': 'Jan 28, 2024'},
+        {'name': 'Bungalow Renovation', 'quotation_status': 'pending',
+         'home_owner': {'name': 'Olivia Rhye', 'image': '/static/images/ownerAvatar.png'},
+         'location': 'New Yersey, Newark', 'created_date': 'Jan 28, 2024'},
+        {'name': 'Bungalow Renovation', 'quotation_status': 'pending',
+         'home_owner': {'name': 'Olivia Rhye', 'image': '/static/images/ownerAvatar.png'},
+         'location': 'New Yersey, Newark', 'created_date': 'Jan 28, 2024'},
+        {'name': 'Bungalow Renovation', 'quotation_status': 'pending',
+         'home_owner': {'name': 'Olivia Rhye', 'image': '/static/images/ownerAvatar.png'},
+         'location': 'New Yersey, Newark', 'created_date': 'Jan 28, 2024'},
     ]
-    
+
     context = {'project_feed': project_feed, 'project_history': project_history, 'loggedInUser': loggedInUser}
     return render(request, 'user/home.html', context)
-
 
 
 def home(request):
     if not request.user.is_authenticated:
         return redirect('account_login')
-    
+
     else:
         print("user type === ", request.user.user_type)
         
@@ -74,16 +76,17 @@ def home(request):
         elif request.user.user_type == "CO":
             return redirect("profile:contractor_profile")
         elif request.user.user_type == "AG":
-            accounts = AssignedAccount.objects.filter(assigned_to=request.user).order_by('-id').select_related("assigned_by", "assigned_to", "assigned_by__user_profile")
+            accounts = AssignedAccount.objects.filter(assigned_to=request.user).order_by('-id').select_related(
+                "assigned_by", "assigned_to", "assigned_by__user_profile")
             context = {
                 "accounts": accounts,
-             }
+            }
             return render(request, "user/agent_home.html", context)
         else:
             return redirect("admins:dashboard")
     
 # def home(request):
-    
+
 #     if loggedInUser == 'agent':
 #         context = {
 #         'loggedInUser': loggedInUser
@@ -94,130 +97,96 @@ def home(request):
 
 
 def requestQuotes(request):
-    context ={
+    context = {
         'loggedInUser': loggedInUser
     }
     return render(request, 'user/request_quotes.html', context)
 
 
-class AssignAgentView(LoginRequiredMixin,  View):
+class AssignAgentView(LoginRequiredMixin, View):
     template_name = 'user/assignAgent.html'
+
     def get(self, request):
         agents = User.objects.filter(user_type='AG')
         context = {
-            'agents' : agents,
+            'agents': agents,
         }
         return render(request, self.template_name, context)
-    
+
     def post(self, request):
         agent_id = request.POST.get('agent')
         try:
             agent = User.objects.get(id=agent_id)
             AssignedAccount.objects.get_or_create(
-                assigned_to=agent, 
+                assigned_to=agent,
                 assigned_by=request.user,
                 is_approved=True
             )
             if not agent.user_type in ['HO', 'AG']:
                 messages.error(request, 'Only Home Owners can assign properties')
-                return redirect('main:assign-agent') 
-            
+                return redirect('main:assign-agent')
+
             send_mail(
                 'mail/assign_agent.tpl',
                 {'first_name': agent.first_name, "base_url": get_base_url(request)},
                 settings.EMAIL_HOST_USER,
                 [agent.email]
             )
-            
+
             messages.success(request, 'Agent assigned successfully. Awaiting agent confirmation')
-            
+
         except Exception as e:
             print(e)
             messages.error(request, 'An error occured')
-        
+
         return redirect('main:home')
 
 
 def QuotationReturn(request):
-    context ={
+    context = {
         'loggedInUser': loggedInUser
     }
     return render(request, 'user/quotation_returns.html', context)
 
+
 def MenuList(request):
-    context ={
+    context = {
         'loggedInUser': loggedInUser
     }
     return render(request, 'user/menu.html', context)
 
+
 def contractors(request):
     searchResults = [
         {'name': 'Olivia Rhye', 'profession': 'plumber', 'phone': '+1 834 955 0920', 'email': 'olivia@untitledui.com'},
-        {'name': 'Phoenix Baker', 'profession': 'electrician', 'phone': '+1 834 955 0920', 'email': 'olivia@untitledui.com'},
-        {'name': 'Lana Steiner', 'profession': 'carpenter', 'phone': '+1 834 955 0920', 'email': 'olivia@untitledui.com'},
-        {'name': 'Demi Wilkinson', 'profession': 'interior designer', 'phone': '+1 834 955 0920', 'email': 'olivia@untitledui.com'},
+        {'name': 'Phoenix Baker', 'profession': 'electrician', 'phone': '+1 834 955 0920',
+         'email': 'olivia@untitledui.com'},
+        {'name': 'Lana Steiner', 'profession': 'carpenter', 'phone': '+1 834 955 0920',
+         'email': 'olivia@untitledui.com'},
+        {'name': 'Demi Wilkinson', 'profession': 'interior designer', 'phone': '+1 834 955 0920',
+         'email': 'olivia@untitledui.com'},
         {'name': 'Candice Wua', 'profession': 'painter', 'phone': '+1 834 955 0920', 'email': 'olivia@untitledui.com'},
-        {'name': 'Natali Craig', 'profession': 'carpenter', 'phone': '+1 834 955 0920', 'email': 'olivia@untitledui.com'},
+        {'name': 'Natali Craig', 'profession': 'carpenter', 'phone': '+1 834 955 0920',
+         'email': 'olivia@untitledui.com'},
         {'name': 'Drew Cano', 'profession': 'painter', 'phone': '+1 834 955 0920', 'email': 'olivia@untitledui.com'},
-        {'name': 'Phoenix Baker', 'profession': 'electrician', 'phone': '+1 834 955 0920', 'email': 'olivia@untitledui.com'},
-        {'name': 'Lana Steiner', 'profession': 'carpenter', 'phone': '+1 834 955 0920', 'email': 'olivia@untitledui.com'},
-        {'name': 'Demi Wilkinson', 'profession': 'interior designer', 'phone': '+1 834 955 0920', 'email': 'olivia@untitledui.com'},
+        {'name': 'Phoenix Baker', 'profession': 'electrician', 'phone': '+1 834 955 0920',
+         'email': 'olivia@untitledui.com'},
+        {'name': 'Lana Steiner', 'profession': 'carpenter', 'phone': '+1 834 955 0920',
+         'email': 'olivia@untitledui.com'},
+        {'name': 'Demi Wilkinson', 'profession': 'interior designer', 'phone': '+1 834 955 0920',
+         'email': 'olivia@untitledui.com'},
     ]
-    context ={
+    context = {
         'contractors': searchResults,
         'loggedInUser': loggedInUser
     }
     return render(request, 'user/contractors.html', context)
- 
+
+
 def contractorDetail(request, profession):
-    context ={
+    context = {
         'loggedInUser': loggedInUser
     }
     return render(request, 'user/contractorDetail.html', context)
 
-
-
-# web based admin- applications
-
-def loginAdmin(request):
-  context ={}  
-  return render(request, 'user_admin/login.html', context) 
-
-
-def projectRequest(request):
-    project_history = [
-        {'id':1,'name':'Bungalow Renovation', 'quotation_status': 'pending', 'home_owner': {'name':'Olivia Rhye', 'image':'/static/images/ownerAvatar.png'}, 'location': 'New Yersey, Newark', 'created_date': 'Jan 28, 2024'},
-        {'id':2,'name':'Bungalow Renovation', 'quotation_status': 'pending', 'home_owner': {'name':'Olivia Rhye', 'image':'/static/images/ownerAvatar.png'}, 'location': 'New Yersey, Newark', 'created_date': 'Jan 28, 2024'},
-        {'id':3,'name':'Bungalow Renovation', 'quotation_status': 'pending', 'home_owner': {'name':'Olivia Rhye', 'image':'/static/images/ownerAvatar.png'}, 'location': 'New Yersey, Newark', 'created_date': 'Jan 28, 2024'},
-        {'id':4,'name':'Bungalow Renovation', 'quotation_status': 'pending', 'home_owner': {'name':'Olivia Rhye', 'image':'/static/images/ownerAvatar.png'}, 'location': 'New Yersey, Newark', 'created_date': 'Jan 28, 2024'},
-        {'id':5,'name':'Bungalow Renovation', 'quotation_status': 'pending', 'home_owner': {'name':'Olivia Rhye', 'image':'/static/images/ownerAvatar.png'}, 'location': 'New Yersey, Newark', 'created_date': 'Jan 28, 2024'},
-        {'id':6,'name':'Bungalow Renovation', 'quotation_status': 'pending', 'home_owner': {'name':'Olivia Rhye', 'image':'/static/images/ownerAvatar.png'}, 'location': 'New Yersey, Newark', 'created_date': 'Jan 28, 2024'},
-        {'id':7,'name':'Bungalow Renovation', 'quotation_status': 'pending', 'home_owner': {'name':'Olivia Rhye', 'image':'/static/images/ownerAvatar.png'}, 'location': 'New Yersey, Newark', 'created_date': 'Jan 28, 2024'},
-        {'id':8,'name':'Bungalow Renovation', 'quotation_status': 'pending', 'home_owner': {'name':'Olivia Rhye', 'image':'/static/images/ownerAvatar.png'}, 'location': 'New Yersey, Newark', 'created_date': 'Jan 28, 2024'},
-        {'id':9,'name':'Bungalow Renovation', 'quotation_status': 'pending', 'home_owner': {'name':'Olivia Rhye', 'image':'/static/images/ownerAvatar.png'}, 'location': 'New Yersey, Newark', 'created_date': 'Jan 28, 2024'},
-        {'id':10,'name':'Bungalow Renovation', 'quotation_status': 'pending', 'home_owner': {'name':'Olivia Rhye', 'image':'/static/images/ownerAvatar.png'}, 'location': 'New Yersey, Newark', 'created_date': 'Jan 28, 2024'},
-        {'id':11,'name':'Bungalow Renovation', 'quotation_status': 'pending', 'home_owner': {'name':'Olivia Rhye', 'image':'/static/images/ownerAvatar.png'}, 'location': 'New Yersey, Newark', 'created_date': 'Jan 28, 2024'},
-        {'id':12,'name':'Bungalow Renovation', 'quotation_status': 'pending', 'home_owner': {'name':'Olivia Rhye', 'image':'/static/images/ownerAvatar.png'}, 'location': 'New Yersey, Newark', 'created_date': 'Jan 28, 2024'},
-    ]
-    context ={'project_history': project_history}  
-    return render(request, 'admin/project_request.html', context)
-
-
-def projectRequestDetail(request, id):
-    quotation_items =[
-        {'name': 'Building Material', 'price':'20,000'},
-        {'name': 'Rentals', 'price':'5000'},
-        {'name': 'Cleaning', 'price':'8000'},
-        {'name': 'Cleaning', 'price':'8000'},
-        {'name': 'Labour', 'price':'10,000'},
-    ]
-    quotation_history =[
-        {'date': 'Jan 16, 2024', 'contractor_name':'Olivia Rhye', 'price':'$43,000', 'status':'pending' },
-        {'date': 'Jan 16, 2024', 'contractor_name':'Olivia Rhye', 'price':'$43,000', 'status':'pending' },
-        {'date': 'Jan 16, 2024', 'contractor_name':'Olivia Rhye', 'price':'$43,000', 'status':'pending' },
-    ]
-    quotation_history_length = len(quotation_history)
-    # Quotation history length greater than 0 will change the UI under quotations history, defaulted to 0 at the beginning
-    context ={'quotation_items':quotation_items, 'quotation_history_length': 0, 'quotation_history':quotation_history}
-    return render(request, 'admin/project_request_detail.html', context)
 

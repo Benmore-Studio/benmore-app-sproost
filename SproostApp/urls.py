@@ -13,7 +13,6 @@ urlpatterns = [
     path('profiles/', include('profiles.urls', namespace='profile')),
     path('quotes/', include('quotes.urls', namespace='quotes')),
     path('property/', include('property.urls', namespace='property')),
-    
 ]
 
 
