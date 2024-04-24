@@ -6,14 +6,13 @@ from django.conf import settings
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('user-admin/', include('admins.urls', namespace='admins')),
     path('', include('main.urls', namespace='main')),
     path('accounts/', include('accounts.urls')),
     path('accounts/', include('allauth.urls')),
     path('profiles/', include('profiles.urls', namespace='profile')),
     path('quotes/', include('quotes.urls', namespace='quotes')),
     path('property/', include('property.urls', namespace='property')),
-    # path('admin/', include('admins.urls', namespace='admins')),
-    
 ]
 
 
