@@ -6,6 +6,7 @@ from django.contrib.contenttypes.fields import GenericRelation
 class QuoteRequestStatus(models.TextChoices):
     pending = "Pending"
     approved = "Approved"
+    rejected = "Rejected"
 
 
 class QuoteRequest(models.Model):

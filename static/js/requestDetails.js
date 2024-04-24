@@ -90,3 +90,26 @@ window.addEventListener('DOMContentLoaded', () => {
     });
 
 })
+
+
+document.addEventListener('DOMContentLoaded', function() {
+    const acceptRadio = document.getElementById('acceptRadio');
+    const rejectRadio = document.getElementById('rejectRadio');
+    const additionalField = document.getElementById('additionalField');
+    const fileInput = document.getElementById('upload-file');
+
+    // Function to handle radio button change event
+    function handleRadioChange() {
+        if (acceptRadio.checked) {
+            additionalField.style.display = 'block';
+            fileInput.required = true;
+        } else {
+            additionalField.style.display = 'none';
+            fileInput.required = false;
+        }
+    }
+
+    // Listen for change events on radio buttons
+    acceptRadio.addEventListener('change', handleRadioChange);
+    rejectRadio.addEventListener('change', handleRadioChange);
+});
