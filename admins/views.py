@@ -6,7 +6,7 @@ from django.core.paginator import Paginator
 # Create your views here.
 def projectRequest(request):
     project_history = QuoteRequest.objects.all()
-    paginator = Paginator(project_history, 10)
+    paginator = Paginator(project_history, 1)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     context = {

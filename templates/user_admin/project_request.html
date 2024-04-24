@@ -17,7 +17,7 @@
     </div>
     <div class="">
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6">
-            {% for project in project_history %}
+            {% for project in page_obj %}
             <a href="{% url 'admins:project-requests' project.id %}" class="w-full flex flex-col gap-4 p-4 border text-xs border-neutral-150 rounded-md shadow-sm">
                 <div class="w-full flex items-center justify-between">
                     <div class="text-xs flex flex-col gap-2">
@@ -67,7 +67,7 @@
                 </button>
             {% endif %}
 
-            <span class="text-gray-700 text-sm font-medium">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+            <span class="text-gray-700  text-sm font-medium">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
             {% if page_obj.has_next %}
                 <button class="inline-flex items-center justify-center border border-neutral-150 rounded-md p-2 outline-none shadow-sm">
                     <a href="?page={{ page_obj.next_page_number }}"><img src="{%  static 'svgs/arrow-right.svg' %}" alt="" class="" /></a>
