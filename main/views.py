@@ -60,6 +60,7 @@ def home(request):
     
     else:
         print("user type === ", request.user.user_type)
+        
         if request.user.user_type == "HO":
             quotes = QuoteRequest.objects.filter(user=request.user)
             projects = Project.objects.filter(quote_request__user=request.user)
@@ -79,7 +80,7 @@ def home(request):
              }
             return render(request, "user/agent_home.html", context)
         else:
-            return render(request, "user_admin/dashboard.html")
+            return redirect("admins:dashboard")
     
 # def home(request):
     
@@ -182,65 +183,6 @@ def loginAdmin(request):
   context ={}  
   return render(request, 'user_admin/login.html', context) 
 
-def adminDashboard(request):
-    recent_home_owners =[
-        {
-            'name':'Olivia Rhye', 'photo':'/static/images/ownerAvatar.png', 'phone': '+1 834 955 0920', 'email':'olivia@untitledui.com', 'project_name':'Project title', 'quotation_status':"accepted"
-        },
-        {
-            'name':'Olivia Rhye', 'photo':'/static/images/ownerAvatar.png', 'phone': '+1 834 955 0920', 'email':'olivia@untitledui.com', 'project_name':'Project title', 'quotation_status':"rejected"
-        },
-        {
-            'name':'Olivia Rhye', 'photo':'/static/images/ownerAvatar.png', 'phone': '+1 834 955 0920', 'email':'olivia@untitledui.com', 'project_name':'Project title', 'quotation_status':"accepted"
-        },
-        {
-            'name':'Olivia Rhye', 'photo':'/static/images/ownerAvatar.png', 'phone': '+1 834 955 0920', 'email':'olivia@untitledui.com', 'project_name':'Project title', 'quotation_status':"pending"
-        },
-    ]
-    recent_agents =[
-        {
-            'name':'Olivia Rhye', 'phone': '+1 834 955 0920', 'email':'olivia@untitledui.com', 'project_name':'Project title', 'quotation_status':"accepted", 'rating':4, 'total_project':5
-        },
-        {
-            'name':'Olivia Rhye', 'phone': '+1 834 955 0920', 'email':'olivia@untitledui.com', 'project_name':'Project title', 'quotation_status':"rejected", 'total_project':2
-        },
-        {
-            'name':'Olivia Rhye', 'phone': '+1 834 955 0920', 'email':'olivia@untitledui.com', 'project_name':'Project title', 'quotation_status':"accepted", 'total_project':1
-        },
-        {
-            'name':'Olivia Rhye', 'phone': '+1 834 955 0920', 'email':'olivia@untitledui.com', 'project_name':'Project title', 'quotation_status':"pending",'total_project':10       
-            },
-    ]
-    recent_contractors =[
-        {
-            'name':'Olivia Rhye', 'phone': '+1 834 955 0920', 'email':'olivia@untitledui.com', 'project_name':'Project title', 'quotation_status':"accepted", 'rating':4, 'total_project':5
-        },
-        {
-            'name':'Olivia Rhye', 'phone': '+1 834 955 0920', 'email':'olivia@untitledui.com', 'project_name':'Project title', 'quotation_status':"rejected", 'rating':4, 'total_project':2
-        },
-        {
-            'name':'Olivia Rhye', 'phone': '+1 834 955 0920', 'email':'olivia@untitledui.com', 'project_name':'Project title', 'quotation_status':"accepted", 'rating':4, 'total_project':1
-        },
-        {
-            'name':'Olivia Rhye', 'phone': '+1 834 955 0920', 'email':'olivia@untitledui.com', 'project_name':'Project title', 'quotation_status':"pending", 'rating':4, 'total_project':10       
-            },
-    ]
-    project_history = [
-        {'name':'Bungalow Renovation', 'quotation_status': 'pending', 'home_owner': {'name':'Olivia Rhye', 'image':'/static/images/ownerAvatar.png'}, 'location': 'New Yersey, Newark', 'created_date': 'Jan 28, 2024'},
-        {'name':'Bungalow Renovation', 'quotation_status': 'pending', 'home_owner': {'name':'Olivia Rhye', 'image':'/static/images/ownerAvatar.png'}, 'location': 'New Yersey, Newark', 'created_date': 'Jan 28, 2024'},
-        {'name':'Bungalow Renovation', 'quotation_status': 'pending', 'home_owner': {'name':'Olivia Rhye', 'image':'/static/images/ownerAvatar.png'}, 'location': 'New Yersey, Newark', 'created_date': 'Jan 28, 2024'},
-        {'name':'Bungalow Renovation', 'quotation_status': 'pending', 'home_owner': {'name':'Olivia Rhye', 'image':'/static/images/ownerAvatar.png'}, 'location': 'New Yersey, Newark', 'created_date': 'Jan 28, 2024'},
-    ]
-    
-    overall_stats = [
-        {'title':'Home Owners', 'project_counts': 316, 'increased_by':'20%', 'action':'View owners'},
-        {'title':'Agents', 'project_counts': 316, 'increased_by':'10%', 'action':'View agents'},
-        {'title':'Contractors', 'project_counts': 316, 'increased_by':'10%', 'action':'View contractors'},
-        {'title':'Active Projects', 'project_counts': 316, 'increased_by':'40%', 'action':'View projects'},
-    ]
-    context ={'recent_home_owners': recent_home_owners, 'recent_agents':recent_agents,
-              'recent_contractors': recent_contractors, 'project_history': project_history, 'overall_stats': overall_stats }  
-    return render(request, 'user_admin/dashboard.html', context)
 
 def projectRequest(request):
     project_history = [
@@ -279,32 +221,3 @@ def projectRequestDetail(request, id):
     context ={'quotation_items':quotation_items, 'quotation_history_length': 0, 'quotation_history':quotation_history}
     return render(request, 'admin/project_request_detail.html', context)
 
-def contractorsAdmin(request):
-    contractors_search_result = [
-        {
-            'name':'Olivia Rhye', 'phone': '+1 834 955 0920', 'email':'olivia@untitledui.com', 'projects_handled':5, 'location':"New jersey, Newark", 'rating':4, 'action':'#'
-        },
-        {
-            'name':'Olivia Rhye', 'phone': '+1 834 955 0920', 'email':'olivia@untitledui.com', 'projects_handled':5, 'location':"New jersey, Newark", 'rating':4, 'action':'#'
-        },
-        {
-            'name':'Olivia Rhye', 'phone': '+1 834 955 0920', 'email':'olivia@untitledui.com', 'projects_handled':5, 'location':"New jersey, Newark", 'rating':4, 'action':'#'
-        },
-        {
-            'name':'Olivia Rhye', 'phone': '+1 834 955 0920', 'email':'olivia@untitledui.com', 'projects_handled':5, 'location':"New jersey, Newark", 'rating':4, 'action':'#'     
-            },
-        {
-            'name':'Olivia Rhye', 'phone': '+1 834 955 0920', 'email':'olivia@untitledui.com', 'projects_handled':5, 'location':"New jersey, Newark", 'rating':4, 'action':'#'
-        },
-        {
-            'name':'Olivia Rhye', 'phone': '+1 834 955 0920', 'email':'olivia@untitledui.com', 'projects_handled':5, 'location':"New jersey, Newark", 'rating':4, 'action':'#'
-        },
-        {
-            'name':'Olivia Rhye', 'phone': '+1 834 955 0920', 'email':'olivia@untitledui.com', 'projects_handled':5, 'location':"New jersey, Newark", 'rating':4, 'action':'#'
-        },
-        {
-            'name':'Olivia Rhye', 'phone': '+1 834 955 0920', 'email':'olivia@untitledui.com', 'projects_handled':5, 'location':"New jersey, Newark", 'rating':4, 'action':'#'     
-            },
-    ]
-    context = {'contractors_search_results': contractors_search_result}
-    return render(request, 'admin/contractors.html', context)

@@ -12,9 +12,7 @@ urlpatterns = [
     path('contractors/<str:profession>/', views.contractorDetail, name="contractors"),
     # admin
     path('login-admin/', views.loginAdmin, name="login-admin"),
-    path('dashboard/', views.adminDashboard, name="dashboard"),
     path('project-requests/', views.projectRequest, name="project-requests"),
     path('project-requests/<int:id>/', views.projectRequestDetail, name="project-requests"),
-    path('contractors-admin/', views.contractorsAdmin, name="contractors-admin"),
 ]
 
