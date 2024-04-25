@@ -61,8 +61,6 @@ def home(request):
         return redirect('account_login')
 
     else:
-        print("user type === ", request.user.user_type)
-        
         if request.user.user_type == "HO":
             quotes = QuoteRequest.objects.filter(user=request.user)
             projects = Project.objects.filter(quote_request__user=request.user)
