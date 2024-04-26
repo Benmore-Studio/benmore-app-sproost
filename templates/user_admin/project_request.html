@@ -5,13 +5,9 @@
             <h1 class="text-2xl font-semibold text-gray-700">Project Request</h1>
         </div>
         <div class="w-full flex items-center justify-between">
-            <div class="w-1/3 group border border-gray-300 rounded-md gap-2 p-2 mt-1">
-                <form class = "flex items-center ">
-                    <input type="text" name="q" id="search" placeholder="Search" class="w-full h-full outline-none group-focus:outline-none mt-1 focus-visible:border-none border-none" />
-                    <button type = "submit">
-                        <img src="{% static 'svgs/search.svg' %}" alt="" class="w-[20px] h-[20px] object-contain" />
-                    </button>
-                </form>
+            <div class="w-1/3 group border border-gray-300 rounded-md flex items-center gap-2 p-2 mt-1">
+                <img src="{% static 'svgs/search.svg' %}" alt="" class="w-[20px] h-[20px] object-contain" />
+                <input type="text" name="search" id="search" placeholder="Search" class="w-full h-full outline-none group-focus:outline-none mt-1 focus-visible:border-none border-none" />
             </div>
             <div class="group border border-gray-300 rounded-md flex items-center justify-center gap-2 p-2 mt-1">
                 <img src="{% static 'svgs/Filterlines.svg' %}" alt="" class="w-[20px] h-[20px] object-contain" />
@@ -21,12 +17,12 @@
     </div>
     <div class="">
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6">
-            {% for project in page_obj %}
-            <a href="{% url 'admins:project-requests' project.id %}" class="w-full flex flex-col gap-4 p-4 border text-xs border-neutral-150 rounded-md shadow-sm">
+            {% for quote in page_obj %}
+            <a href="{% url 'admins:project-requests' quote.id %}" class="hover:shadow-md w-full flex flex-col gap-4 p-4 border text-xs border-neutral-150 rounded-md shadow-sm">
                 <div class="w-full flex items-center justify-between">
                     <div class="text-xs flex flex-col gap-2">
                         <span class="text-gray-500 font-medium">Project Name</span>
-                        <h3 class="text-gray-600 font-semibold">{{project.title}}</h3>
+                        <h3 class="text-gray-600 font-semibold">{{quote.title}}</h3>
                     </div>
                     <span class="">
                   <img src="{% static 'svgs/more-vertical.svg' %}" alt="" class="" />
@@ -37,25 +33,24 @@
                         <span class="text-gray-500 font-medium">Home Owner</span>
                         <div class="flex items-center gap-4 mt-2">
 <!--                            <img src="{{project.user.image.url}}" alt="" class="w-8 h-8 object-contain" />-->
-                            <span class="text-gray-900 font-medium">{{project.user.first_name}} {{project.user.last_name}}</span>
+                            <span class="text-gray-900 font-medium">{{quote.user.first_name}} {{quote.user.last_name}}</span>
                             <img src="{% static 'svgs/chat-msg.svg' %}" alt="" />
                         </div>
                     </div>
                     <div class="text-xs flex flex-col gap-2">
                         <span class="text-gray-500 font-medium">Created Date</span>
-                        <h3 class="text-gray-600 font-semibold mt-2">{{project.upload_date}}</h3>
+                        <h3 class="text-gray-600 font-semibold mt-2">{{quote.upload_date}}</h3>
                     </div>
                 </div>
                 <div class="flex items-start gap-14 w-full">
                     <div class="text-xs flex flex-col gap-2">
                         <span class="text-gray-500 font-medium">Location</span>
-                        <h3 class="text-gray-600 font-semibold mt-2">{{project.property_address}}</h3>
+                        <h3 class="text-gray-600 font-semibold mt-2">{{quote.property_address}}</h3>
                     </div>
                     <div class="text-xs flex flex-col gap-2">
                         <span class="text-gray-500 font-medium">Quotation Status</span>
-                        <div class="inline-flex p-1 px-2 bg-gray-200 bg-opacity-50 items-center w-fit gap-2 border border-neutral-150 rounded-xl">
-                            <div class="w-2 h-2 {% if project.status|lower == "pending" %} bg-blue-600 {% elif project.status|lower == "approved" %} bg-green-600 {% else %} bg-red-600  {% endif %}rounded-full"></div>
-                            <span class="text-[10px]">{{project.status}}</span>
+                        <div id = "QuoteStatusContainer{{quote.pk}}" class = "quoteContainer p-1 px-2 bg-gray-200 text-[10px] bg-opacity-50 w-fit  border border-neutral-150 rounded-xl">
+                            {% include "user_admin/partials/QuoteStatusForm.html" %}
                         </div>
                     </div>
                 </div>
@@ -82,3 +77,6 @@
     </div>
 </main>
 {% endblock %}
+{% block extraScripts %}
+    <script src = "{% static "js/user_admin/project_request.js" %}"></script>
+{% endblock extraScripts %}

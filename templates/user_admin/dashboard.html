@@ -1,5 +1,6 @@
 {% extends "user_admin/base.html" %} 
 {% load static %} 
+{% load form_tags %}
 {% block navbar %} 
     {% include "user_admin/navbar.html" %} 
 {% endblock navbar %} 
@@ -71,16 +72,18 @@
                             </td>
                             <td class="w-1/4 p-4">
                                 <span class=" font-semibold text-xs rounded-xl p-1 px-2 border border-neutral-150 bg-gray-50 bg-opacity-90 {% if home_owner.quote_requests.latest_quote.status|lower == 'approved' %} bg-toneLightGreen text-primary bg-opacity-70 border-primary {% elif home_owner.quote_requests.latest_quote.status|lower == 'rejected' %} bg-[#B42318] bg-opacity-50 border-red-500 text-[#B42318] {% endif %} "> 
-                                    {{home_owner.quote_requests.latest_quote.title}}
+                                    {{home_owner.quote_requests.latest_quote.title|default:"no projects"}}
                                 </span>
                             </td>
 
                             <td class="w-1/4 p-4 ">
                                 <div class="inline-flex items-center gap-2 rounded-xl p-1 px-2 border border-neutral-150">
+                                    {% if home_owner.quote_requests.latest_quote.status %}
                                     <span class="w-2 h-2 bg-[#B42318] rounded-full {% if home_owner.quote_requests.latest_quote.status|lower == 'approved' %} bg-primary {% elif home_owner.quote_requests.latest_quote.status|lower == 'pending' %} bg-gray-800 {% endif %} "></span>
                                     <span class="font-semibold text-xs capitalize"> 
                                         {{home_owner.quote_requests.latest_quote.status}}
                                     </span>
+                                    {% endif %}
                                 </div>
                             </td>
                         </tr>
@@ -230,9 +233,8 @@
                             </div>
                             <div class="text-xs flex flex-col gap-2">
                                 <span class="text-gray-500 font-medium">Quotation Status</span>
-                                <div class="inline-flex p-1 px-2 bg-gray-200 bg-opacity-50 items-center w-fit gap-2 border border-neutral-150 rounded-xl">
-                                    <div class="w-2 h-2 {% if quote.status|lower == "pending" %} bg-blue-600 {% elif quote.status|lower == "approved" %} bg-green-600 {% else %} bg-red-600  {% endif %}rounded-full"></div>
-                                    <span class="text-[10px]">{{quote.status}}</span>
+                                <div id = "QuoteStatusContainer{{quote.pk}}" class = "p-1 px-2 bg-gray-200 text-[10px] bg-opacity-50 w-fit  border border-neutral-150 rounded-xl">
+                                    {% include "user_admin/partials/QuoteStatusForm.html" %}
                                 </div>
                             </div>
                         </div>
