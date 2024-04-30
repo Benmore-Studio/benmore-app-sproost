@@ -11,4 +11,5 @@ urlpatterns = [
     path('active-projects/', views.activeProjectList, name="active-projects"),
     path('project-requests/', views.projectRequest, name="project-requests"),
     path('project-requests/<int:id>/', views.projectRequestDetail, name="project-requests"),
+    path('change-quote-status/<int:pk>/', views.changeQuoteStatus, name="change-quote"),
 ]

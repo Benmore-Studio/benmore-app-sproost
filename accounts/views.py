@@ -28,8 +28,6 @@ def validate_phone_numbers(request):
         return JsonResponse({'valid': form.is_valid()}, status=200)
     else:
         return JsonResponse({'valid': False, 'message' : 'Invalid phone number', 'errors': form.errors}, status=400)
-    
-    
 
 
 def logout_user(request):

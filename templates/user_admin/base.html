@@ -6,6 +6,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{% block title %} {% endblock title %}</title>
+    <script src="https://unpkg.com/htmx.org@1.9.10" integrity="sha384-D1Kt99CQMDuVetoL1lrYwg5t+9QdHe7NLX/SoJYkXDFfX37iInKRy5xLSi8nO7UC" crossorigin="anonymous"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="{% static 'js/index.js' %}"></script>
     <script>
@@ -38,12 +40,31 @@
             opacity: 0;
             scroll-behavior: smooth;
         }
+        
+        .htmx-request .mainContent{
+            display: none;
+        }
+
+        .htmx-request .spinner{
+            display: block;
+        }
+        
+        .mainContent{
+            display: block;
+        }
+        .spinner{
+            display: none;
+        }
     </style>
+    {% block extraStyles %}
+{% endblock %}
 </head>
 
-<body>
+<body hx-headers='{"X-CSRFToken":"{{csrf_token}}"}' >
     <div class="w-full">
         {% block navbar %}{% endblock navbar %} {% block content %} {% endblock content %}</div>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <script src = "{% static "js/user_admin/base.js" %}"></script>
     {% block extraScripts %} {% endblock extraScripts %}
 </body>
 
