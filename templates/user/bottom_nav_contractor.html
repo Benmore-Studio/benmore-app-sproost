@@ -9,11 +9,11 @@
       <img src="{% static 'svgs/listing-outline.svg' %}" alt="" class="" />
       <span class="text-gray-500 text-xs">Projects</span> {% endif %}
     </a>
-    <input type="file" id="file-input" style="display: none" />
+    {% comment %} <input type="file" id="file-input" style="display: none" />
     <div id="upload-btn" href="#" class="inline-flex flex-col gap-1 items-center">
       <img src="{% static 'svgs/Add-upload.svg' %}" alt="" class="" />
       <span class="text-gray-500 text-xs">Upload</span>
-    </div>
+    </div> {% endcomment %}
     <a href="{% url 'profile:search_contractor' %}" class="inline-flex flex-col gap-1 items-center">
       <img src="{% static 'svgs/search.svg' %}" alt="" class="" />
       <span class="text-gray-500 text-xs">Search</span>
