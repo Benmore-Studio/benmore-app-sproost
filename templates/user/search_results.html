@@ -39,5 +39,13 @@
     </div>
 {% endif %}
     
-{% endblock %}{% block bottomNav %}{% if loggedInUser == 'agent' %}{% include "user/bottom_nav_agent.html" %}{% elif loggedInUser == 'contractor' %}{% include "user/bottom_nav_contractor.html"%}{% else %}{% include "user/bottom_nav.html" %} {% endif %}
+{% endblock %}
+{% block bottomNav %}
+    {% if request.user.user_type == 'AG' %}
+        {% include "user/bottom_nav_agent.html" %}
+    {% elif request.user.user_type == 'CO' %}
+        {% include "user/bottom_nav_contractor.html"%}
+    {% else %}
+        {% include "user/bottom_nav.html" %}
+    {% endif %}
 {% endblock bottomNav %} 

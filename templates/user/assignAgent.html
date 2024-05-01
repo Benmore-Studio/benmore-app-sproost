@@ -5,7 +5,9 @@
 <div class="w-full">
     <!-- header -->
     <div class="w-full p-4 flex items-center gap-8 mt-4 border-b border-neutral-150">
-        <img onclick="goBack()" src="{% static 'svgs/chevron-left.svg' %}" alt="" class="cursor-pointer" />
+        <a href = {% url "main:home" %} >
+            <img src="{% static 'svgs/chevron-left.svg' %}" alt="" class="cursor-pointer" />
+        </a>
         <h3 class="text-xl text-gray-900 font-medium">Assign Agent</h3>
     </div>
 
@@ -27,7 +29,7 @@
                 <button type="submit" class="flex items-center w-full justify-center p-3 rounded-lg bg-primary text-white border border-neutral-150 shadow-sm font-semibold">
                     Assign Agent
                 </button>
-                <div onclick="goBack()" class="flex p-3 w-full rounded-lg items-center justify-center bg-white border border-neutral-150 shadow-sm font-semibold">Cancel</div>
+                <a href = {% url "main:home" %} class="flex p-3 w-full rounded-lg items-center justify-center bg-white border border-neutral-150 shadow-sm font-semibold">Cancel</a>
             </div>
         </form>
     </div>
@@ -42,14 +44,3 @@
     {% include "user/bottom_nav.html" %} 
 {% endif %} 
 {% endblock bottomNav %} 
-{% block extraScripts %}
-<script>
-    function goBack() {
-        history.back()
-    }
-
-    function gotoPropertyList() {
-        window.location.href = "/property-list/"
-    }
-</script>
-{% endblock extraScripts %}
