@@ -9,6 +9,7 @@ from mail_templated import send_mail
 from quotes.models import QuoteRequest, Project
 from property.models import AssignedAccount
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db.models import Q
 
 User = get_user_model()
 
@@ -105,7 +106,7 @@ class AssignAgentView(LoginRequiredMixin, View):
     template_name = 'user/assignAgent.html'
 
     def get(self, request):
-        agents = User.objects.filter(user_type='AG')
+        agents = User.objects.filter(user_type = "AG").exclude(Q(assigned_properties_to__isnull=False))
         context = {
             'agents': agents,
         }
