@@ -5,6 +5,8 @@
         display: none;
     }
 </style>
+{{form.media}}
+
 <div class="w-full">
     <div class="w-full">
         <!-- header -->
@@ -31,62 +33,63 @@
                 {% endif %}
                 <div class="w-full">
                     <label for="email" class="text-gray-700 font-medium text-sm">Email</label>
-                    <input type="email" name="email" id="email" value="{{details.user.email}}" class="w-full p-2 text-gray-500 border border-gray-300 rounded-md px-4 focus:outline-none mt-1 focus:border-gray-500" required />
+                    {{ form.email|addattrs:"class=w-full p-2 text-gray-500 border border-gray-300 rounded-md focus:outline-none mt-1 focus:border-gray-500"}}
                     {% if form.email.errors %}
-                    <div class="w-full p-3 bg-red-300 border border-red-600 rounded text-white">
-                        {{form.email.errors}}
-                    </div>
+                        <div class = "w-full py-1 rounded text-red-500">
+                            {{form.email.errors}}
+                        </div>
                     {% endif %}
                 </div>
                 <div class="w-full">
-                    <label for="phone" class="text-gray-700 font-medium text-sm">Phone number</label>
-                    <div class="flex gap-2 p-2 border border-gray-300 p-2 mt-1 border border-gray-300 rounded-md">
-                        <select name="country" id="country" class="w-2/12 rounded-md focus:outline-none mt-1 disabled:bg-transparent bg-transparent outline-none border-none focus:border-gray-500">
-                            <option value="" disabled selected>US</option>
-                            <option value="USA">US</option>
-                            <option value="Canada">Canada</option>
-                            <option value="UK">UK</option>
-                            <!-- Add more country options here -->
-                        </select>
-                        <input type="tel" name="phone_number" id="phone" value="{{details.user.phone_number}}" class="w-10/12 rounded-md text-gray-500 focus:outline-none mt-1 focus:border-gray-500" />
+                    <label for="phone_number" class="text-gray-700 font-medium text-sm">Phone number</label>
+                    <!-- Render phone_number field using Django template tag -->
+                    <div class = "flex">
+                        {{form.phone_number|addattrs:"class=w-full p-2 text-gray-500 border border-gray-300 rounded-md focus:outline-none mt-1 focus:border-gray-500,placeholder=Phone number"}}
                         {% if form.phone_number.errors %}
-                        <div class="w-full p-3 bg-red-300 border border-red-600 rounded text-white">
-                            {{form.phone_number.errors}}
-                        </div>
+                            <div class = "w-full py-1 rounded text-red-500">
+                                {{form.phone_number.errors}}
+                            </div>
                         {% endif %}
                     </div>
                 </div>
                 <div class="w-full">
-                    <label for="city" class="text-gray-700 font-medium text-sm">City</label>
-                    <input type="text" name="city" id="city" value="{{details.city}}" class="w-full p-2 text-gray-500 border border-gray-300 rounded-md px-4 focus:outline-none mt-1 focus:border-gray-500" required />
-                    {% if form.city.errors %}
-                    <div class="w-full p-3 bg-red-300 border border-red-600 rounded text-white">
-                        {{form.city.errors}}
-                    </div>
-                    {% endif %}
-                </div>
-                <div class="w-full">
-                    <label for="address" class="text-gray-700 font-medium text-sm">Home Address</label>
-                    <input type="text" name="address" id="address" value="{{details.address}}" class="w-full p-2 text-gray-500 border border-gray-300 rounded-md px-4 focus:outline-none mt-1 focus:border-gray-500" required />
+                    <label for="address" class="text-gray-700 font-medium text-sm">Address</label>
+                    {{form.address}}
                     {% if form.address.errors %}
-                    <div class="w-full p-3 bg-red-300 border border-red-600 rounded text-white">
-                        {{form.address.errors}}
-                    </div>
+                        <div class = "w-full py-1 rounded text-red-500">
+                            {{form.address.errors}}
+                        </div>
                     {% endif %}
                 </div>
+                
+                <div class="w-full">
+                    <label for="City" class="text-gray-700 font-medium text-sm">City</label>
+                    {{form.city|addattrs:"class=w-full p-2 text-gray-500 border border-gray-300 rounded-md focus:outline-none mt-1 focus:border-gray-500,placeholder=City"}}
+                    {% if form.city.errors %}
+                        <div class = "w-full py-1 rounded text-red-500">
+                            {{form.city.errors}}
+                        </div>
+                    {% endif %}
+                </div>
+               
                 {% if details.state_province is None %}
                 <div class="w-full">
-                    <label for="state_province" class="text-gray-700 font-medium text-sm">State province</label>
-                    <input type="text" name="state_province" id="state_province" class="w-full p-2 text-gray-500 border border-gray-300 rounded-md px-4 focus:outline-none mt-1 focus:border-gray-500" />
+                    <label for="state_province" class="text-gray-700 font-medium text-sm">State Province</label>
+                    {{form.state_province|addattrs:"class=w-full p-2 text-gray-500 border border-gray-300 rounded-md focus:outline-none mt-1 focus:border-gray-500,placeholder=City"}}
+                    {% if form.state_province.errors %}
+                        <div class = "w-full py-1 rounded text-red-500">
+                            {{form.state_province.errors}}
+                        </div>
+                    {% endif %}
                 </div>
                 {% else %}
                 <div class="w-full">
-                    <label for="state_province" class="text-gray-700 font-medium text-sm">State province</label>
-                    <input type="text" name="state_province" id="state_province" value="{{details.state_province}}" class="w-full p-2 text-gray-500 border border-gray-300 rounded-md px-4 focus:outline-none mt-1 focus:border-gray-500" required />
+                    <label for="state_province" class="text-gray-700 font-medium text-sm">State Province</label>
+                    {{form.state_province|addattrs:"class=w-full p-2 text-gray-500 border border-gray-300 rounded-md focus:outline-none mt-1 focus:border-gray-500,placeholder=City"}}
                     {% if form.state_province.errors %}
-                    <div class="w-full p-3 bg-red-300 border border-red-600 rounded text-white">
-                        {{form.state_province.errors}}
-                    </div>
+                        <div class = "w-full py-1 rounded text-red-500">
+                            {{form.state_province.errors}}
+                        </div>
                     {% endif %}
                 </div>
                 {% endif %}
@@ -96,7 +99,6 @@
                     </button>
                 </div>
             </form>
-            
         </div>
     </div>
 </div>

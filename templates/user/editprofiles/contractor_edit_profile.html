@@ -1,10 +1,13 @@
-{% extends "user/base.html" %} {% load static %} {% block content %}
+{% extends "user/base.html" %} 
+{% load static %} 
 {% load form_tags %}
+{% block content %}
 <style>
     #step {
         display: none;
     }
 </style>
+
 <div class="w-full">
     <div class="w-full">
         <!-- header -->
@@ -19,8 +22,15 @@
                 <h3 class="text-base text-gray-600"> Provide some basic information to set up your account.</h3>
             </div>
             {{form.media}}
-            <form class="w-full mt-4 flex flex-col gap-4" action = "{% url 'profile:edit-profile-request' %}" method="POST">
+            <form class="w-full mt-4 flex flex-col gap-4" action = "{% url 'profile:contractor-edit-profile-request' %}" method="POST">
                 {% csrf_token %}
+                {% if form.non_field_errors %}
+                <div class="bg-red-400 rounded-md text-center border border-red-700">
+                    {% for error in form.non_field_errors %}
+                        <p>{{ error }}</p>
+                    {% endfor %}
+                </div>
+                {% endif %}
                 <div class="w-full">
                     <label for="companyName" class="text-gray-700 font-medium text-sm">Company Name</label>
                     {{ form.company_name|addattrs:"class=w-full p-2 text-gray-500 border border-gray-300 rounded-md focus:outline-none mt-1 focus:border-gray-500,placeholder=Company Name"}}
@@ -61,11 +71,11 @@
                     {% endif %}
                 </div>
                 <div class="w-full">
-                    <label for="{{ form.registration_number.auto_id }}" class="text-gray-700 font-medium text-sm">Registration Number</label>
-                    {{ form.registration_number|addattrs:"class=w-full p-2 text-gray-500 border border-gray-300 rounded-md focus:outline-none mt-1 focus:border-gray-500,placeholder=Enter registration number" }}
-                    {% if form.registration_number.errors %}
+                    <label for="{{ form.registration_number.auto_id }}" class="text-gray-700 font-medium text-sm">Website</label>
+                    {{ form.website|addattrs:"class=w-full p-2 text-gray-500 border border-gray-300 rounded-md focus:outline-none mt-1 focus:border-gray-500,placeholder=Enter website" }}
+                    {% if form.website.errors %}
                         <div class="w-full py-1 rounded text-red-500">
-                            {{ form.registration_number.errors }}
+                            {{ form.website.errors }}
                         </div>
                     {% endif %}
                 </div>

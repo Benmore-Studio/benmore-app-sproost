@@ -11,8 +11,6 @@ media
 <<<<<<< HEAD
 =======
 media_cdn
->>>>>>> a570b8f7b2e63196a7fb2c8682e46087be5d855a
-*/migrations
 
 # Backup files # 
 *.bak 

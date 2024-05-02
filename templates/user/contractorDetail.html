@@ -88,8 +88,19 @@
     </div>
 </main>
 
-{% endblock %}{% block bottomNav %}{% if loggedInUser == 'agent' %}{% include "user/bottom_nav_agent.html" %}{% elif loggedInUser == 'contractor' %}{% include "user/bottom_nav_contractor.html"%}{% else %}{% include "user/bottom_nav.html" %} {% endif %}
-{% endblock bottomNav %} {% block extraScripts %}
+{% endblock %}
+
+{% block bottomNav %}
+    {% if request.user.user_type == 'AG' %}
+        {% include "user/bottom_nav_agent.html" %}
+    {% elif request.user.user_type == 'CO' %}
+        {% include "user/bottom_nav_contractor.html"%}
+    {% else %}
+        {% include "user/bottom_nav.html" %}
+    {% endif %}
+{% endblock bottomNav %} 
+
+{% block extraScripts %}
 <script src="{% static 'js/contractorDetail.js' %}"></script>
 
 {% endblock extraScripts %}

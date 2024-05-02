@@ -1,16 +1,18 @@
-{% extends "user/base.html" %} {% load static %} 
-{% include "user/bottom_navigation.html" %}
-
+{% extends "user/base.html" %} 
+{% load static %} 
+{% include "user/bottom_navigation.html" %} 
 {% block content %}
 <div class="w-full">
     <!-- header -->
     <div class="w-full p-4 flex items-center gap-8 mt-4 border-b border-neutral-150">
-        <img onclick="goBack()" src="{% static 'svgs/chevron-left.svg' %}" alt="" class="cursor-pointer" />
+        <a href = {% url "main:home" %} >
+            <img src="{% static 'svgs/chevron-left.svg' %}" alt="" class="cursor-pointer" />
+        </a>
         <h3 class="text-xl text-gray-900 font-medium">Assign Agent</h3>
     </div>
 
     <div class="w-full p-4">
-        <form method = "POST" class="w-full mt-4 flex flex-col gap-4">
+        <form method="POST" class="w-full mt-4 flex flex-col gap-4">
             {% csrf_token %}
             <div class="w-full">
                 <label for="agentName" class="text-gray-700 font-medium text-sm">Agent Name</label>
@@ -21,38 +23,24 @@
                     {% endfor %}
                 </select>
             </div>
-                <div class="w-full">
-                    <label for="agentName" class="text-gray-700 font-medium text-sm">Properties</label>
-                    <select required name="project_id" id="agentName" class="w-full p-2 border border-gray-300 rounded-md focus:outline-none mt-1 focus:border-gray-500">
-                        <option value="">Select a Property</option>
-                        {% for property in properties %}
-                            <option value="{{property.id}}">{{property.quote_request}}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-            </div>
-            
 
-            <div class="flex w-full flex-col gap-4 border-t border-neutral-150 pt-5">
+
+            <div class="flex w-full flex-col gap-4 border-t border-neutral-150 pt-1">
                 <button type="submit" class="flex items-center w-full justify-center p-3 rounded-lg bg-primary text-white border border-neutral-150 shadow-sm font-semibold">
                     Assign Agent
                 </button>
-                <div onclick="goBack()" class="flex p-3 w-full rounded-lg items-center justify-center bg-white border border-neutral-150 shadow-sm font-semibold">Cancel</div>
+                <a href = {% url "main:home" %} class="flex p-3 w-full rounded-lg items-center justify-center bg-white border border-neutral-150 shadow-sm font-semibold">Cancel</a>
             </div>
         </form>
     </div>
 </div>
-{% endblock %}
-
-{% block bottomNav %}{% if request.user == 'AG' %}{% include "user/bottom_nav_agent.html" %}{% elif request.user == 'CO' %}{% include "user/bottom_nav_contractor.html"%}{% else %}{% include "user/bottom_nav.html" %} {% endif %}
-{% endblock bottomNav %} {% block extraScripts %}
-<script>
-    function goBack() {
-        history.back()
-    }
-
-    function gotoPropertyList() {
-        window.location.href = "/property-list/"
-    }
-</script>
-{% endblock extraScripts %}
+{% endblock %} 
+{% block bottomNav %}
+{% if request.user == 'AG' %}
+    {% include "user/bottom_nav_agent.html" %}
+{% elif request.user == 'CO' %}
+    {% include "user/bottom_nav_contractor.html"%}
+{% else %}
+    {% include "user/bottom_nav.html" %} 
+{% endif %} 
+{% endblock bottomNav %} 

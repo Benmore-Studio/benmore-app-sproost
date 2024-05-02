@@ -6,10 +6,15 @@ from django.contrib.contenttypes.fields import GenericRelation
 class QuoteRequestStatus(models.TextChoices):
     pending = "Pending"
     approved = "Approved"
+    rejected = "Rejected"
 
+class QuoteRequestManager(models.Manager):
+    @property
+    def latest_quote(self):
+        return self.order_by('-id').first()
 
 class QuoteRequest(models.Model):
-    user = models.ForeignKey("accounts.User", on_delete=models.CASCADE, null=False)
+    user = models.ForeignKey("accounts.User", on_delete=models.CASCADE, null=False, related_name="quote_requests")
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     title = models.CharField(max_length=255, null=False)
     summary = models.TextField(null=False, max_length=257)
@@ -22,8 +27,13 @@ class QuoteRequest(models.Model):
     is_quote = models.BooleanField(default=True)
     
     
+    
+    objects = QuoteRequestManager()
+    
     def __str__(self) -> str:
         return self.title
+    
+    # a method that retuns the last in the querset of QuoteRequest
     
 
 def upload_location(instance, filename):
@@ -47,6 +57,7 @@ class Project(models.Model):
         if self.is_approved: 
             self.is_approved = True 
             self.quote_request.is_quote = False
+            self.quote_request.status = QuoteRequestStatus.approved
             self.quote_request.save()  
 
         super(Project, self).save(*args, **kwargs)

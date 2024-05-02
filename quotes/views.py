@@ -4,6 +4,7 @@ from django.views.generic import View
 from django.contrib import messages
 
 from accounts.models import UserTypes
+from accounts.services.user import UserService
 from quotes.forms import QuoteRequestForm
 from quotes.services import QuoteService
 from services.utils import CustomRequestUtil
@@ -15,11 +16,23 @@ class Quotes(LoginRequiredMixin, View, CustomRequestUtil):
     form_class = QuoteRequestForm
 
     def get(self, request, *args, **kwargs):
+        home_owner_id = kwargs.get("id")
+
+        self.user = self.auth_user
+
+        if home_owner_id:
+            user_service = UserService(request)
+            self.user, error = user_service.fetch_single_by_pk(id=home_owner_id)
+
+            if error:
+                messages.error(request, error)
+                return redirect('main:home')
+
         form = self.form_class(initial={
-            'contact_email': request.user.email,
-            'contact_phone': request.user.phone_number,
-            'property_address': request.user.user_profile.address
-            })
+            'contact_email': self.user.email,
+            'contact_phone': self.user.phone_number,
+            'property_address': self.user.user_profile.address
+        })
 
         self.extra_context_data = {
             "loggedInUser": f"{UserTypes.contractor}",
@@ -30,7 +43,13 @@ class Quotes(LoginRequiredMixin, View, CustomRequestUtil):
     
 
     def post(self, request, *args, **kwargs):
-        self.template_on_error = "quotes:request-quotes"
+        home_owner_id = kwargs.get("id")
+
+        if home_owner_id:
+            self.template_on_error = ("quotes:request-quotes", home_owner_id)
+        else:
+            self.template_on_error = "quotes:request-quotes"
+
         self.template_name = None
         
         form = self.form_class(request.POST)
@@ -38,9 +57,14 @@ class Quotes(LoginRequiredMixin, View, CustomRequestUtil):
         if form.is_valid():
             form_data = form.cleaned_data
 
+            form_data["home_owner_id"] = home_owner_id
+            form_data['media'] = None
+
             if request.FILES:
                 uploaded_files = request.FILES.getlist("upload-quote")
-                form_data["media"] = uploaded_files
+                uploaded_captures = request.FILES.getlist("upload-capture")
+
+                form_data["media"] = uploaded_files + uploaded_captures
 
             quote_service = QuoteService(request)
 
