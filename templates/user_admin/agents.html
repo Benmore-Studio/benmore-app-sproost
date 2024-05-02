@@ -19,10 +19,10 @@
                     </button>
                 </form>
             </div>
-            <div class="group border border-gray-300 rounded-md flex items-center justify-center gap-2 p-2 mt-1">
+            {% comment %} <div class="group border border-gray-300 rounded-md flex items-center justify-center gap-2 p-2 mt-1">
                 <img src="{% static 'svgs/Filterlines.svg' %}" alt="" class="w-[20px] h-[20px] object-contain" />
                 <span class="text-gray-700 font-semibold text-sm">Filters</span>
-            </div>
+            </div> {% endcomment %}
         </div>
     </div>
     <div class="w-full">
@@ -33,14 +33,12 @@
                     <tr class="text-gray-600 text-xs font-medium">
                         <th class=" text-start p-4">
                             <div class="inline-flex items-center gap-4">
-                                <input type="checkbox" class="w-4 h-4 rounded-xl">
                                 <h3 class="text-gray-900 text-sm font-medium capitalize">Name</h3>
                             </div>
                         </th>
                         <th class=" text-start p-4">Email Address</th>
                         <th class=" text-start p-4">Phone Number</th>
                         <th class=" text-start p-4">Location</th>
-                        <th class=" text-start p-4">Recent Project</th>
                         <th class=" text-start p-4">Total Projects</th>
                     </tr>
                 </thead>
@@ -49,10 +47,9 @@
                     {% for agent in agents %}
                     <tr class="border-b border-neutral-100 last:border-0">
                         <td class=" p-4">
-                            <div class="inline-flex items-center gap-4">
-                                <input type="checkbox" class="w-4 h-4 rounded-xl">
+                            <a href = "{% url "admins:update_agent" agent.pk %}" class="inline-flex items-center gap-4">
                                 <h3 class="text-gray-900 text-sm font-medium capitalize">{{agent.first_name}} {{agent.last_name}}</h3>
-                            </div>
+                            </a>
                         </td>
                         <td class=" p-4">
                             <div class="flex flex-col gap-1">
@@ -68,11 +65,6 @@
                             <div class="flex flex-col gap-1">
                                 <span class="text-gray-500 text-sm">{{agent.user_profile.address}}</span>
                             </div>
-                        </td>
-                        <td class=" p-4">
-                            <span class=" font-semibold text-xs rounded-xl p-1 px-2 border border-neutral-150 bg-gray-50 bg-opacity-90 {% if home_owner.quote_requests.latest_quote.status|lower == 'approved' %} bg-toneLightGreen text-primary bg-opacity-70 border-primary {% elif home_owner.quote_requests.latest_quote.status|lower == 'rejected' %} bg-[#B42318] bg-opacity-50 border-red-500 text-[#B42318] {% endif %} "> 
-                               
-                            </span>
                         </td>
 
                         <td class="p-4 ">

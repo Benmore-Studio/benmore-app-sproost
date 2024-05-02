@@ -9,10 +9,10 @@
                 <img src="{% static 'svgs/search.svg' %}" alt="" class="w-[20px] h-[20px] object-contain" />
                 <input type="text" name="search" id="search" placeholder="Search" class="w-full h-full outline-none group-focus:outline-none mt-1 focus-visible:border-none border-none" />
             </div>
-            <div class="group border border-gray-300 rounded-md flex items-center justify-center gap-2 p-2 mt-1">
+            {% comment %} <div class="group border border-gray-300 rounded-md flex items-center justify-center gap-2 p-2 mt-1">
                 <img src="{% static 'svgs/Filterlines.svg' %}" alt="" class="w-[20px] h-[20px] object-contain" />
                 <span class="text-gray-700 font-semibold text-sm">Filters</span>
-            </div>
+            </div> {% endcomment %}
         </div>
     </div>
     <div class="">
@@ -24,9 +24,9 @@
                         <span class="text-gray-500 font-medium">Project Name</span>
                         <h3 class="text-gray-600 font-semibold">{{quote.title}}</h3>
                     </div>
-                    <span class="">
-                  <img src="{% static 'svgs/more-vertical.svg' %}" alt="" class="" />
-                </span>
+                    {% comment %} <span class="">
+                        <img src="{% static 'svgs/more-vertical.svg' %}" alt="" class="" />
+                    </span> {% endcomment %}
                 </div>
                 <div class="flex items-start gap-12 w-full">
                     <div class="">

@@ -1,12 +1,12 @@
 
 from django.shortcuts import render, redirect
-from profiles.models import ContractorProfile, UserProfile
+from profiles.models import ContractorProfile, UserProfile, AgentProfile
 from django.urls import reverse
 from django.contrib import messages
 from django.db.models import Q
 
 from profiles.services.contractor import ContractorService
-from .forms import ContractorProfileForm, HomeOwnersEditForm
+from .forms import ContractorProfileForm, HomeOwnersEditForm, AgentEditForm
 from django.views.generic.edit import UpdateView
 from django.views.generic import DetailView
 from django.contrib.auth.decorators import login_required
@@ -66,18 +66,22 @@ def editProfile(request):
     user = request.user
     # render CO edit page if user type is CO
     if request.user.user_type == 'CO': 
-        contractorProfile = ContractorProfile.objects.get(user = user.id)   
-        email = user.email
-        form = ContractorProfileForm(instance = contractorProfile, user=user, initial={'email' : email})
+        contractorProfile = ContractorProfile.objects.get(user = user.id)
+        form = ContractorProfileForm(instance = contractorProfile, initial={'email' : user.email, 'phone_number' : user.phone_number})
         return render(request, 'user/editprofiles/contractor_edit_profile.html', {"details":contractorProfile,'form' :form})
     
-    elif request.user.user_type == 'AG' or  request.user.user_type == 'HO':
-        user_profile = UserProfile.objects.get(user = user.id)    
-        email = user.email
-        form = HomeOwnersEditForm(instance = user_profile, user=user, initial={'email' : email})
+    elif request.user.user_type == 'AG':
+        agent_profile = AgentProfile.objects.get(user = user.id)
+        form = AgentEditForm(instance = agent_profile, initial={'email' : user.email, 'phone_number' : user.phone_number})
+        return render(request, 'user/editprofiles/agents_edit_profile.html', {'form' :form})
+    
+    elif request.user.user_type == 'HO':
+        user_profile = UserProfile.objects.get(user = user.id)
+        form = HomeOwnersEditForm(instance = user_profile, initial={'email' : user.email, 'phone_number' : user.phone_number})
         return render(request, 'user/editprofiles/home_owners_edit_profile.html', {"details":user_profile, 'form' :form})
     else:
         return redirect('main:dashboard')
+
 
 @login_required
 def editHomeOwnerProfileRequest(request):
@@ -94,6 +98,23 @@ def editHomeOwnerProfileRequest(request):
             return redirect('main:home')
         else:
             return render(request, 'user/editprofiles/home_owners_edit_profile.html', {'form': form})
+    return redirect('profile:edit-profile')
+
+@login_required
+def editAgentProfile(request):
+    user = request.user
+    user_profile = AgentProfile.objects.get_or_create(user=request.user)[0]
+    if request.method == 'POST':
+        form = AgentEditForm(request.POST, instance=user_profile)
+        if form.is_valid():
+            form.save()
+            user.phone_number = form.cleaned_data['phone_number']
+            user.email = form.cleaned_data['email']
+            user.save()
+            messages.success(request, 'Profile updated successfully!')
+            return redirect('main:home')
+        else:
+            return render(request, 'user/editprofiles/agents_edit_profile.html', {'form': form})
     return redirect('profile:edit-profile')
 
 

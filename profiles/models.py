@@ -5,9 +5,17 @@ from django.contrib.contenttypes.fields import GenericRelation
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name = 'user_profile')
-    address = AddressField()
+    address = AddressField(null = True)
     city = models.CharField(max_length = 50, null = True, blank = True)
     state_province = models.CharField(max_length = 50, null = True, blank = True)    
+    
+    def __str__(self):
+        return self.user.email
+
+class AgentProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name = 'agent_profile')
+    address = AddressField(null = True)
+    registration_ID = models.CharField(max_length = 225, null = True, blank = True, unique=True)
     
     def __str__(self):
         return self.user.email
@@ -18,7 +26,7 @@ class ContractorProfile(models.Model):
     company_name = models.CharField(max_length = 255)
     registration_number = models.CharField(max_length = 225)
     specialization = models.CharField(max_length = 225, null = True, blank = True)
-    company_address = AddressField()
+    company_address = AddressField(null =True)
     city = models.CharField(max_length = 50)
     media_paths = GenericRelation("main.Media")
     

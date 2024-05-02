@@ -1,5 +1,5 @@
 from django.test import TestCase, Client
-from profiles.models import ContractorProfile, User, UserProfile
+from profiles.models import ContractorProfile, User, UserProfile, AgentProfile
 
 class CustomSignupFormTest(TestCase):
     def setUp(self):
@@ -46,12 +46,11 @@ class CustomSignupFormTest(TestCase):
         response = self.client.post('/accounts/signup/', data={
             'phone_number_0' : "NG" , # for the phone field
             'phone_number_1' : "+2347058985430",
-            'address': '123 Street',
+            'agent_address': '123 Street',
             'user_type': 'AG',
-            'first_name': 'John',
-            'last_name': 'Doe',
-            'city': 'City',
-            'state': 'State',
+            'agent_first_name': 'John',
+            'agent_last_name': 'Doe',
+            'registration_ID' : "2223344DH",
             'email' : 'test@gmai.com',
             'password1' : '123pass?%@',
             'password2' : '123pass?%@',
@@ -59,5 +58,6 @@ class CustomSignupFormTest(TestCase):
         self.assertEqual(response.status_code, 302) 
         user = User.objects.first()
         self.assertEqual(user.user_type, 'AG')
-        self.assertTrue(UserProfile.objects.filter(user=user).exists())
+        self.assertEqual(user.first_name, 'John')
+        self.assertTrue(AgentProfile.objects.filter(user=user).exists())
             

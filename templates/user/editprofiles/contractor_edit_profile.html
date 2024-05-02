@@ -22,7 +22,7 @@
                 <h3 class="text-base text-gray-600"> Provide some basic information to set up your account.</h3>
             </div>
             {{form.media}}
-            <form class="w-full mt-4 flex flex-col gap-4" action = "{% url 'profile:contractor-edit-profile-request' %}" method="POST">
+            <form class="w-full mt-4 flex flex-col gap-4" action = "{% url 'profile:edit-contractor-profile' %}" method="POST">
                 {% csrf_token %}
                 {% if form.non_field_errors %}
                 <div class="bg-red-400 rounded-md text-center border border-red-700">

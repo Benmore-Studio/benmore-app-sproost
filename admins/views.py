@@ -2,14 +2,18 @@ from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import get_user_model
 from django.db.models import Count, Case, When, CharField
-from property.models import AssignedAccount
-from django.db.models import Prefetch
 from django.db.models import Q
 from django.core.paginator import Paginator
 from django.urls import reverse
 from quotes.models import Project, QuoteRequest, QuoteRequestStatus
-from .forms import QuoteStatusForm
+from .forms import UpdateAgentForm, UpdateContractorProfileForm, QuoteStatusForm, UpdateHomeOwnerForm
 from django.http import HttpResponseBadRequest, HttpResponseNotFound
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.views.generic import View
+from profiles.models import AgentProfile, ContractorProfile, UserProfile
+from django.urls import reverse_lazy
+from django.shortcuts import redirect
+from django.contrib import messages
 
 
 User = get_user_model()
@@ -32,10 +36,10 @@ def adminDashboard(request):
     recent_contractors = User.objects.filter(user_type='CO').select_related("contractor_profile").order_by('-id')[:4]
     
     overall_stats = [
-        {'title':'Home Owners', 'project_counts': counts['home_owner_count'], 'increased_by':'20%', 'action':'View owners', 'link' : reverse('admins:homeowners')},
-        {'title':'Agents', 'project_counts': counts['agent_count'], 'increased_by':'10%', 'action':'View agents', 'link' : reverse('admins:agents')},
-        {'title':'Contractors', 'project_counts': counts['contractor_count'], 'increased_by':'10%', 'action':'View contractors', 'link' : reverse('admins:contractors')},
-        {'title':'Active Projects', 'project_counts': active_projects, 'increased_by':'40%', 'action':'View projects', 'link' : reverse('admins:active-projects')},
+        {'title':'Home Owners', 'project_counts': counts['home_owner_count'], 'action':'View owners', 'link' : reverse('admins:homeowners')},
+        {'title':'Agents', 'project_counts': counts['agent_count'], 'action':'View agents', 'link' : reverse('admins:agents')},
+        {'title':'Contractors', 'project_counts': counts['contractor_count'], 'action':'View contractors', 'link' : reverse('admins:contractors')},
+        {'title':'Active Projects', 'project_counts': active_projects, 'action':'View projects', 'link' : reverse('admins:active-projects')},
     ]
     context ={'recent_home_owners': recent_home_owners, 'recent_agents':recent_agents,
               'recent_contractors': recent_contractors, 'recent_quote_requests': recent_quote_requests, 'overall_stats': overall_stats,
@@ -208,4 +212,88 @@ def changeQuoteStatus(request, pk):
         return HttpResponseNotFound("Quote not found")
     
     return render(request, 'user_admin/partials/QuoteStatusForm.html', {'quote' : quote})
+
+
+class updateContractor(LoginRequiredMixin, View):
+    form_class = UpdateContractorProfileForm
+    template_name = 'user_admin/update_contractor.html'
+    success_url = reverse_lazy('admins:contractors')
+    
+    def get(self, request, *args, **kwargs):
+        user = User.objects.get(id=self.kwargs.get('pk'))
+        obj = ContractorProfile.objects.get_or_create(user=user)[0]
+        form = self.form_class(instance=obj, initial = { 'email' : user.email , 'phone_number' : user.phone_number})
+        return render(request, self.template_name, {'form': form})
+    
+    def post(self, request, *args, **kwargs):
+        try:
+            obj = ContractorProfile.objects.get(user__id=self.kwargs.get('pk'))
+            form = self.form_class(request.POST, instance=obj)
+            if form.is_valid():
+                form.save()
+                obj.user.email = form.cleaned_data.get('email')
+                obj.user.phone_number = form.cleaned_data.get('phone_number')
+                obj.user.save()
+                messages.success(self.request, 'Contractor updated successfully')
+                return redirect(self.success_url)
+            return render(request, self.template_name, {'form': form})
+        except ContractorProfile.DoesNotExist:
+            messages.error(self.request, 'An Error Occurred, Contractor not found')
+            return redirect(self.success_url)
+        
+class updateHomeOwner(LoginRequiredMixin, View):
+    form_class = UpdateHomeOwnerForm
+    template_name = 'user_admin/update_home_owner.html'
+    success_url = reverse_lazy('admins:homeowners')
+    
+    def get(self, request, *args, **kwargs):
+        user = User.objects.get(id=self.kwargs.get('pk'))
+        obj = UserProfile.objects.get_or_create(user=user)[0]
+        form = self.form_class(instance=obj, initial = { 'email' : user.email , 'phone_number' : user.phone_number})
+        return render(request, self.template_name, {'form': form})
+    
+    def post(self, request, *args, **kwargs):
+        try:
+            obj = UserProfile.objects.get(user__id=self.kwargs.get('pk'))
+            form = self.form_class(request.POST, instance=obj)
+            if form.is_valid():
+                form.save()
+                obj.user.email = form.cleaned_data.get('email')
+                obj.user.phone_number = form.cleaned_data.get('phone_number')
+                obj.user.save()
+                messages.success(self.request, 'Home Owner updated successfully')
+                return redirect(self.success_url)
+            return render(request, self.template_name, {'form': form})
+        except ContractorProfile.DoesNotExist:
+            messages.error(self.request, 'An Error Occurred, Home Owner not found')
+            return redirect(self.success_url)
+        
+class UpdateAgent(LoginRequiredMixin, View):
+    form_class = UpdateAgentForm
+    template_name = 'user_admin/update_agent.html'
+    success_url = reverse_lazy('admins:agents')
+    
+    def get(self, request, *args, **kwargs):
+        user = User.objects.get(id=self.kwargs.get('pk'))
+        print(user)
+        obj = AgentProfile.objects.get_or_create(user=user)[0]
+        form = self.form_class(instance=obj, initial = { 'email' : user.email , 'phone_number' : user.phone_number})
+        return render(request, self.template_name, {'form': form})
+    
+    def post(self, request, *args, **kwargs):
+        try:
+            obj = AgentProfile.objects.get(user__id=self.kwargs.get('pk'))
+            form = self.form_class(request.POST, instance=obj)
+            if form.is_valid():
+                form.save()
+                obj.user.email = form.cleaned_data.get('email')
+                obj.user.phone_number = form.cleaned_data.get('phone_number')
+                obj.user.save()
+                messages.success(self.request, 'Agent updated successfully')
+                return redirect(self.success_url)
+            return render(request, self.template_name, {'form': form})
+        except ContractorProfile.DoesNotExist:
+            messages.error(self.request, 'An Error Occurred, Agent not found')
+            return redirect(self.success_url)
+
     
