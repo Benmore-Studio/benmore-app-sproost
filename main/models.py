@@ -7,7 +7,6 @@ def file_upload_location(instance, filename):
     return f'files/{instance.object_id}/{filename}'
 
 def image_upload_location(instance, filename):
-    
     return f'images/{instance.object_id}/{filename}'
 
 

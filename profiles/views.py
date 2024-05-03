@@ -4,13 +4,16 @@ from profiles.models import ContractorProfile, UserProfile
 from django.urls import reverse
 from django.contrib import messages
 from django.db.models import Q
+from django.utils import timezone
+
 
 from profiles.services.contractor import ContractorService
-from .forms import ContractorProfileForm, HomeOwnersEditForm
+from .forms import ContractorProfileForm, HomeOwnersEditForm, ProfilePictureForm
 from django.views.generic.edit import UpdateView
 from django.views.generic import DetailView
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
+from main.models import Media
 
 
 @login_required
@@ -39,9 +42,10 @@ def contractor_profile_view(request):
     
     # TODO add try and except to catch possible errors
     profile = ContractorProfile.objects.get(user = request.user)
-
+    form = ProfilePictureForm(instance = profile)
     context = {
         'profile' : profile,
+        "form": form
     }
     return render(request, 'user/contractor_home.html', context)
 
@@ -140,3 +144,61 @@ def search_view(request):
 def upload_image(request):
     print(request.FILES)
     return redirect('profile:contractor_profile')
+
+
+# def change_profile_pics_view(request):
+#     if request.method == 'POST':
+#         form = ProfilePictureForm(request.POST, request.FILES)
+#         if form.is_valid():
+#             # Get the uploaded image
+#             image_instance = form.cleaned_data['image']
+            
+#             # Constructing a new filename
+#             new_filename = f"{request.user.username}_profilepic_{request.user.id}.jpg"
+            
+#             # Check if a media instance with the new filename exists
+#             existing_media_instance = Media.objects.filter(image__icontains=new_filename).first()
+            
+#             if existing_media_instance:
+#                 # If an instance with the new filename exists, update its image
+#                 existing_media_instance.image = image_instance
+#                 existing_media_instance.upload_date = timezone.now()
+#                 existing_media_instance.save()
+#             else:
+#                 # If no instance with the new filename exists, create a new one
+#                 media_instance = Media.objects.create(
+#                     content_object=request.user.contractor_profile,
+#                     image=image_instance,
+#                     upload_date=timezone.now()
+#                 )
+            
+#             # Redirect to the user's profile page
+#             return redirect('profile')
+#     else:
+#         form = ProfilePictureForm()
+#     return render(request, 'change_profile_picture.html', {'form': form})
+
+
+def change_profile_pics_view(request):
+    if request.method == 'POST':
+        form = ProfilePictureForm(request.POST, request.FILES)
+        print(request.POST)
+        print(request.FILES)
+        if form.is_valid():
+            image_instance = form.cleaned_data['image']
+            
+            # Get or create the ContractorProfile instance for the current user
+            contractor_profile = ContractorProfile.objects.get(user=request.user)
+            
+            # Update the image field of the ContractorProfile instance
+            contractor_profile.image = image_instance
+            contractor_profile.save()
+            
+            # Redirect to the user's profile page
+            return redirect('profile:contractor_profile')
+        else:
+            print(form.errors)
+            print("form.errors")
+    else:
+        form = ProfilePictureForm()
+    return render(request, 'user/contractor_home.html', {'form': form})

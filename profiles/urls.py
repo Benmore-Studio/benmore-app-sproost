@@ -12,4 +12,5 @@ urlpatterns = [
     path('edit-profile-request/', views.ContractorProfileEditView, name="edit-profile-request"),
     path('contractor-edit-profile-request/', views.ContractorProfileEditView, name="contractor-edit-profile-request"),
     path('edit-homeowners-profile-request/', views.editHomeOwnerProfileRequest, name="edit-homeowners-profile-request"),
+    path('change-dp-request/', views.change_profile_pics_view, name="change-dp-request"),
 ]

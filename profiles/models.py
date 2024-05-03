@@ -3,6 +3,10 @@ from accounts.models import User
 from address.models import AddressField
 from django.contrib.contenttypes.fields import GenericRelation
 
+def image_upload_location(instance, filename):
+    return f'contractorprofilepics/{instance.id}/{filename}'
+
+
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name = 'user_profile')
     address = AddressField()
@@ -21,6 +25,8 @@ class ContractorProfile(models.Model):
     company_address = AddressField()
     city = models.CharField(max_length = 50)
     media_paths = GenericRelation("main.Media")
+    image = models.ImageField(upload_to=image_upload_location, null=True)
+
     
     def __str__(self):
         return self.user.email

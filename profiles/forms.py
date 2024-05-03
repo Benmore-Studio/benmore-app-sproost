@@ -4,6 +4,7 @@ from phonenumber_field.formfields import PhoneNumberField
 from phonenumber_field.widgets import PhoneNumberPrefixWidget
 from address.forms import AddressField, AddressWidget
 from django.contrib.auth import get_user_model
+from main.models import Media
 
 User = get_user_model()
 
@@ -60,3 +61,9 @@ class HomeOwnersEditForm(forms.ModelForm):
         if User.objects.exclude(id=user_id).filter(email=email).exists():
             raise forms.ValidationError('This email address is already in use.')
         return email
+
+class ProfilePictureForm(forms.ModelForm):
+    class Meta:
+        model = ContractorProfile
+        fields = ['image']
+
