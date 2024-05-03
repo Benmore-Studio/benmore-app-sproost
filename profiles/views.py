@@ -11,12 +11,14 @@ from django.views.generic.edit import UpdateView
 from django.views.generic import DetailView
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth import get_user_model
 
+User = get_user_model()
 
 @login_required
 def contractor_profile_view(request):
     if request.user.user_type != 'CO':
-        return redirect('main:dashboard')
+        return redirect('main:home')
     
     if request.method == "POST":
         if request.FILES:
@@ -84,7 +86,8 @@ def editProfile(request):
 
 @login_required
 def editHomeOwnerProfileRequest(request):
-    user = request.user
+    user = User.objects.get(id=request.user.id)
+    print(user, "home user")
     user_profile = UserProfile.objects.get_or_create(user=request.user)[0]
     if request.method == 'POST':
         form = HomeOwnersEditForm(request.POST, instance=user_profile)

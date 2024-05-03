@@ -126,7 +126,7 @@ class AssignAgentView(LoginRequiredMixin, View):
             try:
                 
                 agent = AgentProfile.objects.get(registration_ID=regID)
-                if AssignedAccount.objects.filter(assigned_by=request.user).exists():
+                if AssignedAccount.objects.filter(assigned_by=request.user, assigned_to=agent.user).exists():
                     messages.warning(request, 'Agent already assigned. Awaiting agent confirmation')
                     return redirect('main:assign-agent')
                 
