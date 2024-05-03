@@ -186,3 +186,5 @@ SOCIALACCOUNT_PROVIDERS = {
 AUTH_USER_MODEL = 'accounts.User'
 
 GOOGLE_API_KEY = "AIzaSyBIMv62jBi-MjrYXsARUfy8S5xZwKqeGqc"
+
+CSRF_TRUSTED_ORIGINS = ['https://fdb9-105-113-33-126.ngrok-free.app']

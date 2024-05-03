@@ -14,6 +14,67 @@
   }
 </style>
 
+    <div id="capture-video" class="relative hidden w-full">
+      <div class="fixed inset-0 flex items-center justify-center z-50">
+          <div class="fixed inset-0 bg-black/75"></div>
+          <div class="flex flex-col items-center">
+            <div class="z-50">
+              <video id="video" autoplay></video>
+              <div class="flex gap-4 justify-center mt-3">
+                <button id="stop" class="bg-primary py-3 px-4 cursor-pointer text-white rounded-lg">Stop</button>
+                <button id="capture" class="bg-primary py-3 px-4 cursor-pointer text-white rounded-lg">Capture</button>     
+
+              </div>
+              <canvas id="canvas" style="display: none;"></canvas>
+            </div>
+          </div>
+      </div>
+    </div>
+
+    <!-- modal for dp view -->
+    <div id="imagePreviewModal" class="relative hidden w-full">
+      <div class="fixed inset-0 flex items-center justify-center z-50">
+          <div class="fixed inset-0 bg-black/75"></div>
+          <div class="flex flex-col items-center">
+            <div class="modal z-50">
+              <span class="close text-red-500 text-3xl font-bold absolute top-2 right-4 cursor-pointer">&times;</span>
+              <form id="imageForm" class="" action="{% url 'profile:change-dp-request' %}" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                  <div id="dp-view"  class="flex flex-col items-center justify-center">
+                    <img class="modal-content rounded-md max-w-[80%] max-h-[70vh]" src="#" id="previewImage">
+                    <div class="flex items-center justify-center gap-8 mt-4">
+                      <div id="change-through-camera" class="">
+                        <i class="fa fa-camera fa-4x text-primary cursor-pointer text-3xl" aria-hidden="true"></i>
+                      </div>
+                      <div class="change-icon-container ">
+                        <div id="">
+                          <input type="file" id="id_gallery_change" name="image" class="hidden">
+                        </div>
+                        <label for="id_gallery_change" class="gallery-icon-label">
+                            <span><i id="change-through-gallery" class="fa fa-pencil fa-4x text-primary cursor-pointer text-3xl" aria-hidden="true"></i>
+                        </label>
+                        
+                      </div>             
+                    </div>
+                  </div>
+                  <!-- for sending dp change request -->
+                  <div id="send-button" class="hidden  sm:h-[70vh] flex-col justify-center items-center"> 
+                      <img id="previewImageForm" name class="w-full h-full" src="#" alt="Image Preview">
+                      <div class="flex gap-4 justify-center w-full mt-4">
+                        <button id="cancel-dp-change" class="bg-primary py-3 px-4 cursor-pointer text-white rounded-lg" type="button">Cancel</button>
+                        <button type="submit" class="bg-primary py-3 px-4 cursor-pointer text-white rounded-lg">Change</button>
+                      </div>
+                  </div>
+                </form>
+
+            </div>
+          </div>
+      </div>
+    </div>
+
+
+
+
 <main class="w-full relative mb-4">
   <div class="w-full h-[195px] rounded-bl-lg rounded-br-lg bg-primary"></div>
   <!-- <div class="absolute top-16 border border-neutral-150 rounded-md w-fit p-2 right-4">
@@ -21,20 +82,29 @@
             <img src="{% static 'svgs/Notification.svg' %}" alt="" class="" />
             <span class="bg-[#F9BC36] w-2 h-2 rounded-full absolute top-0 right-0"></span>
         </div>
-    </div> -->
+    </div> -->'
+    <form class="absolute right-4 top-4" action="{% url 'account_logout' %}" method="POST">
+        {% csrf_token %}
+        <button type="submit" class="flex gap-2 items-center rounded-md text-black bg-white border border-gray-300 p-2 cursor-pointer">Logout <img src = {% static 'svgs/logout.svg' %} class = "w-4 h-4" /></button>
+    </form>'
   <div class="min-h-[750px] mt-[-8rem]">
     <div class="w-[120px] h-[120px] relative z-10 rounded-full border border-enutral-150 mx-auto mt-[-1rem]">
-      <img src="{% static 'images/truck.jpeg' %}" alt="" class="w-full h-full object-cover rounded-full" />
+      {% if form.image.errors %}
+          <div class = "w-full py-1 rounded text-red-500 absolute top-[-45%] left-[30px]">
+              {{form.image.errors}}
+          </div>
+      {% endif %}
+      {% if profile.image %}
+        <img id="profilepicture" src="{{profile.image.url}}" alt="" class="w-full h-full object-cover rounded-full" />
+        {% else %}
+        <img id="profilepicture" src="{% static 'images/truck.jpeg' %}" alt="" class="w-full h-full object-cover rounded-full" />
+      {% endif %}
+        
       <div class="w-[33px] h-[33px] rounded-full bg-white flex items-center justify-center absolute bottom-0 right-0 shadow-sm">
         <img src="{% static 'svgs/sproost.svg' %}" alt="" class="w-[26px] h-[12px] object-contain" />
       </div>
     </div>
     <div class="w-11/12 mx-auto bg-white min-h-[700px] shadow-md mt-[-4rem] relative">
-      <form class="absolute right-4 top-4" action="{% url 'account_logout' %}" method="POST">
-        {% csrf_token %}
-        <button type="submit" class="border border-gray-300 p-2 cursor-pointer"><img src = {% static 'svgs/logout.svg' %} class = "w-4 h-4" /></button>
-      </form>
-
       <div class="pt-20">
         <!-- header -->
         <div class="flex flex-col items-center justify-center mb-4">
@@ -65,7 +135,7 @@
             </div>
 
             {% if request.user == profile.user %}
-            <a href = {% url "profile:edit-profile" %} class="bg-[#eaf7e6] p-2 px-4 px-2 text-primary rounded-md text-gray-500 text-sm font-semibold">Edit Profile</a> 
+            <a href = '{% url "profile:edit-profile" %}' class="bg-[#eaf7e6] p-2 px-4 px-2 text-primary rounded-md text-gray-500 text-sm font-semibold">Edit Profile</a> 
             {% endif %}
           </div>
         </div>
@@ -153,7 +223,8 @@
 {% endblock bottomNav %} 
 {% block extraScripts %}
 <script>
-  var csrf_token = "{{csrf_token}}"
+    var csrf_token = "{{csrf_token}}"
 </script>
+<script src="{% static 'js/changeProfilePics.js' %}" async></script>
 <script src="{% static 'js/contractorDetail.js' %}"></script>
 {% endblock extraScripts %}
