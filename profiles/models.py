@@ -27,6 +27,7 @@ class ContractorProfile(models.Model):
     registration_number = models.CharField(max_length = 225)
     specialization = models.CharField(max_length = 225, null = True, blank = True)
     company_address = AddressField(null =True)
+    website = models.URLField(max_length=255, null=True)
     city = models.CharField(max_length = 50)
     media_paths = GenericRelation("main.Media")
     

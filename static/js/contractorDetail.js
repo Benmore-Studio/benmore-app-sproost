@@ -5,6 +5,10 @@ document.addEventListener("DOMContentLoaded", function () {
   handleImageUpload()
 })
 
+window.addEventListener("DOMContentLoaded", () => {
+  uploadFiles()
+})
+
 async function handleImageUpload() {
   const uploadBtn = document.getElementById("upload-btn")
   const fileInput = document.getElementById("file-input")
@@ -93,7 +97,6 @@ function openTab(evt, tabName) {
 document.getElementById("tab1").style.display = "block"
 document.getElementsByClassName("tablinks")[0].className += " active"
 
-console.log("we are here")
 
 function uploadFiles() {
   const fileContainer = document.getElementById("file-container")
@@ -107,8 +110,7 @@ function uploadFiles() {
     for (var i = 0; i < selectedFiles.length; i++) {
       selectedFileList.push(selectedFiles[i])
     }
-    console.log({selectedFiles})
-    console.log({selectedFileList})
+    
 
     if (selectedFileList.length > 0) {
       photos = selectedFileList.filter((file) => file.type.startsWith("image/"))

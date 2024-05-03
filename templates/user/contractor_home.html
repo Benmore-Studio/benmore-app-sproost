@@ -21,11 +21,11 @@
             <img src="{% static 'svgs/Notification.svg' %}" alt="" class="" />
             <span class="bg-[#F9BC36] w-2 h-2 rounded-full absolute top-0 right-0"></span>
         </div>
-    </div> -->'
+    </div> -->
     <form class="absolute right-4 top-4" action="{% url 'account_logout' %}" method="POST">
         {% csrf_token %}
         <button type="submit" class="flex gap-2 items-center rounded-md text-black bg-white border border-gray-300 p-2 cursor-pointer">Logout <img src = {% static 'svgs/logout.svg' %} class = "w-4 h-4" /></button>
-    </form>'
+    </form>
   <div class="min-h-[750px] mt-[-8rem]">
     <div class="w-[120px] h-[120px] relative z-10 rounded-full border border-enutral-150 mx-auto mt-[-1rem]">
       <img src="{% static 'images/truck.jpeg' %}" alt="" class="w-full h-full object-cover rounded-full" />
@@ -38,7 +38,7 @@
         <!-- header -->
         <div class="flex flex-col items-center justify-center mb-4">
           <h3 class="text-xl text-gray-700">
-            {% if profile.user.username %} {{ profile.company_name }} {% else %} {{ profile.user.username }} {% endif %}
+            {% if profile.company_name %} {{ profile.company_name }} {% else %} {{ profile.user.username }} {% endif %}
           </h3>
           <p class="font-[300]">{{profile.specialization|default:"Not Provided"}}</p>
         </div>
@@ -50,17 +50,12 @@
               <span class="text-gray-500 text-sm">{{profile.company_address|default:"None"}}, {{profile.city|default:"None"}}</span>
             </div>
             <div class="flex flex-col gap-3">
-              <span class="text-primarydark font-bold text-sm">Registration No.</span>
-              <span class="text-gray-500 text-sm">#{{profile.registration_number}}</span>
+              <span class="text-primarydark font-bold text-sm">Website</span>
+              <span class="text-gray-500 text-sm">{{profile.website|default:"None"}}</span>
             </div>
           </div>
           <div class="w-full flex items-center justify-between border-b border-neutral-150 pb-4">
             <div class="flex flex-col gap-2">
-              <img src="{% static 'svgs/helmet.svg' %}" alt="" class="w-[18px] h-[18px] object-contain" />
-              <div class="flex flex-col gap-3">
-                <span class="text-primarydark font-bold text-sm">Completed Projects</span>
-                <span class="text-gray-500 text-sm">24</span>
-              </div>
             </div>
 
             {% if request.user == profile.user %}
@@ -71,18 +66,13 @@
         <!-- tabs -->
         <div class="tab flex flex-items-center justify-between p-4">
           <div class="flex flex-row">
-            <button class="tablinks p-2 text-gray-500 text-sm font-medium" onclick="openTab(event, 'tab1')">All media</button> 
-            {% if request.user == profile.user %}
-            <button class="tablinks p-2 text-gray-500 text-sm font-medium" onclick="openTab(event, 'tab4')">
-              <i class="fa fa-plus"></i>
-            </button>
-            {% endif %}
+            <button class="tablinks p-2 text-gray-500 text-sm font-medium" onclick="openTab(event, 'tab1')">Media</button> 
           </div>
-          <button class="tablinks p-2 text-gray-500 text-sm font-medium" onclick="openTab(event, 'tab2')">On the job</button>
-          <button class="tablinks p-2 text-gray-500 text-sm font-medium" onclick="openTab(event, 'tab3')">Other jobs</button>
+          <button class="tablinks p-2 text-gray-500 text-sm font-medium" onclick="openTab(event, 'tab2')">Description</button>
+          <button class="tablinks p-2 text-gray-500 text-sm font-medium" onclick="openTab(event, 'tab3')">Contact</button>
         </div>
 
-        <div id="tab1" class="tabcontent p-4">
+        <div id="tab1" class="tabcontent p-4 w-full">
           <div class="w-full grid grid-cols-4 gap-2">
             {% for media in profile.media_paths.all %} {% if media.image %}
             <img src="/media/{{media.image }}" alt="" class="w-full h-[81px] border border-neutral-150 object-cover" /> {% elif media.file %}
@@ -93,6 +83,13 @@
             {% endif %} 
             {% endfor %}
           </div>
+          {% if request.user == profile.user %}
+          <div id="tab1" class="w-full flex justify-center items-center mt-4">
+            <button class="tablinks px-2 py-1 text-gray-500 text-xl font-lg border border-black rounded-full" onclick="openTab(event, 'tab4')">
+              <i class="fa fa-plus-circle"></i>
+            </button>
+          </div>
+          {% endif %}
         </div>
 
         <div id="tab2" class="tabcontent">
@@ -102,8 +99,12 @@
         </div>
 
         <div id="tab3" class="tabcontent">
-          <div class="w-full min-h-24 flex items-center justify-center">
-            <h3 class="text-gray-900 font-semibold">Coming soon</h3>
+          <div class="w-full min-h-24 p-4 flex flex-col gap-4">
+            <p class="text-gray-500 text-sm"><span class="text-primarydark font-bold text-sm">Phone Number</span>: {{ profile.user.phone_number }}</p>
+            <p class="text-gray-500 text-sm"><span class="text-primarydark font-bold text-sm">Address</span>: {{profile.company_address|default:"None"}}, {{profile.city|default:"None"}}</p>
+            {% if profile.website %}
+            <p class="text-gray-500 text-sm"><span class="text-primarydark font-bold text-sm">Website</span>: <a href="{{profile.website}}">{{ profile.website}}</a></p>
+            {% endif %}
           </div>
         </div>
         {% if request.user == profile.user %}

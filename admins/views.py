@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import get_user_model
 from django.db.models import Count, Case, When, CharField
@@ -18,8 +18,13 @@ from django.contrib import messages
 
 User = get_user_model()
 
+
+
 @login_required
 def adminDashboard(request):
+    if request.user.user_type in ['HO', 'AG', 'CO']:
+        return redirect('main:home')
+    
     counts = User.objects.aggregate(
         home_owner_count=Count(Case(When(user_type='HO', then=1), output_field=CharField())),
         agent_count=Count(Case(When(user_type='AG', then=1), output_field=CharField())),

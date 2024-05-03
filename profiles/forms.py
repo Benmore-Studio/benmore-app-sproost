@@ -16,7 +16,7 @@ class ContractorProfileForm(forms.ModelForm):
     email = forms.EmailField()
     class Meta:
         model = ContractorProfile
-        fields = ['company_name', 'specialization', 'city', 'registration_number',  'company_address', 'phone_number']
+        fields = ['company_name', 'specialization', 'city', 'website',  'company_address', 'phone_number']
 
     def clean_email(self):
         email = self.cleaned_data.get('email').lower()

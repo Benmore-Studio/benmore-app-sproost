@@ -37,8 +37,7 @@ def contractor_profile_view(request):
         return redirect("profile:contractor_profile")
     
     
-    # TODO add try and except to catch possible errors
-    profile = ContractorProfile.objects.get(user = request.user)
+    profile = ContractorProfile.objects.get(user=request.user)
 
     context = {
         'profile' : profile,

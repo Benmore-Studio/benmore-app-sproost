@@ -71,11 +71,11 @@
                     {% endif %}
                 </div>
                 <div class="w-full">
-                    <label for="{{ form.registration_number.auto_id }}" class="text-gray-700 font-medium text-sm">Registration Number</label>
-                    {{ form.registration_number|addattrs:"class=w-full p-2 text-gray-500 border border-gray-300 rounded-md focus:outline-none mt-1 focus:border-gray-500,placeholder=Enter registration number" }}
-                    {% if form.registration_number.errors %}
+                    <label for="{{ form.registration_number.auto_id }}" class="text-gray-700 font-medium text-sm">Website</label>
+                    {{ form.website|addattrs:"class=w-full p-2 text-gray-500 border border-gray-300 rounded-md focus:outline-none mt-1 focus:border-gray-500,placeholder=Enter website" }}
+                    {% if form.website.errors %}
                         <div class="w-full py-1 rounded text-red-500">
-                            {{ form.registration_number.errors }}
+                            {{ form.website.errors }}
                         </div>
                     {% endif %}
                 </div>

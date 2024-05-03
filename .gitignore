@@ -8,6 +8,8 @@ db9.sqlite3
 db.sqlite3
 virtualenv/ 
 media
+<<<<<<< HEAD
+=======
 media_cdn
 
 # Backup files # 
