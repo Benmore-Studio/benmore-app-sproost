@@ -43,6 +43,7 @@ class HomeOwnersEditForm(forms.ModelForm):
             raise forms.ValidationError('This email address is already in use.')
         return email
     
+
 class AgentEditForm(forms.ModelForm):
     phone_number = PhoneNumberField(required=False, widget=PhoneNumberPrefixWidget(initial='US'))
     address = AddressField(
@@ -59,3 +60,9 @@ class AgentEditForm(forms.ModelForm):
         if User.objects.exclude(id=user_id).filter(email=email).exists():
             raise forms.ValidationError('This email address is already in use.')
         return email
+
+class ProfilePictureForm(forms.ModelForm):
+    class Meta:
+        model = ContractorProfile
+        fields = ['image']
+
