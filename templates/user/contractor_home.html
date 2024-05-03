@@ -76,7 +76,7 @@
 
 
 <main class="w-full relative mb-4">
-  <div class="w-full h-[195px] rounded-bl-lg rounded-br-lg bg-primary"></div>
+  <div class="w-full h-[120px] rounded-bl-lg rounded-br-lg bg-green-500"></div>
   <!-- <div class="absolute top-16 border border-neutral-150 rounded-md w-fit p-2 right-4">
         <div class="relative ">
             <img src="{% static 'svgs/Notification.svg' %}" alt="" class="" />
@@ -87,8 +87,8 @@
         {% csrf_token %}
         <button type="submit" class="flex gap-2 items-center rounded-md text-black bg-white border border-gray-300 p-2 cursor-pointer">Logout <img src = {% static 'svgs/logout.svg' %} class = "w-4 h-4" /></button>
     </form>
-  <div class="min-h-[750px] mt-[-8rem]">
-    <div class="w-[120px] h-[120px] relative z-10 rounded-full border border-enutral-150 mx-auto mt-[-1rem]">
+  <div class="min-h-[750px] mt-[-6rem]">
+    <div class="w-[120px] h-[120px] border-[5px] border-green-300 relative z-10 rounded-full border border-enutral-150 mx-auto mt-[-1rem]">
       {% if form.image.errors %}
           <div class = "w-full py-1 rounded text-red-500 absolute top-[-45%] left-[30px]">
               {{form.image.errors}}
@@ -104,7 +104,7 @@
         <img src="{% static 'svgs/sproost.svg' %}" alt="" class="w-[26px] h-[12px] object-contain" />
       </div>
     </div>
-    <div class="w-11/12 mx-auto bg-white min-h-[700px] shadow-md mt-[-4rem] relative">
+    <div class="w-11/12 mx-auto bg-white min-h-[700px] shadow-md mt-[-4rem] rounded-lg relative">
       <div class="pt-20">
         <!-- header -->
         <div class="flex flex-col items-center justify-center mb-4">
