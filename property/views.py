@@ -10,7 +10,7 @@ def agents_home_owner_account(request, pk):
     try:
         home_owner = User.objects.get(pk=pk)
         if not AssignedAccount.objects.filter(assigned_by = home_owner, assigned_to = request.user).exists():
-            messages.error(request, "you were not assigned by this user")
+            messages.error(request, f"you were not assigned by {home_owner.email} to view their account.")
             return  redirect('main:home')
         
         quotes = QuoteRequest.objects.filter(user=home_owner)

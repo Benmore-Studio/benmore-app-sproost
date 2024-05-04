@@ -1,0 +1,9 @@
+<div class = "mainContent inline-flex  items-center gap-2">
+    <div class="w-2 h-2 {% if quote.status|lower == "pending" %} bg-blue-600 {% elif quote.status|lower == "approved" %} bg-green-600 {% else %} bg-red-600  {% endif %}rounded-full"></div>
+    <select name="status"  class="focus:outline-none" hx-swap = "innerHTML" hx-post="{% url "admins:change-quote" quote.pk %}" hx-target = "#QuoteStatusContainer{{quote.pk}}" hx-indicator= "#QuoteStatusContainer{{quote.pk}}" hx-trigger="change" hx-data='{"status": this.value}' id="statusSelectInput">
+        <option {% if quote.status|lower == "pending" %} selected {% endif %} value="Pending">Pending</option>
+        <option {% if quote.status|lower == "approved" %} selected {% endif %} value="Approved">Approved</option> 
+        <option {% if quote.status|lower == "rejected" %} selected {% endif %} value="Rejected">Rejected</option>
+    </select>
+</div>
+<div class = "w-[15px] h-[15px] spinner">{%include "partials/spinner.html"  %}</div>

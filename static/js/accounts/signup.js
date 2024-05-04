@@ -5,7 +5,29 @@ window.addEventListener("DOMContentLoaded", () => {
     validateEmail();
     validatePhoneNumber();
     validatePassword();
+    validateRegistrationID();
 })
+
+function validateRegistrationID() {
+    const regId = document.getElementById('registration_ID')
+    const regIdError = document.getElementById('reg-id-error')
+    regIdError.style.display = "none"
+    regId.addEventListener('input', function (e) {
+        const regId = e.target.value
+        if (regId.length === 0) {
+            regIdError.style.display = "block"
+            regIdError.textContent = "Registration ID is required"
+            regId.classList.add('focus:border-red-500');
+            regId.classList.remove('focus:border-green-500');
+        } else {
+            regIdError.style.display = "none"
+            regId.classList.remove('focus:border-red-500');
+            regId.classList.add('focus:border-green-500');
+        }
+    })
+
+}
+
 
 function validatePassword() {
     password1 = document.getElementById('id_password1')
@@ -63,7 +85,7 @@ async function checkPhoneNumber(phone, location) {
         const response = await fetch(`/accounts/validate-phone?phone=${phone}&location=${location}`)
         const data = await response.json()
         if (!response.ok || phone === ""){
-            const message = data?.message || "please provide a valid phone number"
+            const message = data?.message || "Please provide a valid phone number"
             phoneError.style.display = "block"
             phoneError.textContent = message
             phoneField.classList.add('border-red-500');
@@ -106,6 +128,8 @@ function showStep(n) {
     const userType = document.querySelector('input[name="user_type"]:checked')
     if (userType && userType.value === "CO") {
         var x = document.getElementsByClassName("step-contractor")
+    }else if(userType && userType.value === "AG"){
+        var x = document.getElementsByClassName("step-agent")
     }else{
         var x = document.getElementsByClassName("step")
     }
@@ -137,6 +161,8 @@ function validateForm() {
     const userType = document.querySelector('input[name="user_type"]:checked')
     if (userType && userType.value === "CO") {
         var x = document.getElementsByClassName("step-contractor")
+    }else if(userType && userType.value === "AG"){
+        var x = document.getElementsByClassName("step-agent")
     }else{
         var x = document.getElementsByClassName("step")
     }
@@ -158,13 +184,15 @@ function nextPrev(n) {
     const userType = document.querySelector('input[name="user_type"]:checked')
     if (userType && userType.value === "CO") {
         var x = document.getElementsByClassName("step-contractor")
+    }else if(userType && userType.value === "AG"){
+        var x = document.getElementsByClassName("step-agent")
     }else{
         var x = document.getElementsByClassName("step")
     }
     
     if (n == 1 && !validateForm()) {
         // if we get here it means, we are trying to go to the next step, but not all fields are filled
-        let toastMsg = currentStep === 0 ? "please select one of the options before proceeding" : "please make sure required fields are filled out before proceeding"
+        let toastMsg = currentStep === 0 ? "Please select one of the options before proceeding" : "Please make sure required fields are filled out before proceeding"
         Toastify({
             text: toastMsg,
             duration: 3000,
