@@ -65,4 +65,3 @@ class ProfilePictureForm(forms.ModelForm):
     class Meta:
         model = ContractorProfile
         fields = ['image']
-

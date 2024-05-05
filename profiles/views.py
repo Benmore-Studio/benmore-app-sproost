@@ -40,9 +40,11 @@ def contractor_profile_view(request):
     
     
     profile = ContractorProfile.objects.get(user=request.user)
+    form = ProfilePictureForm(instance = profile)
 
     context = {
         'profile' : profile,
+        "form": form
     }
     return render(request, 'user/contractor_home.html', context)
 
