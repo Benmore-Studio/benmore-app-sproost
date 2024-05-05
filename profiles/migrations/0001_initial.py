@@ -2,6 +2,7 @@
 
 import address.models
 import django.db.models.deletion
+import profiles.models
 from django.conf import settings
 from django.db import migrations, models
 
@@ -24,6 +25,7 @@ class Migration(migrations.Migration):
                 ('registration_number', models.CharField(max_length=225)),
                 ('specialization', models.CharField(blank=True, max_length=225, null=True)),
                 ('city', models.CharField(max_length=50)),
+                ('image', models.ImageField(null=True, upload_to=profiles.models.image_upload_location)),
                 ('company_address', address.models.AddressField(on_delete=django.db.models.deletion.CASCADE, to='address.address')),
                 ('user', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='contractor_profile', to=settings.AUTH_USER_MODEL)),
             ],

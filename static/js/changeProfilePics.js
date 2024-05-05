@@ -231,7 +231,6 @@ captureButton.addEventListener('click', () => {
           // Add the file to the DataTransfer object
           dataTransfer.items.add(file);
           galleryInput.files = dataTransfer.files
-
         }else{
           alert("error")
         }
