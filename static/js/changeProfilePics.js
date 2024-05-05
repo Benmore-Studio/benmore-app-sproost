@@ -61,7 +61,6 @@ img.onclick = function() {
 
           // Proceed with further processing, such as displaying the resized image
           modalImg.src = URL.createObjectURL(file);
-          console.log("too faith");
       }, 'image/jpeg');
 
       loading.style.display = "none";
@@ -87,7 +86,6 @@ cancelDpChange.onclick = function() {
 galleryInput.addEventListener('change', function(event) {
   // Get the selected file
   const selectedFile = event.target.files[0];
-  console.log(selectedFile);
 
   // Display the selected image in the modal
   if(selectedFile){
@@ -184,7 +182,6 @@ changeThroughCamera.onclick = function(){
 
   // function to stop the camera
   function stopfunction(){
-      console.log("stop record");
       captureVideoModal.style.display = "none";
       // Stop the camera stream
       video.srcObject.getTracks().forEach(track => {
@@ -234,9 +231,7 @@ captureButton.addEventListener('click', () => {
           // Add the file to the DataTransfer object
           dataTransfer.items.add(file);
           galleryInput.files = dataTransfer.files
-          // console.log(imageData);
-          // console.log(blobUrl);
-          // console.log(previewImage);
+
         }else{
           alert("error")
         }
