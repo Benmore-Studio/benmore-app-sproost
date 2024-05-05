@@ -14,7 +14,6 @@ const handleHtmxErrors = () => {
 }
 
 const DisplayErrors = (msg, color) => {
-    console.log("hello")
     Toastify({
         text: msg,
         duration: 3000,
@@ -30,7 +29,6 @@ const DisplayErrors = (msg, color) => {
     }).showToast();
 }
 const handleDjangoMessages = () => {
-    console.log(messages)
     messages.forEach(function(message) {
         var color;
         switch(message.level) {
