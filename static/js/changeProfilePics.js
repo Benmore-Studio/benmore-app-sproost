@@ -12,12 +12,12 @@ const previewImage = document.getElementById('previewImageForm');
 let galleryInput = document.getElementById('id_gallery_change')
 const captureButton = document.getElementById('capture');
 const canvas = document.getElementById('canvas');
+const loading = document.getElementById('loading');
 
 
 // clicking on the profile pics to display it
 img.onclick = function() {
-  modal.style.display = "block";
-  console.log(this.src);
+  loading.style.display = "block";
 
   // Create a new Image element
   const image = new Image();
@@ -38,17 +38,15 @@ img.onclick = function() {
       // Calculate new dimensions while maintaining aspect ratio
       let newWidth = image.width;
       let newHeight = image.height;
-      if (newWidth > maxWidth || newHeight > maxHeight) {
-          const aspectRatio = newWidth / newHeight;
-          if (newWidth > newHeight) {
-              newWidth = maxWidth;
-              newHeight = maxWidth / aspectRatio;
-          } else {
-              newHeight = maxHeight;
-              newWidth = maxHeight * aspectRatio;
-          }
-      }
 
+      const aspectRatio = newWidth / newHeight;
+      if (newWidth > newHeight) {
+          newWidth = maxWidth;
+          newHeight = maxWidth / aspectRatio;
+      } else {
+          newHeight = maxHeight;
+          newWidth = maxHeight * aspectRatio;
+      }
       // Set canvas dimensions
       canvas.width = newWidth;
       canvas.height = newHeight;
@@ -65,7 +63,11 @@ img.onclick = function() {
           modalImg.src = URL.createObjectURL(file);
           console.log("too faith");
       }, 'image/jpeg');
+
+      loading.style.display = "none";
+      modal.style.display = "block";
   };
+ 
 };
 // the x button that closes the modal
 span.onclick = function() {
@@ -124,8 +126,6 @@ function resizeImage(selectedFile, callback) {
           // Calculate new dimensions while maintaining aspect ratio
           let newWidth = img.width;
           let newHeight = img.height;
-          console.log(newWidth, newHeight);
-          console.log('newWidth, newHeight');
           if (newWidth > maxWidth || newHeight > maxHeight) {
               const aspectRatio = newWidth / newHeight;
               if (newWidth > newHeight) {
