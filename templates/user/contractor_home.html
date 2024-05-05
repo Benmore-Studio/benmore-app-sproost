@@ -37,29 +37,38 @@
           <div class="fixed inset-0 bg-black/75"></div>
           <div class="flex flex-col items-center">
             <div class="modal z-50">
-              <span class="close text-red-500 text-3xl font-bold absolute top-2 right-4 cursor-pointer">&times;</span>
               <form id="imageForm" class="" action="{% url 'profile:change-dp-request' %}" method="post" enctype="multipart/form-data">
                 {% csrf_token %}
-                  <div id="dp-view"  class="flex flex-col items-center justify-center">
-                    <img class="modal-content rounded-md max-w-[80%] max-h-[70vh]" src="#" id="previewImage">
-                    <div class="flex items-center justify-center gap-8 mt-4">
-                      <div id="change-through-camera" class="">
-                        <i class="fa fa-camera fa-4x text-primary cursor-pointer text-3xl" aria-hidden="true"></i>
-                      </div>
-                      <div class="change-icon-container ">
-                        <div id="">
-                          <input type="file" id="id_gallery_change" name="image" class="hidden">
+                <div id="dp-view"  class="flex flex-col items-center sm:h-[70vh] justify-center">
+                  <div class="bg-white rounded-lg pt-6 pb-4 px-2">
+                    <div class="flex justify-between items-center mb-3">
+                      <p class="text-sm text-primary">
+                        {% if profile.company_name %} {{ profile.company_name }} {% else %} {{ profile.user.username }} {% endif %}
+                      </p>
+                      <span class="close text-red-500 text-3xl font-bold float-right cursor-pointer mr-4">&times;</span>
+                    </div>
+                    <div class="flex flex-col justify-center items-center">
+                      <img class="modal-content w-full h-full rounded-lg" src="#" id="previewImage">
+                      <div class="flex items-center justify-center gap-8 mt-4">
+                        <div id="change-through-camera" class="">
+                          <i class="fa fa-camera fa-4x text-primary cursor-pointer text-2xl" aria-hidden="true"></i>
                         </div>
-                        <label for="id_gallery_change" class="gallery-icon-label">
-                            <span><i id="change-through-gallery" class="fa fa-pencil fa-4x text-primary cursor-pointer text-3xl" aria-hidden="true"></i>
-                        </label>
-                        
-                      </div>             
+                        <div class="change-icon-container ">
+                          <div id="">
+                            <input type="file" id="id_gallery_change" name="image" class="hidden">
+                          </div>
+                          <label for="id_gallery_change" class="gallery-icon-label">
+                              <span><i id="change-through-gallery" class="fa fa-pencil fa-4x text-primary cursor-pointer text-2xl" aria-hidden="true"></i>
+                          </label>
+                          
+                        </div>             
+                      </div>
+                    </div>
                     </div>
                   </div>
                   <!-- for sending dp change request -->
-                  <div id="send-button" class="hidden  sm:h-[70vh] flex-col justify-center items-center"> 
-                      <img id="previewImageForm" name class="w-full h-full" src="#" alt="Image Preview">
+                  <div id="send-button" class="hidden sm:h-[70vh] flex-col justify-center items-center"> 
+                      <img id="previewImageForm" name class="w-full h-full rounded-lg" src="#" alt="Image Preview">
                       <div class="flex gap-4 justify-center w-full mt-4">
                         <button id="cancel-dp-change" class="bg-primary py-3 px-4 cursor-pointer text-white rounded-lg" type="button">Cancel</button>
                         <button type="submit" class="bg-primary py-3 px-4 cursor-pointer text-white rounded-lg">Change</button>
@@ -137,16 +146,7 @@
         <!-- tabs -->
         <div class="tab flex flex-items-center justify-between p-4">
           <div class="flex flex-row">
-<<<<<<< HEAD
-            <button class="tablinks p-2 text-gray-500 text-sm font-medium" onclick="openTab(event, 'tab1')">All media</button> 
-            {% if request.user == profile.user %}
-            <button class="tablinks p-2 text-gray-500 text-sm font-medium" onclick="openTab(event, 'tab4')">
-              <i class="fa fa-plus"></i>
-            </button>
-            {% endif %}
-=======
             <button class="tablinks p-2 text-gray-500 text-sm font-medium" onclick="openTab(event, 'tab1')">Media</button> 
->>>>>>> 12869ac9db70f508c88c8b686e07bffdfcf13e05
           </div>
           <button class="tablinks p-2 text-gray-500 text-sm font-medium" onclick="openTab(event, 'tab2')">Description</button>
           <button class="tablinks p-2 text-gray-500 text-sm font-medium" onclick="openTab(event, 'tab3')">Contact</button>

@@ -15,12 +15,58 @@ const canvas = document.getElementById('canvas');
 
 
 // clicking on the profile pics to display it
-img.onclick = function(){
+img.onclick = function() {
   modal.style.display = "block";
-  modalImg.src = this.src;
-  console.log("too faith");
-}
+  console.log(this.src);
 
+  // Create a new Image element
+  const image = new Image();
+
+  // Set the source of the Image element
+  image.src = this.src;
+
+  // Event handler for when the image is loaded
+  image.onload = function() {
+      // Create a canvas element to draw the resized image
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+
+      // Define maximum dimensions
+      const maxWidth = 600;
+      const maxHeight = 400;
+
+      // Calculate new dimensions while maintaining aspect ratio
+      let newWidth = image.width;
+      let newHeight = image.height;
+      if (newWidth > maxWidth || newHeight > maxHeight) {
+          const aspectRatio = newWidth / newHeight;
+          if (newWidth > newHeight) {
+              newWidth = maxWidth;
+              newHeight = maxWidth / aspectRatio;
+          } else {
+              newHeight = maxHeight;
+              newWidth = maxHeight * aspectRatio;
+          }
+      }
+
+      // Set canvas dimensions
+      canvas.width = newWidth;
+      canvas.height = newHeight;
+
+      // Draw the resized image onto the canvas
+      ctx.drawImage(image, 0, 0, newWidth, newHeight);
+
+      // Convert the canvas content to a Blob
+      canvas.toBlob(function(blob) {
+          // Create a File object from the Blob
+          const file = new File([blob], 'filename.jpg', { type: 'image/jpeg' });
+
+          // Proceed with further processing, such as displaying the resized image
+          modalImg.src = URL.createObjectURL(file);
+          console.log("too faith");
+      }, 'image/jpeg');
+  };
+};
 // the x button that closes the modal
 span.onclick = function() {
   modal.style.display = "none";
@@ -37,20 +83,85 @@ cancelDpChange.onclick = function() {
 
 // handling the process tht selects the image from my files and sends it to django
 galleryInput.addEventListener('change', function(event) {
-    // Get the selected file
-    const selectedFile = event.target.files[0];
-    console.log(selectedFile);
+  // Get the selected file
+  const selectedFile = event.target.files[0];
+  console.log(selectedFile);
 
-    // Display the selected image in the modal
-    if(selectedFile){
-      const previewImage = document.getElementById('previewImageForm');
-      previewImage.src = URL.createObjectURL(selectedFile);
-      dpView.style.display = "none";
-      sendButton.style.display = "flex";
-    }
+  // Display the selected image in the modal
+  if(selectedFile){
+    const previewImage = document.getElementById('previewImageForm');
+    previewImage.src = URL.createObjectURL(selectedFile);
+    dpView.style.display = "none";
+    sendButton.style.display = "flex";
 
-    
+    // Call the resizeImage function to resize the image
+    resizeImage(selectedFile, function(resizedImage) {
+        // Set the source of the preview image to the resized image
+        previewImage.src = resizedImage.src;
+    });
+  }
 });
+
+// Function to resize the image
+function resizeImage(selectedFile, callback) {
+  // Create a new FileReader
+  const reader = new FileReader();
+
+  // Define maximum dimensions
+  const maxWidth = 800;
+  const maxHeight = 600;
+
+  reader.onload = function(e) {
+      // Create an image element to load the selected file
+      const img = new Image();
+
+      // Image onload event handler
+      img.onload = function() {
+          // Create a canvas element to draw the resized image
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+
+          // Calculate new dimensions while maintaining aspect ratio
+          let newWidth = img.width;
+          let newHeight = img.height;
+          console.log(newWidth, newHeight);
+          console.log('newWidth, newHeight');
+          if (newWidth > maxWidth || newHeight > maxHeight) {
+              const aspectRatio = newWidth / newHeight;
+              if (newWidth > newHeight) {
+                  newWidth = maxWidth;
+                  newHeight = maxWidth / aspectRatio;
+              } else {
+                  newHeight = maxHeight;
+                  newWidth = maxHeight * aspectRatio;
+              }
+          }
+
+          // Set canvas dimensions
+          canvas.width = newWidth;
+          canvas.height = newHeight;
+
+          // Draw the resized image onto the canvas
+          ctx.drawImage(img, 0, 0, newWidth, newHeight);
+
+          // Convert the canvas content to a Blob
+          canvas.toBlob(function(blob) {
+              // Create a new Image object from the Blob
+              const resizedImage = new Image();
+              resizedImage.src = URL.createObjectURL(blob);
+
+              // Callback function with resized image as argument
+              callback(resizedImage);
+          }, 'image/jpeg');
+      };
+
+      // Load the selected file into the image element
+      img.src = e.target.result;
+  };
+
+  // Read the selected file as a data URL
+  reader.readAsDataURL(selectedFile);
+}
 
 
 // selecting image through camera
