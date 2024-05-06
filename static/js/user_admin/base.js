@@ -1,5 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
     handleHtmxErrors();
+    handleDjangoMessages();
 })
 
 const handleHtmxErrors = () => {
@@ -13,7 +14,6 @@ const handleHtmxErrors = () => {
 }
 
 const DisplayErrors = (msg, color) => {
-    console.log("hello")
     Toastify({
         text: msg,
         duration: 3000,
@@ -27,4 +27,38 @@ const DisplayErrors = (msg, color) => {
         },
         onClick: function(){}
     }).showToast();
+}
+const handleDjangoMessages = () => {
+    messages.forEach(function(message) {
+        var color;
+        switch(message.level) {
+            case 'info':
+                color = "blue";
+                break;
+            case 'error':
+                color = "red";
+                break;
+            case 'warning':
+                color = "orange";
+                break;
+            case 'success':
+                color = "green";
+                break;
+            default:
+                color = "black";
+        }
+        Toastify({
+            text: message.text,
+            duration: 3000,
+            close: true,
+            gravity: "top",
+            position: "left",
+            stopOnFocus: true,
+            style: {
+                background: color,
+                maxWidth: "100%",
+            },
+            onClick: function(){}
+        }).showToast();
+    });
 }

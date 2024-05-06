@@ -9,7 +9,7 @@ class ContractorService(CustomRequestUtil):
         media = data.get("media")
         contractor = self.request.user.contractor_profile
         
-        image_types = {'jpg', 'png', 'svg', 'jpeg'}
+        image_types = {'jpg', 'png', 'svg', 'jpeg', 'jfif'}
         file_types = {'mp4','mkv','m4a'}
 
         try:

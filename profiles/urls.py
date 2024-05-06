@@ -9,8 +9,8 @@ urlpatterns = [
     path('edit-profile/', views.editProfile, name="edit-profile"),
     path('search-view/', views.search_view, name="search_contractor"),
     # path('search-view-results/', views.search_view_results, name="search-view-results"),
-    path('edit-profile-request/', views.ContractorProfileEditView, name="edit-profile-request"),
-    path('contractor-edit-profile-request/', views.ContractorProfileEditView, name="contractor-edit-profile-request"),
-    path('edit-homeowners-profile-request/', views.editHomeOwnerProfileRequest, name="edit-homeowners-profile-request"),
+    path('contractor/update', views.ContractorProfileEditView, name="edit-contractor-profile"),
+    path('home-owner/update', views.editHomeOwnerProfileRequest, name="edit-homeowners-profile"),
+    path('agent/update', views.editAgentProfile, name="edit-agent-profile"),
     path('change-dp-request/', views.change_profile_pics_view, name="change-dp-request"),
 ]

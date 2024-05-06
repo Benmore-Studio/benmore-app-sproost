@@ -2,7 +2,7 @@
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
-from .models import UserProfile, ContractorProfile
+from .models import UserProfile, ContractorProfile, AgentProfile
 from .forms import HomeOwnersEditForm
 
 User= get_user_model()
@@ -20,6 +20,14 @@ class UserEditTestCase(TestCase):
             address='Test Company Address',
             city='Test City',
         )
+        
+        # Create a agentProfile instance for the user
+        self.agent_profile = AgentProfile.objects.create(
+            user=self.user,
+            address='Test Company Address',
+            registration_ID='111111DH',
+        )
+        
         # Create a ContractorProfile instance for the user
         self.contractor_profile = ContractorProfile.objects.create(
             user=self.user,
@@ -37,10 +45,8 @@ class UserEditTestCase(TestCase):
             'phone_number_0' : "NG" , # for the phone field
             'phone_number_1' : "7058985430",
             'address': '456 Avenue',
-            'city': 'Test City',
-            'state_province': 'Test State',
         }
-        response = self.client.post(reverse('profile:edit-homeowners-profile-request'), valid_data)
+        response = self.client.post(reverse('profile:edit-homeowners-profile'), valid_data)
 
         # Checking if the response is a redirect 
         self.assertEqual(response.status_code, 302)
@@ -52,17 +58,49 @@ class UserEditTestCase(TestCase):
         self.user.refresh_from_db()
 
         # Checking if the user profile fields have been updated correctly
-        self.assertEqual(self.user.user_profile.city, 'Test City')
-        self.assertEqual(self.user.user_profile.state_province, 'Test State')
+        self.assertEqual(self.user.email, 'test@gmail.com')
+        self.assertEqual(self.user.user_profile.address.raw, '456 Avenue')
 
     # checking for validation
     def test_edit_profile_validation(self):
         # Making a POST request to the edit profile view with invalid data
-        response = self.client.post(reverse('profile:edit-homeowners-profile-request'), {
+        response = self.client.post(reverse('profile:edit-homeowners-profile'), {
         })
 
         # Checking ifresponse is 200, which means the form was returned 
-        print("validation", response)
+        self.assertEqual(response.status_code, 200)
+        
+    def test_edit_agentprofile_success(self):
+        # Make a POST request to the edit profile view with updated data
+        valid_data = {
+            'email' : 'test@gmail.com',
+            'phone_number_0' : "NG" , # for the phone field
+            'phone_number_1' : "7058985430",
+            'address': '456 Avenue',
+            'registration_ID' : "232434GH"
+        }
+        response = self.client.post(reverse('profile:edit-agent-profile'), valid_data)
+
+        # Checking if the response is a redirect 
+        self.assertEqual(response.status_code, 302)
+
+        # Check if the redirect location matches the expected URL
+        self.assertEqual(response.url, '/')
+
+        # Refreshing the database
+        self.user.refresh_from_db()
+
+        # Checking if the user profile fields have been updated correctly
+        self.assertEqual(self.user.email, 'test@gmail.com')
+        self.assertEqual(self.user.agent_profile.registration_ID, '232434GH')
+
+    # checking for validation
+    def test_edit_agentprofile_validation(self):
+        # Making a POST request to the edit profile view with invalid data
+        response = self.client.post(reverse('profile:edit-agent-profile'), {
+        })
+
+        # Checking ifresponse is 200, which means the form was returned 
         self.assertEqual(response.status_code, 200)
 
     # checking authentication of the edit page
@@ -87,8 +125,7 @@ class UserEditTestCase(TestCase):
             'city': 'Test City',
             'specialization':'coding',
         }
-        response = self.client.post(reverse('profile:contractor-edit-profile-request'), valid_data)
-        print("edit", response)
+        response = self.client.post(reverse('profile:edit-contractor-profile'), valid_data)
 
         # Checking if the response is a redirect 
         self.assertEqual(response.status_code, 302)
@@ -99,9 +136,6 @@ class UserEditTestCase(TestCase):
         # Refreshing the database
         self.user.refresh_from_db()
 
-        print(self.user.user_profile.address)
-        print('self.user_profile')
-
         # Checking if the user profile fields have been updated correctly
         self.assertEqual(self.user.contractor_profile.city, 'Test City')
         self.assertEqual(self.user.contractor_profile.specialization, 'coding')
@@ -109,11 +143,10 @@ class UserEditTestCase(TestCase):
     # checking for validation
     def test_edit_contractorprofile_validation(self):
         # Making a POST request to the edit profile view with invalid data
-        response = self.client.post(reverse('profile:contractor-edit-profile-request'), {
+        response = self.client.post(reverse('profile:edit-contractor-profile'), {
         })
 
         # Checking ifresponse is 200, which means the form was returned 
-        print("validation", response)
         self.assertEqual(response.status_code, 200)
 
     # checking authentication of the edit page
@@ -140,7 +173,6 @@ class SearchTestCase(TestCase):
         query = 'City 1'
         response = self.client.get(f'{reverse("profile:search_contractor")}?query={query}')
         self.assertEqual(response.status_code, 200)
-        print("search1", response)
         # to ensure my seach functionality is beaving as expectd
         self.assertNotContains(response, 'Company')
         self.assertNotContains(response, 'enugu')
@@ -156,7 +188,6 @@ class SearchTestCase(TestCase):
         # Search for a term that matches specific fields
         query = 'ho@example.com'
         response = self.client.get(f'{reverse("profile:search_contractor")}?query={query}')
-        print("search3", response)
         self.assertEqual(response.status_code, 200)
         self.assertNotContains(response, 'Company 1')
         self.assertNotContains(response, 'Company 2')

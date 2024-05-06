@@ -4,10 +4,12 @@ from django.contrib.auth import get_user_model
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.sites.shortcuts import get_current_site
+from .forms import AgentAssignmentForm
 
 from mail_templated import send_mail
 from quotes.models import QuoteRequest, Project
 from property.models import AssignedAccount
+from profiles.models import AgentProfile
 from django.contrib.auth.mixins import LoginRequiredMixin
 
 User = get_user_model()
@@ -103,41 +105,49 @@ def requestQuotes(request):
 
 class AssignAgentView(LoginRequiredMixin, View):
     template_name = 'user/assignAgent.html'
+    form_class = AgentAssignmentForm
 
     def get(self, request):
+        if not request.user.user_type == 'HO':
+            return redirect('main:home')
+        
         agents = User.objects.filter(user_type='AG')
         context = {
             'agents': agents,
+            'form' : self.form_class()
         }
         return render(request, self.template_name, context)
 
     def post(self, request):
-        agent_id = request.POST.get('agent')
-        try:
-            agent = User.objects.get(id=agent_id, user_type = 'AG')
-            AssignedAccount.objects.get_or_create(
-                assigned_to=agent,
-                assigned_by=request.user,
-                is_approved=True
-            )
-            if not agent.user_type in ['HO', 'AG']:
-                messages.error(request, 'Only Home Owners can assign properties')
-                return redirect('main:assign-agent')
+        
+        form = self.form_class(request.POST)
+        if form.is_valid():
+            regID = form.cleaned_data.get('registration_id')
+            try:
+                
+                agent = AgentProfile.objects.get(registration_ID=regID)
+                if AssignedAccount.objects.filter(assigned_by=request.user, assigned_to=agent.user).exists():
+                    messages.warning(request, 'Agent already assigned. Awaiting agent confirmation')
+                    return redirect('main:assign-agent')
+                
+                AssignedAccount.objects.get_or_create(
+                    assigned_to=agent.user,
+                    assigned_by=request.user,
+                    is_approved=True
+                )
+                send_mail(
+                    'mail/assign_agent.tpl',
+                    {'first_name': agent.user.first_name, "base_url": get_base_url(request)},
+                    settings.EMAIL_HOST_USER,
+                    [agent.user.email]
+                )
 
-            send_mail(
-                'mail/assign_agent.tpl',
-                {'first_name': agent.first_name, "base_url": get_base_url(request)},
-                settings.EMAIL_HOST_USER,
-                [agent.email]
-            )
+                messages.success(request, 'Agent assigned successfully. Awaiting agent confirmation')
+                return redirect('main:home')
+            except AgentProfile.DoesNotExist:
+                messages.error(request, f'No Agent exists with such liscense ID: {regID}')
 
-            messages.success(request, 'Agent assigned successfully. Awaiting agent confirmation')
-
-        except Exception as e:
-            print(e)
-            messages.error(request, 'An error occured')
-
-        return redirect('main:home')
+        return redirect('main:assign-agent')
 
 
 

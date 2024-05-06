@@ -1,4 +1,5 @@
 {% extends "user/base.html" %} 
+{% load form_tags %}
 {% load static %} 
 {% include "user/bottom_navigation.html" %} 
 {% block content %}
@@ -8,20 +9,15 @@
         <a href = {% url "main:home" %} >
             <img src="{% static 'svgs/chevron-left.svg' %}" alt="" class="cursor-pointer" />
         </a>
-        <h3 class="text-xl text-gray-900 font-medium">Assign Agent</h3>
+        <h3 class="text-xl text-gray-900 font-medium">Add my Agent</h3>
     </div>
 
     <div class="w-full p-4">
         <form method="POST" class="w-full mt-4 flex flex-col gap-4">
             {% csrf_token %}
             <div class="w-full">
-                <label for="agentName" class="text-gray-700 font-medium text-sm">Agent Name</label>
-                <select required name="agent" id="agentName" class="w-full p-2 border border-gray-300 rounded-md focus:outline-none mt-1 focus:border-gray-500">
-                    <option value="">Select an Agent</option>
-                    {% for agent in agents %}
-                        <option value="{{agent.id}}">{{agent.first_name}} {{agent.last_name}} @ {{ agent.email }}</option>
-                    {% endfor %}
-                </select>
+                <label for="agentName" class="text-gray-700 font-medium text-sm">Agent License Number</label>
+                {{ form.registration_id|addattrs:"class=w-full p-2 text-gray-500 border border-gray-300 rounded-md focus:outline-none mt-1 focus:border-gray-500,placeholder=Enter Agent License Number" }}
             </div>
 
 
