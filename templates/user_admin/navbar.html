@@ -20,7 +20,8 @@
             </li>
         </ul>
     {% endwith %}
-    <div class="inline-flex items-center gap-6 w-fit">
-        <a href="{% url 'logout' %}" style="color: red;">Logout</a>
-    </div>
+    <form action="{% url 'account_logout' %}" method="POST">
+        {% csrf_token %}
+        <button type="submit" class="flex gap-2 items-center rounded-md text-black bg-white border border-gray-300 p-2 cursor-pointer">Logout <img src = "{% static 'svgs/logout.svg' %}" class = "w-4 h-4" /></button>
+    </form>
 </nav>

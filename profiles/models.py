@@ -4,7 +4,7 @@ from address.models import AddressField
 from django.contrib.contenttypes.fields import GenericRelation
 
 def image_upload_location(instance, filename):
-    return f'contractorprofilepics/{instance.id}/{filename}'
+    return f'contractorprofile/{instance.id}/{filename}'
 
 
 class UserProfile(models.Model):
