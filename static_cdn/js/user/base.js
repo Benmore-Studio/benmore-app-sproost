@@ -3,7 +3,6 @@ window.addEventListener("DOMContentLoaded", () => {
 });
 
 const handleDjangoMessages = () => {
-    console.log(messages)
     messages.forEach(function(message) {
         var color;
         switch(message.level) {
