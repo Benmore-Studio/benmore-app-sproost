@@ -185,8 +185,10 @@
 
         <div id="tab1" class="tabcontent p-4 w-full">
           <div class="w-full grid grid-cols-4 gap-2">
-            {% for media in profile.media_paths.all %} {% if media.image %}
-            <img src="/media/{{media.image }}" alt="" class="w-full h-[81px] border border-neutral-150 object-cover" /> {% elif media.file %}
+            {% for media in profile.media_paths.all %} 
+            {% if media.image %}
+            <a href="/media/{{media.image }}"><img src="/media/{{media.image }}" alt="" class="w-full h-[150px] border border-neutral-150 object-cover" /> </a>
+            {% elif media.file %}
             <video class="w-full h-[81px] border border-neutral-150 object-cover" controls>
               <source src="/media/{{media.file}}" type="video/mp4" />
             </video>

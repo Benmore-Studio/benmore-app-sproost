@@ -145,7 +145,7 @@ class AssignAgentView(LoginRequiredMixin, View):
                 messages.success(request, 'Agent assigned successfully. Awaiting agent confirmation')
                 return redirect('main:home')
             except AgentProfile.DoesNotExist:
-                messages.error(request, f'Agent with liscense ID {regID} not found')
+                messages.error(request, f'No Agent exists with such liscense ID: {regID}')
 
         return redirect('main:assign-agent')
 

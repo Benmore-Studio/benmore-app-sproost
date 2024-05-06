@@ -148,7 +148,9 @@ def ContractorProfileEditView(request):
 @login_required
 def search_view(request):
     query = request.GET.get('query')
-    results = []
+    results = ContractorProfile.objects.all()
+    
+    print("results ==== ", results)
     if query:
         # Perform search based on Title, Speciality, Email, and Phone number
         results = ContractorProfile.objects.filter(
@@ -158,8 +160,6 @@ def search_view(request):
             Q(user__email__icontains=query) 
         )   
     context = {'results': results}
-    if not query or not results:
-        context['no_results'] = True
     return render(request, 'user/search_results.html', context)
 
 @login_required
