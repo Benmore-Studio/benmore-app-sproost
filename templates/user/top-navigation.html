@@ -18,15 +18,13 @@
 </div>
 
 
-<div class="w-full fixed top-0 border-b border-primary z-20 rounded-bl-lg rounded-br-lg shadow-sm bg-primary flex items-center py-4 pl-7">
-    <div id="profile-pic-navbar" class="w-[60px] h-[60px] cursor-pointer">
-        <img src="{% static 'images/avatar.png' %}" alt="" class="w-full h-full object-contain" />
+<div class="w-full fixed top-0  shadow-sm bg-primary flex items-center py-4">
+    <div id="profile-pic-navbar" class="w-[28px] h-full flex items-center absolute bottom-0 left-3 cursor-pointer">
+        <img src="{% static 'svgs/avatar.svg' %}" alt="" class="w-full h-full object-contain" />
     </div>
-    <div class="w-full flex flex-grow justify-center mr-8">
-        <img src="{% static 'svgs/sproost-white.svg' %}" alt="" class="" />
+    <div class="flex w-full items-center justify-center">
+        <img src="{% static 'svgs/sproost-white.svg' %}" alt="" class="w-[7rem]" />
     </div>
-
-
 </div>
 <script>
     let profilePicnavbar = document.querySelector('#profile-pic-navbar')

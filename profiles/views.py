@@ -1,22 +1,24 @@
 
 from django.shortcuts import render, redirect
-from profiles.models import ContractorProfile, UserProfile
+from profiles.models import ContractorProfile, UserProfile, AgentProfile
 from django.urls import reverse
 from django.contrib import messages
 from django.db.models import Q
 
 from profiles.services.contractor import ContractorService
-from .forms import ContractorProfileForm, HomeOwnersEditForm
+from .forms import ContractorProfileForm, HomeOwnersEditForm, AgentEditForm, ProfilePictureForm
 from django.views.generic.edit import UpdateView
 from django.views.generic import DetailView
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth import get_user_model
 
+User = get_user_model()
 
 @login_required
 def contractor_profile_view(request):
     if request.user.user_type != 'CO':
-        return redirect('main:dashboard')
+        return redirect('main:home')
     
     if request.method == "POST":
         if request.FILES:
@@ -37,11 +39,12 @@ def contractor_profile_view(request):
         return redirect("profile:contractor_profile")
     
     
-    # TODO add try and except to catch possible errors
-    profile = ContractorProfile.objects.get(user = request.user)
+    profile = ContractorProfile.objects.get(user=request.user)
+    form = ProfilePictureForm(instance = profile)
 
     context = {
         'profile' : profile,
+        "form": form
     }
     return render(request, 'user/contractor_home.html', context)
 
@@ -66,22 +69,27 @@ def editProfile(request):
     user = request.user
     # render CO edit page if user type is CO
     if request.user.user_type == 'CO': 
-        contractorProfile = ContractorProfile.objects.get(user = user.id)   
-        email = user.email
-        form = ContractorProfileForm(instance = contractorProfile, user=user, initial={'email' : email})
+        contractorProfile = ContractorProfile.objects.get(user = user.id)
+        form = ContractorProfileForm(instance = contractorProfile, initial={'email' : user.email, 'phone_number' : user.phone_number})
         return render(request, 'user/editprofiles/contractor_edit_profile.html', {"details":contractorProfile,'form' :form})
     
-    elif request.user.user_type == 'AG' or  request.user.user_type == 'HO':
-        user_profile = UserProfile.objects.get(user = user.id)    
-        email = user.email
-        form = HomeOwnersEditForm(instance = user_profile, user=user, initial={'email' : email})
+    elif request.user.user_type == 'AG':
+        agent_profile = AgentProfile.objects.get(user = user.id)
+        form = AgentEditForm(instance = agent_profile, initial={'email' : user.email, 'phone_number' : user.phone_number})
+        return render(request, 'user/editprofiles/agents_edit_profile.html', {'form' :form})
+    
+    elif request.user.user_type == 'HO':
+        user_profile = UserProfile.objects.get(user = user.id)
+        form = HomeOwnersEditForm(instance = user_profile, initial={'email' : user.email, 'phone_number' : user.phone_number})
         return render(request, 'user/editprofiles/home_owners_edit_profile.html', {"details":user_profile, 'form' :form})
     else:
         return redirect('main:dashboard')
 
+
 @login_required
 def editHomeOwnerProfileRequest(request):
-    user = request.user
+    user = User.objects.get(id=request.user.id)
+    print(user, "home user")
     user_profile = UserProfile.objects.get_or_create(user=request.user)[0]
     if request.method == 'POST':
         form = HomeOwnersEditForm(request.POST, instance=user_profile)
@@ -94,6 +102,23 @@ def editHomeOwnerProfileRequest(request):
             return redirect('main:home')
         else:
             return render(request, 'user/editprofiles/home_owners_edit_profile.html', {'form': form})
+    return redirect('profile:edit-profile')
+
+@login_required
+def editAgentProfile(request):
+    user = request.user
+    user_profile = AgentProfile.objects.get_or_create(user=request.user)[0]
+    if request.method == 'POST':
+        form = AgentEditForm(request.POST, instance=user_profile)
+        if form.is_valid():
+            form.save()
+            user.phone_number = form.cleaned_data['phone_number']
+            user.email = form.cleaned_data['email']
+            user.save()
+            messages.success(request, 'Profile updated successfully!')
+            return redirect('main:home')
+        else:
+            return render(request, 'user/editprofiles/agents_edit_profile.html', {'form': form})
     return redirect('profile:edit-profile')
 
 
@@ -123,7 +148,9 @@ def ContractorProfileEditView(request):
 @login_required
 def search_view(request):
     query = request.GET.get('query')
-    results = []
+    results = ContractorProfile.objects.all()
+    
+    print("results ==== ", results)
     if query:
         # Perform search based on Title, Speciality, Email, and Phone number
         results = ContractorProfile.objects.filter(
@@ -133,10 +160,65 @@ def search_view(request):
             Q(user__email__icontains=query) 
         )   
     context = {'results': results}
-    
     return render(request, 'user/search_results.html', context)
 
 @login_required
 def upload_image(request):
     print(request.FILES)
     return redirect('profile:contractor_profile')
+
+
+# def change_profile_pics_view(request):
+#     if request.method == 'POST':
+#         form = ProfilePictureForm(request.POST, request.FILES)
+#         if form.is_valid():
+#             # Get the uploaded image
+#             image_instance = form.cleaned_data['image']
+            
+#             # Constructing a new filename
+#             new_filename = f"{request.user.username}_profilepic_{request.user.id}.jpg"
+            
+#             # Check if a media instance with the new filename exists
+#             existing_media_instance = Media.objects.filter(image__icontains=new_filename).first()
+            
+#             if existing_media_instance:
+#                 # If an instance with the new filename exists, update its image
+#                 existing_media_instance.image = image_instance
+#                 existing_media_instance.upload_date = timezone.now()
+#                 existing_media_instance.save()
+#             else:
+#                 # If no instance with the new filename exists, create a new one
+#                 media_instance = Media.objects.create(
+#                     content_object=request.user.contractor_profile,
+#                     image=image_instance,
+#                     upload_date=timezone.now()
+#                 )
+            
+#             # Redirect to the user's profile page
+#             return redirect('profile')
+#     else:
+#         form = ProfilePictureForm()
+#     return render(request, 'change_profile_picture.html', {'form': form})
+
+
+def change_profile_pics_view(request):
+    if request.method == 'POST':
+        form = ProfilePictureForm(request.POST, request.FILES)
+        if form.is_valid():
+            image_instance = form.cleaned_data['image']
+            
+            # Get or create the ContractorProfile instance for the current user
+            contractor_profile = ContractorProfile.objects.get(user=request.user)
+            
+            # Update the image field of the ContractorProfile instance
+            contractor_profile.image = image_instance
+            contractor_profile.save()
+            
+            # Redirect to the user's profile page
+            return redirect('profile:contractor_profile')
+        else:
+            print(form.errors)
+            print("form.errors")
+    else:
+        form = ProfilePictureForm()
+    return render(request, 'user/contractor_home.html', {'form': form})
