@@ -21,12 +21,18 @@
       {% endif %}
       
     </a>
-    <a href="#" class="inline-flex flex-col gap-1 items-center">
+    <a href="{% url 'quotes:request-quotes'%}" class="inline-flex flex-col gap-1 items-center">
       {% if url_name == 'home' %}
       {% else %}
       {% endif %}
+      
+      {% if url_name == 'request-quotes' %}
+      <img src="{% static 'svgs/Upload-selected.svg' %}" alt="" class="" />
+      <span class="text-gray-500 text-xs font-medium text-primary">Upload</span>
+      {% else %}
       <img src="{% static 'svgs/Add-upload.svg' %}" alt="" class="" />
       <span class="text-gray-500 text-xs">Upload</span>
+      {% endif %}
     </a>
     <a href="#" class="inline-flex flex-col gap-1 items-center">
       {% if url_name == 'home' %}
