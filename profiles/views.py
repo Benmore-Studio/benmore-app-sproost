@@ -4,8 +4,6 @@ from profiles.models import ContractorProfile, UserProfile, AgentProfile
 from django.urls import reverse
 from django.contrib import messages
 from django.db.models import Q
-from django.utils import timezone
-
 
 from profiles.services.contractor import ContractorService
 from .forms import ContractorProfileForm, HomeOwnersEditForm, AgentEditForm, ProfilePictureForm
@@ -13,7 +11,6 @@ from django.views.generic.edit import UpdateView
 from django.views.generic import DetailView
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from main.models import Media
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
@@ -124,26 +121,36 @@ def editAgentProfile(request):
             return render(request, 'user/editprofiles/agents_edit_profile.html', {'form': form})
     return redirect('profile:edit-profile')
 
-
 @login_required
 def ContractorProfileEditView(request):
     user = request.user
-    contractor_profile = ContractorProfile.objects.get_or_create(user=user)[0]
-
+    contractor_profile = ContractorProfile.objects.get(user=user)
+    print(request.FILES)
+    print(request.POST)
     if request.method == 'POST':
-        profile_form = ContractorProfileForm(request.POST, instance=contractor_profile)
+        profile_form = ContractorProfileForm(request.POST, request.FILES, instance=contractor_profile)
         if profile_form.is_valid():
+            # Save the form to update other profile fields
             profile_form.save()
 
+            # Update profile picture if provided
+            if 'image' in request.POST:
+                contractor_profile.image = request.POST['image']
+                contractor_profile.save()  # Save the contractor profile after updating the image
+
+            # Update user details
             user.phone_number = profile_form.cleaned_data['phone_number']
             user.email = profile_form.cleaned_data['email']
             user.save()
+
             messages.success(request, 'Profile updated successfully!')
             return redirect('profile:contractor_profile')
         else:
+            print(profile_form.errors)
             return render(request, 'user/editprofiles/contractor_edit_profile.html', {'form': profile_form})
     
-    return redirect('profile:contractor_profile')
+    profile_form = ContractorProfileForm(instance=contractor_profile)
+    return render(request, 'user/editprofiles/contractor_edit_profile.html', {'form': profile_form})
 
     
 
@@ -151,9 +158,7 @@ def ContractorProfileEditView(request):
 @login_required
 def search_view(request):
     query = request.GET.get('query')
-    results = ContractorProfile.objects.all()
-    
-    print("results ==== ", results)
+    results = []
     if query:
         # Perform search based on Title, Speciality, Email, and Phone number
         results = ContractorProfile.objects.filter(
@@ -163,6 +168,8 @@ def search_view(request):
             Q(user__email__icontains=query) 
         )   
     context = {'results': results}
+    if not query or not results:
+        context['no_results'] = True
     return render(request, 'user/search_results.html', context)
 
 @login_required
