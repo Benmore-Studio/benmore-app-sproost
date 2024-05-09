@@ -1,5 +1,5 @@
 
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from profiles.models import ContractorProfile, UserProfile, AgentProfile
 from django.urls import reverse
 from django.contrib import messages
@@ -72,17 +72,17 @@ def editProfile(request):
     user = request.user
     # render CO edit page if user type is CO
     if request.user.user_type == 'CO': 
-        contractorProfile = ContractorProfile.objects.get(user = user.id)
+        contractorProfile = get_object_or_404(ContractorProfile, user=user.id)
         form = ContractorProfileForm(instance = contractorProfile, initial={'email' : user.email, 'phone_number' : user.phone_number})
         return render(request, 'user/editprofiles/contractor_edit_profile.html', {"details":contractorProfile,'form' :form})
     
     elif request.user.user_type == 'AG':
-        agent_profile = AgentProfile.objects.get(user = user.id)
+        agent_profile = get_object_or_404(AgentProfile, user=user.id)
         form = AgentEditForm(instance = agent_profile, initial={'email' : user.email, 'phone_number' : user.phone_number})
         return render(request, 'user/editprofiles/agents_edit_profile.html', {'form' :form})
     
     elif request.user.user_type == 'HO':
-        user_profile = UserProfile.objects.get(user = user.id)
+        user_profile = get_object_or_404(UserProfile, user=user.id)
         form = HomeOwnersEditForm(instance = user_profile, initial={'email' : user.email, 'phone_number' : user.phone_number})
         return render(request, 'user/editprofiles/home_owners_edit_profile.html', {"details":user_profile, 'form' :form})
     else:

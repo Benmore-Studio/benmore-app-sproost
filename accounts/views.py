@@ -7,6 +7,8 @@ from django.http import JsonResponse
 
 from django.contrib.auth import logout
 from django.shortcuts import redirect
+from django.http import HttpResponseBadRequest, HttpResponseServerError
+from django.template import loader
 
 
 class CustomLoginView(LoginView):
@@ -33,3 +35,13 @@ def validate_phone_numbers(request):
 def logout_user(request):
     logout(request)
     return redirect('account_login')
+
+
+
+def custom_bad_request(request, exception):
+    template = loader.get_template('400.html')
+    return HttpResponseBadRequest(template.render({}, request))
+
+def custom_server_error(request):
+    template = loader.get_template('500.html')
+    return HttpResponseServerError(template.render({}, request))
