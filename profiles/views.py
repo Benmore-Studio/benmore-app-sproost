@@ -77,7 +77,7 @@ def editProfile(request):
         return render(request, 'user/editprofiles/contractor_edit_profile.html', {"details":contractorProfile,'form' :form})
     
     elif request.user.user_type == 'AG':
-        agent_profile = get_object_or_404(AgentProfile, user=user.id)
+        agent_profile = AgentProfile.objects.get_or_create(user = user)[0]
         form = AgentEditForm(instance = agent_profile, initial={'email' : user.email, 'phone_number' : user.phone_number})
         return render(request, 'user/editprofiles/agents_edit_profile.html', {'form' :form})
     
