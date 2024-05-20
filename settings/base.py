@@ -3,6 +3,10 @@ from pathlib import Path
 from django.urls import reverse_lazy
 from decouple import config
 
+import cloudinary
+import cloudinary.uploader
+import cloudinary.api	
+
 from django.core.management.utils import get_random_secret_key
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -47,6 +51,8 @@ INSTALLED_APPS = [
     'allauth.account',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
+    'cloudinary_storage',
+    'cloudinary',
 ]
 
 MIDDLEWARE = [
@@ -195,3 +201,11 @@ AUTH_USER_MODEL = 'accounts.User'
 GOOGLE_API_KEY = "AIzaSyBIMv62jBi-MjrYXsARUfy8S5xZwKqeGqc"
 
 CSRF_TRUSTED_ORIGINS = ['https://fdb9-105-113-33-126.ngrok-free.app']
+
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': 'dnggljofw',
+    'API_KEY': '586111527832668',
+    'API_SECRET': 'WmY1BwTV7RHirzWinywslKg3tXU'
+}
+
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
