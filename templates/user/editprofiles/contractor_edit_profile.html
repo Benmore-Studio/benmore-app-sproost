@@ -8,6 +8,41 @@
     }
 </style>
 
+  <!-- loading -->
+    <!-- added to mask the time it takes to display beteen when a prof pics is clicked and before it gets resized in js -->
+    <div id="loading" class="relative hidden w-full">
+        <div class="fixed inset-0 flex items-center justify-center z-50">
+            <div class="fixed inset-0 bg-black/75"></div>
+            <div class="flex flex-col items-center">
+                <span class="loader"></span>
+            </div>
+        </div>
+    </div>
+
+<div id="imagePreviewModalEditProfile" class="relative hidden w-full">
+    <div class="fixed inset-0 flex items-center justify-center z-50">
+        <div class="fixed inset-0 bg-black/75"></div>
+        <div class="flex flex-col items-center">
+            <div class="modal z-50">
+                <form id="imageForm" class="" action="{% url 'profile:edit-contractor-profile' %}" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                    <div id="">
+                        <input type="file" id="image_input" name="image" class="hidden">
+                    </div>
+                    <div id="send-button" class="hidden sm:h-[70vh] flex-col justify-center items-center"> 
+                        <img id="previewImageForm" name="image" class="w-full h-full rounded-lg" src="#" alt="Image Preview">
+                        <div class="flex gap-4 justify-center w-full mt-4">
+                        <button id="cancel-dp-change-edit" class="bg-primary py-3 px-4 cursor-pointer text-white rounded-lg" type="button">Cancel</button>
+                        <button type="button" id="select-image" class="bg-primary py-3 px-4 cursor-pointer text-white rounded-lg">Select</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 <div class="w-full">
     <div class="w-full">
         <!-- header -->
@@ -98,6 +133,28 @@
                         </div>
                     {% endif %}
                 </div>
+                <div class="w-full text-center my-4 text-gray-700 font-medium text-sm">
+                    <p class="mt-4">Change your profile pics</p>
+                    <div id="file-input-container">
+                        <div class="change-icon-container ">
+                            <div id="">
+                              <input type="file" id="id_gallery_change_editprofile" name="image" class="hidden">
+                            </div>
+                            <label for="id_gallery_change_editprofile" class="gallery-icon-label">
+                                <span><i id="change-through-gallery-editprofile" class="fa-solid fa-image fa-4x text-primary cursor-pointer text-2xl" aria-hidden="true"></i>
+                            </label>
+                            
+                        </div>
+
+                        <div class="hidden" id="editparentmodalpreview">
+                            <div class="float-right cursor-pointer ml-2 text-red-600" id="image-preview-cancel">x</div>
+                            <img alt="" class="w-[50px] h-[50px]" id="imagemodalpreview" src="" style="display: block;">
+                        </div>
+                    </div>
+                        
+                    </div>
+                </div>
+
                 <div class="flex w-full flex-col gap-4 border-t border-neutral-150 pt-5">
                     <button type="submit" class="flex items-center w-full justify-center p-3 rounded-lg bg-primary text-white border border-neutral-150 shadow-sm font-semibold">Save</button>
                 </div>
@@ -118,4 +175,6 @@
         history.back()
     }
 </script>
+<script src="{% static 'js/changeProfilePics.js' %}" async></script>
+
 {% endblock extraScripts %}
