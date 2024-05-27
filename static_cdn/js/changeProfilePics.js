@@ -94,7 +94,7 @@ if(cancelDpChangeHomePage){
   sendButton.style.display = "none";
   dpView.style.display = "flex";
   // imageModalPreview.src = ""
-  previewImage.src = ''
+  // previewImage.src = ''
   // sendButton.style.display = "none";
 }
 }
@@ -102,8 +102,8 @@ if(cancelDpChangeEditPage){
   cancelDpChangeEditPage.onclick = function() {
   modalEditProfile.style.display = "none";
   editParentModalPreview.style.display = "none";
-  imageModalPreview.src = ""
-  previewImage.src = ''
+  // imageModalPreview.src = ""
+  // previewImage.src = ''
   sendButton.style.display = "none";
   // dpView.style.display = "flex";
 }
