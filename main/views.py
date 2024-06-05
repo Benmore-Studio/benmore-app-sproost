@@ -12,6 +12,9 @@ from property.models import AssignedAccount
 from profiles.models import AgentProfile
 from django.contrib.auth.mixins import LoginRequiredMixin
 
+
+from decouple import config
+
 User = get_user_model()
 
 
@@ -63,6 +66,25 @@ def home(request):
         return redirect('account_login')
 
     else:
+        # try:
+        #     home_owner = User.objects.get(pk=pk)
+        #     if not AssignedAccount.objects.filter(assigned_by = home_owner, assigned_to = request.user).exists():
+        #         messages.error(request, f"you were not assigned by {home_owner.email} to view their account.")
+        #         return  redirect('main:home')
+            
+        #     quotes = QuoteRequest.objects.filter(user=home_owner)
+        #     projects = Project.objects.filter(quote_request__user=home_owner)
+        #     context = {
+        #         "quotes": quotes,
+        #         "projects": projects,
+        #         "quote_count": quotes.count(),
+        #         "projects_count": projects.count(),
+        #         "home_owner_id": pk
+        #     }
+        #     return render(request, 'user/home.html', context)
+        # except User.DoesNotExist:
+        #     messages.error(request, 'Home Owner not found')
+        #     return redirect('main:home')
         if request.user.user_type == "HO":
             quotes = QuoteRequest.objects.filter(user=request.user)
             projects = Project.objects.filter(quote_request__user=request.user)
@@ -76,10 +98,19 @@ def home(request):
         elif request.user.user_type == "CO":
             return redirect("profile:contractor_profile")
         elif request.user.user_type == "AG":
+            URL = config('UPDATEURL')
+            quotes = QuoteRequest.objects.filter(user=request.user)
+            projects = Project.objects.filter(quote_request__user=request.user)
             accounts = AssignedAccount.objects.filter(assigned_to=request.user).order_by('-id').select_related(
                 "assigned_by", "assigned_to", "assigned_by__user_profile")
+            agent = User.objects.get(pk=request.user.pk)
+            onboarding_message = AgentProfile.objects.get(user=agent)
             context = {
+                "quote_count": quotes.count(),
+                "projects_count": projects.count(),
                 "accounts": accounts,
+                'url':URL,
+                'onboarding_message': onboarding_message.has_seen_onboarding_message
             }
             return render(request, "user/agent_home.html", context)
         else:
