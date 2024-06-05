@@ -40,9 +40,10 @@
           </div>
         {% endif %}
       </div>
+
       <div class="flex items-center justify-between gap-2 w-full">
         <label for="remember" class="flex items-center">
-          {{form.remember|addattrs:"class=mr-2"}}
+          <input type="checkbox" name="remember" id="remember" class="mr-2">
           <span class="text-gray-600 text-sm">Remember for 30 days</span>
         </label>
         <a href="{% url 'account_reset_password' %}" class="text-primary font-semibold text-sm">Forgot password?</a>
