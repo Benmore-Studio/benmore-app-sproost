@@ -18,10 +18,15 @@
       {% else %}
         <img src="{% static 'svgs/search.svg' %}" alt="" class="" />
         <span class="text-gray-500 text-xs">Search</span>
-      {% endif %}
-      
+      {% endif %}     
     </a>
-    <a href="#" class="inline-flex flex-col gap-1 items-center">
+
+    <a href="{% url 'quotes:request-quotes'%}" class="inline-flex flex-col gap-1 items-center">
+      <img src="{% static 'svgs/Add-upload.svg' %}" alt="" class="" />
+      <span class="text-gray-500 text-xs">Upload</span>
+    </a>
+
+    <a href="{% url 'profile:show-agent-message' %}" class="inline-flex flex-col gap-1 items-center">
       {% if url_name == 'home' %}
       {% else %}
       {% endif %}
