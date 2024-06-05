@@ -9,7 +9,10 @@ import cloudinary.api
 
 from decouple import config
 UPDATEURL = config('UPDATEURL')
-# print(UPDATEURL)
+SECRET = config('SECRET')
+CLIENT_ID = config('CLIENT_ID')
+print(CLIENT_ID)
+print(SECRET)
 from django.core.management.utils import get_random_secret_key
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -196,9 +199,9 @@ SOCIALACCOUNT_PROVIDERS = {
         'SCOPE': ['profile', 'email'],
         "APPS": [
             {
-                "client_id": "841391955732-ri8c12jdcuifbgu30v0i82g4k78g9bce.apps.googleusercontent.com",
-                "secret": "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",
-                "key": ""
+                "client_id": CLIENT_ID,
+                "secret": SECRET,
+                "key": ''
             },
         ],
         
@@ -207,7 +210,6 @@ SOCIALACCOUNT_PROVIDERS = {
         },
     }
 }
-
 
 AUTH_USER_MODEL = 'accounts.User'
 
