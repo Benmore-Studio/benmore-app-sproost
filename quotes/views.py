@@ -19,6 +19,7 @@ class Quotes(LoginRequiredMixin, View, CustomRequestUtil):
         home_owner_id = kwargs.get("id")
 
         self.user = self.auth_user
+        print(self.user.user_type)
 
         if home_owner_id:
             user_service = UserService(request)
@@ -27,12 +28,19 @@ class Quotes(LoginRequiredMixin, View, CustomRequestUtil):
             if error:
                 messages.error(request, error)
                 return redirect('main:home')
-
-        form = self.form_class(initial={
-            'contact_email': self.user.email,
-            'contact_phone': self.user.phone_number,
-            'property_address': self.user.user_profile.address
-        })
+            
+        if self.user.user_type == 'HO':
+            form = self.form_class(initial={
+                'contact_email': self.user.email,
+                'contact_phone': self.user.phone_number,
+                'property_address': self.user.user_profile.address
+            })
+        elif self.user.user_type == 'AG':
+            form = self.form_class(initial={
+                'contact_email': self.user.email,
+                'contact_phone': self.user.phone_number,
+                'property_address': self.user.agent_profile.address
+            })
 
         self.extra_context_data = {
             "loggedInUser": f"{UserTypes.contractor}",
