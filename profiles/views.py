@@ -15,6 +15,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from main.models import Media
 from django.contrib.auth import get_user_model
+from django.http import JsonResponse
+
 
 User = get_user_model()
 
@@ -220,8 +222,24 @@ def change_profile_pics_view(request):
             # Redirect to the user's profile page
             return redirect('profile:contractor_profile')
         else:
-            print(form.errors)
-            print("form.errors")
+            # print(form.errors)
+            pass
     else:
         form = ProfilePictureForm()
     return render(request, 'user/contractor_home.html', {'form': form})
+
+def show_agent_menu_view(request):
+    return render(request, 'user/agent_menu.html', {})
+
+def show_agent_message_view(request):
+    return render(request, 'user/agent_message.html', {})
+
+def update_onboarding_status(request):
+    if request.method == 'POST':
+        # Get the current user's AgentProfile instance
+        agent_profile = request.user.agent_profile
+        agent_profile.has_seen_onboarding_message = True
+        agent_profile.save()      
+        return JsonResponse({'message': 'Onboarding status updated successfully'}, status=200)
+    else:
+        return JsonResponse({'error': 'Invalid request'}, status=400)
