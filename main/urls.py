@@ -10,5 +10,6 @@ urlpatterns = [
     path('assign-agent/', views.AssignAgentView.as_view(), name="assign-agent"),
     path('contractors/', views.contractors, name="contractors"),
     path('contractors/<str:profession>/', views.contractorDetail, name="contractors"),
+    path('assigned-projects/', views.Assigned_projects, name="assigned-projects"),
 ]
 

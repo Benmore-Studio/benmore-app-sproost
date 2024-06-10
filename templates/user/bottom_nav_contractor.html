@@ -22,14 +22,14 @@
       
     </a>
     
-    <a href="#" class="inline-flex flex-col gap-1 items-center">
+    <a href="{% url 'profile:show-agent-message' %}" class="inline-flex flex-col gap-1 items-center">
       {% if url_name == 'home' %}
       {% else %}
       {% endif %}
       <img src="{% static 'svgs/Message.svg' %}" alt="" class="" />
       <span class="text-gray-500 text-xs">Messages</span>
     </a>
-    <a href="{% url 'profile:edit-profile'  %}" class="inline-flex flex-col gap-1 items-center">
+    <a href="{% url 'profile:show-agent-menu'  %}" class="inline-flex flex-col gap-1 items-center">
       {% if url_name == 'edit-profile'%}
       <img src="{% static 'svgs/more-horizon-green.svg' %}" alt="" class="" />
       <span class="text-primary font-medium text-xs">Menu</span> 

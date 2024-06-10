@@ -9,8 +9,10 @@ from .forms import AgentAssignmentForm
 from mail_templated import send_mail
 from quotes.models import QuoteRequest, Project
 from property.models import AssignedAccount
-from profiles.models import AgentProfile
+from profiles.models import AgentProfile, Referral
 from django.contrib.auth.mixins import LoginRequiredMixin
+
+from django.urls import reverse
 
 
 from decouple import config
@@ -104,18 +106,48 @@ def home(request):
             accounts = AssignedAccount.objects.filter(assigned_to=request.user).order_by('-id').select_related(
                 "assigned_by", "assigned_to", "assigned_by__user_profile")
             agent = User.objects.get(pk=request.user.pk)
-            onboarding_message = AgentProfile.objects.get(user=agent)
+            agent_profile = AgentProfile.objects.get(user=agent)
+            referral, created = Referral.objects.get_or_create(referrer=request.user)
+            if created:
+                referral.code = agent_profile.registration_ID
+                referral.save()
+
+            signup_url = reverse('account_signup')
+            referral_link = request.build_absolute_uri(f'{signup_url}?ref={referral.code}')
+            print(referral_link)
+            print('referral_link')
             context = {
                 "quote_count": quotes.count(),
                 "projects_count": projects.count(),
                 "accounts": accounts,
+                "accounts_len": len(accounts),
                 'url':URL,
-                'onboarding_message': onboarding_message.has_seen_onboarding_message
+                'quotes':quotes,
+                'onboarding_message': agent_profile.has_seen_onboarding_message,
+                'referral_link': referral_link
             }
             return render(request, "user/agent_home.html", context)
         else:
             return redirect("admins:dashboard")
-    
+        
+def Assigned_projects(request):
+    if not request.user.is_authenticated:
+        return redirect('account_login')
+
+    else:
+        quotes = QuoteRequest.objects.filter(user=request.user)
+        projects = Project.objects.filter(quote_request__user=request.user)
+        accounts = AssignedAccount.objects.filter(assigned_to=request.user).order_by('-id').select_related(
+            "assigned_by", "assigned_to", "assigned_by__user_profile")
+        context = {
+            "quote_count": quotes.count(),
+            "projects_count": projects.count(),
+            "accounts": accounts,
+            "accounts_len": len(accounts),
+            
+        }
+        return render(request, "user/agent_assignor.html", context)
+       
 # def home(request):
 
 #     if loggedInUser == 'agent':
