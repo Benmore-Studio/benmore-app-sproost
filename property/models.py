@@ -12,7 +12,7 @@ class AssignedAccount(models.Model):
     
     
     def __str__(self) -> str:
-        return f'{self.assigned_to.email} assigned by {self.assigned_by}'
+        return f'{self.assigned_to} assigned by {self.assigned_by}'
         
     def save(self, *args, **kwargs):
         if self.assigned_to and not self.assigned_to.user_type == 'AG':
