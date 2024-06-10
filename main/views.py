@@ -18,6 +18,22 @@ from decouple import config
 User = get_user_model()
 
 
+def home_owner_function(request):
+    quotes = QuoteRequest.objects.filter(user=request.user)
+    projects = Project.objects.filter(quote_request__user=request.user)
+    context ={
+        "quotes": quotes,
+        "projects": projects,
+        "quote_count": quotes.count(),
+        "projects_count": projects.count(),
+        "home_owner_slug": request.user.slug
+    }
+    return context
+
+def home_owner_with_slug_name(request, name):
+    context = home_owner_function(request)
+    return render(request, "user/home.html", context)
+
 def get_base_url(request):
     # Use 'get_current_site' to get the domain
     domain = get_current_site(request).domain
@@ -64,36 +80,9 @@ def homeOwners(request):
 def home(request):
     if not request.user.is_authenticated:
         return redirect('account_login')
-
     else:
-        # try:
-        #     home_owner = User.objects.get(pk=pk)
-        #     if not AssignedAccount.objects.filter(assigned_by = home_owner, assigned_to = request.user).exists():
-        #         messages.error(request, f"you were not assigned by {home_owner.email} to view their account.")
-        #         return  redirect('main:home')
-            
-        #     quotes = QuoteRequest.objects.filter(user=home_owner)
-        #     projects = Project.objects.filter(quote_request__user=home_owner)
-        #     context = {
-        #         "quotes": quotes,
-        #         "projects": projects,
-        #         "quote_count": quotes.count(),
-        #         "projects_count": projects.count(),
-        #         "home_owner_id": pk
-        #     }
-        #     return render(request, 'user/home.html', context)
-        # except User.DoesNotExist:
-        #     messages.error(request, 'Home Owner not found')
-        #     return redirect('main:home')
         if request.user.user_type == "HO":
-            quotes = QuoteRequest.objects.filter(user=request.user)
-            projects = Project.objects.filter(quote_request__user=request.user)
-            context = {
-                "quotes": quotes,
-                "projects": projects,
-                "quote_count": quotes.count(),
-                "projects_count": projects.count()
-            }
+            context = home_owner_function(request)
             return render(request, "user/home.html", context)
         elif request.user.user_type == "CO":
             return redirect("profile:contractor_profile")

@@ -21,7 +21,13 @@
       {% endif %}
       
     </a>
-    <a href="{% url 'quotes:request-quotes'%}" class="inline-flex flex-col gap-1 items-center">
+    
+    {% if request.user.user_type == 'AG' %}
+      <a href="{% url 'quotes:request-quotes' name='home_owner_slug' %}" class="inline-flex flex-col gap-1 items-center">       
+      {% elif request.user.user_type == 'HO' %} 
+      <a href="{% url 'quotes:request-quotes'%}" class="inline-flex flex-col gap-1 items-center">
+    {% endif %}
+      
       {% if url_name == 'home' %}
       {% else %}
       {% endif %}

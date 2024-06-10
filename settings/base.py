@@ -96,12 +96,12 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'SproostApp.wsgi.application'
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
-# }
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
+}
 
 
 # Database
@@ -159,6 +159,7 @@ STATICFILES_FINDERS = (
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 SITE_ID = 2
+
 AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
     'allauth.account.auth_backends.AuthenticationBackend',
@@ -199,8 +200,8 @@ SOCIALACCOUNT_PROVIDERS = {
         'SCOPE': ['profile', 'email'],
         "APPS": [
             {
-                "client_id": CLIENT_ID,
-                "secret": SECRET,
+                "client_id":'857781473992-qretbc6751pctrhtc7gjqrq9356dqudj.apps.googleusercontent.com',
+                "secret":'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',
                 "key": ''
             },
         ],

@@ -11,7 +11,13 @@ class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name = 'user_profile')
     address = AddressField(null = True)
     city = models.CharField(max_length = 50, null = True, blank = True)
-    state_province = models.CharField(max_length = 50, null = True, blank = True)    
+    state_province = models.CharField(max_length = 50, null = True, blank = True) 
+    # slug = models.SlugField(
+    #     blank=True,
+    #     null=True,
+    #     unique=True, 
+    #     max_length=100, 
+    #     allow_unicode=True)   
     
     def __str__(self):
         return self.user.email

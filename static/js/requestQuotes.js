@@ -40,24 +40,55 @@ function validateForm() {
   return valid // return the valid status
 }
 
+// function nextPrev(n) {
+//   // This function will figure out which tab to display
+//   var x = document.querySelectorAll("#step")
+//   //   if (n == 1 && !validateForm()) return false
+//   // Hide the current tab:
+//   x[currentStep].style.display = "none"
+//   // Increase or decrease the current tab by 1:
+//   currentStep = currentStep + n
+//   console.log("x&n: ", x, n, currentStep)
+//   // if you have reached the end of the form...
+//   if (currentStep >= x.length) {
+//     // ... the form gets submitted:
+//     console.log(document.getElementById("quoteRequestForm"))
+//     document.getElementById("quoteRequestForm").submit()
+//     return false
+//   }
+//   showStep(currentStep)
+// }
+
+
 function nextPrev(n) {
-  // This function will figure out which tab to display
-  var x = document.querySelectorAll("#step")
-  //   if (n == 1 && !validateForm()) return false
+  var x = document.querySelectorAll("#step");
+
+  // Check if the current step is valid before proceeding to the next step
+  var currentForm = document.getElementById("quoteRequestForm");
+  if (n === 1 && !currentForm.checkValidity()) {
+      // If the form is invalid, display the built-in validation messages
+      currentForm.reportValidity();
+      return false;
+  }
+
   // Hide the current tab:
-  x[currentStep].style.display = "none"
+  x[currentStep].style.display = "none";
+
   // Increase or decrease the current tab by 1:
-  currentStep = currentStep + n
-  console.log("x&n: ", x, n, currentStep)
+  currentStep = currentStep + n;
+
   // if you have reached the end of the form...
   if (currentStep >= x.length) {
-    // ... the form gets submitted:
-    console.log(document.getElementById("quoteRequestForm"))
-    document.getElementById("quoteRequestForm").submit()
-    return false
+      // ... the form gets submitted:
+      console.log(document.getElementById("quoteRequestForm"));
+      document.getElementById("quoteRequestForm").submit();
+      return false;
   }
-  showStep(currentStep)
+
+  // Otherwise, display the correct tab:
+  showStep(currentStep);
 }
+
 
 function submitQuote() {
   document.getElementById("quoteRequestForm").submit()

@@ -10,6 +10,14 @@ virtualenv/
 media
 media_cdn
 
+
+# pages
+/settings/production.py
+/settings/development.py
+/settings/base.py
+/SproostApp/urls.py
+SproostApp/urls.py
+
 # Backup files # 
 *.bak 
 

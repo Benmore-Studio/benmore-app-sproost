@@ -2,6 +2,7 @@ import uuid
 from django.db import models
 from phonenumber_field.modelfields import PhoneNumberField
 from django.contrib.contenttypes.fields import GenericRelation
+# from profiles.models import AgentProfile, UserProfile
 
 class QuoteRequestStatus(models.TextChoices):
     pending = "Pending"
@@ -26,6 +27,9 @@ class QuoteRequest(models.Model):
     media_paths = GenericRelation("main.Media")
     is_quote = models.BooleanField(default=True)
     
+    created_by_agent = models.ForeignKey("accounts.User", on_delete=models.SET_NULL, blank=True, null=True, related_name='agent_quote_requests')
+    
+    # created_by_homeowner = models.Forei/gnKey(UserProfile, on_delete=models.SET_NULL, blank=True, null=True, related_name='homeowner_quote_requests')
     
     
     objects = QuoteRequestManager()
@@ -33,6 +37,11 @@ class QuoteRequest(models.Model):
     def __str__(self) -> str:
         return self.title
     
+    # def save(self, *args, **kwargs): 
+    #     if not self.slug:
+    #         slug_name= slugify(self.title) + result + local_time.strftime("%Y-%m-%d-%H-%M-%S")
+    #         self.slug =  slug_name  
+
     # a method that retuns the last in the querset of QuoteRequest
     
 

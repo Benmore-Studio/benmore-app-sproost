@@ -72,7 +72,8 @@ video {
           <div class="w-full"><label for="title" class="text-gray-700 font-medium text-sm">Title</label> {{ form.title }}</div>
 
           <div class="w-full">
-            <label for="Summary" class="text-gray-700 font-medium text-sm">Summary</label> {{ form.summary }}
+            <label for="Summary" class="text-gray-700 font-medium text-sm">Summary</label> 
+            {{ form.summary }}
             <small class="text-gray-500">257 characters left</small>
           </div>
 
@@ -104,6 +105,17 @@ video {
               <img src="{% static 'svgs/mail.svg' %}" alt="" class="w-[20px] h-[20px] object-contain" /> {{ form.contact_email }}
             </div>
           </div>
+
+            {{custom_home_owner_id}}
+          <!-- adding the home owner id and hiding it, this is for routing purpose, as i dont want numbers to be part of the url -->     
+           
+          {% if custom_home_owner_id  %}
+            <div class="w-full hidden">
+              <label for="title" class="text-gray-700 font-medium text-sm">home id</label>
+              {{ form.custom_home_owner_id }}
+            </div>         
+           {% endif %}      
+            
 
           <div class="w-full"><label for="house-address" class="text-gray-700 font-medium text-sm">House Address</label> {{ form.property_address }}</div>
 

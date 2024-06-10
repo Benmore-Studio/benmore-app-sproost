@@ -55,28 +55,7 @@
   {% endcomment %}
     
 
-    <div class="w-full my-8 flex flex-col gap-5">
-      <div class="w-full p-4 bg-white border border-neutral-150 rounded-md shadow-sm">
-        <div class="w-full flex flex-col gap-4">
-          <div class="w-full flex items-center justify-between">
-            <h3 class="text-gray-900 font-medium">Number of Uploaded Projects</h3>
-            <span class="">
-              <img src="{% static 'svgs/more-vertical.svg' %}" alt="" class="" />
-            </span>
-          </div>
-          <div class="w-full flex items-center justify-between">
-            {% if projects_count > 0 %}
-              <h3 class="text-gray-900 text-2xl font-semibold">{{ projects_count }}</h3>
-            {% else %}
-              <h3 class="text-gray-900 text-2xl font-semibold">0</h3>
-            {% endif %}
-            <span class="">
-              <img src="{% static 'svgs/uploaded-project.svg' %}" alt="" class="" />
-            </span>
-          </div>
-        </div>
-      </div>
-  
+    <div class="w-full my-8 flex flex-col gap-5">  
       <div class="w-full p-4 bg-white border border-neutral-150 rounded-md shadow-sm">
         <div class="w-full flex flex-col gap-4">
           <div class="w-full flex items-center justify-between">
@@ -125,7 +104,25 @@
       <div class="w-full p-4 bg-white border border-neutral-150 rounded-md shadow-sm">
         <div class="w-full flex flex-col gap-4">
           <div class="w-full flex items-center justify-between">
-            <h3 class="text-gray-900 font-medium">Number of Assigned Project</h3>
+            <h3 class="text-gray-900 font-medium">Homes Under Renovation</h3>
+            <span class="">
+              <img src="{% static 'svgs/more-vertical.svg' %}" alt="" class="" />
+            </span>
+          </div>
+          <div class="w-full flex items-center justify-between">
+            <h3 class="text-gray-900 text-2xl font-semibold">0</h3>
+  
+            <span class="">
+              <img src="{% static 'svgs/completed-project.svg' %}" alt="" class="" />
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="w-full p-4 bg-white border border-neutral-150 rounded-md shadow-sm">
+        <div class="w-full flex flex-col gap-4">
+          <div class="w-full flex items-center justify-between">
+            <h3 class="text-gray-900 font-medium">My Listings</h3>
             <span class="">
               <img src="{% static 'svgs/more-vertical.svg' %}" alt="" class="" />
             </span>
@@ -140,7 +137,9 @@
         </div>
       </div>
   
-      <div class="w-full flex items-center justify-end gap-4">
+      
+      {% comment %}
+      <!-- <div class="w-full flex items-center justify-end gap-4">
         {% if request.user.user_type == "HO" %}
           <a
             href="{% url 'main:assign-agent' %}"
@@ -150,16 +149,14 @@
             <span class="text-primary text-sm font-semibold">Assign Agent</span>
           </a>
         {% endif %}
-        {% if home_owner_id %}
-          <a href="{% url 'quotes:request-quotes' id=home_owner_id %}" class="w-[50%] flex items-center justify-center gap-2 cursor-pointer bg-primary p-3 rounded-md shadow-sm">
-        {% else %}
-          <a href="{% url 'quotes:request-quotes' %}" class="w-[50%] flex items-center justify-center gap-2 cursor-pointer bg-primary p-3 rounded-md shadow-sm">
-        {% endif %}
           <img src="{% static 'svgs/plus.svg' %}" alt="" class="" />
           <span class="text-white text-sm font-semibold">Request Quote</span>
-        </a>
-      </div>
+      </div> -->
+        
+      {% endcomment %}
+        
     </div>
+
     <!-- project request history -->
     <div class="w-full">
       <div class="rounded-lg w-full border border-neutral-150 p-4">

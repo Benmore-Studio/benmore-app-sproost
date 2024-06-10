@@ -66,14 +66,19 @@
           <span class="text-primary text-sm font-semibold">Assign Agent</span>
         </a>
       {% endif %}
-      {% if home_owner_id %}
-        <a href="{% url 'quotes:request-quotes' id=home_owner_id %}" class="w-[50%] flex items-center justify-center gap-2 cursor-pointer bg-primary p-3 rounded-md shadow-sm">
-      {% else %}
-        <a href="{% url 'quotes:request-quotes' %}" class="w-[50%] flex items-center justify-center gap-2 cursor-pointer bg-primary p-3 rounded-md shadow-sm">
+
+      {% if request.user.user_type == 'AG' %}
+      <a href="{% url 'quotes:request-quotes' name='home_owner_slug' %}" class="inline-flex flex-col gap-1 items-center">       
+          burna
+          <img src="{% static 'svgs/plus.svg' %}" alt="" class="" />
+          <span class="text-white bg-primary text-sm font-semibold">Request Quote</span>
+        </a>
+        {% else %} 
+        <a href="{% url 'quotes:request-quotes'%}" class="inline-flex flex-col gap-1 items-center">
+          <img src="{% static 'svgs/plus.svg' %}" alt="" class="" />
+          <span class="text-white text-sm font-semibold">Request Quote</span>
+        </a>
       {% endif %}
-        <img src="{% static 'svgs/plus.svg' %}" alt="" class="" />
-        <span class="text-white text-sm font-semibold">Request Quote</span>
-      </a>
     </div>
   </div>
   <!-- project request history -->
