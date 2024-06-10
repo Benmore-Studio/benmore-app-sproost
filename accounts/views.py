@@ -1,8 +1,9 @@
 from django.shortcuts import render
 from allauth.account.views import LoginView
+from allauth.account.views import SignupView
 from django.contrib.auth import get_user_model
 from phonenumbers import parse, is_valid_number
-from .forms import ValidatePhoneNumberForm
+from .forms import ValidatePhoneNumberForm, CustomSignupForm
 from django.http import JsonResponse
 
 from django.contrib.auth import logout
@@ -21,6 +22,14 @@ class CustomLoginView(LoginView):
             self.request.session.set_expiry(0)  # Browser close
         return super().form_valid(form)
     
+
+
+class CustomSignupView(SignupView):
+    form_class = CustomSignupForm
+    def dispatch(self, request, *args, **kwargs):
+        print('****')
+        return super().post(request, *args, **kwargs)
+
 
 def validate_phone_numbers(request):
     phone_number = request.GET.get('phone')

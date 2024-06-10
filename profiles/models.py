@@ -47,3 +47,14 @@ class ContractorProfile(models.Model):
         return self.user.email
     
     
+
+class Referral(models.Model):
+    referrer = models.OneToOneField(User, on_delete=models.CASCADE, related_name = 'referrer')
+    referred = models.ManyToManyField(User, related_name = 'referred')
+    code = models.CharField(max_length=100)
+  
+    
+    def __str__(self):
+        return self.referrer.email
+
+

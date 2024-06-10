@@ -200,8 +200,8 @@ SOCIALACCOUNT_PROVIDERS = {
         'SCOPE': ['profile', 'email'],
         "APPS": [
             {
-                "client_id":'857781473992-qretbc6751pctrhtc7gjqrq9356dqudj.apps.googleusercontent.com',
-                "secret":'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',
+                "client_id":CLIENT_ID,
+                "secret":SECRET,
                 "key": ''
             },
         ],
