@@ -79,18 +79,14 @@ class CustomSignupForm(SignupForm):
             
             # Handle referral code directly from the request
             referral_code = request.GET.get('ref', '')
-            print(referral_code)
             if referral_code:
                 try:
                     referral = Referral.objects.get(code=referral_code)
                     referral.referred.add(user)
                     referral.save()
-                    print('referral_code11')
                     try:                          
                         agent = AgentProfile.objects.get(registration_ID=referral_code)
-                        print('referral_code22')
                         if AssignedAccount.objects.filter(assigned_by=user, assigned_to=agent.user).exists():
-                            print('referral_code33')
                             pass
                         else:
                             AssignedAccount.objects.get_or_create(
@@ -98,7 +94,6 @@ class CustomSignupForm(SignupForm):
                                 assigned_by=user,
                                 is_approved=True
                             )
-                            print('referral_code44')
                             send_mail(
                                 'mail/assign_agent.tpl',
                                 {'first_name': agent.user.first_name, "base_url": get_base_url(request)},
