@@ -1,5 +1,4 @@
 {% extends "user/base.html" %} {% load static %} {% block topNav %} {% include "user/top-navigation.html" %} {% endblock topNav %} {% block content %}
-
 <div class="w-full p-4 font['Inter'] mt-14">
   <div class="w-full my-8 flex flex-col gap-5">
     <div class="w-full p-4 bg-white border border-neutral-150 rounded-md shadow-sm">
@@ -20,10 +19,10 @@
       </div>
     </div>
 
-    <div class="w-full p-4 bg-white border border-neutral-150 rounded-md shadow-sm">
+    <a href="#quote-request-history" class="w-full p-4 bg-white border border-neutral-150 rounded-md shadow-sm">
       <div class="w-full flex flex-col gap-4">
         <div class="w-full flex items-center justify-between">
-          <h3 class="text-gray-900 font-medium">Number of Quotes Requested</h3>
+          <h3 class="text-gray-900 font-medium">My Quotes</h3>
           <span class="">
             <img src="{% static 'svgs/more-vertical.svg' %}" alt="" class="" />
           </span>
@@ -36,7 +35,7 @@
           </span>
         </div>
       </div>
-    </div>
+    </a>
 
     <div class="w-full p-4 bg-white border border-neutral-150 rounded-md shadow-sm">
       <div class="w-full flex flex-col gap-4">
@@ -66,19 +65,14 @@
           <span class="text-primary text-sm font-semibold">Assign Agent</span>
         </a>
       {% endif %}
-
       {% if request.user.user_type == 'AG' %}
-      <a href="{% url 'quotes:request-quotes' name='home_owner_slug' %}" class="inline-flex flex-col gap-1 items-center">       
-          burna
-          <img src="{% static 'svgs/plus.svg' %}" alt="" class="" />
-          <span class="text-white bg-primary text-sm font-semibold">Request Quote</span>
-        </a>
-        {% else %} 
-        <a href="{% url 'quotes:request-quotes'%}" class="inline-flex flex-col gap-1 items-center">
-          <img src="{% static 'svgs/plus.svg' %}" alt="" class="" />
-          <span class="text-white text-sm font-semibold">Request Quote</span>
-        </a>
+        <a href="{% url 'quotes:request-quotes' name=name %}" class="w-[50%] flex items-center justify-center gap-2 cursor-pointer bg-primary p-3 rounded-md shadow-sm">
+      {% elif request.user.user_type == 'HO' %}
+        <a href="{% url 'quotes:request-quotes' %}" class="w-[50%] flex items-center justify-center gap-2 cursor-pointer bg-primary p-3 rounded-md shadow-sm">
       {% endif %}
+        <img src="{% static 'svgs/plus.svg' %}" alt="" class="" />
+        <span class="text-white text-sm font-semibold">Request Quote</span>
+      </a>
     </div>
   </div>
   <!-- project request history -->
@@ -86,7 +80,7 @@
     <div class="rounded-lg w-full border border-neutral-150 p-4">
       <!-- header -->
       <div class="w-full flex items-center justify-between border-b border-neutral-150 pb-4">
-        <h3 class="text-gray-900 font-semibold">Quote Request history</h3>
+        <h3 id="quote-request-history" class="text-gray-900 font-semibold">Quote Request history</h3>
         <a href="#" class="text-primary bg-toneLightGreen text-center p-2 px-4 rounded-md"> See all </a>
       </div>
       <!-- content -->
@@ -140,7 +134,6 @@
     </div>
   </div>
 </div>
-
 {% endblock content %} 
 {% block bottomNav %} 
   {% include "user/bottom_nav.html" %}

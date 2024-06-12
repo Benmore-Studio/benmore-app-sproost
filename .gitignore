@@ -15,6 +15,7 @@ media_cdn
 /settings/production.py
 /settings/development.py
 /settings/base.py
+settings/base.py
 /SproostApp/urls.py
 SproostApp/urls.py
 

@@ -106,13 +106,12 @@ video {
             </div>
           </div>
 
-            {{custom_home_owner_id}}
           <!-- adding the home owner id and hiding it, this is for routing purpose, as i dont want numbers to be part of the url -->     
            
-          {% if custom_home_owner_id  %}
+          {% if home_owner_id  %}
             <div class="w-full hidden">
               <label for="title" class="text-gray-700 font-medium text-sm">home id</label>
-              {{ form.custom_home_owner_id }}
+              {{ form.home_owner_id }}
             </div>         
            {% endif %}      
             
