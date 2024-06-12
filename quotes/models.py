@@ -15,7 +15,7 @@ class QuoteRequestManager(models.Manager):
         return self.order_by('-id').first()
 
 class QuoteRequest(models.Model):
-    user = models.ForeignKey("accounts.User", on_delete=models.CASCADE, null=False, related_name="quote_requests")
+    user = models.ForeignKey("accounts.User", on_delete=models.CASCADE, null=False, related_name="quote_requests", help_text='created_by_home_owners')
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     title = models.CharField(max_length=255, null=False)
     summary = models.TextField(null=False, max_length=257)

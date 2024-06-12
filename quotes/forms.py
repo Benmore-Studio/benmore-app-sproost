@@ -3,7 +3,7 @@ from quotes.models import QuoteRequest
     
 
 class QuoteRequestForm(forms.ModelForm):
-    custom_home_owner_id = forms.IntegerField(required=False)
+    home_owner_id = forms.IntegerField(required=False)
 
     class Meta:
         model = QuoteRequest
