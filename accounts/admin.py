@@ -19,7 +19,7 @@ class UserAdmin(BaseUserAdmin):
         (('Permissions'), {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
     )
 
-    list_display = ('username', 'email', 'first_name', 'last_name', 'slug', 'is_staff', 'phone_number', 'user_type')
+    list_display = ('username', 'email','user_type', 'slug', 'is_staff', 'first_name', 'last_name', 'phone_number' )
     search_fields = ('username', 'first_name', 'last_name', 'email', 'phone_number', 'slug')
     ordering = ('username',)
 
