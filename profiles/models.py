@@ -2,6 +2,8 @@ from django.db import models
 from accounts.models import User
 from address.models import AddressField
 from django.contrib.contenttypes.fields import GenericRelation
+from django.utils.translation import gettext_lazy as _
+
 
 def image_upload_location(instance, filename):
     return f'contractorprofile/{instance.id}/{filename}'
@@ -49,12 +51,35 @@ class ContractorProfile(models.Model):
     
 
 class Referral(models.Model):
-    referrer = models.OneToOneField(User, on_delete=models.CASCADE, related_name = 'referrer')
-    referred = models.ManyToManyField(User, related_name = 'referred')
-    code = models.CharField(max_length=100)
-  
-    
+    """Represents a referral made by a user.
+
+    Attributes:
+        referrer (User): The user who made the referral.
+        referred (User): The users who have been referred.
+        code (str): The referral code.
+    """
+    referrer = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        related_name='referrer',
+        help_text=_('The user who made the referral.')
+    )
+    referred = models.ManyToManyField(
+        User,
+        related_name='referred',
+        help_text=_('The users who have been referred.')
+    )
+    code = models.CharField(
+        max_length=100,
+        help_text=_('The referral code.')
+    )
+
+    class Meta:
+        verbose_name = _('Referral')
+        verbose_name_plural = _('Referrals')
+
     def __str__(self):
         return self.referrer.email
+
 
 
