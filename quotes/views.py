@@ -3,7 +3,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import View
 from django.contrib import messages
 
-from accounts.models import UserTypes
+from accounts.models import UserTypes, User
 from accounts.services.user import UserService
 from quotes.forms import QuoteRequestForm
 from quotes.services import QuoteService
@@ -19,7 +19,6 @@ class Quotes(LoginRequiredMixin, View, CustomRequestUtil):
         home_owner_id = kwargs.get("id")
 
         self.user = self.auth_user
-        print(self.user.user_type)
 
         if home_owner_id:
             user_service = UserService(request)
@@ -30,7 +29,6 @@ class Quotes(LoginRequiredMixin, View, CustomRequestUtil):
                 return redirect('main:home')
             
         if self.user.user_type == 'HO':
-            print(request.user.pk)
             form = self.form_class(initial={
                 'contact_email': self.user.email,
                 'contact_phone': self.user.phone_number,
@@ -56,7 +54,6 @@ class Quotes(LoginRequiredMixin, View, CustomRequestUtil):
     def post(self, request, *args, **kwargs):
         # home_owner_id is also home_owner_name but not renamed
         home_owner_id = kwargs.get("name")
-        print(home_owner_id)
 
         if home_owner_id:
             self.template_on_error = ("quotes:request-quotes", home_owner_id)
@@ -71,27 +68,27 @@ class Quotes(LoginRequiredMixin, View, CustomRequestUtil):
         if form.is_valid():
             form_data = form.cleaned_data
 
-            if form_data['custom_home_owner_id']:
+            if home_owner_id:
+                user = User.objects.get(slug = home_owner_id)
                 form_data["created_by_agent"] = request.user
+                form_data["user"] = user
+            else:
+                form_data["user"] = request.user
+                form_data["created_by_agent"] = None
 
             # form_data["home_owner_id"] = home_owner_id
             form_data['media'] = None
-
-            print('form_data')
-            print(form_data)
-
             if request.FILES:
                 uploaded_files = request.FILES.getlist("upload-quote")
                 uploaded_captures = request.FILES.getlist("upload-capture")
 
                 form_data["media"] = uploaded_files + uploaded_captures
             quote_service = QuoteService(request)
-            print(quote_service)
+           
 
             return self.process_request(request, target_view="main:home", target_function=quote_service.create, payload=form_data)
 
         else:
-            print(form.errors)
             for field, errors in form.errors.items():
                 for error in errors:
                     messages.error(self.request, f"{error}")

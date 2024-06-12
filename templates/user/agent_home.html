@@ -22,6 +22,20 @@
     .slide-down {
         animation: slide-down 0.5s ease-out forwards;
     }
+
+    #copied-message {
+      position: fixed;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: rgba(0, 0, 0, 0.7);
+      color: white;
+      padding: 10px;
+      border-radius: 5px;
+      display: none; /* Make sure this is set to none */
+      z-index: 1000; /* Ensure it appears on top of other elements */
+    }
+
   </style>
 
   {{onboarding_message}}
@@ -77,72 +91,39 @@
           </div>
         </div>
       </div>
-  
-      
-      {% comment %}
-      <!-- <div class="w-full p-4 bg-white border border-neutral-150 rounded-md shadow-sm">
-        <div class="w-full flex flex-col gap-4">
-          <div class="w-full flex items-center justify-between">
-            <h3 class="text-gray-900 font-medium">Number of Completed Project</h3>
-            <span class="">
-              <img src="{% static 'svgs/more-vertical.svg' %}" alt="" class="" />
-            </span>
-          </div>
-          <div class="w-full flex items-center justify-between">
-            <h3 class="text-gray-900 text-2xl font-semibold">0</h3>
-  
-            <span class="">
-              <img src="{% static 'svgs/completed-project.svg' %}" alt="" class="" />
-            </span>
-          </div>
-        </div>
-      </div> -->
-        
-      {% endcomment %}
-        
 
-      <a href="{% url 'main:assigned-projects'  %}" class="w-full p-4 bg-white border border-neutral-150 rounded-md shadow-sm">
+      <a href="{% url 'main:assigned-projects' %}" class="w-full p-4 bg-white border border-neutral-150 rounded-md shadow-sm">
         <div class="w-full flex flex-col gap-4">
           <div class="w-full flex items-center justify-between">
-            <h3 class="text-gray-900 font-medium">Homes Under Renovation</h3>
+            <h3 class="text-gray-900 font-medium">My Listing</h3>
             <span class="">
               <img src="{% static 'svgs/more-vertical.svg' %}" alt="" class="" />
             </span>
           </div>
-          <div class="w-full flex items-center justify-between">
-            <h3 class="text-gray-900 text-2xl font-semibold">0</h3>
-  
-            <span class="">
-              <img src="{% static 'svgs/completed-project.svg' %}" alt="" class="" />
-            </span>
-          </div>
-        </div>
-      </div>
-
-      <div class="w-full p-4 bg-white border border-neutral-150 rounded-md shadow-sm">
-        <div class="w-full flex flex-col gap-4">
-          <div class="w-full flex items-center justify-between">
-            <h3 class="text-gray-900 font-medium">My Listings</h3>
-            <span class="">
-              <img src="{% static 'svgs/more-vertical.svg' %}" alt="" class="" />
-            </span>
-          </div>
-          <div class="w-full flex items-center justify-between">
+          <div class="w-full flex items-center justify-between">            
             {% if accounts_len > 0 %}
-            <h3 class="text-gray-900 text-2xl font-semibold">{{accounts_len}}</h3>
+              <h3 class="text-gray-900 text-2xl font-semibold">{{ accounts_len }}</h3>  
             {% else %}
-            <h3 class="text-gray-900 text-2xl font-semibold">0</h3>
-              
+              <h3 class="text-gray-900 text-2xl font-semibold">0</h3>              
             {% endif %}
               
-  
             <span class="">
-              <img src="{% static 'svgs/completed-project.svg' %}" alt="" class="" />
+              <img src="{% static 'svgs/quotes.svg' %}" alt="" class="" />
             </span>
           </div>
         </div>
       </a>
-  
+    </div>  
+
+    
+    <div id="share-link"  data-link="{{referral_link}}" class="w-full flex items-center justify-center flex-col cursor-pointer mb-6">
+      <div class="w-[50%] flex items-center justify-center text-center gap-2 cursor-pointer bg-primary p-3 rounded-md shadow-sm">
+        <img src="{% static 'svgs/plus.svg' %}" alt="" class="" />
+        <span class="text-white text-sm font-semibold">Inivite</span>
+      </div>
+    </div>
+    <div id="copied-message" class="hidden text-green-500 text-sm mt-2">Copied!</div>
+
       
       {% comment %}
       <!-- <div class="w-full flex items-center justify-end gap-4">
@@ -228,11 +209,35 @@
 {% block extraScripts %}
     <script src="{% static 'js/agent.js' %}"></script>
     <script>
-      let getStarted = document.querySelector('#get-started')
-      let modalOverlay = document.querySelector('#modal-overlay')
-      if(getStarted){
-        getStarted.addEventListener('click', ()=>modalOverlay.style.display= 'none')
-      }
+      document.addEventListener("DOMContentLoaded", function() {
+        let getStarted = document.querySelector('#get-started')
+        let modalOverlay = document.querySelector('#modal-overlay')
+
+        let shareLink = document.getElementById("share-link");
+        let copiedMessage = document.getElementById("copied-message");
+
+
+        if(getStarted){
+          getStarted.addEventListener('click', ()=>modalOverlay.style.display= 'none')
+        }
+        
+        // copying invite link
+        shareLink.addEventListener("click", function() {
+            let referralLink = shareLink.getAttribute("data-link");
+            navigator.clipboard.writeText(referralLink).then(function() {
+                // Show the copied message
+                copiedMessage.style.display = 'block';
+
+                // Hide the message after 2 seconds
+                setTimeout(function() {
+                    copiedMessage.style.display = 'none';
+                }, 2000);
+            }).catch(function(error) {
+                console.error("Failed to copy text: ", error);
+            });
+        });
+    });
+
     </script>
 
     <script>

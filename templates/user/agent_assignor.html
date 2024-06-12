@@ -17,7 +17,7 @@
     <!-- client -->
     {% if accounts %}
         {% for account in accounts%}
-            <div class="w-full block p-4 bg-white border border-neutral-150 rounded-md shadow-sm">
+            <a href='{% url "main:home_owner_with_slug_name" name=account.assigned_by.slug %}' class="w-full block p-4 bg-white border border-neutral-150 rounded-md shadow-sm cursor-pointer">
                 <div class="w-full flex flex-col gap-8">
                     <div class="w-full flex items-center justify-between">
                         <div class="">
@@ -32,14 +32,13 @@
                         <img src="{% static 'svgs/address.svg' %}" alt="" class="w-[32px] h-[32px] object-contain">
                     </div>
                 </div>
-            </div>
+            </a>
         {% endfor %}
     {%else%}
         <div class="w-full flex flex-col items-center justify-center gap-4">
             <h3 class="text-gray-900 font-semibold text-center">No clients assigned to you yet</h3>
         </div>
     {% endif %}
-    
 </div>
 
 
