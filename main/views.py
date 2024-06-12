@@ -14,9 +14,6 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 
 from django.urls import reverse
 
-
-from decouple import config
-
 User = get_user_model()
 
 # general function to be called in other functions
@@ -92,7 +89,7 @@ def home(request):
         elif request.user.user_type == "CO":
             return redirect("profile:contractor_profile")
         elif request.user.user_type == "AG":
-            URL = config('UPDATEURL')
+            URL = settings.UPDATEURL
             quotes = QuoteRequest.objects.filter(created_by_agent=request.user) 
             projects = Project.objects.filter(quote_request__user=request.user)
             accounts = AssignedAccount.objects.filter(assigned_to=request.user).order_by('-id').select_related(
