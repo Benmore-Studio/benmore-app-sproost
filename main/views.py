@@ -11,6 +11,7 @@ from quotes.models import QuoteRequest, Project
 from property.models import AssignedAccount
 from profiles.models import AgentProfile, Referral
 from django.contrib.auth.mixins import LoginRequiredMixin
+from utils.views import get_base_url
 
 from django.urls import reverse
 
@@ -89,7 +90,7 @@ def home(request):
         elif request.user.user_type == "CO":
             return redirect("profile:contractor_profile")
         elif request.user.user_type == "AG":
-            URL = settings.UPDATEURL
+            URL = get_base_url(request)
             quotes = QuoteRequest.objects.filter(created_by_agent=request.user) 
             projects = Project.objects.filter(quote_request__user=request.user)
             accounts = AssignedAccount.objects.filter(assigned_to=request.user).order_by('-id').select_related(
