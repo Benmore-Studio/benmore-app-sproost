@@ -9,11 +9,32 @@ from .forms import AgentAssignmentForm
 from mail_templated import send_mail
 from quotes.models import QuoteRequest, Project
 from property.models import AssignedAccount
-from profiles.models import AgentProfile
+from profiles.models import AgentProfile, Referral
 from django.contrib.auth.mixins import LoginRequiredMixin
+
+from django.urls import reverse
 
 User = get_user_model()
 
+# general function to be called in other functions
+def home_owner_function(request, value):
+    quotes = QuoteRequest.objects.filter(user=value)
+    projects = Project.objects.filter(quote_request__user=value)
+    context ={
+        "quotes": quotes,
+        "projects": projects,
+        "quote_count": quotes.count(),
+        "projects_count": projects.count(),
+        "home_owner_slug": request.user.slug
+    }
+    return context
+
+# the vieew to route the home owner with slug
+def home_owner_with_slug_name(request, name):
+    user = User.objects.get(slug=name)
+    context = home_owner_function(request, user)
+    context['name'] = name
+    return render(request, "user/home.html", context)
 
 def get_base_url(request):
     # Use 'get_current_site' to get the domain
@@ -61,30 +82,60 @@ def homeOwners(request):
 def home(request):
     if not request.user.is_authenticated:
         return redirect('account_login')
-
     else:
         if request.user.user_type == "HO":
-            quotes = QuoteRequest.objects.filter(user=request.user)
-            projects = Project.objects.filter(quote_request__user=request.user)
-            context = {
-                "quotes": quotes,
-                "projects": projects,
-                "quote_count": quotes.count(),
-                "projects_count": projects.count()
-            }
+            context = home_owner_function(request, request.user)
             return render(request, "user/home.html", context)
         elif request.user.user_type == "CO":
             return redirect("profile:contractor_profile")
         elif request.user.user_type == "AG":
+            URL = settings.UPDATEURL
+            quotes = QuoteRequest.objects.filter(created_by_agent=request.user) 
+            projects = Project.objects.filter(quote_request__user=request.user)
             accounts = AssignedAccount.objects.filter(assigned_to=request.user).order_by('-id').select_related(
-                "assigned_by", "assigned_to", "assigned_by__user_profile")
+                "assigned_by", "assigned_to")
+            agent = User.objects.get(pk=request.user.pk)
+            agent_profile = AgentProfile.objects.get(user=agent)
+            referral, created = Referral.objects.get_or_create(referrer=request.user)
+            if created:
+                referral.code = agent_profile.registration_ID
+                referral.save()
+
+            signup_url = reverse('account_signup')
+            referral_link = request.build_absolute_uri(f'{signup_url}?ref={referral.code}')
             context = {
+                "quote_count": quotes.count(),
+                "projects_count": projects.count(),
                 "accounts": accounts,
+                "accounts_len": len(accounts),
+                'url':URL,
+                'quotes':quotes,
+                'onboarding_message': agent_profile.has_seen_onboarding_message,
+                'referral_link': referral_link
             }
             return render(request, "user/agent_home.html", context)
         else:
             return redirect("admins:dashboard")
-    
+        
+def Assigned_projects(request):
+    if not request.user.is_authenticated:
+        return redirect('account_login')
+
+    else:
+        quotes = QuoteRequest.objects.filter(user=request.user)
+        projects = Project.objects.filter(quote_request__user=request.user)
+        accounts = AssignedAccount.objects.filter(assigned_to=request.user).order_by('-id').select_related(
+            "assigned_by", "assigned_to")
+
+        context = {
+            "quote_count": quotes.count(),
+            "projects_count": projects.count(),
+            "accounts": accounts,
+            "accounts_len": len(accounts),
+            
+        }
+        return render(request, "user/agent_assignor.html", context)
+       
 # def home(request):
 
 #     if loggedInUser == 'agent':

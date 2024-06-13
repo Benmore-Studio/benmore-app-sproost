@@ -1,12 +1,18 @@
 import os 
 from pathlib import Path
 from django.urls import reverse_lazy
-from decouple import config
 
 import cloudinary
 import cloudinary.uploader
 import cloudinary.api	
 
+
+from decouple import config
+UPDATEURL = config('UPDATEURL')
+SECRET = config('SECRET')
+CLIENT_ID = config('CLIENT_ID')
+
+# print(SECRET)
 from django.core.management.utils import get_random_secret_key
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -47,6 +53,7 @@ INSTALLED_APPS = [
     'sslserver',
     
     "phonenumber_field",
+    'django.contrib.sites',
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
@@ -88,6 +95,13 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'SproostApp.wsgi.application'
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
 
 
 # Database
@@ -144,6 +158,7 @@ STATICFILES_FINDERS = (
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+SITE_ID = 2
 
 AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
@@ -160,6 +175,8 @@ ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_CHANGE_EMAIL = True
 ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_EMAIL_VERIFICATION = 'none'
+ACCOUNT_SESSION_REMEMBER = True
+SOCIALACCOUNT_QUERY_EMAIL = True
 
 
 ACCOUNT_LOGOUT_REDIRECT_URL = reverse_lazy('account_login')
@@ -183,9 +200,9 @@ SOCIALACCOUNT_PROVIDERS = {
         'SCOPE': ['profile', 'email'],
         "APPS": [
             {
-                "client_id": "266706476801-q88ck56s88399r7umslne3rmdp9s7rel.apps.googleusercontent.com",
-                "secret": "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",
-                "key": ""
+                "client_id":CLIENT_ID,
+                "secret":SECRET,
+                "key": ''
             },
         ],
         
@@ -194,7 +211,6 @@ SOCIALACCOUNT_PROVIDERS = {
         },
     }
 }
-
 
 AUTH_USER_MODEL = 'accounts.User'
 

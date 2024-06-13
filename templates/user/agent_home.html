@@ -4,43 +4,264 @@
 {% block topNav %} 
     {% include "user/top-navigation.html" %} 
 {% endblock topNav %} 
+
 {% block content %}
 
-<div class="w-full p-4 font['Inter'] mt-24 flex flex-col gap-5">
-    <!-- client -->
-    {% if accounts %}
-        {% for account in accounts%}
-            <a href="{% url "property:agent-homeowner-dashboard" account.assigned_by.pk %}" class="w-full block p-4 bg-white border border-neutral-150 rounded-md shadow-sm">
-                <div class="w-full flex flex-col gap-8">
-                    <div class="w-full flex items-center justify-between">
-                        <div class="">
-                            <h3 class="text-gray-900 font-semibold">{{account.assigned_by.first_name}} {{account.assigned_by.last_name}}</h3>
-                            <small class="text-gray-600">{{account.assigned_by.email}}</small>
-                        </div>
-                        <span class="">
-                <img src="{% static 'svgs/chevron-right.svg' %}" alt="" class="w-[32px] h-[32px] object-contain" />
-            </span>
-                    </div>
-                    <div class="flex items-center justify-between">
-                        <p class="text-gray-900 text-sm font-medium">{{account.assigned_by.user_profile.address}}</p>
-                        <img src="{% static 'svgs/address.svg' %}" alt="" class="w-[32px] h-[32px] object-contain">
-                    </div>
-                </div>
-            </a>
-        {% endfor %}
-    {%else%}
-        <div class="w-full flex flex-col items-center justify-center gap-4">
-            <h3 class="text-gray-900 font-semibold text-center">No clients assigned to you yet</h3>
-        </div>
-    {% endif %}
-    
-</div>
+<style>
 
+  /* https://sproost-1d5809b5aa5b.herokuapp.com/accounts/google/login/callback/ */
+  
+    @keyframes slide-down {
+        0% {
+            transform: translateY(-100%);
+        }
+        100% {
+            transform: translateY(0);
+        }
+    }
+    .slide-down {
+        animation: slide-down 0.5s ease-out forwards;
+    }
+
+    #copied-message {
+      position: fixed;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: rgba(0, 0, 0, 0.7);
+      color: white;
+      padding: 10px;
+      border-radius: 5px;
+      display: none; /* Make sure this is set to none */
+      z-index: 1000; /* Ensure it appears on top of other elements */
+    }
+
+  </style>
+
+  {{onboarding_message}}
+  {% if not onboarding_message %}    
+   <!-- Overlay -->
+  <div id="modal-overlay" class="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center">
+    <!-- Modal -->
+    <div class="bg-white rounded-lg shadow-lg max-w-lg w-full p-6 slide-down">
+        <h2 class="text-xl font-bold mb-4">Welcome to your profile!</h2>
+        <ol class="mb-4">
+         <li class="text-sm text-gray-500 mt-2">1. For Dashboard - here you can see an overview of your key activities on Sproost.</li>
+         <li class="text-sm text-gray-500 mt-2">2. For Request Quote - click here to make a quote request for your desired property.</li>
+         <li class="text-sm text-gray-500 mt-2">3. Upload button - this is another short cut for requesting a quote.</li>
+         <li class="text-sm text-gray-500 mt-2">4. Quote request history "see all" - here you can view a list of all the quote requests you have made.</li>
+        </ol>
+        <button type="button" id="get-started" class="bg-primary text-white px-4 py-2 rounded hover:bg-[#267e05]">Get Started</button>
+    </div>
+  </div>
+  {% endif %}
+
+<div class="w-full p-4 font['Inter'] mt-14">
+
+  
+  {% comment %}
+  <!-- <div class="w-full flex items-center justify-end gap-4">   
+    <a href="" class="w-[50%] flex items-center justify-center gap-2 cursor-pointer bg-primary p-3 rounded-md shadow-sm">
+    <img src="/static/svgs/plus.svg" alt="" class="">
+    <span class="text-white text-sm font-semibold">Add Property</span>
+    </a>
+  </div>    -->
+  {% endcomment %}
+    
+
+    <div class="w-full my-8 flex flex-col gap-5">  
+      <div class="w-full p-4 bg-white border border-neutral-150 rounded-md shadow-sm">
+        <div class="w-full flex flex-col gap-4">
+          <div class="w-full flex items-center justify-between">
+            <h3 class="text-gray-900 font-medium">Number of Quotes Requested</h3>
+            <span class="">
+              <img src="{% static 'svgs/more-vertical.svg' %}" alt="" class="" />
+            </span>
+          </div>
+          <div class="w-full flex items-center justify-between">            
+            {% if quote_count > 0 %}
+              <h3 class="text-gray-900 text-2xl font-semibold">{{ quote_count }}</h3>  
+            {% else %}
+              <h3 class="text-gray-900 text-2xl font-semibold">0</h3>              
+            {% endif %}
+              
+            <span class="">
+              <img src="{% static 'svgs/quotes.svg' %}" alt="" class="" />
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <a href="{% url 'main:assigned-projects' %}" class="w-full p-4 bg-white border border-neutral-150 rounded-md shadow-sm">
+        <div class="w-full flex flex-col gap-4">
+          <div class="w-full flex items-center justify-between">
+            <h3 class="text-gray-900 font-medium">My Listing</h3>
+            <span class="">
+              <img src="{% static 'svgs/more-vertical.svg' %}" alt="" class="" />
+            </span>
+          </div>
+          <div class="w-full flex items-center justify-between">            
+            {% if accounts_len > 0 %}
+              <h3 class="text-gray-900 text-2xl font-semibold">{{ accounts_len }}</h3>  
+            {% else %}
+              <h3 class="text-gray-900 text-2xl font-semibold">0</h3>              
+            {% endif %}
+              
+            <span class="">
+              <img src="{% static 'svgs/quotes.svg' %}" alt="" class="" />
+            </span>
+          </div>
+        </div>
+      </a>
+    </div>  
+
+    
+    <div id="share-link"  data-link="{{referral_link}}" class="w-full flex items-center justify-center flex-col cursor-pointer mb-6">
+      <div class="w-[50%] flex items-center justify-center text-center gap-2 cursor-pointer bg-primary p-3 rounded-md shadow-sm">
+        <img src="{% static 'svgs/plus.svg' %}" alt="" class="" />
+        <span class="text-white text-sm font-semibold">Inivite</span>
+      </div>
+    </div>
+    <div id="copied-message" class="hidden text-green-500 text-sm mt-2">Copied!</div>
+
+      
+      {% comment %}
+      <!-- <div class="w-full flex items-center justify-end gap-4">
+        {% if request.user.user_type == "HO" %}
+          <a
+            href="{% url 'main:assign-agent' %}"
+            class="flex items-center justify-center cursor-pointer gap-2 bg-toneLightGreen p-3 w-[50%] rounded-md shadow-sm"
+          >
+            <img src="{% static 'svgs/plus-green.svg' %}" alt="" class="" />
+            <span class="text-primary text-sm font-semibold">Assign Agent</span>
+          </a>
+        {% endif %}
+          <img src="{% static 'svgs/plus.svg' %}" alt="" class="" />
+          <span class="text-white text-sm font-semibold">Request Quote</span>
+      </div> -->
+        
+      {% endcomment %}
+        
+    </div>
+
+    <!-- project request history -->
+    <div class="w-full">
+      <div class="rounded-lg w-full border border-neutral-150 p-4">
+        <!-- header -->
+        <div class="w-full flex items-center justify-between border-b border-neutral-150 pb-4">
+          <h3 class="text-gray-900 font-semibold">Quote Request history</h3>
+          <a href="#" class="text-primary bg-toneLightGreen text-center p-2 px-4 rounded-md"> See all </a>
+        </div>
+        <!-- content -->
+        <div class="mt-4 flex flex-col gap-4">
+          {% for quote in quotes %}
+          <a href="{{quote.quote_project.first.admin_pdf}}" class="w-full flex flex-col gap-4 p-4 border text-xs border-neutral-150 rounded-md">
+            <div class="w-full flex items-center justify-between">
+              <div class="text-xs flex flex-col gap-2">  
+                <h3 class="text-gray-600 font-semibold">{{quote.title}}</h3>
+              </div>
+              <span class="">
+                <img src="{% static 'svgs/more-vertical.svg' %}" alt="" class="" />
+              </span>
+            </div>
+            <div class="flex items-start gap-8">
+              <div class="">
+                <span class="text-gray-500 font-medium">Home Owner</span>
+                <div class="flex items-center gap-4 mt-2">
+                  <span class="text-gray-900 font-medium">{{quote.user.first_name}} {{quote.user.last_name}}</span>
+                  <img src="{% static 'svgs/chat-msg.svg' %}" alt="" />
+                </div>
+              </div>
+              <div class="text-xs flex flex-col gap-2">
+                <span class="text-gray-500 font-medium">Created Date</span>
+                <h3 class="text-gray-600 font-semibold mt-2">{{quote.upload_date}}</h3>
+              </div>
+            </div>
+            <div class="flex items-start gap-8">
+              <div class="text-xs flex flex-col gap-2">
+                <span class="text-gray-500 font-medium">Location</span>
+                <h3 class="text-gray-600 font-semibold mt-2">{{quote.property_address}}</h3>
+              </div>
+              <div class="text-xs flex flex-col gap-2">
+                <span class="text-gray-500 font-medium">Quotation Status</span>
+                <div class="inline-flex p-1 px-2 bg-gray-200 bg-opacity-50 items-center w-fit gap-2 border border-neutral-150 rounded-xl">
+                  {% if quote.is_quote %}
+                  <div class="w-2 h-2 bg-blue-600 rounded-full"></div>
+                  <span class="text-[10px]">Pending</span>
+                  {% else %}
+                  <div class="w-2 h-2 bg-green-600 rounded-full"></div>
+                  <span class="text-[10px]">Approved</span>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+          </a>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
 
 {% endblock %}
 {% block bottomNav %}
-{% include "user/bottom_nav_agent.html" %} 
-    {% endblock bottomNav %} 
+    {% include "user/bottom_nav_agent.html" %} 
+{% endblock bottomNav %} 
 {% block extraScripts %}
     <script src="{% static 'js/agent.js' %}"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function() {
+        let getStarted = document.querySelector('#get-started')
+        let modalOverlay = document.querySelector('#modal-overlay')
+
+        let shareLink = document.getElementById("share-link");
+        let copiedMessage = document.getElementById("copied-message");
+
+
+        if(getStarted){
+          getStarted.addEventListener('click', ()=>modalOverlay.style.display= 'none')
+        }
+        
+        // copying invite link
+        shareLink.addEventListener("click", function() {
+            let referralLink = shareLink.getAttribute("data-link");
+            navigator.clipboard.writeText(referralLink).then(function() {
+                // Show the copied message
+                copiedMessage.style.display = 'block';
+
+                // Hide the message after 2 seconds
+                setTimeout(function() {
+                    copiedMessage.style.display = 'none';
+                }, 2000);
+            }).catch(function(error) {
+                console.error("Failed to copy text: ", error);
+            });
+        });
+    });
+
+    </script>
+
+    <script>
+      // using jQuery
+      console.log($('#get-started'))
+      let url = '{{url}}'
+      console.log(url+'/profiles/update_onboarding_status/')
+      $('#get-started').click(function() {
+      $.ajax({
+          url: url+'/profiles/update_onboarding_status/',  // URL to your Django view
+          type: 'POST',
+          dataType: 'json',
+          beforeSend: function(xhr) {
+              xhr.setRequestHeader('X-CSRFToken', '{{ csrf_token }}');  // Include CSRF token
+          },
+          success: function(data) {
+              console.log(data.message);
+              // Continue navigating the page or perform other actions
+          },
+          error: function(xhr, textStatus, errorThrown) {
+              console.error('Error:', errorThrown);
+          }
+      });
+  });
+
+    </script>
 {% endblock extraScripts %}
