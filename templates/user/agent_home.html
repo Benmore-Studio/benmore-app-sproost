@@ -38,23 +38,6 @@
 
   </style>
 
-  {{onboarding_message}}
-  {% if not onboarding_message %}    
-   <!-- Overlay -->
-  <div id="modal-overlay" class="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center">
-    <!-- Modal -->
-    <div class="bg-white rounded-lg shadow-lg max-w-lg w-full p-6 slide-down">
-        <h2 class="text-xl font-bold mb-4">Welcome to your profile!</h2>
-        <ol class="mb-4">
-         <li class="text-sm text-gray-500 mt-2">1. For Dashboard - here you can see an overview of your key activities on Sproost.</li>
-         <li class="text-sm text-gray-500 mt-2">2. For Request Quote - click here to make a quote request for your desired property.</li>
-         <li class="text-sm text-gray-500 mt-2">3. Upload button - this is another short cut for requesting a quote.</li>
-         <li class="text-sm text-gray-500 mt-2">4. Quote request history "see all" - here you can view a list of all the quote requests you have made.</li>
-        </ol>
-        <button type="button" id="get-started" class="bg-primary text-white px-4 py-2 rounded hover:bg-[#267e05]">Get Started</button>
-    </div>
-  </div>
-  {% endif %}
 
 <div class="w-full p-4 font['Inter'] mt-14">
 

@@ -63,6 +63,9 @@ class CustomSignupForm(SignupForm):
         user_type = self.cleaned_data['user_type']
         if not registration_ID and user_type == 'AG':
             raise forms.ValidationError('Registration ID is required')
+        elif user_type == 'AG' and registration_ID:
+            if AgentProfile.objects.filter(registration_ID=registration_ID).exists():
+                raise forms.ValidationError('An agent with this registration ID already exists.')
         return registration_ID
 
     def save(self, request):
@@ -115,6 +118,7 @@ class CustomSignupForm(SignupForm):
                 address = self.cleaned_data['agent_address'],
                 registration_ID = self.cleaned_data['registration_ID'],
             )
+        
         else:
             ContractorProfile.objects.create(
                 user = user, 
