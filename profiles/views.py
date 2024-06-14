@@ -236,10 +236,11 @@ def show_agent_message_view(request):
 
 def update_onboarding_status(request):
     if request.method == 'POST':
+        pass
         # Get the current user's AgentProfile instance
-        agent_profile = request.user.agent_profile
-        agent_profile.has_seen_onboarding_message = True
-        agent_profile.save()      
-        return JsonResponse({'message': 'Onboarding status updated successfully'}, status=200)
+        # agent_profile = request.user.agent_profile
+        # agent_profile.has_seen_onboarding_message = True
+        # agent_profile.save()      
+        # return JsonResponse({'message': 'Onboarding status updated successfully'}, status=200)
     else:
         return JsonResponse({'error': 'Invalid request'}, status=400)
