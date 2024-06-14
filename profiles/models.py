@@ -28,7 +28,7 @@ class AgentProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name = 'agent_profile')
     address = AddressField(null = True)
     registration_ID = models.CharField(max_length = 225, null = True, blank = True, unique=True, verbose_name="license number", help_text='Also known as licences_ID')
-    # has_seen_onboarding_message = models.BooleanField(default=False)
+    has_seen_onboarding_message = models.BooleanField(default=False)
     
     def __str__(self):
         return self.user.email
