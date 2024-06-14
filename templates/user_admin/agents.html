@@ -47,7 +47,8 @@
                     {% for agent in agents %}
                     <tr class="border-b border-neutral-100 last:border-0">
                         <td class=" p-4">
-                            <a href = "{% url "admins:update_agent" agent.pk %}" class="inline-flex items-center gap-4">
+                            <a href = "{% url "admins:update_agent" agent.pk %}" class="inline-flex items-center gap-1">
+                                <img class = "w-4" src = {% static "svgs/edit-02.svg" %} />
                                 <h3 class="text-gray-900 text-sm font-medium capitalize">{{agent.first_name}} {{agent.last_name}}</h3>
                             </a>
                         </td>

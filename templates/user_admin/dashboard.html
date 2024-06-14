@@ -54,7 +54,8 @@
                         {% for home_owner in recent_home_owners %}
                         <tr class="border-b border-neutral-100 last:border-0">
                             <td class="w-1/4 p-4">
-                                <a href="{% url 'admins:update_home_owner' home_owner.pk %}" class="">
+                                <a href="{% url 'admins:update_home_owner' home_owner.pk %}" class="flex gap-1 items-center">
+                                    <img class = "w-4" src = {% static "svgs/edit-02.svg" %} />
                                     <div class="w-full flex items-center gap-2">
                                         <p class="text-gray-900 text-sm font-medium capitalize">{{home_owner.first_name}} {{home_owner.last_name}}</p>
                                     </div>
@@ -109,7 +110,10 @@
                         {% for agent in recent_agents %}
                         <tr class="border-b border-neutral-100 last:border-0">
                             <td class="w-1/4 p-4">
-                                <a href = {% url 'admins:update_agent' agent.pk %} class="text-gray-900 text-sm font-medium capitalize">{{agent.first_name}} {{agent.last_name}}</a>
+                                <a href = {% url 'admins:update_agent' agent.pk %} class="flex gap-1 items-center text-gray-900 text-sm font-medium capitalize">
+                                    <img class = "w-4" src = {% static "svgs/edit-02.svg" %} />
+                                    {{agent.first_name}} {{agent.last_name}}
+                                </a>
                             </td>
                             <td class="w-1/4 p-4">
                                 <div class="flex flex-col gap-1">
@@ -150,7 +154,10 @@
                         {% for contractor in recent_contractors %}
                         <tr class="border-b border-neutral-100 last:border-0">
                             <td class="w-1/4 p-4">
-                                <a href = {% url 'admins:update_contractor' contractor.pk %} class="text-gray-900 text-sm font-medium capitalize">{{contractor.contractor_profile.company_name}}</a>
+                                <a href = {% url 'admins:update_contractor' contractor.pk %} class="text-gray-900 text-sm font-medium capitalize flex gap-1 items-center">
+                                    <img class = "w-4" src = {% static "svgs/edit-02.svg" %} />
+                                    {{contractor.contractor_profile.company_name}}
+                                </a>
                             </td>
                             <td class="w-1/4 p-4">
                                 <div class="flex flex-col gap-1">
@@ -188,7 +195,6 @@
                             <div class="">
                                 <span class="text-gray-500 font-medium">Home Owner</span>
                                 <div class="flex items-center gap-4 mt-2">
-                                    {% comment %} <img src="{{project.home_owner.image}}" alt="" class="w-8 h-8 object-contain" /> {% endcomment %}
                                     <span class="text-gray-900 font-medium">{{quote.user.first_name}} {{quote.user.last_name}}</span>
                                     <img src="{% static 'svgs/chat-msg.svg' %}" alt="" />
                                 </div>

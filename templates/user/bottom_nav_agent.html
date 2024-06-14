@@ -8,7 +8,7 @@
         <span class="text-primary text-xs">My Listing</span> 
       {% else %}
         <img src="{% static 'svgs/listing-outline.svg' %}" alt="" class="" />
-        <span class="text-gray-500 text-xs">My listing</span> 
+        <span class="text-gray-500 text-xs">My Listing</span> 
       {% endif %}
     </a>
     <a href="{% url 'profile:search_contractor' %}" class="inline-flex flex-col gap-1 items-center">
@@ -18,17 +18,22 @@
       {% else %}
         <img src="{% static 'svgs/search.svg' %}" alt="" class="" />
         <span class="text-gray-500 text-xs">Search</span>
-      {% endif %}
-      
+      {% endif %}     
     </a>
-    <a href="#" class="inline-flex flex-col gap-1 items-center">
+
+    <a href="{% url 'main:home_owner_with_slug_name' name='home_owner_slug' %}" class="inline-flex flex-col gap-1 items-center">
+      <img src="{% static 'svgs/Add-upload.svg' %}" alt="" class="" />
+      <span class="text-gray-500 text-xs">Upload</span>
+    </a>
+
+    <a href="{% url 'profile:show-agent-message' %}" class="inline-flex flex-col gap-1 items-center">
       {% if url_name == 'home' %}
       {% else %}
       {% endif %}
       <img src="{% static 'svgs/Message.svg' %}" alt="" class="" />
       <span class="text-gray-500 text-xs">Messages</span>
     </a>
-    <a href="{% url 'profile:edit-profile'  %}" class="inline-flex flex-col gap-1 items-center">
+    <a href="{% url 'profile:show-agent-menu'  %}" class="inline-flex flex-col gap-1 items-center">
       {% if url_name == 'edit-profile'%}
       <img src="{% static 'svgs/more-horizon-green.svg' %}" alt="" class="" />
       <span class="text-primary font-medium text-xs">Menu</span> 

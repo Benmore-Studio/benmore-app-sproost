@@ -4,6 +4,7 @@ from phonenumber_field.formfields import PhoneNumberField
 from phonenumber_field.widgets import PhoneNumberPrefixWidget
 from address.forms import AddressField, AddressWidget
 from django.contrib.auth import get_user_model
+from main.models import Media
 
 User = get_user_model()
 

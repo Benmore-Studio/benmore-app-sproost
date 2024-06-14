@@ -187,12 +187,11 @@
           <div class="w-full grid grid-cols-4 gap-2">
             {% for media in profile.media_paths.all %} 
             {% if media.image %}
-            <a href="/media/{{media.image }}"><img src="/media/{{media.image }}" alt="" class="w-full h-[150px] border border-neutral-150 object-cover" /> </a>
+            <a href="{{media.image.url}}"><img src="{{media.image.url }}" alt="" class="w-full h-[150px] border border-neutral-150 object-cover" /> </a>
             {% elif media.file %}
             <video class="w-full h-[81px] border border-neutral-150 object-cover" controls>
-              <source src="/media/{{media.file}}" type="video/mp4" />
+              <source src="{{media.file.url }}" type="video/mp4" />
             </video>
-            <!-- <img src="/media/{{image.file }}" alt="" class="w-full h-[81px] border border-neutral-150 object-cover" /> -->
             {% endif %} 
             {% endfor %}
           </div>

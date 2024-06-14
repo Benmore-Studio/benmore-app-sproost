@@ -2,12 +2,13 @@ from django.db import models
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 
+from cloudinary_storage.storage import RawMediaCloudinaryStorage
+
 def file_upload_location(instance, filename):
     
     return f'files/{instance.object_id}/{filename}'
 
 def image_upload_location(instance, filename):
-    
     return f'images/{instance.object_id}/{filename}'
 
 
@@ -21,5 +22,5 @@ class Media(models.Model):
     object_id = models.PositiveIntegerField()
     content_object = GenericForeignKey()
     image = models.ImageField(upload_to=image_upload_location, null=True)
-    file = models.FileField(upload_to=file_upload_location, null=True)
+    file = models.FileField(upload_to=file_upload_location, null=True, storage=RawMediaCloudinaryStorage())
     upload_date = models.DateTimeField(auto_now_add=True, null=False)

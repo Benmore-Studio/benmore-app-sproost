@@ -3,7 +3,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import View
 from django.contrib import messages
 
-from accounts.models import UserTypes
+from accounts.models import UserTypes, User
 from accounts.services.user import UserService
 from quotes.forms import QuoteRequestForm
 from quotes.services import QuoteService
@@ -27,12 +27,21 @@ class Quotes(LoginRequiredMixin, View, CustomRequestUtil):
             if error:
                 messages.error(request, error)
                 return redirect('main:home')
-
-        form = self.form_class(initial={
-            'contact_email': self.user.email,
-            'contact_phone': self.user.phone_number,
-            'property_address': self.user.user_profile.address
-        })
+            
+        if self.user.user_type == 'HO':
+            form = self.form_class(initial={
+                'contact_email': self.user.email,
+                'contact_phone': self.user.phone_number,
+                'property_address': self.user.user_profile.address,
+                'custom_home_owner_id': request.user.pk,
+                'created_by_agent': request.user.pk
+            })
+        elif self.user.user_type == 'AG':
+            form = self.form_class(initial={
+                'contact_email': self.user.email,
+                'contact_phone': self.user.phone_number,
+                'property_address': self.user.agent_profile.address
+            })
 
         self.extra_context_data = {
             "loggedInUser": f"{UserTypes.contractor}",
@@ -43,7 +52,8 @@ class Quotes(LoginRequiredMixin, View, CustomRequestUtil):
     
 
     def post(self, request, *args, **kwargs):
-        home_owner_id = kwargs.get("id")
+        # home_owner_id is also home_owner_name but not renamed
+        home_owner_id = kwargs.get("name")
 
         if home_owner_id:
             self.template_on_error = ("quotes:request-quotes", home_owner_id)
@@ -53,20 +63,28 @@ class Quotes(LoginRequiredMixin, View, CustomRequestUtil):
         self.template_name = None
         
         form = self.form_class(request.POST)
+        # print(request.POST)
 
         if form.is_valid():
             form_data = form.cleaned_data
 
-            form_data["home_owner_id"] = home_owner_id
-            form_data['media'] = None
+            if home_owner_id:
+                user = User.objects.get(slug = home_owner_id)
+                form_data["created_by_agent"] = request.user
+                form_data["user"] = user
+            else:
+                form_data["user"] = request.user
+                form_data["created_by_agent"] = None
 
+            # form_data["home_owner_id"] = home_owner_id
+            form_data['media'] = None
             if request.FILES:
                 uploaded_files = request.FILES.getlist("upload-quote")
                 uploaded_captures = request.FILES.getlist("upload-capture")
 
                 form_data["media"] = uploaded_files + uploaded_captures
-
             quote_service = QuoteService(request)
+           
 
             return self.process_request(request, target_view="main:home", target_function=quote_service.create, payload=form_data)
 
@@ -75,4 +93,4 @@ class Quotes(LoginRequiredMixin, View, CustomRequestUtil):
                 for error in errors:
                     messages.error(self.request, f"{error}")
 
-            return redirect('quotes:request-quotes')
+            return redirect('quotes:confirm-request-quotes')

@@ -48,7 +48,8 @@
                     {% for homeowner in homeowners %}
                     <tr class="border-b border-neutral-100 last:border-0">
                         <td class=" p-4">
-                            <a href = {% url 'admins:update_home_owner' homeowner.pk %} class="inline-flex items-center gap-4">
+                            <a href = {% url 'admins:update_home_owner' homeowner.pk %} class="inline-flex items-center gap-1">
+                                <img class = "w-4" src = {% static "svgs/edit-02.svg" %} />
                                 <h3 class="text-gray-900 text-sm font-medium capitalize">{{homeowner.first_name}} {{homeowner.last_name}}</h3>
                             </a>
                         </td>
@@ -77,6 +78,8 @@
                             <div class="inline-flex items-center gap-2 rounded-xl p-1 px-2 border border-neutral-150">
                                 {% if homeowner.quote_requests.latest_quote.status%}
                                     <span class="w-2 h-2 rounded-full {% if homeowner.quote_requests.latest_quote.status|lower == 'approved' %} bg-green-500 {% elif homeowner.quote_requests.latest_quote.status|lower == 'pending' %} bg-yellow-500 {% else %} bg-red-500 {% endif %} "></span>
+                                {% else %}
+                                    <span class=" rounded-full text-sm">no quotes</span>
                                 {% endif %}
                                 <span class="font-semibold text-xs capitalize"> 
                                     {{homeowner.quote_requests.latest_quote.status}}
