@@ -9,12 +9,12 @@ class Command(BaseCommand):
         users = User.objects.all()
         for user in users:
             if not user.slug:
-                slug_base = f"{user.first_name} {user.last_name}" if user.first_name and user.last_name else user.username
-                slug = slugify(slug_base, allow_unicode=True)
-                unique_slug = slug
-                counter = 1
-                while User.objects.filter(slug=unique_slug).exists():
-                    unique_slug = f"{slug}-{counter}"
-                    user.save()
+                # slug_base = f"{user.first_name} {user.last_name}" if user.first_name and user.last_name else user.username
+                # slug = slugify(slug_base, allow_unicode=True)
+                # unique_slug = slug
+                # counter = 1
+                # while User.objects.filter(slug=unique_slug).exists():
+                #     unique_slug = f"{slug}-{counter}"
+                user.save()
                
                 self.stdout.write(self.style.SUCCESS(f'Successfully updated slug for user {user.username}'))
