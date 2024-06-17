@@ -111,7 +111,7 @@ def home(request):
                 "accounts_len": len(accounts),
                 'url':URL,
                 'quotes':quotes,
-                'onboarding_message': agent_profile.has_seen_onboarding_message,
+                # 'onboarding_message': agent_profile.has_seen_onboarding_message,
                 'referral_link': referral_link
             }
             return render(request, "user/agent_home.html", context)
