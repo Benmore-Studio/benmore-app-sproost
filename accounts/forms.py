@@ -136,3 +136,6 @@ class CustomSignupForm(SignupForm):
 class ValidatePhoneNumberForm(forms.Form):
     phone_number = PhoneNumberField(required=False, widget=PhoneNumberPrefixWidget(initial='US'))
     
+
+class UserTypeForm(forms.Form):
+    user_type = forms.ChoiceField(choices=USER_TYPE_CHOICES, widget=forms.RadioSelect)

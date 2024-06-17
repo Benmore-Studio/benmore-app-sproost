@@ -41,16 +41,14 @@ def contractor_profile_view(request):
         else:
             messages.error(request, "No file found!")
         
-        return redirect("profile:contractor_profile")
-    
-    
-    profile = ContractorProfile.objects.get(user=request.user)
-    form = ProfilePictureForm(instance = profile)
-
-    context = {
-        'profile' : profile,
-        "form": form
-    }
+        return redirect("profile:contractor_profile")  
+    else:
+        profile = ContractorProfile.objects.get(user=request.user)
+        form = ProfilePictureForm(instance = profile)
+        context = {
+            'profile' : profile,
+            "form": form
+        }
     return render(request, 'user/contractor_home.html', context)
 
 class contractorDetails(DetailView):
