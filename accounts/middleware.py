@@ -1,21 +1,22 @@
-# middlewares.py
 from django.shortcuts import redirect
-from django.utils.deprecation import MiddlewareMixin
-from urllib.parse import urlparse, parse_qs
-
+from .utils import stash_sociallogin
+from allauth.socialaccount.models import SocialLogin
 
 class GoogleOAuthCallbackMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
 
     def __call__(self, request):
+        print(request.session.get('sociallogin_key'))
+        print(request.path)
         if request.path == '/accounts/google/login/callback/' and request.user.is_authenticated:
-            if not request.session.get('user_type_selected'):
-                sociallogin = SocialLogin.stash_state(request)
-                request.session['sociallogin'] = sociallogin.serialize()
-                return redirect('select_user_type')
+            print('sure')
+            # if not request.session.get('user_type_selected'):
+            # sociallogin = SocialLogin.deserialize(request)
+            # print('sociallogin')
+            # print(sociallogin)
+            # stash_sociallogin(request, sociallogin)
+            return redirect('select_user_type')
+        
         response = self.get_response(request)
         return response
-
-            
-

@@ -43,12 +43,16 @@ def contractor_profile_view(request):
         
         return redirect("profile:contractor_profile")  
     else:
-        profile = ContractorProfile.objects.get(user=request.user)
-        form = ProfilePictureForm(instance = profile)
-        context = {
-            'profile' : profile,
-            "form": form
-        }
+        try:
+            profile = ContractorProfile.objects.get(user=request.user)
+            form = ProfilePictureForm(instance = profile)
+            context = {
+                'profile' : profile,
+                "form": form
+            }
+        except:
+            context = {}
+            # return redirect('account_signup')
     return render(request, 'user/contractor_home.html', context)
 
 class contractorDetails(DetailView):

@@ -14,6 +14,18 @@ from django.template import loader
 
 from allauth.socialaccount.models import SocialLogin
 from allauth.socialaccount.helpers import complete_social_signup
+# from .utils import retrieve_sociallogin
+
+from django.core.cache import cache
+import uuid
+
+
+
+import logging
+
+logger = logging.getLogger(__name__)
+
+
 
 
 class CustomLoginView(LoginView):
@@ -25,7 +37,26 @@ class CustomLoginView(LoginView):
         else:
             self.request.session.set_expiry(0)  # Browser close
         return super().form_valid(form)
-    
+
+def handle_google_callback(request):
+    if request.user.is_authenticated:
+        # Social login data should already be available here
+        sociallogin = SocialLogin.from_request(request)
+        if sociallogin:
+            sociallogin_key = str(uuid.uuid4())
+            cache.set(sociallogin_key, sociallogin.serialize(), timeout=600)  # Store for 10 minutes
+            request.session['sociallogin_key'] = sociallogin_key
+            return redirect('select_user_type')
+    return redirect('account_login')
+
+def retrieve_sociallogin(request):
+    sociallogin_key = request.session.get('sociallogin_key')
+    if sociallogin_key:
+        sociallogin_data = cache.get(sociallogin_key)
+        if sociallogin_data:
+            return SocialLogin.deserialize(sociallogin_data)
+    return None
+
 def select_user_type(request):
     if request.method == 'POST':
         print('Received POST request')
@@ -35,26 +66,36 @@ def select_user_type(request):
         
         if form.is_valid():
             print('Form is valid')
+            sociallogin_key = request.session.get('sociallogin_key')
+            print(request.session)
+            print(cache.get(sociallogin_key))
             user_type = form.cleaned_data['user_type']
             print(f'Selected user type: {user_type}')
             request.session['user_type'] = user_type
             request.session['user_type_selected'] = True
             print('User type saved to session')
 
-            sociallogin_data = request.session.pop('sociallogin', None)
+            sociallogin = retrieve_sociallogin(request)
+            sociallogin_data = cache.get('sociallogin_key')
             if sociallogin_data:
+                print('social found 22')
+            else:
+                print('social notfound 44')
+
+            if sociallogin:
                 print('Sociallogin data found in session')
-                sociallogin = SocialLogin.deserialize(sociallogin_data)
                 sociallogin.user.user_type = user_type  # Set user type before completing signup
                 sociallogin.user.save()
                 print('User type set and user saved')
                 return complete_social_signup(request, sociallogin)
             else:
                 print('No sociallogin data found in session, redirecting to login')
-                return redirect('account_login')
+                return complete_social_signup(request, sociallogin)
         else:
             print('Form is not valid')
             print(form.errors)
+            logger.error('Form is not valid')
+            logger.error(form.errors)
     else:
         form = UserTypeForm()
     return render(request, 'account/user_type_selection.html', {'form': form})
