@@ -5,9 +5,9 @@ from django.conf.urls import handler400, handler500, handler404
 from django.conf.urls.static import static
 from django.conf import settings
 
-# handler400 = 'accounts.views.custom_bad_request'
-# handler404 = 'accounts.views.custom_bad_request'
-# handler500 = 'accounts.views.custom_server_error'
+handler400 = 'accounts.views.custom_bad_request'
+handler404 = 'accounts.views.custom_bad_request'
+handler500 = 'accounts.views.custom_server_error'
 
 urlpatterns = [
     path('admin/', admin.site.urls),

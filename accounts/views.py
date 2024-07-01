@@ -19,6 +19,9 @@ from allauth.socialaccount.helpers import complete_social_signup
 from django.core.cache import cache
 import uuid
 
+from profiles.models import UserProfile, AgentProfile, ContractorProfile
+
+
 
 
 import logging
@@ -57,6 +60,19 @@ def retrieve_sociallogin(request):
             return SocialLogin.deserialize(sociallogin_data)
     return None
 
+def generate_username(email):
+    base_username = email.split('@')[0]
+    username = base_username
+    counter = 1
+    from django.contrib.auth import get_user_model
+    User = get_user_model()
+    
+    while User.objects.filter(username=username).exists():
+        username = f"{base_username}{counter}"
+        counter += 1
+    return username
+
+
 def select_user_type(request):
     if request.method == 'POST':
         print('Received POST request')
@@ -76,21 +92,25 @@ def select_user_type(request):
             print('User type saved to session')
 
             sociallogin = retrieve_sociallogin(request)
-            sociallogin_data = cache.get('sociallogin_key')
-            if sociallogin_data:
-                print('social found 22')
-            else:
-                print('social notfound 44')
-
+            
             if sociallogin:
                 print('Sociallogin data found in session')
+                username = generate_username(sociallogin.user.email)
+                sociallogin.user.username = username 
                 sociallogin.user.user_type = user_type  # Set user type before completing signup
                 sociallogin.user.save()
+                if sociallogin.user.user_type == "HO":
+                    UserProfile.objects.create(user = sociallogin.user) 
+                    print('ho')
+                elif sociallogin.user.user_type == "AG":
+                    AgentProfile.objects.create(user = sociallogin.user) 
+                print('ag')
+                print(sociallogin.user)
                 print('User type set and user saved')
                 return complete_social_signup(request, sociallogin)
             else:
                 print('No sociallogin data found in session, redirecting to login')
-                return complete_social_signup(request, sociallogin)
+                return redirect('account_signup')
         else:
             print('Form is not valid')
             print(form.errors)
