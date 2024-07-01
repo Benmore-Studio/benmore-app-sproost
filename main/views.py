@@ -93,14 +93,20 @@ def home(request):
             URL = get_base_url(request)
             quotes = QuoteRequest.objects.filter(created_by_agent=request.user) 
             projects = Project.objects.filter(quote_request__user=request.user)
+            proj = Project.objects.filter(admin=request.user)
             accounts = AssignedAccount.objects.filter(assigned_to=request.user).order_by('-id').select_related(
                 "assigned_by", "assigned_to")
+            print(proj)
+            for i in proj:
+                print(i.file.url)
+            # print(projects)
             agent = User.objects.get(pk=request.user.pk)
             agent_profile = AgentProfile.objects.get(user=agent)
             referral, created = Referral.objects.get_or_create(referrer=request.user)
             if created:
-                referral.code = agent_profile.registration_ID
-                referral.save()
+                if agent_profile.registration_ID:
+                    referral.code = agent_profile.registration_ID
+                    referral.save()
 
             signup_url = reverse('account_signup')
             referral_link = request.build_absolute_uri(f'{signup_url}?ref={referral.code}')
@@ -110,6 +116,7 @@ def home(request):
                 "accounts": accounts,
                 "accounts_len": len(accounts),
                 'url':URL,
+                'proj':proj,
                 'quotes':quotes,
                 # 'onboarding_message': agent_profile.has_seen_onboarding_message,
                 'referral_link': referral_link
@@ -125,6 +132,8 @@ def Assigned_projects(request):
     else:
         quotes = QuoteRequest.objects.filter(user=request.user)
         projects = Project.objects.filter(quote_request__user=request.user)
+        proj = Project.objects.filter(admin=request.user)
+        print(proj)
         accounts = AssignedAccount.objects.filter(assigned_to=request.user).order_by('-id').select_related(
             "assigned_by", "assigned_to")
 
@@ -132,6 +141,7 @@ def Assigned_projects(request):
             "quote_count": quotes.count(),
             "projects_count": projects.count(),
             "accounts": accounts,
+            'proj':proj,
             "accounts_len": len(accounts),
             
         }

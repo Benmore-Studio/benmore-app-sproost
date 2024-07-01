@@ -1,210 +1,363 @@
 {% extends "user/base.html" %} 
 {% load static %} 
 {% load form_tags %} 
-{% block topNav %} 
-    {% include "user/top-navigation.html" %} 
-{% endblock topNav %} 
 
 {% block content %}
-
 <style>
+     .container-bottom {
+           width: 100%;
+           height: 150px;
+            margin: 70px auto;
 
-  /* https://sproost-1d5809b5aa5b.herokuapp.com/accounts/google/login/callback/ */
-  
-    @keyframes slide-down {
-        0% {
-            transform: translateY(-100%);
         }
-        100% {
-            transform: translateY(0);
+        .glide__slide img {
+            aspect-ratio: 3 / 2; 
         }
-    }
-    .slide-down {
-        animation: slide-down 0.5s ease-out forwards;
-    }
+        .glide__slide {
+            flex: 0 0 auto;
+        }
 
-    #copied-message {
-      position: fixed;
-      bottom: 10px;
-      left: 50%;
-      transform: translateX(-50%);
-      background-color: rgba(0, 0, 0, 0.7);
-      color: white;
-      padding: 10px;
-      border-radius: 5px;
-      display: none; /* Make sure this is set to none */
-      z-index: 1000; /* Ensure it appears on top of other elements */
+    .glide__arrows {
+        display: none;
     }
 
-  </style>
-
-
-<div class="w-full p-4 font['Inter'] mt-14">
-
-  
-  {% comment %}
-  <!-- <div class="w-full flex items-center justify-end gap-4">   
-    <a href="" class="w-[50%] flex items-center justify-center gap-2 cursor-pointer bg-primary p-3 rounded-md shadow-sm">
-    <img src="/static/svgs/plus.svg" alt="" class="">
-    <span class="text-white text-sm font-semibold">Add Property</span>
-    </a>
-  </div>    -->
-  {% endcomment %}
+    @media (min-width: 1000px) {
+        .glide__arrows {
+            display: flex;
+        }
     
+    }
+    .projects-grid img {
+        aspect-ratio: 3 / 2; 
+    }
 
-    <div class="w-full my-8 flex flex-col gap-5">  
-      <div class="w-full p-4 bg-white border border-neutral-150 rounded-md shadow-sm">
-        <div class="w-full flex flex-col gap-4">
-          <div class="w-full flex items-center justify-between">
-            <h3 class="text-gray-900 font-medium">Number of Quotes Requested</h3>
-            <span class="">
-              <img src="{% static 'svgs/more-vertical.svg' %}" alt="" class="" />
-            </span>
-          </div>
-          <div class="w-full flex items-center justify-between">            
-            {% if quote_count > 0 %}
-              <h3 class="text-gray-900 text-2xl font-semibold">{{ quote_count }}</h3>  
-            {% else %}
-              <h3 class="text-gray-900 text-2xl font-semibold">0</h3>              
-            {% endif %}
-              
-            <span class="">
-              <img src="{% static 'svgs/quotes.svg' %}" alt="" class="" />
-            </span>
-          </div>
-        </div>
-      </div>
-
-      <a href="{% url 'main:assigned-projects' %}" class="w-full p-4 bg-white border border-neutral-150 rounded-md shadow-sm">
-        <div class="w-full flex flex-col gap-4">
-          <div class="w-full flex items-center justify-between">
-            <h3 class="text-gray-900 font-medium">My Listing</h3>
-            <span class="">
-              <img src="{% static 'svgs/more-vertical.svg' %}" alt="" class="" />
-            </span>
-          </div>
-          <div class="w-full flex items-center justify-between">            
-            {% if accounts_len > 0 %}
-              <h3 class="text-gray-900 text-2xl font-semibold">{{ accounts_len }}</h3>  
-            {% else %}
-              <h3 class="text-gray-900 text-2xl font-semibold">0</h3>              
-            {% endif %}
-              
-            <span class="">
-              <img src="{% static 'svgs/quotes.svg' %}" alt="" class="" />
-            </span>
-          </div>
-        </div>
-      </a>
-    </div>  
-
+    @media (min-width: 2000px) {
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 1rem;         
+        }
+        #project-image {
+            height: 350px; 
+        }
     
-    <div id="share-link"  data-link="{{referral_link}}" class="w-full flex items-center justify-center flex-col cursor-pointer mb-6">
-      <div class="w-[50%] flex items-center justify-center text-center gap-2 cursor-pointer bg-primary p-3 rounded-md shadow-sm">
-        <img src="{% static 'svgs/plus.svg' %}" alt="" class="" />
-        <span class="text-white text-sm font-semibold">Inivite</span>
-      </div>
-    </div>
-    <div id="copied-message" class="hidden text-green-500 text-sm mt-2">Copied!</div>
+    }
 
-      
-      {% comment %}
-      <!-- <div class="w-full flex items-center justify-end gap-4">
-        {% if request.user.user_type == "HO" %}
-          <a
-            href="{% url 'main:assign-agent' %}"
-            class="flex items-center justify-center cursor-pointer gap-2 bg-toneLightGreen p-3 w-[50%] rounded-md shadow-sm"
-          >
-            <img src="{% static 'svgs/plus-green.svg' %}" alt="" class="" />
-            <span class="text-primary text-sm font-semibold">Assign Agent</span>
-          </a>
+</style>
+<div class="">
+{% include "user/top-navigation.html" %} 
+</div>
+<div class="h-full bg-gray-100">
+    <div class="pt-4 ml-8 mr-4">
+        <div class="w-full pb-8 pt-[100px]">
+            <!-- Top Sliding Tabs -->
+            <div class="glide glide-top">
+                <div class="glide__track" data-glide-el="track">
+                    <ul class="glide__slides">
+                        <li class="glide__slide1 w-[40%]">
+                            <div class="tab flex-shrink-0 rounded-3xl bg-white p-4 rounded-lg shadow-sm w-64">
+                                <p class='text-center'>Sample1</p>
+                            </div>
+                        </li>
+                        <li class="glide__slide1 w-[40%]">
+                            <div class="tab flex-shrink-0 rounded-3xl bg-white p-4 rounded-lg shadow-sm w-64">
+                                <p class='text-center'>Sample2</p>
+                            </div>
+                        </li>
+                        <li class="glide__slide1 w-[40%]">
+                            <div class="tab flex-shrink-0 rounded-3xl bg-white p-4 rounded-lg shadow-sm w-64">
+                                <p class='text-center'>Sample3</p>
+                            </div>
+                        </li>
+                        <li class="glide__slide1 w-[40%]">
+                            <div class="tab flex-shrink-0 rounded-3xl bg-white p-4 rounded-lg shadow-sm w-64">
+                                <p class='text-center'>Sample4</p>
+                            </div>
+                        </li>
+                        <li class="glide__slide1 w-[40%]">
+                            <div class="tab flex-shrink-0 rounded-3xl bg-white p-4 rounded-lg shadow-sm w-64">
+                                <p class='text-center'>Sample5</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                <!-- Navigation Buttons -->
+                <div class="glide__arrows sm:hidden lg:block" data-glide-el="controls">
+                    <button class="glide__arrow glide__arrow--left inline-flex items-center justify-center bg-primary border border-neutral-150 rounded-md p-2 outline-none shadow-sm text-white" data-glide-dir="<">
+                        <i class="fa fa-arrow-left" aria-hidden="true"></i>
+                      </button>
+                    <button class="glide__arrow glide__arrow--right inline-flex items-center justify-center bg-primary border border-neutral-150 rounded-md p-2 outline-none shadow-sm" data-glide-dir=">">
+                        <i class="fa fa-arrow-right" aria-hidden="true"></i>
+                      </button>
+                </div>
+            </div>
+        </div>
+
+            <!-- goals part -->
+        <div class="w-full grid grid-cols-2 lg:grid-cols-4 gap-4 mt-4 mb-12">
+            <div class="tab flex flex-col text-center justify-center bg-white p-4 rounded-lg shadow-md h-[200px]">
+                <div class="w-full flex flex-col gap-4">
+                    <div class="w-full flex items-center justify-between">
+                      <h3 class="text-gray-900 font-medium">TBD</h3>
+                      <span class="">
+                        <img src="{% static 'svgs/more-vertical.svg' %}" alt="" class="" />
+                      </span>
+                    </div>
+                    <div class="w-full flex items-center justify-between">            
+                      {% if quote_count > 0 %}
+                        <h3 class="text-gray-900 text-2xl font-semibold">{{ quote_count }}</h3>  
+                      {% else %}
+                        <h3 class="text-gray-900 text-2xl font-semibold">0</h3>              
+                      {% endif %}
+                        
+                      <span class="">
+                        <img src="{% static 'svgs/quotes.svg' %}" alt="" class="" />
+                      </span>
+                    </div>
+                </div>
+            </div>
+            <div class="tab flex flex-col text-center justify-center bg-white p-4 rounded-lg shadow-md h-[200px]">
+                <a href="{% url 'main:assigned-projects' %}" class="w-full p-4 bg-white">
+                    <div class="w-full flex flex-col gap-4">
+                      <div class="w-full flex items-center justify-between">
+                        <h3 class="text-gray-900 font-medium">My Listing</h3>
+                        <span class="">
+                          <img src="{% static 'svgs/more-vertical.svg' %}" alt="" class="" />
+                        </span>
+                      </div>
+                      <div class="w-full flex items-center justify-between">            
+                        {% if accounts_len > 0 %}
+                          <h3 class="text-gray-900 text-2xl font-semibold">{{ accounts_len }}</h3>  
+                        {% else %}
+                          <h3 class="text-gray-900 text-2xl font-semibold">0</h3>              
+                        {% endif %}
+                          
+                        <span class="">
+                          <img src="{% static 'svgs/quotes.svg' %}" alt="" class="" />
+                        </span>
+                      </div>
+                    </div>
+                  </a>
+            </div>
+            <div class="tab flex flex-col text-center justify-center bg-white p-4 rounded-lg shadow-md h-[200px]">
+                <div class="w-full flex flex-col gap-4">
+                    <div class="w-full flex items-center justify-between">
+                      <h3 class="text-gray-900 font-medium">Number of Quotes Requested</h3>
+                      <span class="">
+                        <img src="{% static 'svgs/more-vertical.svg' %}" alt="" class="" />
+                      </span>
+                    </div>
+                    <div class="w-full flex items-center justify-between">            
+                      {% if quote_count > 0 %}
+                        <h3 class="text-gray-900 text-2xl font-semibold">{{ quote_count }}</h3>  
+                      {% else %}
+                        <h3 class="text-gray-900 text-2xl font-semibold">0</h3>              
+                      {% endif %}
+                        
+                      <span class="">
+                        <img src="{% static 'svgs/quotes.svg' %}" alt="" class="" />
+                      </span>
+                    </div>
+                </div>
+            </div>
+            <div class="tab flex flex-col text-center justify-center bg-white p-4 rounded-lg shadow-md h-[200px]">
+                <div class="w-full flex flex-col gap-4">
+                    <div class="w-full flex items-center justify-between">
+                      <h3 class="text-gray-900 font-medium">Number of Quotes Requested</h3>
+                      <span class="">
+                        <img src="{% static 'svgs/more-vertical.svg' %}" alt="" class="" />
+                      </span>
+                    </div>
+                    <div class="w-full flex items-center justify-between">            
+                      {% if quote_count > 0 %}
+                        <h3 class="text-gray-900 text-2xl font-semibold">{{ quote_count }}</h3>  
+                      {% else %}
+                        <h3 class="text-gray-900 text-2xl font-semibold">0</h3>              
+                      {% endif %}
+                        
+                      <span class="">
+                        <img src="{% static 'svgs/quotes.svg' %}" alt="" class="" />
+                      </span>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+
+        <!-- invite part -->
+        {% if referral_link %}
+        <a id="add-invite" href="{% url 'profile:edit-profile' %}" class="w-full flex items-center justify-center flex-col cursor-pointer mt-4 mb-6">
+            <div class="w-[50%] flex items-center justify-center text-center gap-2 cursor-pointer bg-primary p-3 rounded-md shadow-sm">
+            <img src="{% static 'svgs/plus.svg' %}" alt="" class="" />
+            <span class="text-white text-sm font-semibold">Invite</span>
+            </div>
+        </a>
+        <div id="copied-message-inivite" class="hidden text-white text-sm mt-2 text-center bg-black py-2">Please add your license number in the edit page!</div>
+        {% else %}      
+        <div id="share-link"  data-link="{{referral_link}}" class="w-full flex items-center justify-center flex-col cursor-pointer mt-4 mb-6">
+            <div class="w-[50%] flex items-center justify-center text-center gap-2 cursor-pointer bg-primary p-3 rounded-md shadow-sm">
+            <img src="{% static 'svgs/plus.svg' %}" alt="" class="" />
+            <span class="text-white text-sm font-semibold">Invite</span>
+            </div>
+        </div>
+        <div id="copied-message" class="hidden text-green-500 text-sm mt-2">Copied!</div>
         {% endif %}
-          <img src="{% static 'svgs/plus.svg' %}" alt="" class="" />
-          <span class="text-white text-sm font-semibold">Request Quote</span>
-      </div> -->
+      
+
         
-      {% endcomment %}
+
+    <!-- Image Gallery -->
+    <div class="w-full pb-[200px] overflow-x-hidden">
         
+        {% if proj %}
+        <div class="container-bottom w-full h-full" data-aos="fade-left">
+            <a href="" class="text-primary font-semibold mb-4">View Projects</a>
+            <div class="lg:hidden glide-bottom bg-gray-100 w-full pb-[200px] mt-4">
+                    <!-- Slides here -->
+                    <div class="glide__track" data-glide-el="track">
+                        <ul class="glide__slides">
+                            {% for image in proj %}
+                            <li class="glide__slide">
+                                {% if image.file %}
+                                <img src="{{ image.file.url }}" id="project-image" alt="Project Image" class="h-[400px] md:h-[350px] object-fit rounded-lg">
+                                {% endif %}
+                            </li>
+                            {% endfor %}
+                            <!-- Grid for large screens -->
+                        </ul>
+                    </div>
+            </div>                   
+            <div class="w-full h-full bg-gray-100 mt-4">
+                <div class="projects-grid w-full hidden lg:grid grid-cols-3 gap-4 pb-[200px]">
+                        {% for image in proj %}
+                        <div class="project-item">
+                            {% if image.file %}
+                            <img src="{{ image.file.url }}" alt="Project Image" class="h-[320px] object-fit rounded-lg">
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="w-full flex flex-col items-center justify-center gap-4 mt-4">
+            <h3 class="text-gray-900 font-semibold text-center">No projects yet</h3>
+        </div>
+        {% endif %}
+            
+
     </div>
 
-    <!-- project request history -->
-    <div class="w-full">
-      <div class="rounded-lg w-full border border-neutral-150 p-4">
-        <!-- header -->
-        <div class="w-full flex items-center justify-between border-b border-neutral-150 pb-4">
-          <h3 class="text-gray-900 font-semibold">Quote Request history</h3>
-          <a href="#" class="text-primary bg-toneLightGreen text-center p-2 px-4 rounded-md"> See all </a>
-        </div>
-        <!-- content -->
-        <div class="mt-4 flex flex-col gap-4">
-          {% for quote in quotes %}
-          <a href="{{quote.quote_project.first.admin_pdf}}" class="w-full flex flex-col gap-4 p-4 border text-xs border-neutral-150 rounded-md">
-            <div class="w-full flex items-center justify-between">
-              <div class="text-xs flex flex-col gap-2">  
-                <h3 class="text-gray-600 font-semibold">{{quote.title}}</h3>
-              </div>
-              <span class="">
-                <img src="{% static 'svgs/more-vertical.svg' %}" alt="" class="" />
-              </span>
-            </div>
-            <div class="flex items-start gap-8">
-              <div class="">
-                <span class="text-gray-500 font-medium">Home Owner</span>
-                <div class="flex items-center gap-4 mt-2">
-                  <span class="text-gray-900 font-medium">{{quote.user.first_name}} {{quote.user.last_name}}</span>
-                  <img src="{% static 'svgs/chat-msg.svg' %}" alt="" />
-                </div>
-              </div>
-              <div class="text-xs flex flex-col gap-2">
-                <span class="text-gray-500 font-medium">Created Date</span>
-                <h3 class="text-gray-600 font-semibold mt-2">{{quote.upload_date}}</h3>
-              </div>
-            </div>
-            <div class="flex items-start gap-8">
-              <div class="text-xs flex flex-col gap-2">
-                <span class="text-gray-500 font-medium">Location</span>
-                <h3 class="text-gray-600 font-semibold mt-2">{{quote.property_address}}</h3>
-              </div>
-              <div class="text-xs flex flex-col gap-2">
-                <span class="text-gray-500 font-medium">Quotation Status</span>
-                <div class="inline-flex p-1 px-2 bg-gray-200 bg-opacity-50 items-center w-fit gap-2 border border-neutral-150 rounded-xl">
-                  {% if quote.is_quote %}
-                  <div class="w-2 h-2 bg-blue-600 rounded-full"></div>
-                  <span class="text-[10px]">Pending</span>
-                  {% else %}
-                  <div class="w-2 h-2 bg-green-600 rounded-full"></div>
-                  <span class="text-[10px]">Approved</span>
-                  {% endif %}
-                </div>
-              </div>
-            </div>
-          </a>
-          {% endfor %}
-        </div>
-      </div>
     </div>
-  </div>
+</div>
 
 {% endblock %}
 {% block bottomNav %}
     {% include "user/bottom_nav_agent.html" %} 
 {% endblock bottomNav %} 
 {% block extraScripts %}
-    <script src="{% static 'js/agent.js' %}"></script>
-    <script>
-      document.addEventListener("DOMContentLoaded", function() {
-        let getStarted = document.querySelector('#get-started')
-        let modalOverlay = document.querySelector('#modal-overlay')
-
-        let shareLink = document.getElementById("share-link");
-        let copiedMessage = document.getElementById("copied-message");
-
-
-        if(getStarted){
-          getStarted.addEventListener('click', ()=>modalOverlay.style.display= 'none')
+<script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+<script>
+    AOS.init(
+        {duration: 1200,}
+    );
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js" integrity="sha512-A7AYk1fGKX6S2SsHywmPkrnzTZHrgiVT7GcQkLGDe2ev0aWb8zejytzS8wjo7PGEXKqJOrjQ4oORtnimIRZBtw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdn.jsdelivr.net/npm/@glidejs/glide@3.5.2/dist/glide.min.js"></script>
+<script>
+    // data-aos="fade-right"
+    const configTop = {
+        type: "carousel",
+        perView: 5,  // Show one full image and a part of the next one
+        focusAt: 'center',
+        gap: 10,  // Adjust the gap between slides if needed
+        breakpoints: {
+            1420: {
+                perView: 4
+            },
+            1130: {
+                perView: 3.1
+            },
+            900: {
+                perView: 3
+            },
+            860: {
+                perView: 2.5
+            },          
+            680: {
+                perView: 2
+            },                   
+            680: {
+                perView: 2
+            },                   
+            560: {
+                perView: 1.70
+            },                   
+            475: {
+                perView: 1.50
+            },                   
+            423: {
+                perView: 1.30
+            },                   
+            390: {
+                perView: 1.25
+            }
         }
-        
-        // copying invite link
+    };
+
+    
+    const sliderTop = new Glide('.glide-top', configTop);
+    
+    sliderTop.mount();
+
+    let glide_width = document.querySelector('.glide__slide1')
+    console.log(glide_width)
+    glide_width.style.width= '100%'
+    // let glide_width2 = document.querySelector('.glide__slide')
+    // console.log(glide_width)
+    // glide_width2.style.width= '80%'
+
+
+    // second slide
+    const config = {
+        type: "carousel",
+        perView: 2.25,  // Show one full image and a part of the next one
+        focusAt: 'center',
+        gap: 10,  // Adjust the gap between slides if needed
+        breakpoints: {
+            800: {
+                perView: 1.5
+            },
+            480: {
+                perView: 1.25
+            }
+        }
+    };
+
+    const slider = new Glide('.glide-bottom', config);
+
+    slider.mount();
+
+</script>
+
+<script src="{% static 'js/agent.js' %}"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+    let getStarted = document.querySelector('#get-started')
+    let modalOverlay = document.querySelector('#modal-overlay')
+
+    let shareLink = document.getElementById("share-link");
+    let addInvite = document.getElementById("add-invite");
+    let copiedMessage = document.getElementById("copied-message");
+    let copiedMessageInvite = document.getElementById("copied-message-inivite");
+
+
+    if(getStarted){
+        getStarted.addEventListener('click', ()=>modalOverlay.style.display= 'none')
+    }
+    
+    // copying invite link
+    if(shareLink){
         shareLink.addEventListener("click", function() {
             let referralLink = shareLink.getAttribute("data-link");
             navigator.clipboard.writeText(referralLink).then(function() {
@@ -219,32 +372,42 @@
                 console.error("Failed to copy text: ", error);
             });
         });
+    }
+
+    addInvite.addEventListener("click", function() {
+        // Show the copied message
+        copiedMessageInvite.style.display = 'block';
+
+        // Hide the message after 2 seconds
+        setTimeout(function() {
+            copiedMessageInvite.style.display = 'none';
+        }, 3000);
+        })
+});
+</script>
+
+<script>
+    // using jQuery
+    console.log($('#get-started'))
+    let url = '{{url}}'
+    console.log(url+'/profiles/update_onboarding_status/')
+    $('#get-started').click(function() {
+    $.ajax({
+        url: url+'/profiles/update_onboarding_status/',  // URL to your Django view
+        type: 'POST',
+        dataType: 'json',
+        beforeSend: function(xhr) {
+            xhr.setRequestHeader('X-CSRFToken', '{{ csrf_token }}');  // Include CSRF token
+        },
+        success: function(data) {
+            console.log(data.message);
+            // Continue navigating the page or perform other actions
+        },
+        error: function(xhr, textStatus, errorThrown) {
+            console.error('Error:', errorThrown);
+        }
     });
+});
 
-    </script>
-
-    <script>
-      // using jQuery
-      console.log($('#get-started'))
-      let url = '{{url}}'
-      console.log(url+'/profiles/update_onboarding_status/')
-      $('#get-started').click(function() {
-      $.ajax({
-          url: url+'/profiles/update_onboarding_status/',  // URL to your Django view
-          type: 'POST',
-          dataType: 'json',
-          beforeSend: function(xhr) {
-              xhr.setRequestHeader('X-CSRFToken', '{{ csrf_token }}');  // Include CSRF token
-          },
-          success: function(data) {
-              console.log(data.message);
-              // Continue navigating the page or perform other actions
-          },
-          error: function(xhr, textStatus, errorThrown) {
-              console.error('Error:', errorThrown);
-          }
-      });
-  });
-
-    </script>
+</script>
 {% endblock extraScripts %}

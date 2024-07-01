@@ -72,6 +72,8 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     "allauth.account.middleware.AccountMiddleware",
+    # 'accounts.middleware.GoogleOAuthCallbackMiddleware',
+
 ]
 
 ROOT_URLCONF = 'SproostApp.urls'
@@ -166,9 +168,14 @@ AUTHENTICATION_BACKENDS = (
 )
 
 
-# ACCOUNT_ADAPTER = 'accounts.adapters.CustomAccountAdapter'
+ACCOUNT_ADAPTER = 'accounts.adapters.CustomAccountAdapter'
 ACCOUNT_LOGOUT_ON_GET = True
 SOCIALACCOUNT_LOGIN_ON_GET = False
+SOCIALACCOUNT_ADAPTER = 'accounts.adapters.MySocialAccountAdapter'
+
+# ACCOUNT_AUTHENTICATED_LOGIN_REDIRECTS = True
+
+
 
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
 ACCOUNT_EMAIL_REQUIRED = True
@@ -177,6 +184,10 @@ ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_EMAIL_VERIFICATION = 'none'
 ACCOUNT_SESSION_REMEMBER = True
 SOCIALACCOUNT_QUERY_EMAIL = True
+
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'  # Use database-backed sessions
+SESSION_COOKIE_AGE = 1209600  # Two weeks in seconds
+SESSION_SAVE_EVERY_REQUEST = True  # Save the session to the database on every request
 
 
 ACCOUNT_LOGOUT_REDIRECT_URL = reverse_lazy('account_login')
@@ -225,3 +236,10 @@ CLOUDINARY_STORAGE = {
 }
 
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake',  # This can be any unique identifier
+    }
+}
