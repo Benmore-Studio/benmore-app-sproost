@@ -28,6 +28,8 @@
 </style>
 
 <div class="w-full p-4 font['Inter'] mt-16 flex flex-col gap-5">
+    what should be here is the accounts, but the accounts have no images
+
      <!-- go back arrow -->
      <div class="w-full py-4 md:flex justify-between items-center gap-8 border-b border-neutral-150">
         <img onclick="goBack()" src="{% static 'svgs/chevron-left.svg' %}" alt="" class="cursor-pointer" />
@@ -87,7 +89,9 @@
     </div>
 
     <!-- all Listings -->
-    <div class="container-bottom w-full h-full ">
+     
+     {% if proj %}
+     <div class="container-bottom w-full h-full ">
         <a href="" class="text-primary font-semibold ">All Listings</a>
         <div class="block lg:hidden mt-4">
             <div class="glide glide-top">
@@ -248,7 +252,8 @@
             </div>
         </div>
     </div>
-        
+     {% endif %}
+                
     <!-- create button -->
     <div class="flex justify-center ">
         <div class="tab flex justify-center gap-3 cursor-pointer mb-[130px] items-center flex-shrink-0 rounded-3xl bg-white p-4 rounded-2xl shadow-sm w-64">
