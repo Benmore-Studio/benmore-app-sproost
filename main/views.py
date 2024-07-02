@@ -96,9 +96,6 @@ def home(request):
             proj = Project.objects.filter(admin=request.user)
             accounts = AssignedAccount.objects.filter(assigned_to=request.user).order_by('-id').select_related(
                 "assigned_by", "assigned_to")
-            print(proj)
-            for i in proj:
-                print(i.file.url)
             # print(projects)
             agent = User.objects.get(pk=request.user.pk)
             agent_profile = AgentProfile.objects.get(user=agent)
@@ -133,7 +130,6 @@ def Assigned_projects(request):
         quotes = QuoteRequest.objects.filter(user=request.user)
         projects = Project.objects.filter(quote_request__user=request.user)
         proj = Project.objects.filter(admin=request.user)
-        print(proj)
         accounts = AssignedAccount.objects.filter(assigned_to=request.user).order_by('-id').select_related(
             "assigned_by", "assigned_to")
 

@@ -75,45 +75,30 @@ def generate_username(email):
 
 def select_user_type(request):
     if request.method == 'POST':
-        print('Received POST request')
         form = UserTypeForm(request.POST)
-        print('Form initialized with POST data')
-        print(form)
         
         if form.is_valid():
-            print('Form is valid')
-            sociallogin_key = request.session.get('sociallogin_key')
-            print(request.session)
-            print(cache.get(sociallogin_key))
+            sociallogin_key = request.session.get('sociallogin_key')    
             user_type = form.cleaned_data['user_type']
-            print(f'Selected user type: {user_type}')
             request.session['user_type'] = user_type
             request.session['user_type_selected'] = True
-            print('User type saved to session')
-
             sociallogin = retrieve_sociallogin(request)
             
             if sociallogin:
-                print('Sociallogin data found in session')
                 username = generate_username(sociallogin.user.email)
                 sociallogin.user.username = username 
                 sociallogin.user.user_type = user_type  # Set user type before completing signup
                 sociallogin.user.save()
                 if sociallogin.user.user_type == "HO":
                     UserProfile.objects.create(user = sociallogin.user) 
-                    print('ho')
                 elif sociallogin.user.user_type == "AG":
-                    AgentProfile.objects.create(user = sociallogin.user) 
-                print('ag')
-                print(sociallogin.user)
-                print('User type set and user saved')
+                    AgentProfile.objects.create(user = sociallogin.user)                
+                elif sociallogin.user.user_type == "CO":
+                    ContractorProfile.objects.create(user = sociallogin.user)                
                 return complete_social_signup(request, sociallogin)
             else:
-                print('No sociallogin data found in session, redirecting to login')
                 return redirect('account_signup')
         else:
-            print('Form is not valid')
-            print(form.errors)
             logger.error('Form is not valid')
             logger.error(form.errors)
     else:

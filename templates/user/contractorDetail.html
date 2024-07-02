@@ -91,13 +91,7 @@
 {% endblock %}
 
 {% block bottomNav %}
-    {% if request.user.user_type == 'AG' %}
-        {% include "user/bottom_nav_agent.html" %}
-    {% elif request.user.user_type == 'CO' %}
-        {% include "user/bottom_nav_contractor.html"%}
-    {% else %}
-        {% include "user/bottom_nav.html" %}
-    {% endif %}
+{% include "user/bottom_nav_agent.html" %}
 {% endblock bottomNav %} 
 
 {% block extraScripts %}

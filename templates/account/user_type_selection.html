@@ -84,8 +84,8 @@
             </div>
         </div>
     </div>
-    <button id="submit" type="submit" class="w-full p-3 mt-8 bg-primary shadow-sm text-white rounded-md font-semibold focus:outline-none focus:bg-primary">
-      Sign up
+    <button id="submit" type="submit" class="w-full p-3 mt-8 bg-[#CDDFF3] text-gray-200 shadow-sm rounded-md font-semibold focus:outline-none">
+    Sign up
     </button>
     <div class="flex items-center justify-center text-sm gap-2 mt-4">
       <span class="text-gray-600">Already have an account?</span>
@@ -94,8 +94,23 @@
 </form>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
+   document.addEventListener('DOMContentLoaded', function() {
         const options = document.querySelectorAll('.user-type-option');
+        const submitButton = document.getElementById('submit');
+
+        function checkSelection() {
+            const isSelected = document.querySelector('.user-type-input:checked') !== null;
+            if (isSelected) {
+                submitButton.disabled = false;
+                submitButton.classList.remove('bg-gray-200', 'text-gray-700', 'cursor-not-allowed');
+                submitButton.classList.add('bg-primary', 'text-white', 'cursor-pointer');
+            } else {
+                submitButton.disabled = true;
+                submitButton.classList.add('bg-gray-400', 'text-gray-700', 'cursor-not-allowed');
+                submitButton.classList.remove('bg-primary', 'text-white', 'cursor-pointer');
+            }
+        }
+
         options.forEach(option => {
             option.addEventListener('click', function() {
                 options.forEach(opt => {
@@ -104,8 +119,11 @@
                 });
                 this.querySelector('.user-type-input').checked = true;
                 this.querySelector('.checkmark').classList.remove('hidden');
+                checkSelection();
             });
         });
+
+        checkSelection();
     });
 </script>
 {% endblock authContent %}

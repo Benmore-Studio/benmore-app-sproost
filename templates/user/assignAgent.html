@@ -6,7 +6,7 @@
 <div class="w-full">
     <!-- header -->
     <div class="w-full p-4 flex items-center gap-8 mt-4 border-b border-neutral-150">
-        <a href = {% url "main:home" %} >
+        <a href = '{% url "main:home" %}' >
             <img src="{% static 'svgs/chevron-left.svg' %}" alt="" class="cursor-pointer" />
         </a>
         <h3 class="text-xl text-gray-900 font-medium">Add my Agent</h3>
@@ -32,11 +32,5 @@
 </div>
 {% endblock %} 
 {% block bottomNav %}
-{% if request.user == 'AG' %}
-    {% include "user/bottom_nav_agent.html" %}
-{% elif request.user == 'CO' %}
-    {% include "user/bottom_nav_contractor.html"%}
-{% else %}
-    {% include "user/bottom_nav.html" %} 
-{% endif %} 
+{% include "user/bottom_nav_agent.html" %}
 {% endblock bottomNav %} 

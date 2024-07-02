@@ -22,6 +22,7 @@ User = get_user_model()
 
 @login_required
 def contractor_profile_view(request):
+    print('poo')
     if request.user.user_type != 'CO':
         return redirect('main:home')
     
@@ -43,6 +44,8 @@ def contractor_profile_view(request):
         
         return redirect("profile:contractor_profile")  
     else:
+        # profile = ContractorProfile.objects.get(user=request.user)
+        # form = ProfilePictureForm(instance = profile)
         try:
             profile = ContractorProfile.objects.get(user=request.user)
             form = ProfilePictureForm(instance = profile)
@@ -51,6 +54,7 @@ def contractor_profile_view(request):
                 "form": form
             }
         except:
+            print('failed')
             context = {}
             # return redirect('account_signup')
     return render(request, 'user/contractor_home.html', context)

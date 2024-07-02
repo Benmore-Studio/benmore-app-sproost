@@ -17,21 +17,18 @@ class CustomAccountAdapter(DefaultAccountAdapter):
 # custom_adapter.py
 class MySocialAccountAdapter(DefaultSocialAccountAdapter):
     def pre_social_login(self, request, sociallogin: SocialLogin):
-        print("pre_social_login called")
-        print(sociallogin)
         user = sociallogin.user
+
         if not user.id:  # If user doesn't exist yet
-            print('lop344')
+            # data = (sociallogin.serialize())
+            # email = data['account']['extra_data']['email']
             existing_user = self.get_existing_user(user)
             if existing_user:
-                print(344)
                 sociallogin.connect(request, existing_user)
-                print(123)
             else:
                 sociallogin_key = str(uuid.uuid4())
                 cache.set(sociallogin_key, sociallogin.serialize(), timeout=600)  # Store for 10 minutes
                 request.session['sociallogin_key'] = sociallogin_key
-                print('select_user_type')
                 raise ImmediateHttpResponse(redirect(reverse("select_user_type")))
 
     def get_existing_user(self, user):
@@ -47,7 +44,6 @@ class MySocialAccountAdapter(DefaultSocialAccountAdapter):
     
     
     def save_user(self, request, sociallogin, form=None):
-        print('savemthd')
         user = sociallogin.user
         user_type = request.session.pop('user_type', None)
         if user_type:
