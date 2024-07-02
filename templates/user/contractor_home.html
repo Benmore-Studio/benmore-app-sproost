@@ -1,389 +1,272 @@
 {% extends "user/base.html" %} 
 {% load static %} 
-{% load form_tags %} 
-
 {% block content %}
 <style>
-     .container-bottom {
-           width: 100%;
-           height: 150px;
-            margin: 70px auto;
+  .tabcontent {
+    display: none;
+  }
 
-        }
-        .glide__slide img {
-            aspect-ratio: 3 / 2; 
-        }
-        .glide__slide {
-            flex: 0 0 auto;
-        }
+  .tablinks.active {
+    background-color: #eaf7e6;
+    border-radius: 8px;
+    padding: 8px 16px;
+    color: #217905;
+  }
 
-    .glide__arrows {
-        display: none;
-    }
+/* HTML: <div class="loader"></div> */
+.loader {
+  color: rgb(34 197 94);
+  display: block;
+  width: 7px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  box-shadow: 19px 0 0 7px, 38px 0 0 3px, 57px 0 0 0;
+  transform: translateX(-38px);
+  animation: l21 .5s infinite alternate linear;
+}
 
-    @media (min-width: 1000px) {
-        .glide__arrows {
-            display: flex;
-        }
-    
-    }
-    .projects-grid img {
-        aspect-ratio: 3 / 2; 
-    }
-
-    @media (min-width: 2000px) {
-        .projects-grid {
-            display: grid;
-            grid-template-columns: repeat(4, minmax(0, 1fr));
-            gap: 1rem;         
-        }
-        #project-image {
-            height: 350px; 
-        }
-    
-    }
+@keyframes l21 {
+  50%  {box-shadow: 19px 0 0 3px, 38px 0 0 7px, 57px 0 0 3px}
+  100% {box-shadow: 19px 0 0 0  , 38px 0 0 3px, 57px 0 0 7px}
+}
 
 </style>
-<div class="">
-{% include "user/top-navigation.html" %} 
-</div>
-<div class="h-full bg-gray-100">
-    <div class="pt-4 ml-8 mr-4">
-        <div class="w-full pb-8 pt-[100px]">
-            <!-- Top Sliding Tabs -->
-            <div class="glide glide-top">
-                <div class="glide__track" data-glide-el="track">
-                    <ul class="glide__slides">
-                        <li class="glide__slide1 w-[40%]">
-                            <div class="tab flex-shrink-0 rounded-3xl bg-white p-4 rounded-lg shadow-sm w-64">
-                                <p class='text-center'>Sample1</p>
-                            </div>
-                        </li>
-                        <li class="glide__slide1 w-[40%]">
-                            <div class="tab flex-shrink-0 rounded-3xl bg-white p-4 rounded-lg shadow-sm w-64">
-                                <p class='text-center'>Sample2</p>
-                            </div>
-                        </li>
-                        <li class="glide__slide1 w-[40%]">
-                            <div class="tab flex-shrink-0 rounded-3xl bg-white p-4 rounded-lg shadow-sm w-64">
-                                <p class='text-center'>Sample3</p>
-                            </div>
-                        </li>
-                        <li class="glide__slide1 w-[40%]">
-                            <div class="tab flex-shrink-0 rounded-3xl bg-white p-4 rounded-lg shadow-sm w-64">
-                                <p class='text-center'>Sample4</p>
-                            </div>
-                        </li>
-                        <li class="glide__slide1 w-[40%]">
-                            <div class="tab flex-shrink-0 rounded-3xl bg-white p-4 rounded-lg shadow-sm w-64">
-                                <p class='text-center'>Sample5</p>
-                            </div>
-                        </li>
-                    </ul>
-                </div>
-                <!-- Navigation Buttons -->
-                <div class="glide__arrows sm:hidden lg:block" data-glide-el="controls">
-                    <button class="glide__arrow glide__arrow--left inline-flex items-center justify-center bg-primary border border-neutral-150 rounded-md p-2 outline-none shadow-sm text-white" data-glide-dir="<">
-                        <i class="fa fa-arrow-left" aria-hidden="true"></i>
-                      </button>
-                    <button class="glide__arrow glide__arrow--right inline-flex items-center justify-center bg-primary border border-neutral-150 rounded-md p-2 outline-none shadow-sm" data-glide-dir=">">
-                        <i class="fa fa-arrow-right" aria-hidden="true"></i>
-                      </button>
-                </div>
-            </div>
+
+    <!-- loading -->
+    <!-- added to mask the time it takes to display beteen when a prof pics is clicked and before it gets resized in js -->
+    <div id="loading" class="relative hidden w-full">
+      <div class="fixed inset-0 flex items-center justify-center z-50">
+          <div class="fixed inset-0 bg-black/75"></div>
+          <div class="flex flex-col items-center">
+              <span class="loader"></span>
+          </div>
+        </div>
         </div>
 
-            <!-- goals part -->
-        <div class="w-full grid grid-cols-2 lg:grid-cols-4 gap-4 mt-4 mb-12">
-            <div class="tab flex flex-col text-center justify-center bg-white p-4 rounded-lg shadow-md h-[200px]">
-                <div class="w-full flex flex-col gap-4">
-                    <div class="w-full flex items-center justify-between">
-                      <h3 class="text-gray-900 font-medium">TDB</h3>
-                      <span class="">
-                        <img src="{% static 'svgs/more-vertical.svg' %}" alt="" class="" />
-                      </span>
-                    </div>
-                    <div class="w-full flex items-center justify-between">            
-                      {% if quote_count > 0 %}
-                        <h3 class="text-gray-900 text-2xl font-semibold">{{ quote_count }}</h3>  
-                      {% else %}
-                        <h3 class="text-gray-900 text-2xl font-semibold">0</h3>              
-                      {% endif %}
-                        
-                      <span class="">
-                        <img src="{% static 'svgs/quotes.svg' %}" alt="" class="" />
-                      </span>
-                    </div>
-                </div>
-            </div>
-            <div class="tab flex flex-col text-center justify-center bg-white p-4 rounded-lg shadow-md h-[200px]">
-                <a href="{% url 'main:assigned-projects' %}" class="w-full p-4 bg-white">
-                    <div class="w-full flex flex-col gap-4">
-                      <div class="w-full flex items-center justify-between">
-                        <h3 class="text-gray-900 font-medium">TDB</h3>
-                        <span class="">
-                          <img src="{% static 'svgs/more-vertical.svg' %}" alt="" class="" />
-                        </span>
-                      </div>
-                      <div class="w-full flex items-center justify-between">            
-                        {% if accounts_len > 0 %}
-                          <h3 class="text-gray-900 text-2xl font-semibold">{{ accounts_len }}</h3>  
-                        {% else %}
-                          <h3 class="text-gray-900 text-2xl font-semibold">0</h3>              
-                        {% endif %}
-                          
-                        <span class="">
-                          <img src="{% static 'svgs/quotes.svg' %}" alt="" class="" />
-                        </span>
-                      </div>
-                    </div>
-                  </a>
-            </div>
-            <div class="tab flex flex-col text-center justify-center bg-white p-4 rounded-lg shadow-md h-[200px]">
-                <div class="w-full flex flex-col gap-4">
-                    <div class="w-full flex items-center justify-between">
-                      <h3 class="text-gray-900 font-medium">Number of Quotes Requested</h3>
-                      <span class="">
-                        <img src="{% static 'svgs/more-vertical.svg' %}" alt="" class="" />
-                      </span>
-                    </div>
-                    <div class="w-full flex items-center justify-between">            
-                      {% if quote_count > 0 %}
-                        <h3 class="text-gray-900 text-2xl font-semibold">{{ quote_count }}</h3>  
-                      {% else %}
-                        <h3 class="text-gray-900 text-2xl font-semibold">0</h3>              
-                      {% endif %}
-                        
-                      <span class="">
-                        <img src="{% static 'svgs/quotes.svg' %}" alt="" class="" />
-                      </span>
-                    </div>
-                </div>
-            </div>
-            <div class="tab flex flex-col text-center justify-center bg-white p-4 rounded-lg shadow-md h-[200px]">
-                <div class="w-full flex flex-col gap-4">
-                    <div class="w-full flex items-center justify-between">
-                      <h3 class="text-gray-900 font-medium">Number of Quotes Requested</h3>
-                      <span class="">
-                        <img src="{% static 'svgs/more-vertical.svg' %}" alt="" class="" />
-                      </span>
-                    </div>
-                    <div class="w-full flex items-center justify-between">            
-                      {% if quote_count > 0 %}
-                        <h3 class="text-gray-900 text-2xl font-semibold">{{ quote_count }}</h3>  
-                      {% else %}
-                        <h3 class="text-gray-900 text-2xl font-semibold">0</h3>              
-                      {% endif %}
-                        
-                      <span class="">
-                        <img src="{% static 'svgs/quotes.svg' %}" alt="" class="" />
-                      </span>
-                    </div>
-                </div>
-            </div>
-            
-        </div>     
-        
+    <div id="capture-video" class="relative hidden w-full">
+      <div class="fixed inset-0 flex items-center justify-center z-50">
+          <div class="fixed inset-0 bg-black/75"></div>
+          <div class="flex flex-col items-center">
+            <div class="z-50">
+              <video id="video" autoplay></video>
+              <div class="flex gap-4 justify-center mt-3">
+                <button id="stop" class="bg-primary py-3 px-4 cursor-pointer text-white rounded-lg">Stop</button>
+                <button id="capture" class="bg-primary py-3 px-4 cursor-pointer text-white rounded-lg">Capture</button>     
 
-    <!-- Image Gallery -->
-    <div class="w-full">
-      {% if proj %}
-      <div class="container-bottom w-full h-full" data-aos="fade-left">
-          <a href="" class="text-primary font-semibold mb-4">View Projects</a>
-          <div class="lg:hidden glide-bottom bg-gray-100 w-full pb-[200px] mt-4">
-                  <!-- Slides here -->
-                  <div class="glide__track" data-glide-el="track">
-                      <ul class="glide__slides">
-                          {% for image in proj %}
-                          <li class="glide__slide">
-                              {% if image.file %}
-                              <img src="{{ image.file.url }}" id="project-image" alt="Project Image" class="h-[400px] md:h-[350px] object-fit rounded-lg">
-                              {% endif %}
-                          </li>
-                          {% endfor %}
-                          <!-- Grid for large screens -->
-                      </ul>
-                  </div>
-          </div>                   
-          <div class="w-full h-full bg-gray-100 mt-4">
-              <div class="projects-grid w-full hidden lg:grid grid-cols-3 gap-4 pb-[200px]">
-                      {% for image in proj %}
-                      <div class="project-item">
-                          {% if image.file %}
-                          <img src="{{ image.file.url }}" alt="Project Image" class="h-[320px] object-fit rounded-lg">
-                          {% endif %}
-                      </div>
-                      {% endfor %}
               </div>
+              <canvas id="canvas" style="display: none;"></canvas>
+            </div>
           </div>
       </div>
-      {% else %}
-      <div class="w-full flex flex-col items-center justify-center gap-4">
-          <h3 class="text-gray-900 font-semibold text-center">No projects yet</h3>
+    </div>
+
+    <!-- modal for dp view -->
+    <div id="imagePreviewModal" class="relative hidden w-full">
+      <div class="fixed inset-0 flex items-center justify-center z-50">
+          <div class="fixed inset-0 bg-black/75"></div>
+          <div class="flex flex-col items-center">
+            <div class="modal z-50">
+              <form id="imageForm" class="" action="{% url 'profile:change-dp-request' %}" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div id="dp-view"  class="flex flex-col items-center sm:h-[70vh] justify-center">
+                  <div class="bg-white rounded-lg pt-2 pb-4 px-2">
+                    <div class="flex justify-between items-center mb-3">
+                      <p class="text-sm text-primary">
+                        {% if profile.company_name %} {{ profile.company_name }} {% else %} {{ profile.user.username }} {% endif %}
+                      </p>
+                      <span class="close text-red-500 text-3xl font-bold float-right cursor-pointer mr-1">&times;</span>
+                    </div>
+                    <div class="flex flex-col justify-center items-center">
+                      <img class="modal-content w-full h-[25rem] object-contain object-center rounded-lg border-2 border-gray-300" src="#" id="previewImage">
+                      <div class="flex items-center justify-center gap-8 mt-4">
+                        <div id="change-through-camera" class="">
+                          <i class="fa fa-camera fa-4x text-primary cursor-pointer text-2xl" aria-hidden="true"></i>
+                        </div>
+                        <div class="change-icon-container ">
+                          <div id="">
+                            <input type="file" id="id_gallery_change" name="image" class="hidden">
+                          </div>
+                          <label for="id_gallery_change" class="gallery-icon-label">
+                              <span><i id="change-through-gallery" class="fa-solid fa-image fa-4x text-primary cursor-pointer text-2xl" aria-hidden="true"></i>
+                          </label>
+                          
+                        </div>             
+                      </div>
+                    </div>
+                    </div>
+                  </div>
+                  <!-- for sending dp change request -->
+                  <div id="send-button" class="hidden sm:h-[70vh] flex-col justify-center items-center"> 
+                      <div class = "overflow-hidden rounded-md h-[30rem] w-[95%]">
+                        <img id="previewImageForm" name class="w-full h-full object-contain object-center rounded-lg" src="#" alt="Image Preview">
+                      </div>
+                      <div class="flex gap-4 justify-center w-full mt-4">
+                        <button id="cancel-dp-change" class="bg-primary py-3 px-4 cursor-pointer text-white rounded-lg" type="button">Cancel</button>
+                        <button type="submit" class="bg-primary py-3 px-4 cursor-pointer text-white rounded-lg">Change</button>
+                      </div>
+                  </div>
+                </form>
+
+            </div>
+          </div>
       </div>
+    </div>
+
+
+
+
+<main class="w-full relative mb-4">
+  <div class="w-full h-[120px] rounded-bl-lg rounded-br-lg bg-green-500"></div>
+  <!-- <div class="absolute top-16 border border-neutral-150 rounded-md w-fit p-2 right-4">
+        <div class="relative ">
+            <img src="{% static 'svgs/Notification.svg' %}" alt="" class="" />
+            <span class="bg-[#F9BC36] w-2 h-2 rounded-full absolute top-0 right-0"></span>
+        </div>
+    </div> -->
+    <form class="absolute right-4 top-4" action="{% url 'account_logout' %}" method="POST">
+        {% csrf_token %}
+        <button type="submit" class="flex gap-2 items-center rounded-md text-black bg-white border border-gray-300 p-2 cursor-pointer">Logout <img src = "{% static 'svgs/logout.svg' %}" class = "w-4 h-4" /></button>
+    </form>
+  <div class="min-h-[750px] mt-[-6rem]">
+    <div class="w-[120px] h-[120px] border-[5px] border-green-300 relative z-10 rounded-full border border-enutral-150 mx-auto mt-[-1rem]">
+      {% if form.image.errors %}
+          <div class = "w-full py-1 rounded text-red-500 absolute top-[-45%] left-[30px]">
+              {{form.image.errors}}
+          </div>
       {% endif %}
+      {% if profile.image %}
+        <img id="profilepicture" src="{{profile.image.url}}" alt="" class="w-full h-full object-cover rounded-full" />
+        {% else %}
+        <img id="profilepicture" src="{% static 'images/truck.jpeg' %}" alt="" class="w-full h-full object-cover rounded-full" />
+      {% endif %}
+        
+      <div class="w-[33px] h-[33px] rounded-full bg-white flex items-center justify-center absolute bottom-0 right-0 shadow-sm">
+        <img src="{% static 'svgs/sproost.svg' %}" alt="" class="w-[26px] h-[12px] object-contain" />
+      </div>
     </div>
+    <div class="w-11/12 mx-auto bg-white min-h-[700px] shadow-md mt-[-4rem] rounded-lg relative">
+      <div class="pt-20">
+        <!-- header -->
+        <div class="flex flex-col items-center justify-center mb-4">
+          <h3 class="text-xl text-gray-700">
+            {% if profile.company_name %} {{ profile.company_name }} {% else %} {{ profile.user.username }} {% endif %}
+          </h3>
+          <p class="font-[300]">{{profile.specialization|default:"Not Provided"}}</p>
+        </div>
+        <!-- content -->
+        <div class="w-full p-4 flex flex-col gap-4">
+          <div class="w-full flex items-center justify-between">
+            <div class="flex flex-col gap-3">
+              <span class="text-primarydark font-bold text-sm">Location</span>
+              <span class="text-gray-500 text-sm">{{profile.company_address|default:"None"}}, {{profile.city|default:"None"}}</span>
+            </div>
+            <div class="flex flex-col gap-3">
+              <span class="text-primarydark font-bold text-sm">Website</span>
+              <span class="text-gray-500 text-sm">{{profile.website|default:"None"}}</span>
+            </div>
+          </div>
+          <div class="w-full flex items-center justify-between border-b border-neutral-150 pb-4">
+            <div class="flex flex-col gap-2">
+            </div>
 
+            {% if request.user == profile.user %}
+            <a href = '{% url "profile:edit-profile" %}' class="bg-[#eaf7e6] p-2 px-4 px-2 text-primary rounded-md text-gray-500 text-sm font-semibold">Edit Profile</a> 
+            {% endif %}
+          </div>
+        </div>
+        <!-- tabs -->
+        <div class="tab flex flex-items-center justify-between p-4">
+          <div class="flex flex-row">
+            <button class="tablinks p-2 text-gray-500 text-sm font-medium" onclick="openTab(event, 'tab1')">Media</button> 
+          </div>
+          <button class="tablinks p-2 text-gray-500 text-sm font-medium" onclick="openTab(event, 'tab2')">Description</button>
+          <button class="tablinks p-2 text-gray-500 text-sm font-medium" onclick="openTab(event, 'tab3')">Contact</button>
+        </div>
+
+        <div id="tab1" class="tabcontent p-4 w-full">
+          <div class="w-full grid grid-cols-4 gap-2">
+            {% for media in profile.media_paths.all %} 
+            {% if media.image %}
+            <a href="{{media.image.url}}"><img src="{{media.image.url }}" alt="" class="w-full h-[150px] border border-neutral-150 object-cover" /> </a>
+            {% elif media.file %}
+            <video class="w-full h-[81px] border border-neutral-150 object-cover" controls>
+              <source src="{{media.file.url }}" type="video/mp4" />
+            </video>
+            {% endif %} 
+            {% endfor %}
+          </div>
+          {% if request.user == profile.user %}
+          <div id="tab1" class="w-full flex justify-center items-center mt-4">
+            <button class="tablinks px-2 py-1 text-gray-500 text-xl font-lg border border-black rounded-full" onclick="openTab(event, 'tab4')">
+              <i class="fa fa-plus-circle"></i>
+            </button>
+          </div>
+          {% endif %}
+        </div>
+
+        <div id="tab2" class="tabcontent">
+          <div class="w-full min-h-24 flex items-center justify-center">
+            <h3 class="text-gray-900 font-semibold">Coming soon</h3>
+          </div>
+        </div>
+
+        <div id="tab3" class="tabcontent">
+          <div class="w-full min-h-24 p-4 flex flex-col gap-4">
+            <p class="text-gray-500 text-sm"><span class="text-primarydark font-bold text-sm">Phone Number</span>: {{ profile.user.phone_number }}</p>
+            <p class="text-gray-500 text-sm"><span class="text-primarydark font-bold text-sm">Address</span>: {{profile.company_address|default:"None"}}, {{profile.city|default:"None"}}</p>
+            {% if profile.website %}
+            <p class="text-gray-500 text-sm"><span class="text-primarydark font-bold text-sm">Website</span>: <a href="{{profile.website}}">{{ profile.website}}</a></p>
+            {% endif %}
+          </div>
+        </div>
+        {% if request.user == profile.user %}
+        <div id="tab4" class="tabcontent">
+          <div class="w-full min-h-24 flex items-center justify-center">
+            <div class="w-full p-4">
+              <form method="post" enctype="multipart/form-data" id="contractorMediaForm" class="w-full mt-4 flex flex-col gap-4 mb-[4rem]">
+                {% csrf_token %}
+                <div class="w-full">
+                  <span class="text-sm text-gray-700 font-medium">Upload Pictures & Videos</span>
+                </div>
+                <label for="upload-media">
+                  <div class="w-full min-h-[150px] rounded-md border border-neutral-150 shadow-sm mt-4 flex flex-col gap-4 items-center justify-center">
+                    <div class="w-12 h-12 flex items-center justify-center rounded-full bg-gray-200 bg-opacity-50 p-2">
+                      <img src="{% static 'svgs/upload-cloud.svg' %}" alt="" class="" />
+                    </div>
+                    <p class="text-center text-sm text-gray-500">
+                      <span class="text-primary font-semibold">Click to upload</span> or drag and drop <br />
+                      SVG, PNG, JPG or GIF (max. 800x400px)
+                    </p>
+                  </div>
+                  <input type="file" id="upload-media" multiple name="upload-media" class="hidden" />
+                </label>
+
+                <div id="file-container" class="w-full flex items-center my-4 gap-4">
+                  <!-- dynamic render -->
+                </div>
+                <div class="w-full flex items-center justify-center">
+                  <button type="submit" class="p-3 w-1/4 rounded-lg bg-primary text-white border border-neutral-150 shadow-sm font-semibold">
+                    Submit
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+        {% endif %}
+      </div>
     </div>
-</div>
+  </div>
+</main>
 
-{% endblock %}
-{% block bottomNav %}
-    {% include "user/bottom_nav_agent.html" %} 
+{% endblock %} 
+{% block bottomNav %} 
+{% include "user/bottom_nav_agent.html"%} 
 {% endblock bottomNav %} 
 {% block extraScripts %}
-<script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
 <script>
-    AOS.init(
-        {duration: 1200,}
-    );
+    var csrf_token = "{{csrf_token}}"
 </script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js" integrity="sha512-A7AYk1fGKX6S2SsHywmPkrnzTZHrgiVT7GcQkLGDe2ev0aWb8zejytzS8wjo7PGEXKqJOrjQ4oORtnimIRZBtw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-<script src="https://cdn.jsdelivr.net/npm/@glidejs/glide@3.5.2/dist/glide.min.js"></script>
-<script>
-    // data-aos="fade-right"
-    const configTop = {
-        type: "carousel",
-        perView: 5,  // Show one full image and a part of the next one
-        focusAt: 'center',
-        gap: 10,  // Adjust the gap between slides if needed
-        breakpoints: {
-            1420: {
-                perView: 4
-            },
-            1130: {
-                perView: 3.1
-            },
-            900: {
-                perView: 3
-            },
-            860: {
-                perView: 2.5
-            },          
-            680: {
-                perView: 2
-            },                   
-            680: {
-                perView: 2
-            },                   
-            560: {
-                perView: 1.70
-            },                   
-            475: {
-                perView: 1.50
-            },                   
-            423: {
-                perView: 1.30
-            },                   
-            390: {
-                perView: 1.25
-            }
-        }
-    };
-
-    
-    const sliderTop = new Glide('.glide-top', configTop);
-    
-    sliderTop.mount();
-
-    let glide_width = document.querySelector('.glide__slide1')
-    console.log(glide_width)
-    glide_width.style.width= '100%'
-    // let glide_width2 = document.querySelector('.glide__slide')
-    // console.log(glide_width)
-    // glide_width2.style.width= '80%'
-
-
-    // second slide
-    const config = {
-        type: "carousel",
-        perView: 2.25,  // Show one full image and a part of the next one
-        focusAt: 'center',
-        gap: 10,  // Adjust the gap between slides if needed
-        breakpoints: {
-            800: {
-                perView: 1.5
-            },
-            480: {
-                perView: 1.25
-            }
-        }
-    };
-
-    const slider = new Glide('.glide-bottom', config);
-
-    slider.mount();
-
-</script>
-
-<script src="{% static 'js/agent.js' %}"></script>
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-    let getStarted = document.querySelector('#get-started')
-    let modalOverlay = document.querySelector('#modal-overlay')
-
-    let shareLink = document.getElementById("share-link");
-    let addInvite = document.getElementById("add-invite");
-    let copiedMessage = document.getElementById("copied-message");
-    let copiedMessageInvite = document.getElementById("copied-message-inivite");
-
-
-    if(getStarted){
-        getStarted.addEventListener('click', ()=>modalOverlay.style.display= 'none')
-    }
-    
-    // copying invite link
-    if(shareLink){
-        shareLink.addEventListener("click", function() {
-            let referralLink = shareLink.getAttribute("data-link");
-            navigator.clipboard.writeText(referralLink).then(function() {
-                // Show the copied message
-                copiedMessage.style.display = 'block';
-
-                // Hide the message after 2 seconds
-                setTimeout(function() {
-                    copiedMessage.style.display = 'none';
-                }, 2000);
-            }).catch(function(error) {
-                console.error("Failed to copy text: ", error);
-            });
-        });
-    }
-
-    addInvite.addEventListener("click", function() {
-        // Show the copied message
-        copiedMessageInvite.style.display = 'block';
-
-        // Hide the message after 2 seconds
-        setTimeout(function() {
-            copiedMessageInvite.style.display = 'none';
-        }, 3000);
-        })
-});
-</script>
-
-<script>
-    // using jQuery
-    console.log($('#get-started'))
-    let url = '{{url}}'
-    console.log(url+'/profiles/update_onboarding_status/')
-    $('#get-started').click(function() {
-    $.ajax({
-        url: url+'/profiles/update_onboarding_status/',  // URL to your Django view
-        type: 'POST',
-        dataType: 'json',
-        beforeSend: function(xhr) {
-            xhr.setRequestHeader('X-CSRFToken', '{{ csrf_token }}');  // Include CSRF token
-        },
-        success: function(data) {
-            console.log(data.message);
-            // Continue navigating the page or perform other actions
-        },
-        error: function(xhr, textStatus, errorThrown) {
-            console.error('Error:', errorThrown);
-        }
-    });
-});
-
-</script>
+<script src="{% static 'js/changeProfilePics.js' %}" async></script>
+<script src="{% static 'js/contractorDetail.js' %}"></script>
 {% endblock extraScripts %}
