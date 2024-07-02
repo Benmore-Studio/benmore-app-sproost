@@ -186,6 +186,14 @@
 
         <!-- invite part -->
         {% if referral_link %}
+        <div id="share-link"  data-link="{{referral_link}}" class="w-full flex items-center justify-center flex-col cursor-pointer mt-4 mb-6">
+            <div class="w-[50%] flex items-center justify-center text-center gap-2 cursor-pointer bg-primary p-3 rounded-md shadow-sm">
+            <img src="{% static 'svgs/plus.svg' %}" alt="" class="" />
+            <span class="text-white text-sm font-semibold">Invite</span>
+            </div>
+        </div>       
+        <div id="copied-message" class="hidden text-white text-sm mt-2 text-center bg-black py-2">Copied!</div>
+        {% else %}      
         <a id="add-invite" href="{% url 'profile:edit-profile' %}" class="w-full flex items-center justify-center flex-col cursor-pointer mt-4 mb-6">
             <div class="w-[50%] flex items-center justify-center text-center gap-2 cursor-pointer bg-primary p-3 rounded-md shadow-sm">
             <img src="{% static 'svgs/plus.svg' %}" alt="" class="" />
@@ -193,14 +201,6 @@
             </div>
         </a>
         <div id="copied-message-inivite" class="hidden text-white text-sm mt-2 text-center bg-black py-2">Please add your license number in the edit page!</div>
-        {% else %}      
-        <div id="share-link"  data-link="{{referral_link}}" class="w-full flex items-center justify-center flex-col cursor-pointer mt-4 mb-6">
-            <div class="w-[50%] flex items-center justify-center text-center gap-2 cursor-pointer bg-primary p-3 rounded-md shadow-sm">
-            <img src="{% static 'svgs/plus.svg' %}" alt="" class="" />
-            <span class="text-white text-sm font-semibold">Invite</span>
-            </div>
-        </div>
-        <div id="copied-message" class="hidden text-green-500 text-sm mt-2">Copied!</div>
         {% endif %}
       
 
