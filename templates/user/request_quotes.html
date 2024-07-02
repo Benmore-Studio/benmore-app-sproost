@@ -118,7 +118,7 @@ video {
 
           <div class="w-full"><label for="house-address" class="text-gray-700 font-medium text-sm">House Address</label> {{ form.property_address }}</div>
 
-          <div class="flex justify-end gap-4 border-t border-neutral-150 pt-5">
+          <div class="flex justify-end gap-4 border-t border-neutral-150 pt-5 pb-[130px]">
             <button
               type="button"
               onclick="goBack()"
@@ -150,7 +150,7 @@ video {
           <span class="text-lg mb-2 text-gray-900 font-semibold">Request Quotes</span>
           <p class="text-sm text-gray-500">Please make sure that there are two angles of each room.</p>
         </div>
-        <div class="w-full flex flex-col gap-3">
+        <div class="w-full flex flex-col gap-3 smphone:pb-8 xsm:pb-4">
           <button
             id="nextBtn"
             onclick="submitQuote()"
@@ -189,13 +189,7 @@ video {
 
 {% endblock %} 
 {% block bottomNav %} 
-{% if request.user.user_type == 'AG' %} 
 {% include "user/bottom_nav_agent.html" %} 
-{% elif request.user.user_type == 'CO' %} 
-{% include "user/bottom_nav_contractor.html" %} 
-{% else %} 
-{% include "user/bottom_nav.html"%} 
-{% endif %} 
 {% endblock bottomNav %} 
 {% block extraScripts %}
 <script src="{% static 'js/requestQuotes.js' %}"></script>
