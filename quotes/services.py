@@ -14,7 +14,7 @@ class QuoteService(CustomRequestUtil):
             media = payload.pop("media")
             home_owner_id = payload.pop("home_owner_id")
 
-            payload['user'] = self.request.user
+            # payload['user'] = self.request.user
 
             if home_owner_id:
                 user_service = UserService(self.request)
@@ -54,4 +54,5 @@ class QuoteService(CustomRequestUtil):
             return "Quote Request saved successfully", None
 
         except Exception as e:
+
             return None, self.make_error("An error occurred!", error=e)

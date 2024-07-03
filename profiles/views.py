@@ -1,5 +1,5 @@
 
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from profiles.models import ContractorProfile, UserProfile, AgentProfile
 from django.urls import reverse
 from django.contrib import messages
@@ -12,11 +12,14 @@ from django.views.generic import DetailView
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth import get_user_model
+from django.http import JsonResponse
+
 
 User = get_user_model()
 
 @login_required
 def contractor_profile_view(request):
+    print('poo')
     if request.user.user_type != 'CO':
         return redirect('main:home')
     
@@ -36,16 +39,21 @@ def contractor_profile_view(request):
         else:
             messages.error(request, "No file found!")
         
-        return redirect("profile:contractor_profile")
-    
-    
-    profile = ContractorProfile.objects.get(user=request.user)
-    form = ProfilePictureForm(instance = profile)
-
-    context = {
-        'profile' : profile,
-        "form": form
-    }
+        return redirect("profile:contractor_profile")  
+    else:
+        # profile = ContractorProfile.objects.get(user=request.user)
+        # form = ProfilePictureForm(instance = profile)
+        try:
+            profile = ContractorProfile.objects.get(user=request.user)
+            form = ProfilePictureForm(instance = profile)
+            context = {
+                'profile' : profile,
+                "form": form
+            }
+        except:
+            print('failed')
+            context = {}
+            # return redirect('account_signup')
     return render(request, 'user/contractor_home.html', context)
 
 class contractorDetails(DetailView):
@@ -69,17 +77,17 @@ def editProfile(request):
     user = request.user
     # render CO edit page if user type is CO
     if request.user.user_type == 'CO': 
-        contractorProfile = ContractorProfile.objects.get(user = user.id)
+        contractorProfile = get_object_or_404(ContractorProfile, user=user.id)
         form = ContractorProfileForm(instance = contractorProfile, initial={'email' : user.email, 'phone_number' : user.phone_number})
         return render(request, 'user/editprofiles/contractor_edit_profile.html', {"details":contractorProfile,'form' :form})
     
     elif request.user.user_type == 'AG':
-        agent_profile = AgentProfile.objects.get(user = user.id)
+        agent_profile = get_object_or_404(AgentProfile, user=user.id)
         form = AgentEditForm(instance = agent_profile, initial={'email' : user.email, 'phone_number' : user.phone_number})
         return render(request, 'user/editprofiles/agents_edit_profile.html', {'form' :form})
     
     elif request.user.user_type == 'HO':
-        user_profile = UserProfile.objects.get(user = user.id)
+        user_profile = get_object_or_404(UserProfile, user=user.id)
         form = HomeOwnersEditForm(instance = user_profile, initial={'email' : user.email, 'phone_number' : user.phone_number})
         return render(request, 'user/editprofiles/home_owners_edit_profile.html', {"details":user_profile, 'form' :form})
     else:
@@ -227,8 +235,25 @@ def change_profile_pics_view(request):
             # Redirect to the user's profile page
             return redirect('profile:contractor_profile')
         else:
-            print(form.errors)
-            print("form.errors")
+            # print(form.errors)
+            pass
     else:
         form = ProfilePictureForm()
     return render(request, 'user/contractor_home.html', {'form': form})
+
+def show_agent_menu_view(request):
+    return render(request, 'user/agent_menu.html', {})
+
+def show_agent_message_view(request):
+    return render(request, 'user/agent_message.html', {})
+
+def update_onboarding_status(request):
+    if request.method == 'POST':
+        pass
+        # Get the current user's AgentProfile instance
+        # agent_profile = request.user.agent_profile
+        # agent_profile.has_seen_onboarding_message = True
+        # agent_profile.save()      
+        # return JsonResponse({'message': 'Onboarding status updated successfully'}, status=200)
+    else:
+        return JsonResponse({'error': 'Invalid request'}, status=400)

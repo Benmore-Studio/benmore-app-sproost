@@ -13,4 +13,7 @@ urlpatterns = [
     path('home-owner/update', views.editHomeOwnerProfileRequest, name="edit-homeowners-profile"),
     path('agent/update', views.editAgentProfile, name="edit-agent-profile"),
     path('change-dp-request/', views.change_profile_pics_view, name="change-dp-request"),
+    path('show-agent-menu/', views.show_agent_menu_view, name="show-agent-menu"),
+    path('show-agent-message/', views.show_agent_message_view, name="show-agent-message"),
+    path('update_onboarding_status/', views.update_onboarding_status, name="update_onboarding_status"),
 ]

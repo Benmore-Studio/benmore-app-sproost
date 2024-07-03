@@ -69,7 +69,7 @@
             <span class="text-gray-700  text-sm font-medium">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
             {% if page_obj.has_next %}
                 <button class="inline-flex items-center justify-center border border-neutral-150 rounded-md p-2 outline-none shadow-sm">
-                    <a href="?page={{ page_obj.next_page_number }}"><img src="{%  static 'svgs/arrow-right.svg' %}" alt="" class="" /></a>
+                    <a href="?page={{ page_obj.next_page_number }}"><"{%  static 'svgs/arrow-right.svg' %}" alt="" class="" /></a>
                 </button>
             {% endif %}
 

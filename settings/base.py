@@ -1,8 +1,19 @@
 import os 
 from pathlib import Path
 from django.urls import reverse_lazy
+
+import cloudinary
+import cloudinary.uploader
+import cloudinary.api	
+
+
 from decouple import config
 
+
+SECRET = config('SECRET')
+CLIENT_ID = config('CLIENT_ID')
+
+# print(SECRET)
 from django.core.management.utils import get_random_secret_key
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -13,8 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-# SECRET_KEY = config("SECRET_KEY")
-SECRET_KEY = "ghfhjfyur67urhbvr66eytcgf56476ujht876tvib65t7u6t7fvghc"
+SECRET_KEY = config("SECRET_KEY")
 
 
 # SECURITY WARNING: don't run with debug turned on in production!
@@ -43,10 +53,13 @@ INSTALLED_APPS = [
     'sslserver',
     
     "phonenumber_field",
+    'django.contrib.sites',
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
+    'cloudinary_storage',
+    'cloudinary',
 ]
 
 MIDDLEWARE = [
@@ -59,6 +72,8 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     "allauth.account.middleware.AccountMiddleware",
+    # 'accounts.middleware.GoogleOAuthCallbackMiddleware',
+
 ]
 
 ROOT_URLCONF = 'SproostApp.urls'
@@ -82,6 +97,13 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'SproostApp.wsgi.application'
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
 
 
 # Database
@@ -127,6 +149,9 @@ STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 STATIC_ROOT = os.path.join(BASE_DIR, 'static_cdn')
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media_cdn/')
 
+
+WHITENOISE_ROOT = os.path.join(BASE_DIR, 'static_cdn', 'root') 
+
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder'
@@ -135,6 +160,7 @@ STATICFILES_FINDERS = (
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+SITE_ID = 2
 
 AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
@@ -142,15 +168,26 @@ AUTHENTICATION_BACKENDS = (
 )
 
 
-# ACCOUNT_ADAPTER = 'accounts.adapters.CustomAccountAdapter'
+ACCOUNT_ADAPTER = 'accounts.adapters.CustomAccountAdapter'
 ACCOUNT_LOGOUT_ON_GET = True
 SOCIALACCOUNT_LOGIN_ON_GET = False
+SOCIALACCOUNT_ADAPTER = 'accounts.adapters.MySocialAccountAdapter'
+
+# ACCOUNT_AUTHENTICATED_LOGIN_REDIRECTS = True
+
+
 
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_CHANGE_EMAIL = True
 ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_EMAIL_VERIFICATION = 'none'
+ACCOUNT_SESSION_REMEMBER = True
+SOCIALACCOUNT_QUERY_EMAIL = True
+
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'  # Use database-backed sessions
+SESSION_COOKIE_AGE = 1209600  # Two weeks in seconds
+SESSION_SAVE_EVERY_REQUEST = True  # Save the session to the database on every request
 
 
 ACCOUNT_LOGOUT_REDIRECT_URL = reverse_lazy('account_login')
@@ -174,9 +211,9 @@ SOCIALACCOUNT_PROVIDERS = {
         'SCOPE': ['profile', 'email'],
         "APPS": [
             {
-                "client_id": "266706476801-q88ck56s88399r7umslne3rmdp9s7rel.apps.googleusercontent.com",
-                "secret": "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",
-                "key": ""
+                "client_id":CLIENT_ID,
+                "secret":SECRET,
+                "key": ''
             },
         ],
         
@@ -186,8 +223,23 @@ SOCIALACCOUNT_PROVIDERS = {
     }
 }
 
-
 AUTH_USER_MODEL = 'accounts.User'
 
 GOOGLE_API_KEY = "AIzaSyBIMv62jBi-MjrYXsARUfy8S5xZwKqeGqc"
 
+CSRF_TRUSTED_ORIGINS = ['https://fdb9-105-113-33-126.ngrok-free.app']
+
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': 'dnggljofw',
+    'API_KEY': '586111527832668',
+    'API_SECRET': 'WmY1BwTV7RHirzWinywslKg3tXU'
+}
+
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake',  # This can be any unique identifier
+    }
+}

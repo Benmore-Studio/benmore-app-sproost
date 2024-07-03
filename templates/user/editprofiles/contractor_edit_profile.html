@@ -133,29 +133,7 @@
                         </div>
                     {% endif %}
                 </div>
-                <div class="w-full text-center my-4 text-gray-700 font-medium text-sm">
-                    <p class="mt-4">Change your profile pics</p>
-                    <div id="file-input-container">
-                        <div class="change-icon-container ">
-                            <div id="">
-                              <input type="file" id="id_gallery_change_editprofile" name="image" class="hidden">
-                            </div>
-                            <label for="id_gallery_change_editprofile" class="gallery-icon-label">
-                                <span><i id="change-through-gallery-editprofile" class="fa-solid fa-image fa-4x text-primary cursor-pointer text-2xl" aria-hidden="true"></i>
-                            </label>
-                            
-                        </div>
-
-                        <div class="hidden" id="editparentmodalpreview">
-                            <div class="float-right cursor-pointer ml-2 text-red-600" id="image-preview-cancel">x</div>
-                            <img alt="" class="w-[50px] h-[50px]" id="imagemodalpreview" src="" style="display: block;">
-                        </div>
-                    </div>
-                        
-                    </div>
-                </div>
-
-                <div class="flex w-full flex-col gap-4 border-t border-neutral-150 pt-5">
+                <div class="flex w-full flex-col gap-4 border-t border-neutral-150 pt-5 mb-[120px]">
                     <button type="submit" class="flex items-center w-full justify-center p-3 rounded-lg bg-primary text-white border border-neutral-150 shadow-sm font-semibold">Save</button>
                 </div>
             </form> 
@@ -165,7 +143,7 @@
 
 {% endblock %}
 {% block bottomNav %}
-    {% include "user/bottom_nav_contractor.html"%}
+    {% include "user/bottom_nav_agent.html"%}
 {% endblock bottomNav %} 
 
 {% block extraScripts %}

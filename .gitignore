@@ -8,9 +8,13 @@ db9.sqlite3
 db.sqlite3
 virtualenv/ 
 media
-<<<<<<< HEAD
-=======
 media_cdn
+
+
+# pages
+SproostApp/settings.py
+/SproostApp/settings.py
+
 
 # Backup files # 
 *.bak 

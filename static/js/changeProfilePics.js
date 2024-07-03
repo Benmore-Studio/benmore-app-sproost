@@ -23,63 +23,61 @@ const loading = document.getElementById('loading');
 
 
 // clicking on the profile pics to display it
-if(img){
-  img.onclick = function() {
-    loading.style.display = "block";
-  
-    // Create a new Image element
-    const image = new Image();
-  
-    // Set the source of the Image element
-    console.log(this.src);
-    image.src = this.src;
-  
-    // Event handler for when the image is loaded
-    image.onload = function() {
-        // Create a canvas element to draw the resized image
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-  
-        // Define maximum dimensions
-        const maxWidth = 600;
-        const maxHeight = 400;
-  
-        // Calculate new dimensions while maintaining aspect ratio
-        let newWidth = image.width;
-        let newHeight = image.height;
-        console.log("uyobject");
-  
-        const aspectRatio = newWidth / newHeight;
-        if (newWidth > newHeight) {
-            newWidth = maxWidth;
-            newHeight = maxWidth / aspectRatio;
-        } else {
-            newHeight = maxHeight;
-            newWidth = maxHeight * aspectRatio;
-        }
-        // Set canvas dimensions
-        canvas.width = newWidth;
-        canvas.height = newHeight;
-  
-        // Draw the resized image onto the canvas
-        ctx.drawImage(image, 0, 0, newWidth, newHeight);
-  
-        // Convert the canvas content to a Blob
-        canvas.toBlob(function(blob) {
-            // Create a File object from the Blob
-            const file = new File([blob], 'filename.jpg', { type: 'image/jpeg' });
-  
-            // Proceed with further processing, such as displaying the resized image
-            modalImg.src = URL.createObjectURL(file);
-        }, 'image/jpeg');
-  
-        loading.style.display = "none";
-        modal.style.display = "block";
-      };
-    loading.style.display = "none";
-   
+img.onclick = function() {
+  loading.style.display = "block";
+
+  // Create a new Image element
+  const image = new Image();
+
+  // Set the source of the Image element
+  image.crossOrigin = "Anonymous";
+  image.src = this.src;
+
+  // Event handler for when the image is loaded
+  image.onload = function() {
+      // Create a canvas element to draw the resized image
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+
+      // Define maximum dimensions
+      const maxWidth = 600;
+      const maxHeight = 400;
+
+      // Calculate new dimensions while maintaining aspect ratio
+      let newWidth = image.width;
+      let newHeight = image.height;
+
+      const aspectRatio = newWidth / newHeight;
+      if (newWidth > newHeight) {
+          newWidth = maxWidth;
+          newHeight = maxWidth / aspectRatio;
+      } else {
+          newHeight = maxHeight;
+          newWidth = maxHeight * aspectRatio;
+      }
+      // Set canvas dimensions
+      canvas.width = newWidth;
+      canvas.height = newHeight;
+
+      // Draw the resized image onto the canvas
+      ctx.drawImage(image, 0, 0, newWidth, newHeight);
+
+      // Convert the canvas content to a Blob
+      canvas.toBlob(function(blob) {
+          // Create a File object from the Blob
+          const file = new File([blob], 'filename.jpg', { type: 'image/jpeg' });
+
+          // Proceed with further processing, such as displaying the resized image
+          modalImg.src = URL.createObjectURL(file);
+      }, 'image/jpeg');
+
+      loading.style.display = "none";
+      modal.style.display = "block";
   };
-}
+ 
+};
+
+
 // the x button that closes the modal
 if(span){
   span.onclick = function() {

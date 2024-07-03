@@ -21,7 +21,13 @@
       {% endif %}
       
     </a>
-    <a href="{% url 'quotes:request-quotes'%}" class="inline-flex flex-col gap-1 items-center">
+    
+    {% if request.user.user_type == 'AG' %}
+      <a href="{% url 'quotes:request-quotes' name='home_owner_slug' %}" class="inline-flex flex-col gap-1 items-center">       
+      {% elif request.user.user_type == 'HO' %} 
+      <a href="{% url 'quotes:request-quotes'%}" class="inline-flex flex-col gap-1 items-center">
+    {% endif %}
+      
       {% if url_name == 'home' %}
       {% else %}
       {% endif %}
@@ -34,14 +40,15 @@
       <span class="text-gray-500 text-xs">Upload</span>
       {% endif %}
     </a>
-    <a href="#" class="inline-flex flex-col gap-1 items-center">
+    
+    <a href="{% url 'profile:show-agent-message' %}" class="inline-flex flex-col gap-1 items-center">
       {% if url_name == 'home' %}
       {% else %}
       {% endif %}
       <img src="{% static 'svgs/Message.svg' %}" alt="" class="" />
       <span class="text-gray-500 text-xs">Messages</span>
     </a>
-    <a href="{% url 'profile:edit-profile'  %}" class="inline-flex flex-col gap-1 items-center">
+    <a href="{% url 'profile:show-agent-menu' %}" class="inline-flex flex-col gap-1 items-center">
       {% if url_name == 'edit-profile'%}
       <img src="{% static 'svgs/more-horizon-green.svg' %}" alt="" class="" />
       <span class="text-primary font-medium text-xs">Menu</span> 

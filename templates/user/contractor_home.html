@@ -182,18 +182,19 @@
 
         <div id="tab1" class="tabcontent p-4 w-full">
           <div class="w-full grid grid-cols-4 gap-2">
-            {% for media in profile.media_paths.all %} {% if media.image %}
-            <img src="/media/{{media.image }}" alt="" class="w-full h-[81px] border border-neutral-150 object-cover" /> {% elif media.file %}
+            {% for media in profile.media_paths.all %} 
+            {% if media.image %}
+            <a href="{{media.image.url}}"><img src="{{media.image.url }}" alt="" class="w-full h-[150px] border border-neutral-150 object-cover" /> </a>
+            {% elif media.file %}
             <video class="w-full h-[81px] border border-neutral-150 object-cover" controls>
-              <source src="/media/{{media.file}}" type="video/mp4" />
+              <source src="{{media.file.url }}" type="video/mp4" />
             </video>
-            <!-- <img src="/media/{{image.file }}" alt="" class="w-full h-[81px] border border-neutral-150 object-cover" /> -->
             {% endif %} 
             {% endfor %}
           </div>
           {% if request.user == profile.user %}
-          <div id="tab1" class="w-full flex justify-center items-center mt-4">
-            <button class="tablinks px-2 py-1 text-gray-500 text-xl font-lg border border-black rounded-full" onclick="openTab(event, 'tab4')">
+          <div id="tab1" class="w-full flex justify-center items-center mt-4 smphone:mb-[40px] xsm:mb-0 ">
+            <button class="tablinks px-2 py-1 text-gray-500 text-xl font-lg border border-black rounded-full smphone:mb-[70px]" onclick="openTab(event, 'tab4')">
               <i class="fa fa-plus-circle"></i>
             </button>
           </div>
@@ -219,7 +220,7 @@
         <div id="tab4" class="tabcontent">
           <div class="w-full min-h-24 flex items-center justify-center">
             <div class="w-full p-4">
-              <form method="post" enctype="multipart/form-data" id="contractorMediaForm" class="w-full mt-4 flex flex-col gap-4">
+              <form method="post" enctype="multipart/form-data" id="contractorMediaForm" class="w-full mt-4 flex flex-col gap-4 mb-[4rem]">
                 {% csrf_token %}
                 <div class="w-full">
                   <span class="text-sm text-gray-700 font-medium">Upload Pictures & Videos</span>
@@ -241,7 +242,7 @@
                   <!-- dynamic render -->
                 </div>
                 <div class="w-full flex items-center justify-center">
-                  <button type="submit" class="p-3 w-1/4 rounded-lg bg-primary text-white border border-neutral-150 shadow-sm font-semibold">
+                  <button type="submit" class="p-3 w-1/4 rounded-lg bg-primary text-white border border-neutral-150 xsm:mb-[60px] sm:mb-0 shadow-sm font-semibold">
                     Submit
                   </button>
                 </div>
@@ -257,7 +258,7 @@
 
 {% endblock %} 
 {% block bottomNav %} 
-{% include "user/bottom_nav_contractor.html"%} 
+{% include "user/bottom_nav_agent.html"%} 
 {% endblock bottomNav %} 
 {% block extraScripts %}
 <script>
