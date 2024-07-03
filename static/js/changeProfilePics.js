@@ -23,6 +23,7 @@ img.onclick = function() {
   const image = new Image();
 
   // Set the source of the Image element
+  image.crossOrigin = "Anonymous";
   image.src = this.src;
 
   // Event handler for when the image is loaded
@@ -68,6 +69,8 @@ img.onclick = function() {
   };
  
 };
+
+
 // the x button that closes the modal
 span.onclick = function() {
   modal.style.display = "none";
