@@ -8,6 +8,41 @@
     }
 </style>
 
+  <!-- loading -->
+    <!-- added to mask the time it takes to display beteen when a prof pics is clicked and before it gets resized in js -->
+    <div id="loading" class="relative hidden w-full">
+        <div class="fixed inset-0 flex items-center justify-center z-50">
+            <div class="fixed inset-0 bg-black/75"></div>
+            <div class="flex flex-col items-center">
+                <span class="loader"></span>
+            </div>
+        </div>
+    </div>
+
+<div id="imagePreviewModalEditProfile" class="relative hidden w-full">
+    <div class="fixed inset-0 flex items-center justify-center z-50">
+        <div class="fixed inset-0 bg-black/75"></div>
+        <div class="flex flex-col items-center">
+            <div class="modal z-50">
+                <form id="imageForm" class="" action="{% url 'profile:edit-contractor-profile' %}" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                    <div id="">
+                        <input type="file" id="image_input" name="image" class="hidden">
+                    </div>
+                    <div id="send-button" class="hidden sm:h-[70vh] flex-col justify-center items-center"> 
+                        <img id="previewImageForm" name="image" class="w-full h-full rounded-lg" src="#" alt="Image Preview">
+                        <div class="flex gap-4 justify-center w-full mt-4">
+                        <button id="cancel-dp-change" class="bg-primary py-3 px-4 cursor-pointer text-white rounded-lg" type="button">Cancel</button>
+                        <button type="button" id="select-image" class="bg-primary py-3 px-4 cursor-pointer text-white rounded-lg">Select</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 <div class="w-full">
     <div class="w-full">
         <!-- header -->
@@ -118,4 +153,6 @@
         history.back()
     }
 </script>
+<script src="{% static 'js/changeProfilePics.js' %}" async></script>
+
 {% endblock extraScripts %}
