@@ -127,136 +127,232 @@
         {% csrf_token %}
         <button type="submit" class="flex gap-2 items-center rounded-md text-black bg-white border border-gray-300 p-2 cursor-pointer">Logout <img src = "{% static 'svgs/logout.svg' %}" class = "w-4 h-4" /></button>
     </form>
-  <div class="min-h-[750px] mt-[-6rem]">
-    <div class="w-[120px] h-[120px] border-[5px] border-green-300 relative z-10 rounded-full border border-enutral-150 mx-auto mt-[-1rem]">
-      {% if form.image.errors %}
-          <div class = "w-full py-1 rounded text-red-500 absolute top-[-45%] left-[30px]">
-              {{form.image.errors}}
-          </div>
-      {% endif %}
-      {% if profile.image %}
-        <img id="profilepicture" src="{{profile.image.url}}" alt="" class="w-full h-full object-cover rounded-full" />
-        {% else %}
-        <img id="profilepicture" src="{% static 'images/truck.jpeg' %}" alt="" class="w-full h-full object-cover rounded-full" />
-      {% endif %}
-        
-      <div class="w-[33px] h-[33px] rounded-full bg-white flex items-center justify-center absolute bottom-0 right-0 shadow-sm">
-        <img src="{% static 'svgs/sproost.svg' %}" alt="" class="w-[26px] h-[12px] object-contain" />
-      </div>
-    </div>
-    <div class="w-11/12 mx-auto bg-white min-h-[700px] shadow-md mt-[-4rem] rounded-lg relative">
-      <div class="pt-20">
-        <!-- header -->
-        <div class="flex flex-col items-center justify-center mb-4">
-          <h3 class="text-xl text-gray-700">
-            {% if profile.company_name %} {{ profile.company_name }} {% else %} {{ profile.user.username }} {% endif %}
-          </h3>
-          <p class="font-[300]">{{profile.specialization|default:"Not Provided"}}</p>
+    <div class="min-h-[750px] mt-[-6rem]">
+      <div class="w-[120px] h-[120px] border-[5px] border-green-300 relative z-10 rounded-full border border-enutral-150 mx-auto mt-[-1rem]">
+        {% if form.image.errors %}
+            <div class = "w-full py-1 rounded text-red-500 absolute top-[-45%] left-[30px]">
+                {{form.image.errors}}
+            </div>
+        {% endif %}
+        {% if profile.image %}
+          <img id="profilepicture" src="{{profile.image.url}}" alt="" class="w-full h-full object-cover rounded-full" />
+          {% else %}
+          <img id="profilepicture" src="{% static 'images/truck.jpeg' %}" alt="" class="w-full h-full object-cover rounded-full" />
+        {% endif %}
+          
+        <div class="w-[33px] h-[33px] rounded-full bg-white flex items-center justify-center absolute bottom-0 right-0 shadow-sm">
+          <img src="{% static 'svgs/sproost.svg' %}" alt="" class="w-[26px] h-[12px] object-contain" />
         </div>
-        <!-- content -->
-        <div class="w-full p-4 flex flex-col gap-4">
-          <div class="w-full flex items-center justify-between">
-            <div class="flex flex-col gap-3">
-              <span class="text-primarydark font-bold text-sm">Location</span>
-              <span class="text-gray-500 text-sm">{{profile.company_address|default:"None"}}, {{profile.city|default:"None"}}</span>
+      </div>
+      <div class="w-11/12 mx-auto bg-white  shadow-md mt-[-4rem] rounded-lg relative">
+        <div class="pt-20">
+          <!-- header -->
+          <div class="flex flex-col items-center justify-center mb-4">
+            <h3 class="text-xl text-gray-700">
+              {% if profile.company_name %} {{ profile.company_name }} {% else %} {{ profile.user.username }} {% endif %}
+            </h3>
+            <p class="font-[300]">{{profile.specialization|default:"Not Provided"}}</p>
+          </div>
+          <!-- content -->
+          <div class="w-full p-4 flex flex-col gap-4">
+            <div class="w-full flex items-center justify-between">
+              <div class="flex flex-col gap-3">
+                <span class="text-primarydark font-bold text-sm">Location</span>
+                <span class="text-gray-500 text-sm">{{profile.company_address|default:"None"}}, {{profile.city|default:"None"}}</span>
+              </div>
+              <div class="flex flex-col gap-3">
+                <span class="text-primarydark font-bold text-sm">Website</span>
+                <span class="text-gray-500 text-sm">{{profile.website|default:"None"}}</span>
+              </div>
             </div>
-            <div class="flex flex-col gap-3">
-              <span class="text-primarydark font-bold text-sm">Website</span>
-              <span class="text-gray-500 text-sm">{{profile.website|default:"None"}}</span>
+            <div class="w-full flex items-center justify-between">
+              <div class="flex flex-col gap-2">
+              </div>
+
+              {% if request.user == profile.user %}
+              <a href = '{% url "profile:edit-profile" %}' class="bg-[#eaf7e6] p-2 px-4 px-2 text-primary rounded-md text-gray-500 text-sm font-semibold">Edit Profile</a> 
+              {% endif %}
             </div>
           </div>
-          <div class="w-full flex items-center justify-between border-b border-neutral-150 pb-4">
-            <div class="flex flex-col gap-2">
+        </div>
+      </div>
+      <div class="mx-auto w-11/12">
+      <!-- goals part -->
+        <div class="w-full grid grid-cols-2 lg:grid-cols-4 gap-4 mt-4 mb-2">
+            <div class="tab flex flex-col text-center justify-center bg-white p-4 rounded-lg shadow-md h-[200px]">
+                <div class="w-full flex flex-col gap-4">
+                    <div class="w-full flex items-center justify-between">
+                        <h3 class="text-gray-900 font-medium">View All Projects</h3>
+                        <span class="">
+                            <img src="{% static 'svgs/more-vertical.svg' %}" alt="" class="" />
+                        </span>
+                    </div>
+                    <div class="w-full flex items-center justify-between">            
+                        {% if box1_count > 0 %}
+                            <h3 class="text-gray-900 text-2xl font-semibold">Quote Requests</h3>  
+                        {% else %}
+                            <h3 class="text-gray-900 text-2xl font-semibold">0</h3>              
+                        {% endif %}
+                            
+                        <span class="">
+                            <img src="{% static 'svgs/quotes.svg' %}" alt="" class="" />
+                        </span>
+                    </div>
+                </div>
             </div>
+            <div class="tab flex flex-col text-center justify-center bg-white p-4 rounded-lg shadow-md h-[200px]">
+                <a href="{% url 'main:assigned-projects' %}" class="w-full p-4 bg-white">
+                    <div class="w-full flex flex-col gap-4">
+                        <div class="w-full flex items-center justify-between">
+                            <h3 class="text-gray-900 font-medium">TBD</h3>
+                            <span class="">
+                            <img src="{% static 'svgs/more-vertical.svg' %}" alt="" class="" />
+                            </span>
+                        </div>
+                        <div class="w-full flex items-center justify-between">            
+                            {% if box2_count > 0 %}
+                            <h3 class="text-gray-900 text-2xl font-semibold">{{ box2_count }}</h3>  
+                            {% else %}
+                            <h3 class="text-gray-900 text-2xl font-semibold">0</h3>              
+                            {% endif %}                           
+                            <span class="">
+                            <img src="{% static 'svgs/quotes.svg' %}" alt="" class="" />
+                            </span>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            <div class="tab flex flex-col text-center justify-center bg-white p-4 rounded-lg shadow-md h-[200px]">
+                <div class="w-full flex flex-col gap-4">
+                    <div class="w-full flex items-center justify-between">
+                    <h3 class="text-gray-900 font-medium">TBD</h3>
+                    <span class="">
+                        <img src="{% static 'svgs/more-vertical.svg' %}" alt="" class="" />
+                    </span>
+                    </div>
+                    <div class="w-full flex items-center justify-between">            
+                    {% if box3_count > 0 %}
+                        <h3 class="text-gray-900 text-2xl font-semibold">{{ box3_count }}</h3>  
+                    {% else %}
+                        <h3 class="text-gray-900 text-2xl font-semibold">0</h3>              
+                    {% endif %}
+                        
+                    <span class="">
+                        <img src="{% static 'svgs/quotes.svg' %}" alt="" class="" />
+                    </span>
+                    </div>
+                </div>
+            </div>
+            <div class="tab flex flex-col text-center justify-center bg-white p-4 rounded-lg shadow-md h-[200px]">
+                <div class="w-full flex flex-col gap-4">
+                    <div class="w-full flex items-center justify-between">
+                    <h3 class="text-gray-900 font-medium">Quote Requests</h3>
+                    <span class="">
+                        <img src="{% static 'svgs/more-vertical.svg' %}" alt="" class="" />
+                    </span>
+                    </div>
+                    <div class="w-full flex items-center justify-between">            
+                    {% if box4_count > 0 %}
+                        <h3 class="text-gray-900 text-2xl font-semibold">{{ box4_count }}</h3>  
+                    {% else %}
+                        <h3 class="text-gray-900 text-2xl font-semibold">0</h3>              
+                    {% endif %}
+                        
+                    <span class="">
+                        <img src="{% static 'svgs/quotes.svg' %}" alt="" class="" />
+                    </span>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+      </div>
+      <div class="border-b border-neutral-150 rounded-lg bg-gray-100 pt-2"></div>
+      
 
+          <!-- tabs -->
+        <div class="rounded-lg bg-white">
+          <div class="tab flex flex-items-center justify-between p-4 ">
+            <div class="flex flex-row">
+              <button class="tablinks p-2 text-gray-500 text-sm font-medium" onclick="openTab(event, 'tab1')">Media</button> 
+            </div>
+            <button class="tablinks p-2 text-gray-500 text-sm font-medium" onclick="openTab(event, 'tab2')">Description</button>
+            <button class="tablinks p-2 text-gray-500 text-sm font-medium" onclick="openTab(event, 'tab3')">Contact</button>
+          </div>
+
+          <div id="tab1" class="tabcontent p-4 w-full ">
+            <div class="w-full grid grid-cols-4 gap-2">
+              {% for media in profile.media_paths.all %} 
+              {% if media.image %}
+              <a href="{{media.image.url}}"><img src="{{media.image.url }}" alt="" class="w-full h-[150px] border border-neutral-150 object-cover" /> </a>
+              {% elif media.file %}
+              <video class="w-full h-[81px] border border-neutral-150 object-cover" controls>
+                <source src="{{media.file.url }}" type="video/mp4" />
+              </video>
+              {% endif %} 
+              {% endfor %}
+            </div>
             {% if request.user == profile.user %}
-            <a href = '{% url "profile:edit-profile" %}' class="bg-[#eaf7e6] p-2 px-4 px-2 text-primary rounded-md text-gray-500 text-sm font-semibold">Edit Profile</a> 
+            <div id="tab1" class="w-full flex justify-center items-center mt-4 smphone:mb-[40px] xsm:mb-0 ">
+              <button class="tablinks px-2 py-1 text-gray-500 text-xl font-lg border border-black rounded-full smphone:mb-[70px]" onclick="openTab(event, 'tab4')">
+                <i class="fa fa-plus-circle"></i>
+              </button>
+            </div>
             {% endif %}
           </div>
-        </div>
-        <!-- tabs -->
-        <div class="tab flex flex-items-center justify-between p-4">
-          <div class="flex flex-row">
-            <button class="tablinks p-2 text-gray-500 text-sm font-medium" onclick="openTab(event, 'tab1')">Media</button> 
-          </div>
-          <button class="tablinks p-2 text-gray-500 text-sm font-medium" onclick="openTab(event, 'tab2')">Description</button>
-          <button class="tablinks p-2 text-gray-500 text-sm font-medium" onclick="openTab(event, 'tab3')">Contact</button>
-        </div>
 
-        <div id="tab1" class="tabcontent p-4 w-full">
-          <div class="w-full grid grid-cols-4 gap-2">
-            {% for media in profile.media_paths.all %} 
-            {% if media.image %}
-            <a href="{{media.image.url}}"><img src="{{media.image.url }}" alt="" class="w-full h-[150px] border border-neutral-150 object-cover" /> </a>
-            {% elif media.file %}
-            <video class="w-full h-[81px] border border-neutral-150 object-cover" controls>
-              <source src="{{media.file.url }}" type="video/mp4" />
-            </video>
-            {% endif %} 
-            {% endfor %}
+          <div id="tab2" class="tabcontent mb-[150px]">
+            <div class="w-full min-h-24 flex items-center justify-center">
+              <h3 class="text-gray-900 font-semibold">Coming soon</h3>
+            </div>
+          </div>
+
+          <div id="tab3" class="tabcontent mb-[150px]">
+            <div class="w-full min-h-24 p-4 flex flex-col gap-4">
+              <p class="text-gray-500 text-sm"><span class="text-primarydark font-bold text-sm">Phone Number</span>: {{ profile.user.phone_number }}</p>
+              <p class="text-gray-500 text-sm"><span class="text-primarydark font-bold text-sm">Address</span>: {{profile.company_address|default:"None"}}, {{profile.city|default:"None"}}</p>
+              {% if profile.website %}
+              <p class="text-gray-500 text-sm"><span class="text-primarydark font-bold text-sm">Website</span>: <a href="{{profile.website}}">{{ profile.website}}</a></p>
+              {% endif %}
+            </div>
           </div>
           {% if request.user == profile.user %}
-          <div id="tab1" class="w-full flex justify-center items-center mt-4 smphone:mb-[40px] xsm:mb-0 ">
-            <button class="tablinks px-2 py-1 text-gray-500 text-xl font-lg border border-black rounded-full smphone:mb-[70px]" onclick="openTab(event, 'tab4')">
-              <i class="fa fa-plus-circle"></i>
-            </button>
+          <div id="tab4" class="tabcontent">
+            <div class="w-full min-h-24 flex items-center justify-center">
+              <div class="w-full p-4">
+                <form method="post" enctype="multipart/form-data" id="contractorMediaForm" class="w-full mt-4 flex flex-col gap-4 mb-[4rem]">
+                  {% csrf_token %}
+                  <div class="w-full">
+                    <span class="text-sm text-gray-700 font-medium">Upload Pictures & Videos</span>
+                  </div>
+                  <label for="upload-media">
+                    <div class="w-full min-h-[150px] rounded-md border border-neutral-150 shadow-sm mt-4 flex flex-col gap-4 items-center justify-center">
+                      <div class="w-12 h-12 flex items-center justify-center rounded-full bg-gray-200 bg-opacity-50 p-2">
+                        <img src="{% static 'svgs/upload-cloud.svg' %}" alt="" class="" />
+                      </div>
+                      <p class="text-center text-sm text-gray-500">
+                        <span class="text-primary font-semibold">Click to upload</span> or drag and drop <br />
+                        SVG, PNG, JPG or GIF (max. 800x400px)
+                      </p>
+                    </div>
+                    <input type="file" id="upload-media" multiple name="upload-media" class="hidden" />
+                  </label>
+
+                  <div id="file-container" class="w-full flex items-center my-4 gap-4">
+                    <!-- dynamic render -->
+                  </div>
+                  <div class="w-full flex items-center justify-center">
+                    <button type="submit" class="p-3 w-1/4 rounded-lg bg-primary text-white border border-neutral-150 xsm:mb-[60px] sm:mb-0 shadow-sm font-semibold">
+                      Submit
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
           </div>
           {% endif %}
         </div>
-
-        <div id="tab2" class="tabcontent">
-          <div class="w-full min-h-24 flex items-center justify-center">
-            <h3 class="text-gray-900 font-semibold">Coming soon</h3>
-          </div>
-        </div>
-
-        <div id="tab3" class="tabcontent">
-          <div class="w-full min-h-24 p-4 flex flex-col gap-4">
-            <p class="text-gray-500 text-sm"><span class="text-primarydark font-bold text-sm">Phone Number</span>: {{ profile.user.phone_number }}</p>
-            <p class="text-gray-500 text-sm"><span class="text-primarydark font-bold text-sm">Address</span>: {{profile.company_address|default:"None"}}, {{profile.city|default:"None"}}</p>
-            {% if profile.website %}
-            <p class="text-gray-500 text-sm"><span class="text-primarydark font-bold text-sm">Website</span>: <a href="{{profile.website}}">{{ profile.website}}</a></p>
-            {% endif %}
-          </div>
-        </div>
-        {% if request.user == profile.user %}
-        <div id="tab4" class="tabcontent">
-          <div class="w-full min-h-24 flex items-center justify-center">
-            <div class="w-full p-4">
-              <form method="post" enctype="multipart/form-data" id="contractorMediaForm" class="w-full mt-4 flex flex-col gap-4 mb-[4rem]">
-                {% csrf_token %}
-                <div class="w-full">
-                  <span class="text-sm text-gray-700 font-medium">Upload Pictures & Videos</span>
-                </div>
-                <label for="upload-media">
-                  <div class="w-full min-h-[150px] rounded-md border border-neutral-150 shadow-sm mt-4 flex flex-col gap-4 items-center justify-center">
-                    <div class="w-12 h-12 flex items-center justify-center rounded-full bg-gray-200 bg-opacity-50 p-2">
-                      <img src="{% static 'svgs/upload-cloud.svg' %}" alt="" class="" />
-                    </div>
-                    <p class="text-center text-sm text-gray-500">
-                      <span class="text-primary font-semibold">Click to upload</span> or drag and drop <br />
-                      SVG, PNG, JPG or GIF (max. 800x400px)
-                    </p>
-                  </div>
-                  <input type="file" id="upload-media" multiple name="upload-media" class="hidden" />
-                </label>
-
-                <div id="file-container" class="w-full flex items-center my-4 gap-4">
-                  <!-- dynamic render -->
-                </div>
-                <div class="w-full flex items-center justify-center">
-                  <button type="submit" class="p-3 w-1/4 rounded-lg bg-primary text-white border border-neutral-150 xsm:mb-[60px] sm:mb-0 shadow-sm font-semibold">
-                    Submit
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-        {% endif %}
-      </div>
     </div>
-  </div>
 </main>
 
 {% endblock %} 

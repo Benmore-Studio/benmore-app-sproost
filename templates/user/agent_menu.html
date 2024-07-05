@@ -51,4 +51,82 @@
         history.back()
     }
 </script>
+<script>
+    // data-aos="fade-right"
+    const configTop = {
+        type: "carousel",
+        perView: 6,  // Show one full image and a part of the next one
+        focusAt: 'center',
+        gap: 10,  // Adjust the gap between slides if needed
+        breakpoints: {
+            1420: {
+                perView: 6
+            },
+            1280: {
+                perView: 5
+            },
+            1130: {
+                perView: 4.25
+            },
+            900: {
+                perView: 4.25
+            },
+            860: {
+                perView: 4
+            },          
+            700: {
+                perView: 3.5
+            },                   
+            680: {
+                perView: 3
+            },                   
+            560: {
+                perView: 2.25
+            },                   
+            475: {
+                perView: 2
+            },                   
+            423: {
+                perView: 2
+            },                   
+            390: {
+                perView: 2.1
+            }
+        }
+    };
+  
+    
+    const sliderTop = new Glide('.glide-top', configTop);
+    
+    sliderTop.mount();
+  
+    // let glide_width = document.querySelector('.glide__slide1')
+    // console.log(glide_width)
+    // glide_width.style.width= '100%'
+    // let glide_width2 = document.querySelector('.glide__slide')
+    // console.log(glide_width)
+    // glide_width2.style.width= '80%'
+  
+  
+    // second slide
+    const config = {
+        type: "carousel",
+        perView: 2.25,  // Show one full image and a part of the next one
+        focusAt: 'center',
+        gap: 10,  // Adjust the gap between slides if needed
+        breakpoints: {
+            800: {
+                perView: 1.5
+            },
+            480: {
+                perView: 1.25
+            }
+        }
+    };
+  
+    const slider = new Glide('.glide-bottom', config);
+  
+    slider.mount();
+  
+  </script>
 {% endblock extraScripts %}
