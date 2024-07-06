@@ -208,15 +208,14 @@
 
     <!-- Image Gallery -->
     <div class="w-full pb-[200px]">
-                
-        {% if proj %}
-        <div class="container-bottom w-full h-full" data-aos="fade-left">
+        {% if projs %}
+        <div class="container-bottom w-full h-full">
             <a href="" class="text-primary font-semibold mb-4 mx-4">View Projects</a>
             <div class="lg:hidden glide-bottom bg-gray-100 w-full pb-[200px] mt-4">
                     <!-- Slides here -->
                     <div class="glide__track" data-glide-el="track">
                         <ul class="glide__slides">
-                            {% for image in proj %}
+                            {% for image in projs %}
                             <li class="glide__slide">
                                 {% if image.file %}
                                 <img src="{{ image.file.url }}" id="project-image" alt="Project Image" class="h-[400px] md:h-[350px] object-fit rounded-lg">
@@ -231,7 +230,7 @@
             <div class="w-full h-full bg-gray-100 mt-4">
                 <div class="mx-4">
                     <div class="projects-grid w-full hidden lg:grid grid-cols-3 gap-4 pb-[200px]">
-                            {% for image in proj %}
+                            {% for image in projs %}
                             <div class="project-item">
                                 {% if image.file %}
                                 <img src="{{ image.file.url }}" alt="Project Image" class="h-[320px] object-fit rounded-lg">
