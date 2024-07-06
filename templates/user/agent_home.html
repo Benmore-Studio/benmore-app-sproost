@@ -4,10 +4,14 @@
 
 {% block content %}
 <style>
+    /* #aos-parent{
+        overflow-inline:auto
+    } */
+  
      .container-bottom {
            width: 100%;
            height: 150px;
-            margin: 70px auto;
+        margin: 70px auto;
 
         }
         .glide__slide img {
@@ -44,38 +48,36 @@
     }
 
 </style>
-<div class="">
-{% include "user/top-navigation.html" %} 
-</div>
+
 <div class="h-full bg-gray-100">
-    <div class="pt-4 ml-8 mr-4">
-        <div class="w-full pb-8 pt-[100px]">
+    <div class="pt-8">
+        <div class="w-full pb-8">
             <!-- Top Sliding Tabs -->
-            <div class="glide glide-top">
+            <div class="glide glide-top pt-4">
                 <div class="glide__track" data-glide-el="track">
                     <ul class="glide__slides">
                         <li class="glide__slide1 w-[40%]">
-                            <div class="tab flex-shrink-0 rounded-3xl bg-white p-4 rounded-lg shadow-sm w-64">
+                            <div class="tab flex-shrink-0 rounded-3xl bg-white p-2  shadow-sm w-[180px]">
                                 <p class='text-center'>Sample1</p>
                             </div>
                         </li>
                         <li class="glide__slide1 w-[40%]">
-                            <div class="tab flex-shrink-0 rounded-3xl bg-white p-4 rounded-lg shadow-sm w-64">
+                            <div class="tab flex-shrink-0 rounded-3xl bg-white p-2  shadow-sm w-[180px]">
                                 <p class='text-center'>Sample2</p>
                             </div>
                         </li>
                         <li class="glide__slide1 w-[40%]">
-                            <div class="tab flex-shrink-0 rounded-3xl bg-white p-4 rounded-lg shadow-sm w-64">
+                            <div class="tab flex-shrink-0 rounded-3xl bg-white p-2  shadow-sm w-[180px]">
                                 <p class='text-center'>Sample3</p>
                             </div>
                         </li>
                         <li class="glide__slide1 w-[40%]">
-                            <div class="tab flex-shrink-0 rounded-3xl bg-white p-4 rounded-lg shadow-sm w-64">
+                            <div class="tab flex-shrink-0 rounded-3xl bg-white p-2  shadow-sm w-[180px]">
                                 <p class='text-center'>Sample4</p>
                             </div>
                         </li>
                         <li class="glide__slide1 w-[40%]">
-                            <div class="tab flex-shrink-0 rounded-3xl bg-white p-4 rounded-lg shadow-sm w-64">
+                            <div class="tab flex-shrink-0 rounded-3xl bg-white p-2  shadow-sm w-[180px]">
                                 <p class='text-center'>Sample5</p>
                             </div>
                         </li>
@@ -94,162 +96,160 @@
         </div>
 
             <!-- goals part -->
-        <div class="w-full grid grid-cols-2 lg:grid-cols-4 gap-4 mt-4 mb-12">
-            <div class="tab flex flex-col text-center justify-center bg-white p-4 rounded-lg shadow-md h-[200px]">
-                <div class="w-full flex flex-col gap-4">
-                    <div class="w-full flex items-center justify-between">
-                      <h3 class="text-gray-900 font-medium">TBD</h3>
-                      <span class="">
-                        <img src="{% static 'svgs/more-vertical.svg' %}" alt="" class="" />
-                      </span>
-                    </div>
-                    <div class="w-full flex items-center justify-between">            
-                      {% if quote_count > 0 %}
-                        <h3 class="text-gray-900 text-2xl font-semibold">{{ quote_count }}</h3>  
-                      {% else %}
-                        <h3 class="text-gray-900 text-2xl font-semibold">0</h3>              
-                      {% endif %}
-                        
-                      <span class="">
-                        <img src="{% static 'svgs/quotes.svg' %}" alt="" class="" />
-                      </span>
-                    </div>
-                </div>
-            </div>
-            <div class="tab flex flex-col text-center justify-center bg-white p-4 rounded-lg shadow-md h-[200px]">
-                <a href="{% url 'main:assigned-projects' %}" class="w-full p-4 bg-white">
+        <div class="mx-4">
+            <div class="w-full grid grid-cols-2 lg:grid-cols-4 gap-4 mt-4 mb-12">
+                <div class="tab flex flex-col text-center justify-center bg-white p-4 rounded-lg shadow-md h-[200px]">
                     <div class="w-full flex flex-col gap-4">
-                      <div class="w-full flex items-center justify-between">
-                        <h3 class="text-gray-900 font-medium">My Listing</h3>
+                        <div class="w-full flex items-center justify-between">
+                            <h3 class="text-gray-900 font-medium">TDB</h3>
+                            <span class="">
+                                <img src="{% static 'svgs/more-vertical.svg' %}" alt="" class="" />
+                            </span>
+                        </div>
+                        <div class="w-full flex items-center justify-between">            
+                            {% if box1_count > 0 %}
+                                <h3 class="text-gray-900 text-2xl font-semibold">{{ box1_count }}</h3>  
+                            {% else %}
+                                <h3 class="text-gray-900 text-2xl font-semibold">0</h3>              
+                            {% endif %}
+                                
+                            <span class="">
+                                <img src="{% static 'svgs/quotes.svg' %}" alt="" class="" />
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab flex flex-col text-center justify-center bg-white p-4 rounded-lg shadow-md h-[200px]">
+                    <a href="{% url 'main:assigned-projects' %}" class="w-full p-4 bg-white">
+                        <div class="w-full flex flex-col gap-4">
+                            <div class="w-full flex items-center justify-between">
+                                <h3 class="text-gray-900 font-medium">My Listings</h3>
+                                <span class="">
+                                <img src="{% static 'svgs/more-vertical.svg' %}" alt="" class="" />
+                                </span>
+                            </div>
+                            <div class="w-full flex items-center justify-between">            
+                                {% if box2_count > 0 %}
+                                <h3 class="text-gray-900 text-2xl font-semibold">Request A Quote</h3>  
+                                {% else %}
+                                <h3 class="text-gray-900 text-2xl font-semibold">0</h3>              
+                                {% endif %}                           
+                                <span class="">
+                                <img src="{% static 'svgs/quotes.svg' %}" alt="" class="" />
+                                </span>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                <div class="tab flex flex-col text-center justify-center bg-white p-4 rounded-lg shadow-md h-[200px]">
+                    <div class="w-full flex flex-col gap-4">
+                        <div class="w-full flex items-center justify-between">
+                        <h3 class="text-gray-900 font-medium">Invite My Client</h3>
                         <span class="">
-                          <img src="{% static 'svgs/more-vertical.svg' %}" alt="" class="" />
+                            <img src="{% static 'svgs/more-vertical.svg' %}" alt="" class="" />
                         </span>
-                      </div>
-                      <div class="w-full flex items-center justify-between">            
-                        {% if accounts_len > 0 %}
-                          <h3 class="text-gray-900 text-2xl font-semibold">{{ accounts_len }}</h3>  
+                        </div>
+                        <div class="w-full flex items-center justify-between">            
+                        {% if box3_count > 0 %}
+                            <h3 class="text-gray-900 text-2xl font-semibold">{{ box3_count }}</h3>  
                         {% else %}
-                          <h3 class="text-gray-900 text-2xl font-semibold">0</h3>              
+                            <h3 class="text-gray-900 text-2xl font-semibold">0</h3>              
                         {% endif %}
-                          
+                            
                         <span class="">
-                          <img src="{% static 'svgs/quotes.svg' %}" alt="" class="" />
+                            <img src="{% static 'svgs/quotes.svg' %}" alt="" class="" />
                         </span>
-                      </div>
-                    </div>
-                  </a>
-            </div>
-            <div class="tab flex flex-col text-center justify-center bg-white p-4 rounded-lg shadow-md h-[200px]">
-                <div class="w-full flex flex-col gap-4">
-                    <div class="w-full flex items-center justify-between">
-                      <h3 class="text-gray-900 font-medium">Number of Quotes Requested</h3>
-                      <span class="">
-                        <img src="{% static 'svgs/more-vertical.svg' %}" alt="" class="" />
-                      </span>
-                    </div>
-                    <div class="w-full flex items-center justify-between">            
-                      {% if quote_count > 0 %}
-                        <h3 class="text-gray-900 text-2xl font-semibold">{{ quote_count }}</h3>  
-                      {% else %}
-                        <h3 class="text-gray-900 text-2xl font-semibold">0</h3>              
-                      {% endif %}
-                        
-                      <span class="">
-                        <img src="{% static 'svgs/quotes.svg' %}" alt="" class="" />
-                      </span>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="tab flex flex-col text-center justify-center bg-white p-4 rounded-lg shadow-md h-[200px]">
-                <div class="w-full flex flex-col gap-4">
-                    <div class="w-full flex items-center justify-between">
-                      <h3 class="text-gray-900 font-medium">Number of Quotes Requested</h3>
-                      <span class="">
-                        <img src="{% static 'svgs/more-vertical.svg' %}" alt="" class="" />
-                      </span>
-                    </div>
-                    <div class="w-full flex items-center justify-between">            
-                      {% if quote_count > 0 %}
-                        <h3 class="text-gray-900 text-2xl font-semibold">{{ quote_count }}</h3>  
-                      {% else %}
-                        <h3 class="text-gray-900 text-2xl font-semibold">0</h3>              
-                      {% endif %}
-                        
-                      <span class="">
-                        <img src="{% static 'svgs/quotes.svg' %}" alt="" class="" />
-                      </span>
+                <div class="tab flex flex-col text-center justify-center bg-white p-4 rounded-lg shadow-md h-[200px]">
+                    <div class="w-full flex flex-col gap-4">
+                        <div class="w-full flex items-center justify-between">
+                        <h3 class="text-gray-900 font-medium">Request A Quote</h3>
+                        <span class="">
+                            <img src="{% static 'svgs/more-vertical.svg' %}" alt="" class="" />
+                        </span>
+                        </div>
+                        <div class="w-full flex items-center justify-between">            
+                        {% if box4_count > 0 %}
+                            <h3 class="text-gray-900 text-2xl font-semibold">{{ box4_count }}</h3>  
+                        {% else %}
+                            <h3 class="text-gray-900 text-2xl font-semibold">0</h3>              
+                        {% endif %}
+                            
+                        <span class="">
+                            <img src="{% static 'svgs/quotes.svg' %}" alt="" class="" />
+                        </span>
+                        </div>
                     </div>
                 </div>
+                
             </div>
-            
         </div>
 
-        <!-- invite part -->
-        {% if referral_link %}
-        <div id="share-link"  data-link="{{referral_link}}" class="w-full flex items-center justify-center flex-col cursor-pointer mt-4 mb-6">
-            <div class="w-[50%] flex items-center justify-center text-center gap-2 cursor-pointer bg-primary p-3 rounded-md shadow-sm">
-            <img src="{% static 'svgs/plus.svg' %}" alt="" class="" />
-            <span class="text-white text-sm font-semibold">Invite</span>
-            </div>
-        </div>       
-        <div id="copied-message" class="hidden text-white text-sm mt-2 text-center bg-black py-2">Copied!</div>
-        {% else %}      
-        <a id="add-invite" href="{% url 'profile:edit-profile' %}" class="w-full flex items-center justify-center flex-col cursor-pointer mt-4 mb-6">
-            <div class="w-[50%] flex items-center justify-center text-center gap-2 cursor-pointer bg-primary p-3 rounded-md shadow-sm">
-            <img src="{% static 'svgs/plus.svg' %}" alt="" class="" />
-            <span class="text-white text-sm font-semibold">Invite</span>
-            </div>
-        </a>
-        <div id="copied-message-inivite" class="hidden text-white text-sm mt-2 text-center bg-black py-2">Please add your license number in the edit page!</div>
-        {% endif %}
-      
-
-        
+     <!-- invite part -->
+     {% if referral_link %}
+     <div data-link="{{referral_link}}" class="w-full flex items-center justify-center flex-col cursor-pointer mt-4 mb-6">
+         <div id="share-link" class="w-[50%]  flex items-center justify-center text-center gap-2 cursor-pointer bg-primary p-3 rounded-md shadow-sm">
+         <img src="{% static 'svgs/plus.svg' %}" alt="" class="" />
+         <span class="text-white text-sm font-semibold">Invite</span>
+         </div>
+     </div>       
+     <div id="copied-message" class="hidden text-white text-sm mt-2 text-center bg-black py-2">Copied!</div>
+     {% else %}      
+     <a href="{% url 'profile:edit-profile' %}" class="w-full flex items-center justify-center flex-col cursor-pointer mt-4 mb-6">
+         <div id="add-invite" class="w-[50%] flex items-center justify-center text-center gap-2 cursor-pointer bg-primary p-3 rounded-md shadow-sm">
+         <img src="{% static 'svgs/plus.svg' %}" alt="" class="" />
+         <span class="text-white text-sm font-semibold">Invite</span>
+         </div>
+     </a>
+     <div id="copied-message-inivite" class="hidden text-white text-sm mt-2 text-center bg-black py-2">Please add your license number in the edit page!</div>
+     {% endif %}
 
     <!-- Image Gallery -->
-    <div class="w-full pb-[200px] overflow-x-hidden">
-        
-        {% if proj %}
-        <div class="container-bottom w-full h-full" data-aos="fade-left">
-            <a href="" class="text-primary font-semibold mb-4">View Projects</a>
-            <div class="lg:hidden glide-bottom bg-gray-100 w-full pb-[200px] mt-4">
-                    <!-- Slides here -->
-                    <div class="glide__track" data-glide-el="track">
-                        <ul class="glide__slides">
-                            {% for image in proj %}
-                            <li class="glide__slide">
-                                {% if image.file %}
-                                <img src="{{ image.file.url }}" id="project-image" alt="Project Image" class="h-[400px] md:h-[350px] object-fit rounded-lg">
-                                {% endif %}
-                            </li>
-                            {% endfor %}
-                            <!-- Grid for large screens -->
-                        </ul>
-                    </div>
-            </div>                   
-            <div class="w-full h-full bg-gray-100 mt-4">
-                <div class="projects-grid w-full hidden lg:grid grid-cols-3 gap-4 pb-[200px]">
-                        {% for image in proj %}
-                        <div class="project-item">
-                            {% if image.file %}
-                            <img src="{{ image.file.url }}" alt="Project Image" class="h-[320px] object-fit rounded-lg">
-                            {% endif %}
+    <div class="w-full pb-[200px]">
+            {% if proj %}
+            <div class="container-bottom w-full">
+                <a href="" class="text-primary font-semibold mb-4 mx-4">View Projects</a>
+                <div class="lg:hidden glide-bottom bg-gray-100 w-full mt-4">
+                        <!-- Slides here -->
+                        <div class="glide__track" data-glide-el="track">
+                            <ul class="glide__slides">
+                                {% for image in proj %}
+                                <li class="glide__slide">
+                                    {% if image.file %}
+                                    <img src="{{ image.file.url }}" id="project-image" alt="Project Image" class="h-[400px] md:h-[350px] object-fit rounded-lg">
+                                    {% endif %}
+                                </li>
+                                {% endfor %}
+                                <!-- Grid for large screens -->
+                            </ul>
                         </div>
-                        {% endfor %}
+                </div>  
+                <!-- grid projects                  -->
+                <div class="w-full h-full bg-gray-100 mt-4">
+                    <div class="mx-4">
+                        <div class="projects-grid w-full hidden lg:grid grid-cols-3 gap-4 pb-[200px]">
+                                {% for image in proj %}
+                                <div class="project-item">
+                                    {% if image.file %}
+                                    <img src="{{ image.file.url }}" alt="Project Image" class="h-[320px] object-fit rounded-lg">
+                                    {% endif %}
+                                </div>
+                                {% endfor %}
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
         {% else %}
-        <a href="" class="text-primary font-semibold mb-4">View Projects</a>
+        <a href="" class="text-primary font-semibold mb-4 mx-4">View Projects</a>
         <div class="w-full flex flex-col items-center justify-center gap-4 mt-4">
             <h3 class="text-gray-900 font-semibold text-center">No projects yet</h3>
         </div>
-        {% endif %}
-            
+        {% endif %}           
 
     </div>
 
-    </div>
 </div>
 
 {% endblock %}
@@ -260,7 +260,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
 <script>
     AOS.init(
-        {duration: 1200,}
+        {duration: 1200,  once: true, // animation only happens once - while scrolling down
+        }
     );
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js" integrity="sha512-A7AYk1fGKX6S2SsHywmPkrnzTZHrgiVT7GcQkLGDe2ev0aWb8zejytzS8wjo7PGEXKqJOrjQ4oORtnimIRZBtw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
@@ -269,56 +270,59 @@
     // data-aos="fade-right"
     const configTop = {
         type: "carousel",
-        perView: 5,  // Show one full image and a part of the next one
+        perView: 6,  // Show one full image and a part of the next one
         focusAt: 'center',
         gap: 10,  // Adjust the gap between slides if needed
         breakpoints: {
             1420: {
-                perView: 4
+                perView: 6
+            },
+            1280: {
+                perView: 5
             },
             1130: {
-                perView: 3.1
+                perView: 4.25
             },
             900: {
-                perView: 3
+                perView: 4.25
             },
             860: {
-                perView: 2.5
+                perView: 4
             },          
-            680: {
-                perView: 2
+            700: {
+                perView: 3.5
             },                   
             680: {
-                perView: 2
+                perView: 3
             },                   
             560: {
-                perView: 1.70
+                perView: 2.25
             },                   
             475: {
-                perView: 1.50
+                perView: 2
             },                   
             423: {
-                perView: 1.30
+                perView: 2
             },                   
             390: {
-                perView: 1.25
+                perView: 2.1
             }
         }
     };
-
+  
     
     const sliderTop = new Glide('.glide-top', configTop);
     
     sliderTop.mount();
-
-    let glide_width = document.querySelector('.glide__slide1')
-    console.log(glide_width)
-    glide_width.style.width= '100%'
+  
+    // let glide_width = document.querySelector('.glide__slide1')
+    // console.log(glide_width)
+    // glide_width.style.width= '100%'
     // let glide_width2 = document.querySelector('.glide__slide')
     // console.log(glide_width)
     // glide_width2.style.width= '80%'
-
-
+  
+  
     // second slide
     const config = {
         type: "carousel",
@@ -334,11 +338,11 @@
             }
         }
     };
-
+  
     const slider = new Glide('.glide-bottom', config);
-
+  
     slider.mount();
-
+  
 </script>
 
 <script src="{% static 'js/agent.js' %}"></script>
@@ -375,7 +379,8 @@
         });
     }
 
-    addInvite.addEventListener("click", function() {
+    if(addInvite){
+        addInvite.addEventListener("click", function() {
         // Show the copied message
         copiedMessageInvite.style.display = 'block';
 
@@ -383,7 +388,9 @@
         setTimeout(function() {
             copiedMessageInvite.style.display = 'none';
         }, 3000);
-        })
+    })
+    }
+   
 });
 </script>
 
