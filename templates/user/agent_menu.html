@@ -15,6 +15,15 @@
     </div>
 
     <div class="pl-[1.5rem] pr-[2.5rem]">
+        <a href="{% url 'logout' %}" class="w-full flex items-center justify-between border-b border-neutral-150 py-8">
+            <p class="text-gray-900 font-medium">Logout</p>
+            <i class="fa fa-sign-out ml-3" aria-hidden="true"></i>
+        </a>
+        <a href="{% url 'profile:edit-profile'%}" class="w-full flex items-center justify-between border-b border-neutral-150 py-8">
+            <p class="text-gray-900 font-medium">Edit profile</p>
+            <i class="fa fa-pencil ml-3" aria-hidden="true"></i>
+        </a>
+
         <div class="w-full flex items-center justify-between border-b border-neutral-150 py-8">
             <p class="text-gray-900 font-medium">Find Contractors</p>
             <i class="fa fa-angle-right cursor-pointer text-gray-500" aria-hidden="true"></i>
