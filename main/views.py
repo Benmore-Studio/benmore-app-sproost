@@ -21,9 +21,11 @@ User = get_user_model()
 def home_owner_function(request, value):
     quotes = QuoteRequest.objects.filter(user=value)
     projects = Project.objects.filter(quote_request__user=value)
+    projs = Project.objects.filter(admin=value)
     context ={
         "quotes": quotes,
         "projects": projects,
+        'projs':projs,
         "quote_count": quotes.count(),
         "projects_count": projects.count(),
         "home_owner_slug": request.user.slug
