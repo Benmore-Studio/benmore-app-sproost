@@ -5,7 +5,13 @@ from django.contrib.contenttypes.fields import GenericRelation
 from django.utils.translation import gettext_lazy as _
 
 
-def image_upload_location(instance, filename):
+def image_upload_location_home_owner(instance, filename):
+    return f'home_ownerprofile/{instance.id}/{filename}'
+    
+def image_upload_location_agent(instance, filename):
+    return f'agentprofile/{instance.id}/{filename}'
+    
+def image_upload_location_contractor(instance, filename):
     return f'contractorprofile/{instance.id}/{filename}'
 
 
@@ -13,7 +19,8 @@ class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name = 'user_profile')
     address = AddressField(null = True)
     city = models.CharField(max_length = 50, null = True, blank = True)
-    state_province = models.CharField(max_length = 50, null = True, blank = True) 
+    state_province = models.CharField(max_length = 50, null = True, blank = True)
+    image = models.ImageField(upload_to=image_upload_location_home_owner, null=True) 
     # slug = models.SlugField(
     #     blank=True,
     #     null=True,
@@ -28,6 +35,7 @@ class AgentProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name = 'agent_profile')
     address = AddressField(null = True)
     registration_ID = models.CharField(max_length = 225, null = True, blank = True, unique=True, verbose_name="license number", help_text='Also known as licences_ID')
+    image = models.ImageField(upload_to=image_upload_location_agent, null=True)
     # has_seen_onboarding_message = models.BooleanField(default=False)
     
     def __str__(self):
@@ -43,7 +51,7 @@ class ContractorProfile(models.Model):
     website = models.URLField(max_length=255, null=True)
     city = models.CharField(max_length = 50)
     media_paths = GenericRelation("main.Media")
-    image = models.ImageField(upload_to=image_upload_location, null=True)
+    image = models.ImageField(upload_to=image_upload_location_contractor, null=True)
 
     def __str__(self):
         return self.user.email

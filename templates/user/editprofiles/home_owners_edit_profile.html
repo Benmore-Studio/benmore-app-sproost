@@ -5,13 +5,27 @@
     #step {
         display: none;
     }
+    #id_phone_number_0{
+        width: 17%;
+    }
+    #id_phone_number_1{
+        padding-left: 10px;
+    }
+    #id_phone_number_1:focus, #id_phone_number_0:focus{
+        border: none;
+        outline: none;
+    }
 </style>
 <div class="w-full">
     <div class="w-full">
         <!-- header -->
-        <div class="w-full p-4 flex items-center gap-8 mt-4 border-b border-neutral-150">
-            <img onclick="goBack()" src="{% static 'svgs/chevron-left.svg' %}" alt="" class="cursor-pointer" />
-            <h3 class="text-xl text-gray-900 font-medium">Edit Profile</h3>
+        <div class="w-full p-4 flex items-center mb-[18px]">
+            <div onclick="goBack()">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 cursor-pointer">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
+                </svg>
+            </div>
+            <h3 class="w-full text-xl mr-[48px] text-center text-gray-900 font-medium">Edit Profile</h3>
         </div>
         <!-- content -->
 
@@ -30,37 +44,59 @@
                     </div>
                 {% endif %}
                 <div class="w-full">
-                    <label for="email" class="text-gray-700 font-medium text-sm">Email</label>
-                    {{ form.email|addattrs:"class=w-full p-2 text-gray-500 border border-gray-300 rounded-md focus:outline-none mt-1 focus:border-gray-500"}}
+                    <label for="property_address" class="text-black font-medium text-sm">Email</label>
+                    <div class="border border-gray-300 rounded-3xl p-2 mt-1 h-[60px] pl-6">
+                    <input
+                    type="text"
+                    name="email"
+                    id="email"
+                    class="w-full rounded-3xl h-full focus:outline-none bg-transparent border-none focus:border-gray-500"
+                    placeholder="Type here"
+                    value="{{request.user.email}}"
+                />
+                    </div>
                     {% if form.email.errors %}
                         <div class = "w-full py-1 rounded text-red-500">
                             {{form.email.errors}}
                         </div>
                     {% endif %}
                 </div>
+
                 <div class="w-full">
-                    <label for="phone_number" class="text-gray-700 font-medium text-sm">Phone number</label>
-                    <!-- Render phone_number field using Django template tag -->
-                    <div class = "flex">
-                        {{form.phone_number|addattrs:"class=w-full p-2 text-gray-500 border border-gray-300 rounded-md focus:outline-none mt-1 focus:border-gray-500,placeholder=Phone number"}}
-                        {% if form.phone_number.errors %}
-                            <div class = "w-full py-1 rounded text-red-500">
-                                {{form.phone_number.errors}}
-                            </div>
-                        {% endif %}
+                    <label for="phone" class="text-black font-medium text-sm">Phone Number</label>
+                    <div class="flex items-center gap-4 mt-1">
+                        <div class="flex items-center border border-gray-300 rounded-3xl p-2 h-[60px] w-full">
+                            {{ form.phone_number }}
+                        </div>
                     </div>
+                    {% if form.phone_number.errors %}
+                        <div class = "w-full py-1 rounded text-red-500">
+                            {{form.phone_number.errors}}
+                        </div>
+                    {% endif %}
                 </div>
+                        
                 <div class="w-full">
-                    <label for="address" class="text-gray-700 font-medium text-sm">Address</label>
-                    {{form.address}}
+                    <div class="w-full">
+                        <label for="property_address" class="text-black font-medium text-sm">Title</label>
+                        <div class="border border-gray-300 rounded-3xl p-2 mt-1 h-[60px] pl-6">
+                        <input
+                    type="text"
+                    name="address"
+                    id="address"
+                    class="w-full rounded-3xl h-full focus:outline-none bg-transparent border-none focus:border-gray-500"
+                    placeholder="Type here"
+                    value="{{request.user.user_profile.address}}"
+                />
+            </div>
                     {% if form.address.errors %}
                         <div class = "w-full py-1 rounded text-red-500">
                             {{form.address.errors}}
                         </div>
                     {% endif %}
                 </div>
-                <div class="flex w-full flex-col gap-4 border-t border-neutral-150 pt-5">
-                    <button type="submit" class="flex items-center w-full justify-center p-3 rounded-lg bg-primary text-white border border-neutral-150 shadow-sm font-semibold">
+                <div class="flex w-full justify-center pt-9">
+                    <button type="submit" class="inline-flex items-center w-[70%] md:w-[50%] justify-center p-3 rounded-3xl bg-black text-white border border-neutral-150 shadow-sm font-semibold">
                         Save 
                     </button>
                 </div>
@@ -69,8 +105,8 @@
     </div>
 </div>
 
-{% endblock %}{% block bottomNav %}{% include "user/bottom_nav_agent.html" %}
-{% endblock bottomNav %} {% block extraScripts %}
+{% endblock %}
+{% block extraScripts %}
 
 <script>
     function goBack() {

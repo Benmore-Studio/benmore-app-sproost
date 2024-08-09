@@ -16,9 +16,9 @@
     <link href="https://cdn.jsdelivr.net/npm/@glidejs/glide@3.5.2/dist/css/glide.theme.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" integrity="sha512-1cK78a1o+ht2JcaW6g8OXYwqpev9+6GqOkz9xmBN9iUUhIndKtxwILGWYOSibOKjLsEdjyjZvYDq/cZwNeak0w==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
-    <script>
+    <!-- <script>
         AOS.init();
-    </script>
+    </script> -->
     <script>
         tailwind.config = {
             theme: {
@@ -31,6 +31,7 @@
                         primary: "#2FAA07",
                         "primarydark": "#1A5E04",
                         "toneLightGreen": "#EAF7E6",
+                        "graybg":"#CFCFCF",
                     },
                     fontFamily: {
                         primary: ["Inter", "sans-serif"],
@@ -41,7 +42,7 @@
     </script>
 </head>
 
-<body class="h-full bg-gray-100">
+<body class="h-full">
     <div class="">
         {% block topNav %} {% endblock topNav %}
         <div class="">{% block content %} {% endblock content %}</div>

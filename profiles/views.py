@@ -107,11 +107,16 @@ def editHomeOwnerProfileRequest(request):
         if form.is_valid():
             form.save()
             user.phone_number = form.cleaned_data['phone_number']
+            print(request.POST)
+            print(form.cleaned_data)
+            print(form.cleaned_data['phone_number'])
             user.email = form.cleaned_data['email']
             user.save()
+            print('ol')
             messages.success(request, 'Profile updated successfully!')
             return redirect('main:home')
         else:
+            print(form.errors)
             return render(request, 'user/editprofiles/home_owners_edit_profile.html', {'form': form})
     return redirect('profile:edit-profile')
 
@@ -217,19 +222,32 @@ def change_profile_pics_view(request):
         form = ProfilePictureForm(request.POST, request.FILES)
         if form.is_valid():
             image_instance = form.cleaned_data['image']
-            
             # Get or create the ContractorProfile instance for the current user
-            contractor_profile = ContractorProfile.objects.get(user=request.user)
-            
-            # Update the image field of the ContractorProfile instance
-            contractor_profile.image = image_instance
-            contractor_profile.save()
+            if request.user.user_type == 'CO':
+                contractor_profile = ContractorProfile.objects.get(user=request.user)
+                contractor_profile.image = image_instance
+                contractor_profile.save()
+            elif request.user.user_type == 'HO':
+                home_owner_profile = UserProfile.objects.get(user=request.user)
+                home_owner_profile.image = image_instance
+                home_owner_profile.save()
+                messages.success(request, 'picture changed successfully')
+            elif request.user.user_type == 'AG':
+                agent_profile = AgentProfile.objects.get(user=request.user)
+                agent_profile.image = image_instance
+                agent_profile.save()
+                messages.success(request, 'picture changed successfully')
             
             # Redirect to the user's profile page
-            return redirect('profile:contractor_profile')
+            return redirect('main:home')
         else:
-            # print(form.errors)
-            pass
+            image_errors = form.errors.get('image', [])
+            for i in image_errors:
+                if i == 'This field is required':
+                    messages.error(request, f"Please select an image")
+                else:
+                    messages.error(request, f"An Error Occurred, {i}")
+            return redirect('main:home')
     else:
         form = ProfilePictureForm()
     return render(request, 'user/contractor_home.html', {'form': form})

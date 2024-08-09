@@ -29,5 +29,6 @@ def agents_home_owner_account(request, pk):
         messages.error(request, 'Home Owner not found')
         return redirect('main:home')
         
-        
+def view_all_property(request):
+    return render(request, 'user/all_property.html', {})     
     

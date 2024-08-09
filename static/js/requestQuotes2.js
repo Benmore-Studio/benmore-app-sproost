@@ -2,8 +2,11 @@ var currentStep = 0 // Current tab is set to be the first tab (0)
 window.addEventListener("DOMContentLoaded", () => {
   showStep(currentStep)
   uploadFiles()
+  validateForm()
+  alert('op')
 })
-alert('u')
+
+alert('o')
 
 function showStep(n) {
   // This function will display the specified tab of the form...
@@ -34,62 +37,31 @@ function validateForm() {
     valid = false
   x = document.querySelectorAll("#step")
   y = x[currentStep].getElementsByTagName("input")
-  // A loop that checks every input field in the current tab:
-  if (y) {
-  }
+  var requiredInputs = document.getElementsByClassName("step")
+  console.log(requiredInputs)
+  valid = [...y].every((input) => input.value !== "")
 
   return valid // return the valid status
 }
 
-// function nextPrev(n) {
-//   // This function will figure out which tab to display
-//   var x = document.querySelectorAll("#step")
-//   //   if (n == 1 && !validateForm()) return false
-//   // Hide the current tab:
-//   x[currentStep].style.display = "none"
-//   // Increase or decrease the current tab by 1:
-//   currentStep = currentStep + n
-//   console.log("x&n: ", x, n, currentStep)
-//   // if you have reached the end of the form...
-//   if (currentStep >= x.length) {
-//     // ... the form gets submitted:
-//     console.log(document.getElementById("quoteRequestForm"))
-//     document.getElementById("quoteRequestForm").submit()
-//     return false
-//   }
-//   showStep(currentStep)
-// }
-
-
 function nextPrev(n) {
-  var x = document.querySelectorAll("#step");
-
-  // Check if the current step is valid before proceeding to the next step
-  var currentForm = document.getElementById("quoteRequestForm");
-  if (n === 1 && !currentForm.checkValidity()) {
-      // If the form is invalid, display the built-in validation messages
-      currentForm.reportValidity();
-      return false;
-  }
-
+  // This function will figure out which tab to display
+  var x = document.querySelectorAll("#step")
+  //   if (n == 1 && !validateForm()) return false
   // Hide the current tab:
-  x[currentStep].style.display = "none";
-
+  x[currentStep].style.display = "none"
   // Increase or decrease the current tab by 1:
-  currentStep = currentStep + n;
-
+  currentStep = currentStep + n
+  console.log("x&n: ", x, n, currentStep)
   // if you have reached the end of the form...
   if (currentStep >= x.length) {
-      // ... the form gets submitted:
-      console.log(document.getElementById("quoteRequestForm"));
-      document.getElementById("quoteRequestForm").submit();
-      return false;
+    // ... the form gets submitted:
+    console.log(document.getElementById("quoteRequestForm"))
+    document.getElementById("quoteRequestForm").submit()
+    return false
   }
-
-  // Otherwise, display the correct tab:
-  showStep(currentStep);
+  showStep(currentStep)
 }
-
 
 function submitQuote() {
   document.getElementById("quoteRequestForm").submit()

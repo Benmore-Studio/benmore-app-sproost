@@ -4,10 +4,12 @@ from quotes.models import QuoteRequest
 
 class QuoteRequestForm(forms.ModelForm):
     home_owner_id = forms.IntegerField(required=False)
+    media = forms.FileField(widget=forms.ClearableFileInput(), required=False)
+
 
     class Meta:
         model = QuoteRequest
-        fields = ["title", "summary", "contact_phone", "contact_email", "property_address",'created_by_agent']
+        fields = ["title", "summary", "contact_phone", "contact_username", "property_address",'created_by_agent', 'media']
 
     def __init__(self, *args, **kwargs):
         super(QuoteRequestForm, self).__init__(*args, **kwargs)
@@ -30,8 +32,10 @@ class QuoteRequestForm(forms.ModelForm):
                 field.widget.attrs['class'] += f' {special_field_classes[field_name]}'
             
             # Specify required attribute for specific fields
-            if field_name in ['title', 'summary', 'contact_phone', 'contact_email', 'property_address']:
+            # if field_name in ['title', 'summary', 'contact_phone', 'contact_email', 'property_address']:
+            if field_name == 'summary':
                 field.widget.attrs['required'] = 'required'
+                field.widget.attrs['class'] += ' input'
 
 
         # Custom attributes for contact_phone
@@ -41,7 +45,7 @@ class QuoteRequestForm(forms.ModelForm):
             'type': "tel"
         })
 
-        # Custom attributes for contact_email
-        self.fields['contact_email'].widget.attrs.update({
+        # Custom attributes for contact_username
+        self.fields['contact_username'].widget.attrs.update({
             'class': 'w-full h-full outline-none group-focus:outline-none mt-1 focus-visible:border-none border-none',
         })

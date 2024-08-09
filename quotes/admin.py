@@ -3,9 +3,9 @@ from django.utils.html import format_html
 from .models import QuoteRequest, Project
 
 class QuoteRequestAdmin(admin.ModelAdmin):
-    list_display = ('title', 'user', 'status', 'contact_email','created_by_agent', 'is_quote', 'upload_date')
+    list_display = ('title', 'user', 'status', 'contact_username','created_by_agent', 'is_quote', 'upload_date')
     list_filter = ('status', 'is_quote', 'upload_date')
-    search_fields = ('title', 'user__username', 'contact_email')
+    search_fields = ('title', 'user__username', 'contact_username')
     readonly_fields = ('upload_date',)
 
 class ProjectAdmin(admin.ModelAdmin):

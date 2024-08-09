@@ -14,16 +14,17 @@ class ContractorProfileForm(forms.ModelForm):
     company_address = AddressField(
             widget=AddressWidget(attrs={'placeholder': 'Enter Address', 'class': 'w-full p-2 border border-gray-300 rounded-md focus:outline-none mt-1 focus:border-gray-500'})
         )    
-    email = forms.EmailField()
+    email = forms.EmailField(required=False)
     class Meta:
         model = ContractorProfile
         fields = ['company_name', 'specialization', 'city', 'website',  'company_address', 'phone_number']
 
     def clean_email(self):
         email = self.cleaned_data.get('email').lower()
-        user_id = self.instance.user.id if self.instance.user else None
-        if User.objects.exclude(id=user_id).filter(email=email).exists():
-            raise forms.ValidationError('This email address is already in use.')
+        if email:
+            user_id = self.instance.user.id if self.instance.user else None
+            if User.objects.exclude(id=user_id).filter(email=email).exists():
+                raise forms.ValidationError('This email address is already in use.')
         return email
 
 class HomeOwnersEditForm(forms.ModelForm):
@@ -31,7 +32,7 @@ class HomeOwnersEditForm(forms.ModelForm):
     address = AddressField(
             widget=AddressWidget(attrs={'placeholder': 'Enter Address', 'class': 'w-full p-2 border border-gray-300 rounded-md focus:outline-none mt-1 focus:border-gray-500'})
         )    
-    email = forms.EmailField()
+    email = forms.EmailField(required=False)
     class Meta:
         model = UserProfile
         fields = ['city', 'state_province', 'address', 'phone_number', 'email']
@@ -39,9 +40,10 @@ class HomeOwnersEditForm(forms.ModelForm):
 
     def clean_email(self):
         email = self.cleaned_data.get('email').lower()
-        user_id = self.instance.user.id if self.instance.user else None
-        if User.objects.exclude(id=user_id).filter(email=email).exists():
-            raise forms.ValidationError('This email address is already in use.')
+        if email:
+            user_id = self.instance.user.id if self.instance.user else None
+            if User.objects.exclude(id=user_id).filter(email=email).exists():
+                raise forms.ValidationError('This email address is already in use.')
         return email
     
 
@@ -50,16 +52,17 @@ class AgentEditForm(forms.ModelForm):
     address = AddressField(
             widget=AddressWidget(attrs={'placeholder': 'Enter Address', 'class': 'w-full p-2 border border-gray-300 rounded-md focus:outline-none mt-1 focus:border-gray-500'})
         )    
-    email = forms.EmailField()
+    email = forms.EmailField(required=False)
     class Meta:
         model = AgentProfile
         fields = ['address', 'phone_number', 'email', 'registration_ID' ]
     
     def clean_email(self):
         email = self.cleaned_data.get('email').lower()
-        user_id = self.instance.user.id if self.instance.user else None
-        if User.objects.exclude(id=user_id).filter(email=email).exists():
-            raise forms.ValidationError('This email address is already in use.')
+        if email:
+            user_id = self.instance.user.id if self.instance.user else None
+            if User.objects.exclude(id=user_id).filter(email=email).exists():
+                raise forms.ValidationError('This email address is already in use.')
         return email
 
 class ProfilePictureForm(forms.ModelForm):

@@ -52,6 +52,8 @@ INSTALLED_APPS = [
     'mail_templated',
     'sslserver',
     
+    'corsheaders',
+
     "phonenumber_field",
     'django.contrib.sites',
     'allauth',
@@ -67,6 +69,7 @@ MIDDLEWARE = [
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -177,11 +180,11 @@ SOCIALACCOUNT_ADAPTER = 'accounts.adapters.MySocialAccountAdapter'
 
 
 
-ACCOUNT_AUTHENTICATION_METHOD = 'email'
-ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_AUTHENTICATION_METHOD = 'username'
+ACCOUNT_EMAIL_REQUIRED = False
 ACCOUNT_CHANGE_EMAIL = True
-ACCOUNT_USERNAME_REQUIRED = False
-ACCOUNT_EMAIL_VERIFICATION = 'none'
+ACCOUNT_USERNAME_REQUIRED = True
+ACCOUNT_EMAIL_VERIFICATION = 'optional'
 ACCOUNT_SESSION_REMEMBER = True
 SOCIALACCOUNT_QUERY_EMAIL = True
 
@@ -192,7 +195,7 @@ SESSION_SAVE_EVERY_REQUEST = True  # Save the session to the database on every r
 
 ACCOUNT_LOGOUT_REDIRECT_URL = reverse_lazy('account_login')
 LOGIN_REDIRECT_URL = reverse_lazy('main:home')
-ACCOUNT_SIGNUP_REDIRECT_URL = reverse_lazy('main:home')
+ACCOUNT_SIGNUP_REDIRECT_URL = reverse_lazy('verify_email')
 
 # ACCOUNT_SIGNUP_REDIRECT_URL = "/jobs/job-onboarding/"
 
@@ -243,3 +246,18 @@ CACHES = {
         'LOCATION': 'unique-snowflake',  # This can be any unique identifier
     }
 }
+
+CORS_ALLOW_CREDENTIALS = True
+CSRF_TRUSTED_ORIGINS = [
+    'https://44a8b72b893325a51bc6403f5837d712.serveo.net',
+]
+
+CORS_ALLOW_METHODS = [
+    'GET',
+    'POST',
+    'PUT',
+    'PATCH',
+    'DELETE',
+    'OPTIONS',
+]
+

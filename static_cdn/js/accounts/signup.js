@@ -1,5 +1,8 @@
 var currentStep = 0 // Current tab is set to be the first tab (0)
+alert('ie')
+
 window.addEventListener("DOMContentLoaded", () => {
+    alert('ibah')
     showStep(currentStep);
     selectUserType();
     validateEmail();
@@ -126,6 +129,7 @@ function validatePhoneNumber() {
 function showStep(n) {
     //  check if the radio btn with name user_type has the value CO 
     const userType = document.querySelector('input[name="user_type"]:checked')
+    console.log(userType)
     if (userType && userType.value === "CO") {
         var x = document.getElementsByClassName("step-contractor")
     }else if(userType && userType.value === "AG"){
@@ -152,6 +156,7 @@ function showStep(n) {
 }
 
 function validateForm() {
+    alert('fail')
     // This function deals with validation of the form fields
     var x,
         y,
@@ -180,6 +185,7 @@ function validateForm() {
 }
 
 function nextPrev(n) {
+    alert('fail2')
     // This function will figure out which tab to display
     const userType = document.querySelector('input[name="user_type"]:checked')
     if (userType && userType.value === "CO") {

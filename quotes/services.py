@@ -27,6 +27,7 @@ class QuoteService(CustomRequestUtil):
 
             image_types = {'jpg', 'png', 'svg', 'jpeg'}
             file_types = {'pdf'}
+            video_types = {'mp4', 'mkv', 'webm'}
 
             model_action_service = ModelAction(self.request)
             quote, error = model_action_service.create_model_instance(model=QuoteRequest, payload=payload)
@@ -34,9 +35,11 @@ class QuoteService(CustomRequestUtil):
             if error:
                 return None, error
 
+
+
             if media:
                 for file in media:
-                    media_file, media_image = None, None
+                    media_file, media_image,media_video = None, None, None
 
                     extension = file.name.split('.')[-1].lower()
 
@@ -44,11 +47,14 @@ class QuoteService(CustomRequestUtil):
                         media_file = file
                     elif extension in image_types:
                         media_image = file
+                    elif extension in video_types:
+                        media_video = file
 
                     quote.media_paths.create(
                         content_object=quote,
                         image=media_image,
-                        file=media_file
+                        file=media_file,
+                        video=media_video
                     )
 
             return "Quote Request saved successfully", None
