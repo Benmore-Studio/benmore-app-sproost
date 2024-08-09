@@ -36,6 +36,16 @@
      input[type=number] {
        -moz-appearance: textfield;
      }
+     #id_phone_number_0{
+        width: 17%;
+    }
+    #id_phone_number_1{
+        padding-left: 10px;
+    }
+    #id_phone_number_1:focus, #id_phone_number_0:focus{
+        border: none;
+        outline: none;
+    }
   </style>
 
   <div>
@@ -342,14 +352,18 @@
             </div>       
           </div>
 
-          <div class="flex flex-col gap-4 w-full">
-            <div class="w-full">
-              <label for="{{form.phone_number.auto_id}}" class="text-gray-700 font-medium text-sm">Phone number</label>
-              <div id = "phone-field" class="flex gap-2 p-2 border border-gray-300 p-2 border border-gray-300 rounded-md">
-                {{form.phone_number|addattrs:"class=w-full p-2 border border-gray-300 rounded-md focus:outline-none mt-1 focus:border-gray-500,placeholder=Enter your number"}}
-              </div>
-              <p class = "text-red-500 p-2" id = "phone-error"></p>
+          <div class="w-full">
+            <label for="phone" class="text-black font-medium text-sm">Phone Number</label>
+            <div class="flex items-center gap-4 mt-1">
+                <div class="flex items-center border border-gray-300 rounded-3xl p-2 h-[60px] w-full">
+                    {{ form.phone_number }}
+                </div>
             </div>
+            {% if form.phone_number.errors %}
+                <div class = "w-full py-1 rounded text-red-500">
+                    {{form.phone_number.errors}}
+                </div>
+            {% endif %}
           </div>
         </div>
 
@@ -423,8 +437,8 @@
 
 {% endblock %} 
 {% block extraScripts %}
-  <!-- <script src="{% static 'js/accounts/signup.js' %}"></script> -->
-  <script src="{% static 'js/signup_register.js' %}"></script>
+  <script src="{% static 'js/accounts/signup.js' %}"></script>
+  <!-- <script src="{% static 'js/signup_register.js' %}"></script> -->
   <script>
     const inputs = document.querySelectorAll('.otp-input');
 
