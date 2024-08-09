@@ -66,7 +66,6 @@
      const inputs = document.getElementsByTagName('input');
      const parentDivs = document.querySelectorAll('#container-check');
      const radioBoxes = Array.from(inputs).filter(input => input.type === 'radio');
-     console.log({ radioBoxes });
 
      radioBoxes.forEach((radio, idx) => {
          radio.addEventListener('change', function() {

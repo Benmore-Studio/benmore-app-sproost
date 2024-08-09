@@ -1,8 +1,7 @@
 alert(2)
 document.addEventListener("DOMContentLoaded", function () {
   // By default, open the first tab
-  alert(1)
-  console.log("object")
+
   document.getElementById("tab1").style.display = "block"
   document.getElementsByClassName("tablinks")[0].className += " active"
   uploadFiles()
@@ -16,10 +15,8 @@ function openTab(evt, tabName) {
     tabcontent[i].style.display = "none"
   }
   tablinks = document.getElementsByClassName("tablinks")
-  console.log("object690")
 
   for (i = 0; i < tablinks.length; i++) {
-    console.log(tablinks)
     tablinks[i].className = tablinks[i].className.replace(" active", "")
   }
   document.getElementById(tabName).style.display = "block"

@@ -1,7 +1,5 @@
-alert("hry")
 document.addEventListener("DOMContentLoaded", function () {
   // By default, open the first tab
-  console.log("object2")
 
   document.getElementById("tab1").style.display = "block"
   document.getElementsByClassName("tablinks")[0].className += " active"

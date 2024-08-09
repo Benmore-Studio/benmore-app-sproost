@@ -22,7 +22,6 @@ User = get_user_model()
 
 @login_required
 def contractor_profile_view(request):
-    print('poo')
     if request.user.user_type != 'CO':
         return redirect('main:home')
     
@@ -54,7 +53,6 @@ def contractor_profile_view(request):
                 "form": form
             }
         except:
-            print('failed')
             context = {}
             # return redirect('account_signup')
     return render(request, 'user/contractor_home.html', context)
@@ -70,7 +68,6 @@ class contractorDetails(DetailView):
             return ContractorProfile.objects.get(pk=self.kwargs['pk'])
         except ContractorProfile.DoesNotExist:
             # return to page user came from if profile doesn't exist
-            print('Profile does not exist')
             return redirect('profile:contractor_profile')
 
 
@@ -100,23 +97,17 @@ def editProfile(request):
 @login_required
 def editHomeOwnerProfileRequest(request):
     user = User.objects.get(id=request.user.id)
-    print(user, "home user")
     user_profile = UserProfile.objects.get_or_create(user=request.user)[0]
     if request.method == 'POST':
         form = HomeOwnersEditForm(request.POST, instance=user_profile)
         if form.is_valid():
             form.save()
             user.phone_number = form.cleaned_data['phone_number']
-            print(request.POST)
-            print(form.cleaned_data)
-            print(form.cleaned_data['phone_number'])
             user.email = form.cleaned_data['email']
             user.save()
-            print('ol')
             messages.success(request, 'Profile updated successfully!')
             return redirect('main:home')
         else:
-            print(form.errors)
             return render(request, 'user/editprofiles/home_owners_edit_profile.html', {'form': form})
     return redirect('profile:edit-profile')
 
@@ -166,7 +157,6 @@ def search_view(request):
     query = request.GET.get('query')
     results = ContractorProfile.objects.all()
     
-    print("results ==== ", results)
     if query:
         # Perform search based on Title, Speciality, Email, and Phone number
         results = ContractorProfile.objects.filter(
@@ -180,7 +170,6 @@ def search_view(request):
 
 @login_required
 def upload_image(request):
-    print(request.FILES)
     return redirect('profile:contractor_profile')
 
 

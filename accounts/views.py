@@ -135,14 +135,16 @@ class CustomSignupView(SignupView):
         # This method is called when the form is invalid
         errors = form.errors
         for field, error in errors.items():
-            print(f"Error in {field}: {error}")
+            pass
+            # print(f"Error in {field}: {error}")
         return self.render_to_response(self.get_context_data(form=form))
     
     def form_valid(self, form):
         # If you want to print out the values being submitted
         cleaned_data = form.cleaned_data
         for field, value in cleaned_data.items():
-            print(f"{field}: {value}")
+            pass
+            # print(f"{field}: {value}")
         return super().form_valid(form)
 
 
@@ -163,7 +165,7 @@ def send_verification_email(request, user, verification_code, email):
         )
     
     except Exception as e:
-        print(f'Failed to send verification email to {email}: {e}')
+        # print(f'Failed to send verification email to {email}: {e}')
         return HttpResponse("An error occurred while sending the email.", status=500)
 
     return HttpResponse("Verification email sent.", status=200)
@@ -183,11 +185,9 @@ def verify_email_two(request):
         user = request.user
         try:
             data = json.loads(request.body)
-            print(f"Debug: Raw request body data = {request.body}")
         except json.JSONDecodeError as e:
             return JsonResponse({'status': 'error', 'message': 'Invalid JSON data'}, status=400)
 
-        print('data')
         if User.objects.filter(email=data['email']).exclude(id=user.id).exists():
             return JsonResponse({'status': 'error','message': 'Email already exists for other users'}, status=400)
         else:

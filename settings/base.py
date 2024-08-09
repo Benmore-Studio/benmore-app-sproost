@@ -188,18 +188,19 @@ ACCOUNT_EMAIL_VERIFICATION = 'optional'
 ACCOUNT_SESSION_REMEMBER = True
 SOCIALACCOUNT_QUERY_EMAIL = True
 
+ACCOUNT_LOGOUT_REDIRECT_URL = reverse_lazy('account_login')
+LOGIN_REDIRECT_URL = reverse_lazy('main:home')
+ACCOUNT_SIGNUP_REDIRECT_URL = reverse_lazy('verify_email')
+ACCOUNT_FORMS = {'signup': 'accounts.forms.CustomSignupForm'}
+
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'  # Use database-backed sessions
 SESSION_COOKIE_AGE = 1209600  # Two weeks in seconds
 SESSION_SAVE_EVERY_REQUEST = True  # Save the session to the database on every request
 
 
-ACCOUNT_LOGOUT_REDIRECT_URL = reverse_lazy('account_login')
-LOGIN_REDIRECT_URL = reverse_lazy('main:home')
-ACCOUNT_SIGNUP_REDIRECT_URL = reverse_lazy('verify_email')
 
 # ACCOUNT_SIGNUP_REDIRECT_URL = "/jobs/job-onboarding/"
 
-ACCOUNT_FORMS = {'signup': 'accounts.forms.CustomSignupForm'}
 
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 EMAIL_HOST = 'smtp.gmail.com'

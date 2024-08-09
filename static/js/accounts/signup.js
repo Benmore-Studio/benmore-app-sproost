@@ -63,7 +63,6 @@ passwordshow.onclick = function () {
 const passwordshow2 = document.querySelector("#passwordshow2")
 const confirmPassword = document.querySelector("input[name='password2']");
 passwordshow2.onclick = function () {
-    console.log('object')
     "password" === confirmPassword.type
         ? ((passwordshow2.children[0].classList.remove = "fa fa-eye"), (passwordshow2.children[0].classList = "svg-inline--fa fa-eye-slash"), (confirmPassword.type = "text"))
         : ((passwordshow2.children[0].classList = ""), (passwordshow2.children[0].classList = "svg-inline--fa fa-eye"), (confirmPassword.type = "password"));
@@ -113,7 +112,6 @@ async function checkPhoneNumber(phone, location) {
             phoneField.classList.add('border-green-500');
         }
     } catch (error) {
-        console.log(error)
         phoneField.classList.add('border-red-500');
         phoneField.classList.remove('border-green-500');
         phoneError.textContent = "An error occurred while validating phone number"
@@ -201,7 +199,6 @@ function validateForm() {
 function nextPrev(n) {
     // This function will figure out which tab to display
     const userType = document.querySelector('input[name="user_type"]:checked')
-    console.log(userType)
     if (userType && userType.value === "CO") {
         var x = document.getElementsByClassName("step-contractor")
     }else if(userType && userType.value === "AG"){

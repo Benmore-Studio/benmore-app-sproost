@@ -1,8 +1,27 @@
-var currentStep = 0 // Current tab is set to be the first tab (0)
+  var currentStep = 0 // Current tab is set to be the first tab (0)
 window.addEventListener("DOMContentLoaded", () => {
   showStep(currentStep)
   uploadFiles()
+  validateForm()
 })
+
+
+function validateForm() {
+  // This function deals with validation of the form fields
+  var x,
+    y,
+    i,
+    valid = false
+  x = document.querySelectorAll("#step")
+  y = x[currentStep].getElementsByTagName("input")
+  let requiredInputs = document.getElementsByClassName("input")
+  let requiredInputsResult = Array.from(requiredInputs);
+  valid = [...requiredInputsResult].every((input) => input.value !== "")
+
+  return valid // return the valid status
+}
+
+
 
 function showStep(n) {
   // This function will display the specified tab of the form...
@@ -25,20 +44,7 @@ function showStep(n) {
   }
 }
 
-function validateForm() {
-  // This function deals with validation of the form fields
-  var x,
-    y,
-    i,
-    valid = false
-  x = document.querySelectorAll("#step")
-  y = x[currentStep].getElementsByTagName("input")
-  // A loop that checks every input field in the current tab:
-  if (y) {
-  }
 
-  return valid // return the valid status
-}
 
 function nextPrev(n) {
   // This function will figure out which tab to display
@@ -47,12 +53,31 @@ function nextPrev(n) {
   // Hide the current tab:
   x[currentStep].style.display = "none"
   // Increase or decrease the current tab by 1:
-  currentStep = currentStep + n
-  console.log("x&n: ", x, n, currentStep)
+  
   // if you have reached the end of the form...
+  if (currentStep <= 0) {
+    if(!validateForm()){
+      currentStep = currentStep + 0
+      Toastify({
+            text: 'Please make sure title and summary fields are filled out before proceeding',
+            duration: 3000,
+            close: true,
+            gravity: "top",
+            position: "left",
+            stopOnFocus: true,
+            style: {
+                background: "orange",
+                maxWidth: "100%",
+            },
+        }).showToast();
+    }else{
+      currentStep = currentStep + n
+    }
+  }else{
+    currentStep = currentStep + n
+  }
   if (currentStep >= x.length) {
     // ... the form gets submitted:
-    console.log(document.getElementById("quoteRequestForm"))
     document.getElementById("quoteRequestForm").submit()
     return false
   }
@@ -64,7 +89,7 @@ function submitQuote() {
   return false
 }
 
-function goBack() {
+function goBacks() {
   history.back()
 }
 
@@ -84,44 +109,44 @@ function uploadFiles() {
   let captureInputId = 1
 
   // Function to handle camera capture
-  document.getElementById('captureButton').addEventListener('click', function() {
-    // Trigger the file input click event
+  // document.getElementById('captureButton').addEventListener('click', function() {
+  //   // Trigger the file input click event
 
-    // Create the capture input element
-    var captureInput = document.createElement('input');
-    captureInput.setAttribute('type', 'file');
-    captureInput.setAttribute('id', `upload-capture-${captureInputId}`);
-    captureInput.setAttribute('accept', 'image/*');
-    captureInput.setAttribute('multiple', 'multiple');
-    captureInput.setAttribute('name', 'upload-capture');
-    captureInput.setAttribute('capture', 'environment');
-    captureInput.classList.add('hidden');
+  //   // Create the capture input element
+  //   var captureInput = document.createElement('input');
+  //   captureInput.setAttribute('type', 'file');
+  //   captureInput.setAttribute('id', `upload-capture-${captureInputId}`);
+  //   captureInput.setAttribute('accept', 'image/*');
+  //   captureInput.setAttribute('multiple', 'multiple');
+  //   captureInput.setAttribute('name', 'upload-capture');
+  //   captureInput.setAttribute('capture', 'environment');
+  //   captureInput.classList.add('hidden');
 
-    // Append the file input element to the form
-    quoteRequestForm.appendChild(captureInput);
+  //   // Append the file input element to the form
+  //   quoteRequestForm.appendChild(captureInput);
 
-    captureInputId += 1
+  //   captureInputId += 1
 
-    captureInput.click();
+  //   captureInput.click();
 
-  captureInput.addEventListener('change', function(event) {
-    const newFiles = event.target.files;
+  // captureInput.addEventListener('change', function(event) {
+  //   const newFiles = event.target.files;
 
-    if (newFiles && newFiles.length > 0) {
-      let photo = newFiles[0]
+  //   if (newFiles && newFiles.length > 0) {
+  //     let photo = newFiles[0]
 
-      fileContainerCapture.innerHTML += `
-        <div class="w-[74px] h-[74px] relative rounded-md">
-        <a href='${URL.createObjectURL(photo)}' download>
-            <img src="${URL.createObjectURL(photo)}" alt="" class="w-full h-full object-cover rounded-md">
-        </a>
-        <img src="/static/images/remove.png" alt="" class="w-[16px] h-[16px] -top-2 -right-2 absolute object-cover rounded-full" onclick="removeFile(this)">
-        </div>
-        `
-      }
+  //     fileContainerCapture.innerHTML += `
+  //       <div class="w-[74px] h-[74px] relative rounded-md">
+  //       <a href='${URL.createObjectURL(photo)}' download>
+  //           <img src="${URL.createObjectURL(photo)}" alt="" class="w-full h-full object-cover rounded-md">
+  //       </a>
+  //       <img src="/static/images/remove.png" alt="" class="w-[16px] h-[16px] -top-2 -right-2 absolute object-cover rounded-full" onclick="removeFile(this)">
+  //       </div>
+  //       `
+  //     }
 
-    })
-  });
+  //   })
+  // });
 
   document.getElementById("upload-quote").addEventListener("change", function () {
     let fileInput = document.getElementById("upload-quote")
@@ -137,9 +162,6 @@ function uploadFiles() {
     for (var i = 0; i < selectedFiles.length; i++) {
       selectedFileList.push(selectedFiles[i])
     }
-
-    console.log({selectedFiles})
-    console.log({selectedFileList});
 
     if (selectedFileList.length > 0) {
       photos = selectedFileList.filter((file) => file.type.startsWith("image/"))
@@ -190,3 +212,74 @@ function removeFile(removeIcon) {
   // Remove the parent container
   container.remove()
 }
+
+// recording video
+
+  const videoPreview = document.getElementById("videoPreview");
+const startRecordingButton = document.getElementById("startRecording");
+const stopRecordingButton = document.getElementById("stopRecording");
+const uploadVideoButton = document.getElementById("uploadVideo");
+const uploadStatus = document.getElementById("uploadStatus");
+const videoInput = document.getElementById('recordedVideoInput');
+
+let mediaRecorder;
+let recordedChunks = [];
+let stream;
+
+startRecordingButton.addEventListener("click", startRecording);
+stopRecordingButton.addEventListener("click", stopRecording);
+uploadVideoButton.addEventListener("click", handleRecordedVideo);
+
+async function startRecording() {
+    try {
+      videoPreview.style.display = 'block'
+        stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        videoPreview.srcObject = stream;
+        mediaRecorder = new MediaRecorder(stream);
+
+        mediaRecorder.ondataavailable = (event) => {
+            if (event.data.size > 0) {
+                recordedChunks.push(event.data);
+            }
+        };
+
+        mediaRecorder.onstop = () => {
+            const videoBlob = new Blob(recordedChunks, { type: "video/webm" });
+            recordedChunks = [];
+            const videoFile = new File([videoBlob], 'recorded-video.webm', { type: "video/webm" });
+
+            // Create a DataTransfer object to hold the video file
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(videoFile);
+
+            // Assign the video file to the hidden input
+            videoInput.files = dataTransfer.files;
+
+            // uploadVideoButton.disabled = false;
+            uploadStatus.textContent = 'Video attached successfully!';
+            uploadStatus.style.color = 'green';
+        };
+
+        mediaRecorder.start();
+        startRecordingButton.disabled = true;
+        stopRecordingButton.disabled = false;
+    } catch (error) {
+        console.error("Error starting recording:", error);
+    }
+}
+
+function stopRecording() {
+    if (mediaRecorder && mediaRecorder.state === "recording") {
+        mediaRecorder.stop();
+        stream.getTracks().forEach(track => track.stop());
+        videoPreview.srcObject = null;
+        startRecordingButton.disabled = false;
+        stopRecordingButton.disabled = true;
+    }
+    videoPreview.style.display = 'none'
+}
+
+function handleRecordedVideo() {
+    // The video file is already attached to the hidden input
+}
+

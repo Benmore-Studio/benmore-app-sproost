@@ -142,9 +142,7 @@ class EmailverificationForm(forms.ModelForm):
     def clean_email(self):
         email = self.cleaned_data.get('email')
         user_id = self.instance.id  # Get the current user's ID
-        print(f"Debug: User ID = {user_id}, Email = {email}")
         if User.objects.filter(email=email).exclude(id=user_id).exists():
-            print(f"Debug: Email '{email}' already exists for a different user")
             raise forms.ValidationError("User with this Email already exists.")
         return email
     # email = forms.EmailField(max_length=120)

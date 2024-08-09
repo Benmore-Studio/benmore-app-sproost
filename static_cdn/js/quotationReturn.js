@@ -51,14 +51,11 @@ function uploadFiles() {
         for (var i = 0; i < selectedFiles.length; i++) {
             selectedFileList.push(selectedFiles[i])
         }
-        console.log({ selectedFiles });
-        console.log({ selectedFileList });
+
 
         if (selectedFileList.length > 0) {
             photos = selectedFileList.filter((file) => file.type.startsWith('image/'))
-            console.log({ photos });
             videos = selectedFileList.filter((file) => file.type.startsWith('video/'))
-            console.log({ videos });
 
             photos.forEach(function(photo) {
                 fileContainer.innerHTML += `
