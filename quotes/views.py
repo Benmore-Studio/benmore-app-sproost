@@ -80,10 +80,6 @@ class Quotes(LoginRequiredMixin, View, CustomRequestUtil):
             if request.FILES:
                 uploaded_files = request.FILES.getlist("media")
                 form_data["media"] = uploaded_files
-            
-            print(request.FILES)
-            print(request.POST)
-            print('form_data')
             quote_service = QuoteService(request)
             return self.process_request(request, target_view="main:home", target_function=quote_service.create, payload=form_data)
 

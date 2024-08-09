@@ -251,8 +251,6 @@ function showStep(n) {
      //... and fix the Previous/Next buttons:
     let x = document.getElementsByClassName("step")
     x[n].style.display = "block"
-    console.log(x)
-    console.log(n)
     if (n === 0) {
         document.getElementById("prevBtn").style.display = "none"
         document.getElementById('nextBtn').style.display = 'none'
@@ -322,10 +320,8 @@ function nextPrev(n) {
 
     
     x[currentStep].style.display = "none"
-    console.log((currentStep))
 
     currentStep = currentStep + n
-    console.log(emailSent)
    
     // currentStep = currentStep + n
 
@@ -357,18 +353,14 @@ document.getElementById('signupForm').addEventListener('submit', function(event)
     })
     .then(response => response.json())
     .then(data => {
-      console.log(data)
       if (data.status === 'success') {
           // startCountdown()
           var x = document.getElementsByClassName("step")
           x[currentStep].style.display = "none"
           currentStep = currentStep + 1
           showStep(currentStep)
-          console.log(currentStep)
-          console.log('currentStep')
           emailSent = true
         } else {
-          console.log(data)
           // if(currentStep <= 0){
           //   currentStep = currentStep + 0
           // }

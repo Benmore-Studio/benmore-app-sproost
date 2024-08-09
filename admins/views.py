@@ -280,7 +280,6 @@ class UpdateAgent(LoginRequiredMixin, View):
     
     def get(self, request, *args, **kwargs):
         user = User.objects.get(id=self.kwargs.get('pk'))
-        print(user)
         obj = AgentProfile.objects.get_or_create(user=user)[0]
         form = self.form_class(instance=obj, initial = { 'email' : user.email , 'phone_number' : user.phone_number})
         return render(request, self.template_name, {'form': form})

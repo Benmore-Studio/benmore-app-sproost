@@ -56,7 +56,6 @@ function nextPrev(n) {
   
   // if you have reached the end of the form...
   if (currentStep <= 0) {
-    console.log(validateForm())
     if(!validateForm()){
       currentStep = currentStep + 0
       Toastify({
@@ -79,7 +78,6 @@ function nextPrev(n) {
   }
   if (currentStep >= x.length) {
     // ... the form gets submitted:
-    console.log(document.getElementById("quoteRequestForm"))
     document.getElementById("quoteRequestForm").submit()
     return false
   }
@@ -164,9 +162,6 @@ function uploadFiles() {
     for (var i = 0; i < selectedFiles.length; i++) {
       selectedFileList.push(selectedFiles[i])
     }
-
-    console.log({selectedFiles})
-    console.log({selectedFileList});
 
     if (selectedFileList.length > 0) {
       photos = selectedFileList.filter((file) => file.type.startsWith("image/"))

@@ -87,7 +87,6 @@ cancelDpChange.onclick = function() {
 }
 
 // handling the process tht selects the image from my files and sends it to django
-console.log(menuGalleryInput)
 if(menuGalleryInput){
   menuGalleryInput.addEventListener('change', function(event) {
     // Get the selected file
@@ -98,8 +97,6 @@ if(menuGalleryInput){
     if(selectedFile){
       const previewImage = document.getElementById('previewImageForm');
       previewImage.src = URL.createObjectURL(selectedFile);
-    console.log('previewImage.src' )
-    console.log(previewImage.src )
       dpView.style.display = "none";
       sendButton.style.display = "flex";
       modal.style.display = "block";

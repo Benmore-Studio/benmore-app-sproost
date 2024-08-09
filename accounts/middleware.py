@@ -7,10 +7,7 @@ class GoogleOAuthCallbackMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
-        print(request.session.get('sociallogin_key'))
-        print(request.path)
         if request.path == '/accounts/google/login/callback/' and request.user.is_authenticated:
-            print('sure')
             # if not request.session.get('user_type_selected'):
             # sociallogin = SocialLogin.deserialize(request)
             # print('sociallogin')

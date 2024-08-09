@@ -12,5 +12,5 @@ def handle_social_account_added(request, sociallogin, **kwargs):
     if sociallogin.account.provider == 'google':
         user = sociallogin.user
         # Here you can perform actions like setting user type or any other logic
-        print(f"User {user} signed up with Google!")
+        # print(f"User {user} signed up with Google!")
         logger.info(f"User {user} signed up with Google!")

@@ -361,9 +361,7 @@
 
 <script>
     // using jQuery
-    console.log($('#get-started'))
     let url = '{{url}}'
-    console.log(url+'/profiles/update_onboarding_status/')
     $('#get-started').click(function() {
     $.ajax({
         url: url+'/profiles/update_onboarding_status/',  // URL to your Django view

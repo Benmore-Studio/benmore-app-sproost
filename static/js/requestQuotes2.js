@@ -38,7 +38,6 @@ function validateForm() {
   x = document.querySelectorAll("#step")
   y = x[currentStep].getElementsByTagName("input")
   var requiredInputs = document.getElementsByClassName("step")
-  console.log(requiredInputs)
   valid = [...y].every((input) => input.value !== "")
 
   return valid // return the valid status
@@ -52,11 +51,9 @@ function nextPrev(n) {
   x[currentStep].style.display = "none"
   // Increase or decrease the current tab by 1:
   currentStep = currentStep + n
-  console.log("x&n: ", x, n, currentStep)
   // if you have reached the end of the form...
   if (currentStep >= x.length) {
     // ... the form gets submitted:
-    console.log(document.getElementById("quoteRequestForm"))
     document.getElementById("quoteRequestForm").submit()
     return false
   }
@@ -141,9 +138,6 @@ function uploadFiles() {
     for (var i = 0; i < selectedFiles.length; i++) {
       selectedFileList.push(selectedFiles[i])
     }
-
-    console.log({selectedFiles})
-    console.log({selectedFileList});
 
     if (selectedFileList.length > 0) {
       photos = selectedFileList.filter((file) => file.type.startsWith("image/"))
