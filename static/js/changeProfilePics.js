@@ -10,6 +10,7 @@ let span = document.getElementsByClassName("close")[0];
 let stopButton = document.getElementById("stop");
 const previewImage = document.getElementById('previewImageForm');
 let galleryInput = document.getElementById('id_gallery_change')
+let menuGalleryInput = document.getElementById('menu_id_gallery_change')
 const captureButton = document.getElementById('capture');
 const canvas = document.getElementById('canvas');
 const loading = document.getElementById('loading');
@@ -86,24 +87,50 @@ cancelDpChange.onclick = function() {
 }
 
 // handling the process tht selects the image from my files and sends it to django
-galleryInput.addEventListener('change', function(event) {
-  // Get the selected file
-  const selectedFile = event.target.files[0];
+console.log(menuGalleryInput)
+if(menuGalleryInput){
+  menuGalleryInput.addEventListener('change', function(event) {
+    // Get the selected file
+    const selectedFile = event.target.files[0];
+   
 
-  // Display the selected image in the modal
-  if(selectedFile){
-    const previewImage = document.getElementById('previewImageForm');
-    previewImage.src = URL.createObjectURL(selectedFile);
-    dpView.style.display = "none";
-    sendButton.style.display = "flex";
+    // Display the selected image in the modal
+    if(selectedFile){
+      const previewImage = document.getElementById('previewImageForm');
+      previewImage.src = URL.createObjectURL(selectedFile);
+    console.log('previewImage.src' )
+    console.log(previewImage.src )
+      dpView.style.display = "none";
+      sendButton.style.display = "flex";
+      modal.style.display = "block";
+      // Call the resizeImage function to resize the image
+      resizeImage(selectedFile, function(resizedImage) {
+          // Set the source of the preview image to the resized image
+          previewImage.src = resizedImage.src;
+      });
+    }
+  });
+}
+if(galleryInput){
+  galleryInput.addEventListener('change', function(event) {
+    // Get the selected file
+    const selectedFile = event.target.files[0];
 
-    // Call the resizeImage function to resize the image
-    resizeImage(selectedFile, function(resizedImage) {
-        // Set the source of the preview image to the resized image
-        previewImage.src = resizedImage.src;
-    });
-  }
-});
+    // Display the selected image in the modal
+    if(selectedFile){
+      const previewImage = document.getElementById('previewImageForm');
+      previewImage.src = URL.createObjectURL(selectedFile);
+      dpView.style.display = "none";
+      sendButton.style.display = "flex";
+
+      // Call the resizeImage function to resize the image
+      resizeImage(selectedFile, function(resizedImage) {
+          // Set the source of the preview image to the resized image
+          previewImage.src = resizedImage.src;
+      });
+    }
+  });
+}
 
 // Function to resize the image
 function resizeImage(selectedFile, callback) {

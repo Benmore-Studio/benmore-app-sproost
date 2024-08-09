@@ -3,13 +3,22 @@ from allauth.account.views import LoginView
 from allauth.account.views import SignupView
 from django.contrib.auth import get_user_model
 from phonenumbers import parse, is_valid_number
-from .forms import ValidatePhoneNumberForm, CustomSignupForm, UserTypeForm
+from .forms import ValidatePhoneNumberForm, CustomSignupForm, UserTypeForm, EmailverificationForm
 from django.http import JsonResponse
 
 from django.contrib.auth import logout
 from django.shortcuts import redirect
 from django.http import HttpResponseBadRequest, HttpResponseServerError
 from django.template import loader
+from django.template.loader import render_to_string
+from django.http import HttpResponse
+import random
+from mail_templated import send_mail
+from django.conf import settings
+
+from datetime import timedelta
+
+
 
 
 from allauth.socialaccount.models import SocialLogin
@@ -21,6 +30,11 @@ import uuid
 
 from profiles.models import UserProfile, AgentProfile, ContractorProfile
 
+from django.contrib.sites.shortcuts import get_current_site
+import json
+
+
+
 
 
 
@@ -29,7 +43,17 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+User = get_user_model()
 
+
+def get_base_url(request):
+    # Use 'get_current_site' to get the domain
+    domain = get_current_site(request).domain
+    # Use 'request.is_secure' to determine the scheme (http or https)
+    scheme = 'https' if request.is_secure() else 'http'
+    # Construct the base URL
+    base_url = f"{scheme}://{domain}"
+    return base_url
 
 class CustomLoginView(LoginView):
     def form_valid(self, form):
@@ -63,9 +87,7 @@ def retrieve_sociallogin(request):
 def generate_username(email):
     base_username = email.split('@')[0]
     username = base_username
-    counter = 1
-    from django.contrib.auth import get_user_model
-    User = get_user_model()
+    counter = 1    
     
     while User.objects.filter(username=username).exists():
         username = f"{base_username}{counter}"
@@ -108,8 +130,91 @@ def select_user_type(request):
 
 class CustomSignupView(SignupView):
     form_class = CustomSignupForm
-    def dispatch(self, request, *args, **kwargs):
-        return super().post(request, *args, **kwargs)
+
+    def form_invalid(self, form):
+        # This method is called when the form is invalid
+        errors = form.errors
+        for field, error in errors.items():
+            print(f"Error in {field}: {error}")
+        return self.render_to_response(self.get_context_data(form=form))
+    
+    def form_valid(self, form):
+        # If you want to print out the values being submitted
+        cleaned_data = form.cleaned_data
+        for field, value in cleaned_data.items():
+            print(f"{field}: {value}")
+        return super().form_valid(form)
+
+
+
+def generate_verification_code():
+    return f"{random.randint(100000, 999999)}"
+
+
+def send_verification_email(request, user, verification_code, email):
+
+    try:       
+        send_mail(
+            'mail/email_send.tpl',
+            {'first_name': user.first_name,'verification_code': verification_code,"base_url": get_base_url(request)},
+            settings.EMAIL_HOST_USER,
+            [email],
+            fail_silently=False,
+        )
+    
+    except Exception as e:
+        print(f'Failed to send verification email to {email}: {e}')
+        return HttpResponse("An error occurred while sending the email.", status=500)
+
+    return HttpResponse("Verification email sent.", status=200)
+
+
+def verify_email(request):
+    verification_code = generate_verification_code()
+    request.session['verification_code']=verification_code
+    request.session.set_expiry(timedelta(minutes=30 ))
+
+    return render(request, 'account/verify_email.html', {})
+
+
+def verify_email_two(request):
+    if request.user.is_authenticated:
+        stored_code = request.session.get('verification_code')
+        user = request.user
+        try:
+            data = json.loads(request.body)
+            print(f"Debug: Raw request body data = {request.body}")
+        except json.JSONDecodeError as e:
+            return JsonResponse({'status': 'error', 'message': 'Invalid JSON data'}, status=400)
+
+        print('data')
+        if User.objects.filter(email=data['email']).exclude(id=user.id).exists():
+            return JsonResponse({'status': 'error','message': 'Email already exists for other users'}, status=400)
+        else:
+            email_result = send_verification_email(request, user, stored_code, data['email'])
+            if email_result.status_code == 200:
+                request.session['email_data']=data
+                return JsonResponse({'status': 'success', 'message': 'Email sent', 'stored_code':stored_code}, status=200)
+            return JsonResponse({'message': 'Email not found'}, status=400)
+
+    else:
+        return JsonResponse({'status': 'error', 'message': 'User not authenticated'}, status=401)
+
+
+def final_email_verification(request):
+    stored_email = request.session.get('email_data')
+    user = request.user
+
+    form = EmailverificationForm(stored_email, instance=user)
+    if form.is_valid():
+        email = form.cleaned_data['email']
+        user.email = email
+        user.save()
+        return redirect('main:home')
+    else:
+        return render(request, 'account/verify_email.html', {})
+
+
 
 
 def validate_phone_numbers(request):

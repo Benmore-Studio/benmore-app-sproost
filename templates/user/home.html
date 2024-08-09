@@ -4,45 +4,41 @@
 
 {% block content %}
 <style>
-     .container-bottom {
-           width: 100%;
-           height: 150px;
-            margin: 70px auto;
-
-        }
-        .glide__slide img {
-            aspect-ratio: 3 / 2; 
-        }
-        .glide__slide {
-            flex: 0 0 auto;
-        }
+    .glide__slide img {
+        width: 100%;
+        height: auto; /* Ensures the image maintains its aspect ratio */
+    }
+    
+    .glide__slide {
+        flex: 0 0 auto;
+    }
 
     .glide__arrows {
         display: none;
+    }
+
+    .project-image {
+        height: 350px;
+    }
+
+    .projects-grid img {
+        width: 100%;
+        height: auto; /* Ensures the image maintains its aspect ratio */
     }
 
     @media (min-width: 1000px) {
         .glide__arrows {
             display: flex;
         }
-    
-    }
-    .projects-grid img {
-        aspect-ratio: 3 / 2; 
     }
 
     @media (min-width: 2000px) {
         .projects-grid {
             display: grid;
             grid-template-columns: repeat(4, minmax(0, 1fr));
-            gap: 1rem;         
+            gap: 1rem;
         }
-        #project-image {
-            height: 350px; 
-        }
-    
     }
-
 </style>
 
 <div class="h-full bg-gray-100">
@@ -53,7 +49,7 @@
                 <div class="glide__track" data-glide-el="track">
                     <ul class="glide__slides">
                         <li class="glide__slide1 w-[40%]">
-                            <div class="tab flex-shrink-0 rounded-3xl bg-white p-2  shadow-sm w-[180px]">
+                            <div class="tab flex-shrink-0 rounded-[40px] bg-white p-2 shadow-sm w-[180px]">
                                 <p class='text-center'>Sample1</p>
                             </div>
                         </li>
@@ -91,167 +87,132 @@
             </div>
         </div>
 
-        <!-- goals part -->
+            <!-- goals part -->
         <div class="mx-4">
             <div class="w-full grid grid-cols-2 lg:grid-cols-4 gap-4 mt-4 mb-12">
-                <div class="tab flex flex-col text-center justify-center bg-white p-4 rounded-lg shadow-md h-[200px]">
-                    <div class="w-full flex flex-col gap-4">
-                        <div class="w-full flex items-center justify-between">
-                            <h3 class="text-gray-900 font-medium">My Home</h3>
-                            <span class="">
-                                <img src="{% static 'svgs/more-vertical.svg' %}" alt="" class="" />
-                            </span>
-                        </div>
-                        <div class="w-full flex items-center justify-between">            
-                            {% if box1_count > 0 %}
-                                <h3 class="text-gray-900 text-2xl font-semibold">Quote Requests</h3>  
-                            {% else %}
-                                <h3 class="text-gray-900 text-2xl font-semibold">0</h3>              
-                            {% endif %}
-                                
-                            <span class="">
-                                <img src="{% static 'svgs/quotes.svg' %}" alt="" class="" />
-                            </span>
-                        </div>
+                <div class="tab flex flex-col text-flex-start justify-center bg-white rounded-lg shadow-md h-[200px] lg:h-[300px] pt-[16px] pl-[16px]">
+                    <div class="w-[44px] h-[44px] flex justify-center items-center rounded-full bg-graybg ">
+                        <img src="{% static 'images/Homeadvisor.png' %}" alt="" class="text-black w-[24px] h-[24px]">
                     </div>
-                </div>
-                <div class="tab flex flex-col text-center justify-center bg-white p-4 rounded-lg shadow-md h-[200px]">
-                    <a href="{% url 'main:assigned-projects' %}" class="w-full p-4 bg-white">
-                        <div class="w-full flex flex-col gap-4">
-                            <div class="w-full flex items-center justify-between">
-                                <h3 class="text-gray-900 font-medium">Invite My Agent</h3>
-                                <span class="">
-                                <img src="{% static 'svgs/more-vertical.svg' %}" alt="" class="" />
-                                </span>
-                            </div>
-                            <div class="w-full flex items-center justify-between">            
-                                {% if box2_count > 0 %}
-                                <h3 class="text-gray-900 text-2xl font-semibold">TBD</h3>  
-                                {% else %}
-                                <h3 class="text-gray-900 text-2xl font-semibold">0</h3>              
-                                {% endif %}                           
-                                <span class="">
-                                <img src="{% static 'svgs/quotes.svg' %}" alt="" class="" />
-                                </span>
-                            </div>
-                        </div>
-                    </a>
-                </div>
-                <div class="tab flex flex-col text-center justify-center bg-white p-4 rounded-lg shadow-md h-[200px]">
-                    <div class="w-full flex flex-col gap-4">
-                        <div class="w-full flex items-center justify-between">
-                        <h3 class="text-gray-900 font-medium">Request A Quote</h3>
-                        <span class="">
-                            <img src="{% static 'svgs/more-vertical.svg' %}" alt="" class="" />
-                        </span>
-                        </div>
-                        <div class="w-full flex items-center justify-between">            
-                        {% if box3_count > 0 %}
-                            <h3 class="text-gray-900 text-2xl font-semibold">Quote Requests</h3>  
+                    <h3 class="text-gray-900 font-medium mt-[37px]">Number Of Uploaded Projects</h3>
+                    <div class="w-full mt-[7px] pb-[15px]">            
+                        {% if box1_count > 0 %}
+                            <h3 class="text-gray-900 text-2xl font-semibold">{{ box1_count }}</h3>  
                         {% else %}
                             <h3 class="text-gray-900 text-2xl font-semibold">0</h3>              
                         {% endif %}
-                            
-                        <span class="">
-                            <img src="{% static 'svgs/quotes.svg' %}" alt="" class="" />
-                        </span>
-                        </div>
                     </div>
-                </div>
-                <div class="tab flex flex-col text-center justify-center bg-white p-4 rounded-lg shadow-md h-[200px]">
-                    <div class="w-full flex flex-col gap-4">
-                        <div class="w-full flex items-center justify-between">
-                        <h3 class="text-gray-900 font-medium">TDB</h3>
-                        <span class="">
-                            <img src="{% static 'svgs/more-vertical.svg' %}" alt="" class="" />
-                        </span>
-                        </div>
-                        <div class="w-full flex items-center justify-between">            
-                        {% if box4_count > 0 %}
-                            <h3 class="text-gray-900 text-2xl font-semibold">{{ box4_count }}</h3>  
+                </div>                
+                <div class="tab flex flex-col text-flex-start justify-center bg-white rounded-lg shadow-md h-[200px] lg:h-[300px] pt-[16px] pl-[16px]">
+                    <div class="w-[44px] h-[44px] flex justify-center items-center rounded-full bg-graybg ">
+                        <img src="{% static 'images/documents.png' %}" alt="" class="text-black w-[24px] h-[24px]">
+                    </div>
+                    <h3 class="text-gray-900 font-medium mt-[37px]">Number Of Qoutes Requested</h3>
+                    <div class="w-full mt-[7px] pb-[15px]">            
+                        {% if box1_count > 0 %}
+                            <h3 class="text-gray-900 text-2xl font-semibold">{{ box1_count }}</h3>  
                         {% else %}
                             <h3 class="text-gray-900 text-2xl font-semibold">0</h3>              
                         {% endif %}
-                            
-                        <span class="">
-                            <img src="{% static 'svgs/quotes.svg' %}" alt="" class="" />
-                        </span>
-                        </div>
                     </div>
-                </div>
+                </div>                
+                <div class="tab flex flex-col text-flex-start justify-center bg-white rounded-lg shadow-md lg:h-[300px] h-[200px] pt-[16px] pl-[16px]">
+                    <div class="w-[44px] h-[44px] flex justify-center items-center rounded-full bg-graybg ">
+                        <img src="{% static 'images/verified.png' %}" alt="" class="text-black w-[24px] h-[24px]">
+                    </div>
+                    <h3 class="text-gray-900 font-medium mt-[37px]">Number Of Completed Projects</h3>
+                    <div class="w-full mt-[7px] pb-[15px]">            
+                        {% if box1_count > 0 %}
+                            <h3 class="text-gray-900 text-2xl font-semibold">{{ box1_count }}</h3>  
+                        {% else %}
+                            <h3 class="text-gray-900 text-2xl font-semibold">0</h3>              
+                        {% endif %}
+                    </div>
+                </div> 
+                <div class="flex flex-col gap-4">            
+                    <a href="{% url 'quotes:request-quotes' %}" class="tab flex flex-col text-flex-start justify-center bg-white rounded-lg shadow-md h-[91px] lg:h-[141px] pt-[9px] pl-[16px]">
+                        <div class="w-[28px] h-[28px] flex justify-center items-center rounded-full bg-graybg ">
+                            <img src="{% static 'images/File.png' %}" alt="" class="text-black w-[16px] h-[16px]">
+                        </div>
+                        <h3 class="text-gray-900 font-medium mt-[6px]"> Request Quotes</h3>
+                    </a> 
                 
-            </div>
-        </div>
-
-        <!-- request or assign -->
-        <div class="mx-4">
-            <div class="w-full flex items-center justify-end gap-4 pb-12 ">
-                {% if request.user.user_type == "HO" %}
-                <a
-                    href="{% url 'main:assign-agent' %}"
-                    class="flex items-center justify-center cursor-pointer gap-2 bg-toneLightGreen p-3 w-[50%] rounded-md shadow-sm"
-                >
-                    <img src="{% static 'svgs/plus-green.svg' %}" alt="" class="" />
-                    <span class="text-primary text-sm font-semibold">Assign Agent</span>
-                </a>
-                {% endif %}
-                {% if request.user.user_type == 'AG' %}
-                <a href="{% url 'quotes:request-quotes' name=name %}" class="w-[50%] flex items-center justify-center gap-2 cursor-pointer bg-primary p-3 rounded-md shadow-sm">
-                {% elif request.user.user_type == 'HO' %}
-                <a href="{% url 'quotes:request-quotes' %}" class="w-[50%] flex items-center justify-center gap-2 cursor-pointer bg-primary p-3 rounded-md shadow-sm">
-                {% endif %}
-                <img src="{% static 'svgs/plus.svg' %}" alt="" class="" />
-                <span class="text-white text-sm font-semibold">Request Quote</span>
-                </a>
+                    <a href="{% url 'main:assign-agent' %}" class="tab cursor-pointer flex flex-col text-flex-start justify-center bg-white rounded-lg shadow-md h-[91px] lg:h-[141px] pt-[9px] pl-[16px]">
+                        <div class="w-[28px] h-[28px] flex justify-center items-center rounded-full bg-graybg ">
+                            <img src="{% static 'images/File.png' %}" alt="" class="text-black w-[16px] h-[16px]">
+                        </div>
+                        <h3 class="text-gray-900 font-medium mt-[6px]"> Assign Agent</h3>
+                    </a>
+                </div>                   
             </div>
         </div>
 
     <!-- Image Gallery -->
-    <div class="w-full pb-[200px]">
-        {% if projs %}
-        <div class="container-bottom w-full h-full">
-            <a href="" class="text-primary font-semibold mb-4 mx-4">View Projects</a>
-            <div class="lg:hidden glide-bottom bg-gray-100 w-full pb-[200px] mt-4">
+    <div class="w-full pb-[100px]">
+        {% if proj %}
+        <div class="container-bottom w-full">
+            <div class="flex justify-between">
+                <div class="font-semibold mb-4 mx-4">Property Listing</div>
+                <a href="{% url 'property:all-property' %}" class="font-semibold mb-4 mx-4">See All</a>
+            </div>
+            <div class="lg:hidden glide-bottom bg-gray-100 w-full mt-4">
                     <!-- Slides here -->
                     <div class="glide__track" data-glide-el="track">
                         <ul class="glide__slides">
-                            {% for image in projs %}
-                            <li class="glide__slide">
-                                {% if image.file %}
-                                <img src="{{ image.file.url }}" id="project-image" alt="Project Image" class="h-[400px] md:h-[350px] object-fit rounded-lg">
-                                {% endif %}
-                            </li>
+                            {% for image in proj %}
+                                <li class="glide__slide">
+                                    {% if image.file %}
+                                        <div class="bg-white rounded-lg shadow-md h-auto overflow-hidden" >
+                                            <div id="img-div" class="h-[300px] w-full" style="height: 270px;">
+                                                <img src="{{ image.file.url }}" alt="Project Image" class="project-image w-full h-auto object-fit object-center">
+                                            </div>
+                                            <p class="font-semibold my-[16px] pl-1 bg-white text-black p-2">Bungalow Renovation</p>
+                                        </div>
+                                    {% endif %}
+                                </li>
                             {% endfor %}
-                            <!-- Grid for large screens -->
                         </ul>
                     </div>
             </div>  
             <!-- grid projects                  -->
-            <div class="w-full h-full bg-gray-100 mt-4">
-                <div class="mx-4">
-                    <div class="projects-grid w-full hidden lg:grid grid-cols-3 gap-4 pb-[200px]">
-                            {% for image in projs %}
-                            <div class="project-item">
-                                {% if image.file %}
-                                <img src="{{ image.file.url }}" alt="Project Image" class="h-[320px] object-fit rounded-lg">
-                                {% endif %}
-                            </div>
-                            {% endfor %}
-                    </div>
+            <div class=" hidden p-4 lg:grid grid-cols-1 justify-center items-center gap-4 sm:grid-cols-2 lg:grid-cols-3 pb-[100px] sm:pb-[60px]">
+                <!-- Property Card 1 -->
+                <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                    <img src="{% static 'images/bannerAfter.png' %}" alt="Property Image" class="w-full h-60 object-cover">
+                    <p class="my-[16px] pl-1"> Bungalow Renovation</p>
+                </div>
+                <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                    <img src="{% static 'images/bannerAfter.png' %}" alt="Property Image" class="w-full h-60 object-cover">
+                    <p class="my-[16px] pl-1">Bungalow Renovation</p>
+                </div>
+                <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                    <img src="{% static 'images/bannerAfter.png' %}" alt="Property Image" class="w-full h-60 object-cover">
+                    <p class="my-[16px] pl-1">Bungalow Renovation</p>
                 </div>
             </div>
-        </div>
-        {% else %}
-        <a href="" class="text-primary font-semibold mb-4 mx-4">View Projects</a>
-        <div class="w-full flex flex-col items-center justify-center gap-4 mt-4">
-            <h3 class="text-gray-900 font-semibold text-center">No projects yet</h3>
-        </div>
-        {% endif %}           
+            {% else %}
+            <div class="flex justify-between">
+                <a href="" class="font-semibold mb-4 mx-4">Property Listing</a>
+                <a href="" class="font-semibold mb-4 mx-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                  </svg>
+                </a>
 
+            </div>
+            <div class="w-full flex flex-col items-center justify-center gap-4 mt-4 pb-[30px]">
+                <h3 class="text-gray-900 font-semibold text-center">No projects yet</h3>
+            </div>
+            {% endif %}           
+        </div>
+
+        <div class="fixed bottom-36 w-full flex flex-col items-center">
+            <div id="copied-message" class="hidden text-white w-[50%] text-sm mt-2 text-center bg-black py-2">Copied!</div>
+            <div id="copied-message-inivite" class="hidden w-[50%] text-white text-sm mt-2 text-center bg-black py-2">Please add your license number in the edit page!</div>
+        </div>
+    
     </div>
-
-</div>
-
+    
 {% endblock %}
 {% block bottomNav %}
     {% include "user/bottom_nav_agent.html" %} 
@@ -260,7 +221,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
 <script>
     AOS.init(
-        {duration: 1200,}
+        {duration: 1200,  once: true, // animation only happens once - while scrolling down
+        }
     );
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js" integrity="sha512-A7AYk1fGKX6S2SsHywmPkrnzTZHrgiVT7GcQkLGDe2ev0aWb8zejytzS8wjo7PGEXKqJOrjQ4oORtnimIRZBtw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
@@ -378,7 +340,8 @@
         });
     }
 
-    addInvite.addEventListener("click", function() {
+    if(addInvite){
+        addInvite.addEventListener("click", function() {
         // Show the copied message
         copiedMessageInvite.style.display = 'block';
 
@@ -386,7 +349,9 @@
         setTimeout(function() {
             copiedMessageInvite.style.display = 'none';
         }, 3000);
-        })
+    })
+    }
+   
 });
 </script>
 

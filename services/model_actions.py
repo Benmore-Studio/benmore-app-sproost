@@ -11,6 +11,7 @@ class ModelAction(CustomRequestUtil):
                 error = "Invalid model instance"
                 return None, self.make_error(error=error)
 
+            # print('model object', **payload)
             main_object = model.objects.create(**payload)
             main_object.save()
 

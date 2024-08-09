@@ -195,18 +195,19 @@ class AssignAgentView(LoginRequiredMixin, View):
                     assigned_by=request.user,
                     is_approved=True
                 )
-                send_mail(
-                    'mail/assign_agent.tpl',
-                    {'first_name': agent.user.first_name, "base_url": get_base_url(request)},
-                    settings.EMAIL_HOST_USER,
-                    [agent.user.email]
-                )
+                # send_mail(
+                #     'mail/assign_agent.tpl',
+                #     {'first_name': agent.user.first_name, "base_url": get_base_url(request)},
+                #     settings.EMAIL_HOST_USER,
+                #     [agent.user.email]
+                # )
 
                 messages.success(request, 'Agent assigned successfully. Awaiting agent confirmation')
                 return redirect('main:home')
             except AgentProfile.DoesNotExist:
                 messages.error(request, f'No Agent exists with such liscense ID: {regID}')
-
+        else:
+            pass
         return redirect('main:assign-agent')
 
 

@@ -2,7 +2,7 @@
 from allauth.account.forms import SignupForm
 from phonenumber_field.formfields import PhoneNumberField
 from django import forms
-from .models import USER_TYPE_CHOICES
+from .models import USER_TYPE_CHOICES, User
 from profiles.models import UserProfile, ContractorProfile, AgentProfile, Referral
 from property.models import AssignedAccount
 from phonenumber_field.widgets import PhoneNumberPrefixWidget
@@ -13,10 +13,12 @@ from django.contrib.sites.shortcuts import get_current_site
 
 
 
+from django.utils.crypto import get_random_string
+
+
+
+
 from mail_templated import send_mail
-
-
-
 
 
 def get_base_url(request):
@@ -72,6 +74,7 @@ class CustomSignupForm(SignupForm):
         user = super(CustomSignupForm, self).save(request)
         user.user_type = self.cleaned_data['user_type']
         user.phone_number = self.cleaned_data['phone_number']
+    
         user.save()
 
         if user.user_type == "HO":
@@ -97,12 +100,12 @@ class CustomSignupForm(SignupForm):
                                 assigned_by=user,
                                 is_approved=True
                             )
-                            send_mail(
-                                'mail/assign_agent.tpl',
-                                {'first_name': agent.user.first_name, "base_url": get_base_url(request)},
-                                settings.EMAIL_HOST_USER,
-                                [agent.user.email]
-                            )
+                            # send_mail(
+                            #     'mail/assign_agent.tpl',
+                            #     {'first_name': agent.user.first_name, "base_url": get_base_url(request)},
+                            #     settings.EMAIL_HOST_USER,
+                            #     [agent.user.email]
+                            # )
 
                     except AgentProfile.DoesNotExist:
                         pass
@@ -128,10 +131,24 @@ class CustomSignupForm(SignupForm):
                 city = self.cleaned_data['city'],
             )
 
-        messages.success(request, 'Account created successfully')
         return user
 
-    
+
+class EmailverificationForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ('email',)
+
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        user_id = self.instance.id  # Get the current user's ID
+        print(f"Debug: User ID = {user_id}, Email = {email}")
+        if User.objects.filter(email=email).exclude(id=user_id).exists():
+            print(f"Debug: Email '{email}' already exists for a different user")
+            raise forms.ValidationError("User with this Email already exists.")
+        return email
+    # email = forms.EmailField(max_length=120)
+
 
 class ValidatePhoneNumberForm(forms.Form):
     phone_number = PhoneNumberField(required=False, widget=PhoneNumberPrefixWidget(initial='US'))

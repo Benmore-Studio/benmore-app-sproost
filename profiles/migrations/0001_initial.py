@@ -36,7 +36,7 @@ class Migration(migrations.Migration):
                 ('specialization', models.CharField(blank=True, max_length=225, null=True)),
                 ('website', models.URLField(max_length=255, null=True)),
                 ('city', models.CharField(max_length=50)),
-                ('image', models.ImageField(null=True, upload_to=profiles.models.image_upload_location)),
+                ('image', models.ImageField(null=True, upload_to=profiles.models.image_upload_location_contractor)),
                 ('company_address', address.models.AddressField(null=True, on_delete=django.db.models.deletion.SET_NULL, to='address.address')),
                 ('user', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='contractor_profile', to=settings.AUTH_USER_MODEL)),
             ],

@@ -4,6 +4,11 @@ from phonenumber_field.modelfields import PhoneNumberField
 from django.contrib.contenttypes.fields import GenericRelation
 # from profiles.models import AgentProfile, UserProfile
 
+
+def upload_location_quote(instance, filename):
+    # file will be uploaded to MEDIA_ROOT/projects/<project_id>/<filename>
+    return 'quotes/{0}/{1}'.format(instance.id, filename)
+
 class QuoteRequestStatus(models.TextChoices):
     pending = "Pending"
     approved = "Approved"
@@ -21,11 +26,13 @@ class QuoteRequest(models.Model):
     summary = models.TextField(null=False, max_length=257)
     status = models.CharField(max_length=255, choices=QuoteRequestStatus.choices, default=QuoteRequestStatus.pending, null=False)
     contact_phone = models.CharField(max_length=20, null=False)
-    contact_email = models.EmailField(max_length=255, null=False)
+    contact_username = models.CharField(max_length=255, null=False)
     property_address = models.CharField(max_length=255, null=False)
     upload_date = models.DateTimeField(auto_now_add=True, null=False)
     media_paths = GenericRelation("main.Media")
     is_quote = models.BooleanField(default=True)
+    file = models.FileField(upload_to=upload_location_quote, null=True, blank=True)
+
     
     created_by_agent = models.ForeignKey("accounts.User", on_delete=models.SET_NULL, blank=True, null=True, related_name='agent_quote_requests')
     

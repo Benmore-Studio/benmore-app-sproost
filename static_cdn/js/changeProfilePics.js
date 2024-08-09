@@ -14,6 +14,7 @@ const captureButton = document.getElementById('capture');
 const canvas = document.getElementById('canvas');
 const loading = document.getElementById('loading');
 
+alert('boss')
 
 // clicking on the profile pics to display it
 img.onclick = function() {
