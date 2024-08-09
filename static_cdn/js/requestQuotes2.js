@@ -2,8 +2,11 @@ var currentStep = 0 // Current tab is set to be the first tab (0)
 window.addEventListener("DOMContentLoaded", () => {
   showStep(currentStep)
   uploadFiles()
+  validateForm()
+  alert('op')
 })
-alert('po')
+
+alert('o')
 
 function showStep(n) {
   // This function will display the specified tab of the form...
@@ -34,9 +37,9 @@ function validateForm() {
     valid = false
   x = document.querySelectorAll("#step")
   y = x[currentStep].getElementsByTagName("input")
-  // A loop that checks every input field in the current tab:
-  if (y) {
-  }
+  var requiredInputs = document.getElementsByClassName("step")
+  console.log(requiredInputs)
+  valid = [...y].every((input) => input.value !== "")
 
   return valid // return the valid status
 }
@@ -85,44 +88,44 @@ function uploadFiles() {
   let captureInputId = 1
 
   // Function to handle camera capture
-  document.getElementById('captureButton').addEventListener('click', function() {
-    // Trigger the file input click event
+  // document.getElementById('captureButton').addEventListener('click', function() {
+  //   // Trigger the file input click event
 
-    // Create the capture input element
-    var captureInput = document.createElement('input');
-    captureInput.setAttribute('type', 'file');
-    captureInput.setAttribute('id', `upload-capture-${captureInputId}`);
-    captureInput.setAttribute('accept', 'image/*');
-    captureInput.setAttribute('multiple', 'multiple');
-    captureInput.setAttribute('name', 'upload-capture');
-    captureInput.setAttribute('capture', 'environment');
-    captureInput.classList.add('hidden');
+  //   // Create the capture input element
+  //   var captureInput = document.createElement('input');
+  //   captureInput.setAttribute('type', 'file');
+  //   captureInput.setAttribute('id', `upload-capture-${captureInputId}`);
+  //   captureInput.setAttribute('accept', 'image/*');
+  //   captureInput.setAttribute('multiple', 'multiple');
+  //   captureInput.setAttribute('name', 'upload-capture');
+  //   captureInput.setAttribute('capture', 'environment');
+  //   captureInput.classList.add('hidden');
 
-    // Append the file input element to the form
-    quoteRequestForm.appendChild(captureInput);
+  //   // Append the file input element to the form
+  //   quoteRequestForm.appendChild(captureInput);
 
-    captureInputId += 1
+  //   captureInputId += 1
 
-    captureInput.click();
+  //   captureInput.click();
 
-  captureInput.addEventListener('change', function(event) {
-    const newFiles = event.target.files;
+  // captureInput.addEventListener('change', function(event) {
+  //   const newFiles = event.target.files;
 
-    if (newFiles && newFiles.length > 0) {
-      let photo = newFiles[0]
+  //   if (newFiles && newFiles.length > 0) {
+  //     let photo = newFiles[0]
 
-      fileContainerCapture.innerHTML += `
-        <div class="w-[74px] h-[74px] relative rounded-md">
-        <a href='${URL.createObjectURL(photo)}' download>
-            <img src="${URL.createObjectURL(photo)}" alt="" class="w-full h-full object-cover rounded-md">
-        </a>
-        <img src="/static/images/remove.png" alt="" class="w-[16px] h-[16px] -top-2 -right-2 absolute object-cover rounded-full" onclick="removeFile(this)">
-        </div>
-        `
-      }
+  //     fileContainerCapture.innerHTML += `
+  //       <div class="w-[74px] h-[74px] relative rounded-md">
+  //       <a href='${URL.createObjectURL(photo)}' download>
+  //           <img src="${URL.createObjectURL(photo)}" alt="" class="w-full h-full object-cover rounded-md">
+  //       </a>
+  //       <img src="/static/images/remove.png" alt="" class="w-[16px] h-[16px] -top-2 -right-2 absolute object-cover rounded-full" onclick="removeFile(this)">
+  //       </div>
+  //       `
+  //     }
 
-    })
-  });
+  //   })
+  // });
 
   document.getElementById("upload-quote").addEventListener("change", function () {
     let fileInput = document.getElementById("upload-quote")
