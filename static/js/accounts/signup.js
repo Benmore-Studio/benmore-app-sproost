@@ -1,8 +1,5 @@
 var currentStep = 0 // Current tab is set to be the first tab (0)
-alert('ib')
-
 window.addEventListener("DOMContentLoaded", () => {
-    alert('ibah')
     showStep(currentStep);
     selectUserType();
     validateEmail();
@@ -33,9 +30,9 @@ function validateRegistrationID() {
 
 
 function validatePassword() {
-    password1 = document.getElementById('id_password1')
-    password2 = document.getElementById('id_password2')
-    passwordError = document.getElementById('password-error')
+    let password1 = document.getElementById('id_password1')
+    let password2 = document.getElementById('id_password2')
+    let passwordError = document.getElementById('password-error')
     passwordError.style.display = "none"
 
     password2.addEventListener('input', function (e) {
@@ -45,13 +42,32 @@ function validatePassword() {
             passwordError.style.display = "block"
             password2.classList.add('focus:border-red-500');
             password2.classList.remove('focus:border-green-500');
+            document.getElementById("nextBtn").disabled = true
         } else {
             passwordError.style.display = "none"
             password2.classList.remove('focus:border-red-500');
             password2.classList.add('focus:border-green-500');
+            document.getElementById("nextBtn").disabled = false
+
         }
     })
 }
+
+const passwordshow = document.querySelector("#passwordshow")
+const password = document.querySelector("input[name='password1']");
+passwordshow.onclick = function () {
+    "password" === password.type
+        ? ((passwordshow.children[0].classList.remove = "fa fa-eye"), (passwordshow.children[0].classList = "svg-inline--fa fa-eye-slash"), (password.type = "text"))
+        : ((passwordshow.children[0].classList = ""), (passwordshow.children[0].classList = "svg-inline--fa fa-eye"), (password.type = "password"));
+};
+const passwordshow2 = document.querySelector("#passwordshow2")
+const confirmPassword = document.querySelector("input[name='password2']");
+passwordshow2.onclick = function () {
+    console.log('object')
+    "password" === confirmPassword.type
+        ? ((passwordshow2.children[0].classList.remove = "fa fa-eye"), (passwordshow2.children[0].classList = "svg-inline--fa fa-eye-slash"), (confirmPassword.type = "text"))
+        : ((passwordshow2.children[0].classList = ""), (passwordshow2.children[0].classList = "svg-inline--fa fa-eye"), (confirmPassword.type = "password"));
+};
 
 function validateEmail() {
     const emailError = document.getElementById('email-error')
@@ -64,12 +80,10 @@ function validateEmail() {
 
 
         if (email.match(pattern)) {
-            console.log("green")
             e.target.classList.remove('focus:border-red-500');
             e.target.classList.add('focus:border-green-500');
             emailError.style.display = "none"
         } else {
-            console.log("red")
             e.target.classList.remove('focus:border-green-500');
             e.target.classList.add('focus:border-red-500');
             emailError.textContent = "Please enter a valid email address"
@@ -127,7 +141,6 @@ function validatePhoneNumber() {
 }
 
 function showStep(n) {
-    alert('i')
     //  check if the radio btn with name user_type has the value CO 
     const userType = document.querySelector('input[name="user_type"]:checked')
     if (userType && userType.value === "CO") {
@@ -150,6 +163,8 @@ function showStep(n) {
         document.getElementById("nextBtn").innerHTML = "Complete"
     } else if (n === 0) {
         document.getElementById("nextBtn").textContent = "Continue"
+    } else if (n === 5 ) {
+        document.getElementById("prevBtn").innerHTML = "Didnt get OTP"
     } else {
         document.getElementById("nextBtn").textContent = "Next"
     }
@@ -186,6 +201,7 @@ function validateForm() {
 function nextPrev(n) {
     // This function will figure out which tab to display
     const userType = document.querySelector('input[name="user_type"]:checked')
+    console.log(userType)
     if (userType && userType.value === "CO") {
         var x = document.getElementsByClassName("step-contractor")
     }else if(userType && userType.value === "AG"){
