@@ -1,0 +1,355 @@
+{% extends "user/base.html" %} 
+{% load static %} 
+{% load form_tags %} 
+{% block topNav %} 
+    {% include "user/top-navigation.html" %} 
+{% endblock topNav %} 
+{% block content %}
+
+<style>
+     .glide__slide img {
+            aspect-ratio: 3 / 2; 
+        }
+    .projects-grid img {
+        aspect-ratio: 3 / 2; 
+    }
+
+    @media (min-width: 2000px) {
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 1rem;         
+        }
+        #project-image {
+            height: 350px; 
+        }
+    
+    }
+</style>
+
+<div class="w-full p-4 font['Inter'] mt-16 flex flex-col gap-5">
+    what should be here is the accounts, but the accounts have no images
+
+     <!-- go back arrow -->
+     <div class="w-full py-4 md:flex justify-between items-center gap-8 border-b border-neutral-150">
+        <img onclick="goBack()" src="{% static 'svgs/chevron-left.svg' %}" alt="" class="cursor-pointer" />
+        <div class="flex justify-between md:mt-0 mt-4 md:justify-center items-center gap-[2rem]">
+            <div class="relative">
+                <input type="text" placeholder="Search My Listings" class="p-2 rounded-2xl pl-[2.5rem] w-[250px] sm:w-[370px]" >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 absolute top-[8px] left-[5px] text-gray-600">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+                  </svg>
+                  
+            </div>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-8 text-primary">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+              </svg>
+              
+        </div>
+    </div>
+
+    <!-- most recent --> 
+    <div>
+        {% if proj %}
+        <div class="w-full">
+            <div class="container-bottom w-full h-full ">
+                <a href="" class="text-primary font-semibold mb-4">Most Recent</a>
+                <div class="lg:hidden glide-bottom bg-gray-100 w-full pb-8 mt-4">
+                        <!-- Slides here -->
+                        <div class="glide__track" data-glide-el="track">
+                            <ul class="glide__slides">
+                                {% for image in proj %}
+                                <li class="glide__slide">
+                                    {% if image.file %}
+                                    <img src="{{ image.file.url }}" alt="Project Image" class="h-[400px] md:h-[350px] object-fit rounded-lg">
+                                    {% endif %}
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                </div>                   
+                <div class="w-full h-full bg-gray-100 mt-4">
+                    <div class="projects-grid w-full hidden lg:grid grid-cols-3 gap-4 pb-8">
+                            {% for image in proj %}
+                            <div class="project-item">
+                                {% if image.file %}
+                                <img src="{{ image.file.url }}" id="project-image" alt="Project Image" class="h-[320px] object-fit rounded-lg">
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% else %}
+            <div class="w-full flex flex-col items-center justify-center gap-4 mb-4">
+                <h3 class="text-gray-900 font-semibold text-center">No clients assigned to you yet</h3>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- all Listings -->
+     
+     {% if proj %}
+     <div class="container-bottom w-full h-full ">
+        <a href="" class="text-primary font-semibold ">All Listings</a>
+        <div class="block lg:hidden mt-4">
+            <div class="glide glide-top">
+                <div class="glide__track" data-glide-el="track">
+                    <ul class="glide__slides">
+                        <li class="glide__slide1">
+                            <div class="tab flex flex-col text-center justify-center bg-white p-4 rounded-lg shadow-md h-[200px]">
+                                <a href="{% url 'main:assigned-projects' %}" class="w-full p-4 bg-white">
+                                    <div class="w-full flex flex-col gap-4">
+                                        <div class="w-full flex items-center justify-between">
+                                            <h3 class="text-gray-900 font-medium">My Listing</h3>
+                                            <span class="">
+                                            <img src="{% static 'svgs/more-vertical.svg' %}" alt="" class="" />
+                                            </span>
+                                        </div>
+                                        <div class="w-full flex items-center justify-between">            
+                                            {% if accounts_len > 0 %}
+                                            <h3 class="text-gray-900 text-2xl font-semibold">{{ accounts_len }}</h3>  
+                                            {% else %}
+                                            <h3 class="text-gray-900 text-2xl font-semibold">0</h3>              
+                                            {% endif %}
+                                            
+                                            <span class="">
+                                            <img src="{% static 'svgs/quotes.svg' %}" alt="" class="" />
+                                            </span>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                        </li>
+                        <li class="glide__slide1">
+                            <div class="tab flex flex-col text-center justify-center bg-white p-4 rounded-lg shadow-md h-[200px]">
+                                <a href="{% url 'main:assigned-projects' %}" class="w-full p-4 bg-white">
+                                    <div class="w-full flex flex-col gap-4">
+                                        <div class="w-full flex items-center justify-between">
+                                            <h3 class="text-gray-900 font-medium">My Listing</h3>
+                                            <span class="">
+                                            <img src="{% static 'svgs/more-vertical.svg' %}" alt="" class="" />
+                                            </span>
+                                        </div>
+                                        <div class="w-full flex items-center justify-between">            
+                                            {% if accounts_len > 0 %}
+                                            <h3 class="text-gray-900 text-2xl font-semibold">{{ accounts_len }}</h3>  
+                                            {% else %}
+                                            <h3 class="text-gray-900 text-2xl font-semibold">0</h3>              
+                                            {% endif %}
+                                            
+                                            <span class="">
+                                            <img src="{% static 'svgs/quotes.svg' %}" alt="" class="" />
+                                            </span>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                        </li>
+                        <li class="glide__slide1">
+                            <div class="tab flex flex-col text-center justify-center bg-white p-4 rounded-lg shadow-md h-[200px]">
+                                <a href="{% url 'main:assigned-projects' %}" class="w-full p-4 bg-white">
+                                    <div class="w-full flex flex-col gap-4">
+                                        <div class="w-full flex items-center justify-between">
+                                            <h3 class="text-gray-900 font-medium">My Listing</h3>
+                                            <span class="">
+                                            <img src="{% static 'svgs/more-vertical.svg' %}" alt="" class="" />
+                                            </span>
+                                        </div>
+                                        <div class="w-full flex items-center justify-between">            
+                                            {% if accounts_len > 0 %}
+                                            <h3 class="text-gray-900 text-2xl font-semibold">{{ accounts_len }}</h3>  
+                                            {% else %}
+                                            <h3 class="text-gray-900 text-2xl font-semibold">0</h3>              
+                                            {% endif %}
+                                            
+                                            <span class="">
+                                            <img src="{% static 'svgs/quotes.svg' %}" alt="" class="" />
+                                            </span>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- grid display -->
+        <div class="hidden lg:block w-full h-full bg-gray-100 mt-4">
+            <div class="projects-grid w-full hidden lg:grid grid-cols-3 gap-4 pb-6">
+                <div class="tab flex flex-col text-center justify-center bg-white p-4 rounded-lg shadow-md h-[200px]">
+                        <a href="{% url 'main:assigned-projects' %}" class="w-full p-4 bg-white">
+                            <div class="w-full flex flex-col gap-4">
+                            <div class="w-full flex items-center justify-between">
+                                <h3 class="text-gray-900 font-medium">My Listing</h3>
+                                <span class="">
+                                <img src="{% static 'svgs/more-vertical.svg' %}" alt="" class="" />
+                                </span>
+                            </div>
+                            <div class="w-full flex items-center justify-between">            
+                                {% if accounts_len > 0 %}
+                                <h3 class="text-gray-900 text-2xl font-semibold">{{ accounts_len }}</h3>  
+                                {% else %}
+                                <h3 class="text-gray-900 text-2xl font-semibold">0</h3>              
+                                {% endif %}
+                                
+                                <span class="">
+                                <img src="{% static 'svgs/quotes.svg' %}" alt="" class="" />
+                                </span>
+                            </div>
+                            </div>
+                        </a>
+                </div>
+                <div class="tab flex flex-col text-center justify-center bg-white p-4 rounded-lg shadow-md h-[200px]">
+                        <a href="{% url 'main:assigned-projects' %}" class="w-full p-4 bg-white">
+                            <div class="w-full flex flex-col gap-4">
+                            <div class="w-full flex items-center justify-between">
+                                <h3 class="text-gray-900 font-medium">My Listing</h3>
+                                <span class="">
+                                <img src="{% static 'svgs/more-vertical.svg' %}" alt="" class="" />
+                                </span>
+                            </div>
+                            <div class="w-full flex items-center justify-between">            
+                                {% if accounts_len > 0 %}
+                                <h3 class="text-gray-900 text-2xl font-semibold">{{ accounts_len }}</h3>  
+                                {% else %}
+                                <h3 class="text-gray-900 text-2xl font-semibold">0</h3>              
+                                {% endif %}
+                                
+                                <span class="">
+                                <img src="{% static 'svgs/quotes.svg' %}" alt="" class="" />
+                                </span>
+                            </div>
+                            </div>
+                        </a>
+                </div>
+                <div class="tab flex flex-col text-center justify-center bg-white p-4 rounded-lg shadow-md h-[200px]">
+                        <a href="{% url 'main:assigned-projects' %}" class="w-full p-4 bg-white">
+                            <div class="w-full flex flex-col gap-4">
+                            <div class="w-full flex items-center justify-between">
+                                <h3 class="text-gray-900 font-medium">My Listing</h3>
+                                <span class="">
+                                <img src="{% static 'svgs/more-vertical.svg' %}" alt="" class="" />
+                                </span>
+                            </div>
+                            <div class="w-full flex items-center justify-between">            
+                                {% if accounts_len > 0 %}
+                                <h3 class="text-gray-900 text-2xl font-semibold">{{ accounts_len }}</h3>  
+                                {% else %}
+                                <h3 class="text-gray-900 text-2xl font-semibold">0</h3>              
+                                {% endif %}
+                                
+                                <span class="">
+                                <img src="{% static 'svgs/quotes.svg' %}" alt="" class="" />
+                                </span>
+                            </div>
+                            </div>
+                        </a>
+                </div>
+            </div>
+        </div>
+    </div>
+     {% endif %}
+                
+    <!-- create button -->
+    <div class="flex justify-center ">
+        <div class="tab flex justify-center gap-3 cursor-pointer mb-[130px] items-center flex-shrink-0 rounded-3xl bg-white p-4 rounded-2xl shadow-sm w-64">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+              </svg>
+              <p class='text-center'>Create New</p>             
+        </div>
+    </div>
+        
+        {% comment %}            
+            <!-- <div>
+                {% if accounts %}
+                    {% for account in accounts%}
+                        <a href='{% url "main:home_owner_with_slug_name" name=account.assigned_by.slug %}' class="w-full block p-4 bg-white border border-neutral-150 rounded-md shadow-sm cursor-pointer">
+                            <div class="w-full flex flex-col gap-8">
+                                <div class="w-full flex items-center justify-between">
+                                    <div class="">
+                                        <h3 class="text-gray-900 font-semibold">{{account.assigned_by.first_name}} {{account.assigned_by.last_name}}</h3>
+                                        <small class="text-gray-600">{{account.assigned_by.email}}</small>
+                                    </div>
+                                    <span class="">
+                                    </span>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <p class="text-gray-900 text-sm font-medium">{{account.assigned_by.user_profile.address}}</p>
+                                    <img src="{% static 'svgs/address.svg' %}" alt="" class="w-[32px] h-[32px] object-contain">
+                                </div>
+                            </div>
+                        </a>
+                    {% endfor %}
+                {%else%}
+                    <div class="w-full flex flex-col items-center justify-center gap-4">
+                        <h3 class="text-gray-900 font-semibold text-center">No clients assigned to you yet</h3>
+                    </div>
+                {% endif %}
+            </div> -->
+
+        {% endcomment %}
+</div>
+
+
+{% endblock %}
+{% block bottomNav %}
+    {% include "user/bottom_nav_agent.html" %} 
+{% endblock bottomNav %} 
+{% block extraScripts %}
+    <script src="{% static 'js/agent.js' %}"></script>
+    <script>
+        function goBack() {
+            history.back()
+        }
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js" integrity="sha512-A7AYk1fGKX6S2SsHywmPkrnzTZHrgiVT7GcQkLGDe2ev0aWb8zejytzS8wjo7PGEXKqJOrjQ4oORtnimIRZBtw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@glidejs/glide@3.5.2/dist/glide.min.js"></script>
+    <script>
+        // data-aos="fade-right"
+        const configTop = {
+            type: "carousel",
+            perView: 3,  // Show one full image and a part of the next one
+            focusAt: 'center',
+            gap: 15,  // Adjust the gap between slides if needed
+            breakpoints: {
+                800: {
+                    perView: 1.5
+                },
+                480: {
+                    perView: 1.25
+                }
+            }
+        };
+    
+        const sliderTop = new Glide('.glide-top', configTop);
+        
+        sliderTop.mount();
+    
+    
+        // second slide
+        const config = {
+            type: "carousel",
+            perView: 3,  // Show one full image and a part of the next one
+            focusAt: 'center',
+            gap: 10,  // Adjust the gap between slides if needed
+            breakpoints: {
+                800: {
+                    perView: 1.5
+                },
+                480: {
+                    perView: 1.25
+                }
+            }
+        };
+    
+        const slider = new Glide('.glide-bottom', config);
+    
+        slider.mount();
+    
+    </script>
+{% endblock extraScripts %}

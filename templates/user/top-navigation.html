@@ -1,0 +1,40 @@
+{% load static %}
+<!-- the display modal -->
+<div id="modal" class="relative hidden w-full">
+    <div class="fixed inset-0 flex items-center justify-center z-50">
+        <div class="fixed inset-0 bg-black/75"></div>
+        <div class="bg-white w-[70%] md:w-[30%] rounded-lg z-50 absolute pb-3">
+            <button id="close-modal-button" class="float-right cursor-pointer text-xl mb-2 ml-4">
+                    <i class="fa fa-times mr-3 mt-3 text-red-700 hover:text-red-500" aria-hidden="true"></i>
+                 </button>
+            <div class="w-full flex flex-col items-center justify-center gap-9 mt-6 pb-3 ">
+                <a href="{% url 'profile:edit-profile'%}" class="hover:bg-gray-300 py-3 text-center w-full rounded-lg">Edit profile <span><i class="fa fa-pencil ml-3" aria-hidden="true"></i>
+                    </span></a>
+                <a href="{% url 'logout' %}" class="hover:bg-gray-300 py-3 text-center w-full rounded-lg">Logout <span><i class="fa fa-sign-out ml-3" aria-hidden="true"></i>                    </span></a>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+<div class="w-full fixed top-0  shadow-sm bg-primary flex items-center py-4 z-10">
+    <div id="profile-pic-navbar" class="w-[28px] h-full flex items-center absolute bottom-0 left-3 cursor-pointer ml-4">
+        <img src="{% static 'svgs/avatar.svg' %}" alt="" class="w-full h-full object-contain" />
+    </div>
+    <div class="flex w-full items-center justify-center">
+        <img src="{% static 'svgs/sproost-white.svg' %}" alt="" class="w-[7rem]" />
+    </div>
+</div>
+<script>
+    let profilePicnavbar = document.querySelector('#profile-pic-navbar')
+    let closeModalButton = document.querySelector('#close-modal-button')
+    let modal = document.querySelector('#modal')
+    profilePicnavbar.onclick = () => {
+        modal.style.display = "block"
+    }
+    closeModalButton.onclick = () => {
+        modal.style.display = "none"
+    }
+</script>
+</div>

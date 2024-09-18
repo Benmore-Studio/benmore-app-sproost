@@ -1,0 +1,50 @@
+{% extends "user/base.html" %} 
+{% load form_tags %}
+{% load static %} 
+{% include "user/bottom_navigation.html" %} 
+{% block content %}
+<div class="w-full">
+    <!-- header -->
+    <div class="w-full p-4 flex items-center mb-[18px]">
+        <div onclick="goBack()">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 cursor-pointer">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
+            </svg>
+        </div>
+        <h3 class="w-full text-xl mr-[48px] text-center text-gray-900 font-medium">Assign Agent</h3>
+    </div>
+
+    <div class="w-full p-4">
+        <form method="POST" class="w-full mt-4 flex flex-col gap-4">
+            {% csrf_token %}
+            <div class="w-full">
+                <label for="registration_ID" class="text-black font-medium text-sm">Agent License Number</label>
+                <div class="border border-gray-300 rounded-3xl p-2 mt-1 h-[60px] pl-6">
+                    <input
+                        type="text"
+                        name="registration_id"
+                        id="registration_ID"
+                        class="w-full rounded-3xl h-full focus:outline-none bg-transparent border-none focus:border-gray-500"
+                        placeholder="Type here"
+                    />
+                </div>
+            </div>
+
+
+            <div class="flex w-full flex-col gap-4 items-center pt-[21px]">
+                <button type="submit" class="inline-flex items-center w-[70%] md:w-[50%] justify-center p-3 rounded-3xl bg-black text-white border border-neutral-150 shadow-sm font-semibold">
+                    Assign Agent
+                </button>
+                <a href = '{% url "main:home" %}' class="inline-flex items-center w-[70%] md:w-[50%] justify-center p-3 rounded-3xl bg-[#FFDEDE] text-red-500 border border-neutral-150 shadow-sm font-semibold">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %} 
+{% block extraScripts %}
+    <script>
+        function goBack() {
+            history.back()
+        }
+    </script>
+{% endblock extraScripts %}

@@ -1,0 +1,78 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %} {% endblock title %}</title>
+    <script src="https://unpkg.com/htmx.org@1.9.10" integrity="sha384-D1Kt99CQMDuVetoL1lrYwg5t+9QdHe7NLX/SoJYkXDFfX37iInKRy5xLSi8nO7UC" crossorigin="anonymous"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="{% static 'js/index.js' %}"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#2FAA07",
+                        "toneLightGreen": "#EAF7E6",
+                    },
+                    fontFamily: {
+                        primary: ["Poppins", "sans-serif"],
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        .hide-scroll {
+            scrollbar-width: 0.1rem;
+        }
+        
+        .hide-scroll::-webkit-scrollbar-track {
+            box-shadow: inset 0 0 2rem transparent;
+            scroll-behavior: smooth;
+        }
+        
+        .hide-scroll::-webkit-scrollbar {
+            width: 0.1rem;
+            opacity: 0;
+            scroll-behavior: smooth;
+        }
+        
+        .htmx-request .mainContent{
+            display: none;
+        }
+
+        .htmx-request .spinner{
+            display: block;
+        }
+        
+        .mainContent{
+            display: block;
+        }
+        .spinner{
+            display: none;
+        }
+    </style>
+    {% block extraStyles %}
+{% endblock %}
+</head>
+
+<body hx-headers='{"X-CSRFToken":"{{csrf_token}}"}' >
+    <div class="w-full">
+        {% block navbar %}{% endblock navbar %} {% block content %} {% endblock content %}</div>
+    <script>
+        var messages = [
+            {% for message in messages %}
+                {"text": "{{ message }}", "level": "{{ message.tags }}"},
+            {% endfor %}
+        ];
+    </script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <script src = "{% static "js/user_admin/base.js" %}"></script>
+    {% block extraScripts %} {% endblock extraScripts %}
+</body>
+
+</html>

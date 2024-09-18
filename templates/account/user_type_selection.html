@@ -1,0 +1,129 @@
+{% extends 'account/base.html' %}
+{% load static %}
+{% load socialaccount %}
+{% load form_tags %}
+
+{% block title %}
+  Create an Account
+{% endblock %}
+
+{% block authContent %}
+{{ form.media }}
+<form id="signupForm" method="POST">
+    {% csrf_token %}
+    <div class="step step-contractor step-agent w-full p-4 pt-8" id="step1">
+        <div class="w-full">
+            <div class="flex flex-col gap-8 items-center justify-center">
+                <img src="{% static 'svgs/sproost.svg' %}" alt="" class="" />
+                <div class="flex flex-col items-center justify-center">
+                    <h3 class="text-gray-900 font-semibold text-xl">Create an account</h3>
+                    <p class="text-gray-600 text-center text-base">Provide some basic information to set up your account.</p>
+                </div>
+                {% include 'account/partials/sign_up_errors.html' %}
+                <div class="flex flex-col gap-4 w-full">
+                    <label for="onboard-owner" class="w-full">
+                      <div class="w-full p-2 relative border border-neutral-150 flex items-center justify-center px-4 gap-10 rounded-md font-semibold focus:outline-none user-type-option">
+                        <h3 class="text-gray-600 text-sm">
+                          I am a
+                          <span class="text-gray-900 font-medium uppercase">HOME-OWNER</span>
+                        </h3>
+                        <div class="absolute right-3 h-full flex items-center">
+                          <input type="radio" name="user_type" value="HO" id="onboard-owner" class="hidden user-type-input" />
+                          <div class="w-5 h-5 rounded-full border border-neutral-150 flex items-center justify-center">
+                            <img src="{% static 'svgs/tick-circle.svg' %}" alt="" class="checkmark hidden w-full h-full object-contain">
+                          </div>
+                        </div>
+                      </div>
+                    </label>
+
+                    <label for="onboard-contractor" class="w-full">
+                      <div class="w-full p-2 relative border border-neutral-150 flex items-center justify-center px-4 gap-10 rounded-md font-semibold focus:outline-none user-type-option">
+                        <h3 class="text-gray-600 text-sm">
+                          I am a
+                          <span class="text-gray-900 font-medium uppercase">Contractor</span>
+                        </h3>
+                        <div class="absolute right-3 h-full flex items-center">
+                          <input type="radio" value="CO" name="user_type" id="onboard-contractor" class="hidden user-type-input" />
+                          <div class="w-5 h-5 rounded-full border border-neutral-150 flex items-center justify-center">
+                            <img src="{% static 'svgs/tick-circle.svg' %}" alt="" class="checkmark hidden w-full h-full object-contain">
+                          </div>
+                        </div>
+                      </div>
+                    </label>
+
+                    <label for="onboard-agent" class="w-full">
+                      <div class="w-full p-2 relative border border-neutral-150 flex items-center justify-center px-4 gap-10 rounded-md font-semibold focus:outline-none user-type-option">
+                        <h3 class="text-gray-600 text-sm">
+                          I am an
+                          <span class="text-gray-900 font-medium uppercase">Agent</span>
+                        </h3>
+                        <div class="absolute right-3 h-full flex items-center">
+                          <input value="AG" type="radio" name="user_type" id="onboard-agent" class="hidden user-type-input" />
+                          <div class="w-5 h-5 rounded-full border border-neutral-150 flex items-center justify-center">
+                            <img src="{% static 'svgs/tick-circle.svg' %}" alt="" class="checkmark hidden w-full h-full object-contain">
+                          </div>
+                        </div>
+                      </div>
+                    </label>
+
+                    <label for="onboard-investor" class="w-full">
+                      <div class="w-full p-2 relative border border-neutral-150 flex items-center justify-center px-4 gap-10 rounded-md font-semibold focus:outline-none user-type-option">
+                        <h3 class="text-gray-600 text-sm">
+                          I am an
+                          <span class="text-gray-900 font-medium uppercase">Investor</span>
+                        </h3>
+                        <div class="absolute right-3 h-full flex items-center">
+                          <input value="IV" type="radio" name="user_type" id="onboard-investor" class="hidden user-type-input" />
+                          <div class="w-5 h-5 rounded-full border border-neutral-150 flex items-center justify-center">
+                            <img src="{% static 'svgs/tick-circle.svg' %}" alt="" class="checkmark hidden w-full h-full object-contain">
+                          </div>
+                        </div>
+                      </div>
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+    <button id="submit" type="submit" class="w-full p-3 mt-8 bg-[#CDDFF3] text-gray-200 shadow-sm rounded-md font-semibold focus:outline-none">
+    Sign up
+    </button>
+    <div class="flex items-center justify-center text-sm gap-2 mt-4">
+      <span class="text-gray-600">Already have an account?</span>
+      <a href="{% url 'account_login' %}" class="text-primary font-semibold">Log in</a>
+    </div>
+</form>
+
+<script>
+   document.addEventListener('DOMContentLoaded', function() {
+        const options = document.querySelectorAll('.user-type-option');
+        const submitButton = document.getElementById('submit');
+
+        function checkSelection() {
+            const isSelected = document.querySelector('.user-type-input:checked') !== null;
+            if (isSelected) {
+                submitButton.disabled = false;
+                submitButton.classList.remove('bg-gray-200', 'text-gray-700', 'cursor-not-allowed');
+                submitButton.classList.add('bg-primary', 'text-white', 'cursor-pointer');
+            } else {
+                submitButton.disabled = true;
+                submitButton.classList.add('bg-gray-400', 'text-gray-700', 'cursor-not-allowed');
+                submitButton.classList.remove('bg-primary', 'text-white', 'cursor-pointer');
+            }
+        }
+
+        options.forEach(option => {
+            option.addEventListener('click', function() {
+                options.forEach(opt => {
+                    opt.querySelector('.user-type-input').checked = false;
+                    opt.querySelector('.checkmark').classList.add('hidden');
+                });
+                this.querySelector('.user-type-input').checked = true;
+                this.querySelector('.checkmark').classList.remove('hidden');
+                checkSelection();
+            });
+        });
+
+        checkSelection();
+    });
+</script>
+{% endblock authContent %}

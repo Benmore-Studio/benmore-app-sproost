@@ -1,0 +1,228 @@
+{% extends "user_admin/base.html" %} 
+{% load static %} 
+{% load form_tags %}
+{% block navbar %} 
+    {% include "user_admin/navbar.html" %} 
+{% endblock navbar %} 
+{% block content %}
+<main class="w-full px-[1rem] md:px-[4rem] flex flex-col gap-8 my-8">
+    <h2 class="text-xl text-gray-900 font-semibold">Dashboard</h2>
+    <div class="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        {% for stat in overall_stats %}
+        <div class="w-full p-4 bg-white border border-neutral-150 rounded-md shadow-sm">
+            <div class="w-full flex flex-col gap-4">
+                <div class="w-full flex items-center justify-between">
+                    <h3 class="text-gray-600 font-medium">{{stat.title}}</h3>
+                    {% comment %} <span class="">
+                        <img src="{% static 'svgs/more-vertical.svg' %}" alt="" class="" />
+                    </span> {% endcomment %}
+                </div>
+
+                <div class="w-full flex items-center justify-between">
+                    <h3 class="text-gray-900 text-2xl font-semibold">{{stat.project_counts}}</h3>
+                </div>
+                <div class="flex justify-end border-t border-neutral-150 items-center p-2">
+                    <a href="{{stat.link}}" class="text-primary font-medium ">{{stat.action}}</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+
+    </div>
+
+    <!-- grid cards -->
+    <div class="w-full grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- column 1 -->
+        <div class="rounded-lg w-full border border-neutral-150 p-4">
+            <!-- header -->
+            <div class="w-full flex items-center justify-between border-b border-neutral-150 pb-4">
+                <h3 class="text-gray-900 font-semibold">Recent Home Owners</h3>
+                <a href="{% url "admins:homeowners" %}" class="text-primary bg-toneLightGreen text-center p-2 px-4 rounded-md"> See all </a>
+            </div>
+            <!-- table search result -->
+            <div class="w-full my-2">
+                <table class="w-full">
+                    <thead class="h-10 bg-gray-200 bg-opacity-80">
+                        <tr class="text-gray-600 text-xs font-medium">
+                            <th class="w-1/4 text-start p-4">Name</th>
+                            <th class="w-1/4 text-start p-4">Contact</th>
+                            <th class="w-1/4 text-start p-4">Recent Project</th>
+                            <th class="w-1/4 text-start p-4">Quotation Status</th>
+                        </tr>
+                    </thead>
+                    <tbody class="p-4">
+                        {% for home_owner in recent_home_owners %}
+                        <tr class="border-b border-neutral-100 last:border-0">
+                            <td class="w-1/4 p-4">
+                                <a href="{% url 'admins:update_home_owner' home_owner.pk %}" class="flex gap-1 items-center">
+                                    <img class = "w-4" src = {% static "svgs/edit-02.svg" %} />
+                                    <div class="w-full flex items-center gap-2">
+                                        <p class="text-gray-900 text-sm font-medium capitalize">{{home_owner.first_name}} {{home_owner.last_name}}</p>
+                                    </div>
+                                </a>
+                            </td>
+                            <td class="w-1/4 p-4">
+                                <div class="flex flex-col gap-1">
+                                    <span class="text-gray-500 text-sm">{{home_owner.phone_number}}</span>
+                                    <span class="text-gray-500 text-sm">{{home_owner.email}}</span>
+                                </div>
+                            </td>
+                            <td class="w-1/4 p-4">
+                                <span class=" font-semibold text-xs rounded-xl p-1 px-2 border border-neutral-150 bg-gray-50 bg-opacity-90 {% if home_owner.quote_requests.latest_quote.status|lower == 'approved' %} bg-toneLightGreen text-primary bg-opacity-70 border-primary {% elif home_owner.quote_requests.latest_quote.status|lower == 'rejected' %} bg-[#B42318] bg-opacity-50 border-red-500 text-[#B42318] {% endif %} "> 
+                                    {{home_owner.quote_requests.latest_quote.title|default:"no projects"}}
+                                </span>
+                            </td>
+
+                            <td class="w-1/4 p-4 ">
+                                <div class="inline-flex items-center gap-2 rounded-xl p-1 px-2 border border-neutral-150">
+                                    {% if home_owner.quote_requests.latest_quote.status %}
+                                    <span class="w-2 h-2 bg-[#B42318] rounded-full {% if home_owner.quote_requests.latest_quote.status|lower == 'approved' %} bg-primary {% elif home_owner.quote_requests.latest_quote.status|lower == 'pending' %} bg-yellow-500 {% endif %} "></span>
+                                    <span class="font-semibold text-xs capitalize"> 
+                                        {{home_owner.quote_requests.latest_quote.status}}
+                                    </span>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <!-- column 2 -->
+        <div class="rounded-lg w-full border border-neutral-150 p-4">
+            <!-- header -->
+            <div class="w-full flex items-center justify-between border-b border-neutral-150 pb-4">
+                <h3 class="text-gray-900 font-semibold">Recent Agents</h3>
+                <a href="{% url 'admins:agents' %}" class="text-primary bg-toneLightGreen text-center p-2 px-4 rounded-md"> See all </a>
+            </div>
+            <!-- table search result -->
+            <div class="w-full my-2">
+                <table class="w-full">
+                    <thead class="h-10 bg-gray-200 bg-opacity-80">
+                        <tr class="text-gray-600 text-xs font-medium">
+                            <th class="w-1/4 text-start p-4">Name</th>
+                            <th class="w-1/4 text-start p-4">Contact</th>
+                            <th class="w-1/4 text-start p-4">Total Projects</th>
+                        </tr>
+                    </thead>
+                    <tbody class="p-4">
+                        {% for agent in recent_agents %}
+                        <tr class="border-b border-neutral-100 last:border-0">
+                            <td class="w-1/4 p-4">
+                                <a href = {% url 'admins:update_agent' agent.pk %} class="flex gap-1 items-center text-gray-900 text-sm font-medium capitalize">
+                                    <img class = "w-4" src = {% static "svgs/edit-02.svg" %} />
+                                    {{agent.first_name}} {{agent.last_name}}
+                                </a>
+                            </td>
+                            <td class="w-1/4 p-4">
+                                <div class="flex flex-col gap-1">
+                                    <span class="text-gray-500 text-sm">{{agent.phone_number}}</span>
+                                    <span class="text-gray-500 text-sm">{{agent.email}}</span>
+                                </div>
+                            </td>
+                            <td class="w-1/4 p-4 ">
+                                <div class="inline-flex items-center rounded-full bg-gray-50 p-2 border border-neutral-150">
+                                    <span class="font-semibold text-xs capitalize"> 
+                                        {{agent.total_projects}}
+                                    </span>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <!-- column 3 -->
+        <div class="rounded-lg w-full border border-neutral-150 p-4">
+            <!-- header -->
+            <div class="w-full flex items-center justify-between border-b border-neutral-150 pb-4">
+                <h3 class="text-gray-900 font-semibold">Recent Contractors</h3>
+                <a href="{% url "admins:contractors" %}" class="text-primary bg-toneLightGreen text-center p-2 px-4 rounded-md"> See all </a>
+            </div>
+            <!-- table search result -->
+            <div class="w-full my-2">
+                <table class="w-full">
+                    <thead class="h-10 bg-gray-200 bg-opacity-80">
+                        <tr class="text-gray-600 text-xs font-medium">
+                            <th class="w-1/4 text-start p-4">Name</th>
+                            <th class="w-1/4 text-start p-4">Contact</th>
+                        </tr>
+                    </thead>
+                    <tbody class="p-4">
+                        {% for contractor in recent_contractors %}
+                        <tr class="border-b border-neutral-100 last:border-0">
+                            <td class="w-1/4 p-4">
+                                <a href = {% url 'admins:update_contractor' contractor.pk %} class="text-gray-900 text-sm font-medium capitalize flex gap-1 items-center">
+                                    <img class = "w-4" src = {% static "svgs/edit-02.svg" %} />
+                                    {{contractor.contractor_profile.company_name}}
+                                </a>
+                            </td>
+                            <td class="w-1/4 p-4">
+                                <div class="flex flex-col gap-1">
+                                    <span class="text-gray-500 text-sm">{{contractor.phone_number}}</span>
+                                    <span class="text-gray-500 text-sm">{{contractor.email}}</span>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <!-- column 4 -->
+        <div class="rounded-lg w-full border border-neutral-150 p-4">
+            <!-- header -->
+            <div class="w-full flex items-center justify-between border-b border-neutral-150 pb-4">
+                <h3 class="text-gray-900 font-semibold">Recent Project Request</h3>
+                <a href="{% url "admins:project-requests" %}" class="text-primary bg-toneLightGreen text-center p-2 px-4 rounded-md"> See all </a>
+            </div>
+            <div class="flex mt-6 overflow-x-scroll hide-scroll">
+                <div class="flex gap-4 items-center">
+                    {% for quote in recent_quote_requests %}
+                    <div class="w-full flex flex-col gap-4 p-4 border text-xs border-neutral-150 rounded-md w-max">
+                        <div class="w-full flex items-center justify-between">
+                            <div class="text-xs flex flex-col gap-2">
+                                <span class="text-gray-500 font-medium">Project Name</span>
+                                <h3 class="text-gray-600 font-semibold">{{quote.title}}</h3>
+                            </div>
+                            {% comment %} <span class="">
+                                <img src="{% static 'svgs/more-vertical.svg' %}" alt="" class="" />
+                            </span> {% endcomment %}
+                        </div>
+                        <div class="flex items-start gap-8">
+                            <div class="">
+                                <span class="text-gray-500 font-medium">Home Owner</span>
+                                <div class="flex items-center gap-4 mt-2">
+                                    <span class="text-gray-900 font-medium">{{quote.user.first_name}} {{quote.user.last_name}}</span>
+                                    <img src="{% static 'svgs/chat-msg.svg' %}" alt="" />
+                                </div>
+                            </div>
+                            <div class="text-xs flex flex-col gap-2">
+                                <span class="text-gray-500 font-medium">Created Date</span>
+                                <h3 class="text-gray-600 font-semibold mt-2">{{quote.upload_date|date:"F j, Y"}}</h3>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-8">
+                            <div class="text-xs flex flex-col gap-2">
+                                <span class="text-gray-500 font-medium">Location</span>
+                                <h3 class="text-gray-600 font-semibold mt-2">{{quote.property_address}}</h3>
+                            </div>
+                            <div class="text-xs flex flex-col gap-2">
+                                <span class="text-gray-500 font-medium">Quotation Status</span>
+                                <div id = "QuoteStatusContainer{{quote.pk}}" class = "p-1 px-2 bg-gray-200 text-[10px] bg-opacity-50 w-fit  border border-neutral-150 rounded-xl">
+                                    {% include "user_admin/partials/QuoteStatusForm.html" %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+            </div>
+        </div>
+    </div>
+</main>
+
+{% endblock content %}

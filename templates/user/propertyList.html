@@ -1,0 +1,44 @@
+{% extends "user/base.html" %} {% load static %} {% block topNav %} {% include "user/top-navigation.html" %} {% endblock topNav %} {% block content %}
+<style>
+    #propItem.active {
+        background-color: #eaf7e6;
+    }
+</style>
+<main class="w-full mt-28 p-4">
+    <h3 class="text-gray-900 font-semibold mb-2">Property List</h3>
+    <div class="w-full flex flex-col gap-4">
+        {% for property in properties %}
+        <div id="propItem" class="w-full p-4 bg-white border border-neutral-150 rounded-md shadow-sm">
+            <div class="w-full flex flex-col gap-8">
+                <div class="w-full flex items-center justify-between">
+                    <h3 class="text-gray-900 font-semibold">{{property.name}}</h3>
+                    <span class="">
+            <img src="{% static 'svgs/chevron-right.svg' %}" alt="" class="w-[32px] h-[32px] object-contain" />
+          </span>
+                </div>
+                <p class="text-gray-900 text-sm font-medium">{{property.address}}</p>
+            </div>
+        </div>
+        {% endfor %}
+        <div class="flex justify-end">
+            <a href="{% url 'main:add-property' %}" class="inline-flex items-center justify-center gap-2 cursor-pointer bg-primary p-3 rounded-md shadow-sm">
+                <img src="{% static 'svgs/plus.svg' %}" alt="" class="" />
+                <span class="text-white text-sm font-semibold">Add Property</span>
+            </a>
+        </div>
+    </div>
+</main>
+{% endblock %}{% block bottomNav %}{% include "user/bottom_nav_agent.html" %}
+{% endblock bottomNav %} {% block extraScripts %}
+<script>
+    const propertyListItems = document.querySelectorAll("#propItem")
+    propertyListItems.forEach((propItem) => {
+        propItem.addEventListener("click", () => {
+            propertyListItems.forEach((prop) => {
+                prop.classList.remove("active")
+            })
+            propItem.classList.add("active")
+        })
+    })
+</script>
+{% endblock extraScripts %}

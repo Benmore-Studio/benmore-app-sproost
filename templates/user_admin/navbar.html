@@ -1,0 +1,27 @@
+{% load static %}
+<nav class="w-full px-[1rem] md:px-[4rem] py-2 border-b border-neutral-150 text-gray-700 flex items-center justify-between">
+    <a href={% url 'admins:dashboard' %}> <img src="{% static 'svgs/sproost-plus.svg' %}" alt="" class=""> </a>
+    {% with url_name=request.resolver_match.url_name %}
+        <ul class="inline-flex items-center gap-6">
+            <li class="text-gray-700 font-semibold cursor-pointer {% if url_name == 'dashboard' %} bg-toneLightGreen text-primary bg-opacity-80 p-2 px-4 w-fit rounded-md {% endif %}">
+                <a href="{% url 'admins:dashboard' %}" class="">Dashboard</a>
+            </li>
+            <li class="text-gray-700 font-semibold cursor-pointer {% if url_name == 'project-requests' %} bg-toneLightGreen text-primary bg-opacity-80 p-2 px-4 w-fit rounded-md {% endif %}">
+                <a href="{% url 'admins:project-requests' %}" class="">Project Requests</a>
+            </li>
+            <li class="text-gray-700 font-semibold cursor-pointer {% if url_name == 'active-projects' %} bg-toneLightGreen text-primary bg-opacity-80 p-2 px-4 w-fit rounded-md {% endif %}">
+                <a href="{% url "admins:active-projects" %}" class="">Active Request</a>
+            </li>
+            <li class="text-gray-700 font-semibold cursor-pointer {% if url_name == 'homeowners' %} bg-toneLightGreen text-primary bg-opacity-80 p-2 px-4 w-fit rounded-md {% endif %}">
+                <a href="{% url "admins:homeowners" %}" class="">Home Owners</a>
+            </li>
+            <li class="text-gray-700 font-semibold cursor-pointer {% if url_name == 'contractors' %} bg-toneLightGreen text-primary bg-opacity-80 p-2 px-4 w-fit rounded-md {% endif %}">
+                <a href="{% url 'admins:contractors' %}" class="">Contractors</a>
+            </li>
+        </ul>
+    {% endwith %}
+    <form action="{% url 'account_logout' %}" method="POST">
+        {% csrf_token %}
+        <button type="submit" class="flex gap-2 items-center rounded-md text-black bg-white border border-gray-300 p-2 cursor-pointer">Logout <img src = "{% static 'svgs/logout.svg' %}" class = "w-4 h-4" /></button>
+    </form>
+</nav>

@@ -1,0 +1,64 @@
+{% load static %}
+<div class="w-full fixed bg-white bottom-0 border-t border-neutral-150 p-4 shadow-md z-20">
+  {% with url_name=request.resolver_match.url_name %}
+  <div class="flex items-center justify-between w-full">
+    <a href="{% url 'main:home' %}" class="inline-flex flex-col gap-1 items-center">
+      {% if url_name == 'contractor_profile' %}
+        <img src="{% static 'svgs/listing.svg' %}" alt="" class="" />
+        <span class="text-primary font-medium text-xs">Projects</span> 
+      {% else %}
+        <img src="{% static 'svgs/listing-outline.svg' %}" alt="" class="" />
+        <span class="text-gray-500 text-xs">Projects</span> 
+      {% endif %}
+    </a>
+    <a href="{% url 'profile:search_contractor' %}" class="inline-flex flex-col gap-1 items-center">
+      {% if url_name == 'search_contractor' %}
+        <img src="{% static 'svgs/search-selected.svg' %}" alt="" class="" />
+        <span class="text-gray-500 text-xs font-medium text-primary">Search</span>
+      {% else %}
+        <img src="{% static 'svgs/search.svg' %}" alt="" class="" />
+        <span class="text-gray-500 text-xs">Search</span>
+      {% endif %}
+      
+    </a>
+    
+    <div class="w-full flex items-center justify-end gap-4">
+      {% if request.user.user_type == "HO" %}
+        <a
+          href="{% url 'main:assign-agent' %}"
+          class="flex items-center justify-center cursor-pointer gap-2 bg-toneLightGreen p-3 w-[50%] rounded-md shadow-sm"
+        >
+          <img src="{% static 'svgs/plus-green.svg' %}" alt="" class="" />
+          <span class="text-primary text-sm font-semibold">Assign Agent</span>
+        </a>
+      {% endif %}
+      {% if request.user.user_type == 'AG' %}
+        <a href="{% url 'quotes:request-quotes' name=name %}" class="w-[50%] flex items-center justify-center gap-2 cursor-pointer bg-primary p-3 rounded-md shadow-sm">
+      {% elif request.user.user_type == 'HO' %}
+        <a href="{% url 'quotes:request-quotes' %}" class="w-[50%] flex items-center justify-center gap-2 cursor-pointer bg-primary p-3 rounded-md shadow-sm">
+      {% endif %}
+        <img src="{% static 'svgs/plus.svg' %}" alt="" class="" />
+        <span class="text-white text-sm font-semibold">Request Quote</span>
+      </a>
+    </div>
+
+    <a href="{% url 'profile:show-agent-message' %}" class="inline-flex flex-col gap-1 items-center">
+      {% if url_name == 'home' %}
+      {% else %}
+      {% endif %}
+      <img src="{% static 'svgs/Message.svg' %}" alt="" class="" />
+      <span class="text-gray-500 text-xs">Messages</span>
+    </a>
+    <a href="{% url 'profile:show-agent-menu'  %}" class="inline-flex flex-col gap-1 items-center">
+      {% if url_name == 'edit-profile'%}
+      <img src="{% static 'svgs/more-horizon-green.svg' %}" alt="" class="" />
+      <span class="text-primary font-medium text-xs">Menu</span> 
+      {% else %}
+      <img src="{% static 'svgs/more-horizon.svg' %}" alt="" class="" />
+      <span class="text-gray-500 text-xs">Menu</span>
+      {% endif %}
+    </a>
+   
+  </div>
+  {% endwith %}
+</div>
