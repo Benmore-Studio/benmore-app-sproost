@@ -22,7 +22,7 @@ USER_TYPE_CHOICES = (
     )
  
 class User(AbstractUser):
-    phone_number = PhoneNumberField(null=False, blank=False)
+    phone_number = PhoneNumberField(null=True, blank=True)
     user_type = models.CharField(max_length = 3, choices = USER_TYPE_CHOICES)
     date_joined = models.DateTimeField(auto_now_add=True)
     slug = models.SlugField(

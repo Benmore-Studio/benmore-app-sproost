@@ -20,7 +20,7 @@ class QuoteRequestManager(models.Manager):
         return self.order_by('-id').first()
 
 class QuoteRequest(models.Model):
-    user = models.ForeignKey("accounts.User", on_delete=models.CASCADE, null=False, related_name="quote_requests", help_text='created_by_home_owners')
+    user = models.ForeignKey("accounts.User", on_delete=models.CASCADE, null=False, related_name="quote_requests", help_text='the user who created the quote')
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     title = models.CharField(max_length=255, null=False)
     summary = models.TextField(null=False, max_length=257)
@@ -29,12 +29,12 @@ class QuoteRequest(models.Model):
     contact_username = models.CharField(max_length=255, null=False)
     property_address = models.CharField(max_length=255, null=False)
     upload_date = models.DateTimeField(auto_now_add=True, null=False)
-    media_paths = GenericRelation("main.Media")
     is_quote = models.BooleanField(default=True)
+    media_paths = GenericRelation("main.Media")
     file = models.FileField(upload_to=upload_location_quote, null=True, blank=True)
 
     
-    created_by_agent = models.ForeignKey("accounts.User", on_delete=models.SET_NULL, blank=True, null=True, related_name='agent_quote_requests')
+    quote_for = models.ForeignKey("accounts.User", on_delete=models.SET_NULL, blank=True, null=True, related_name='quote_for')
     
     # created_by_homeowner = models.Forei/gnKey(UserProfile, on_delete=models.SET_NULL, blank=True, null=True, related_name='homeowner_quote_requests')
     

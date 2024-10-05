@@ -73,6 +73,9 @@ class CustomSignupForm(SignupForm):
     def save(self, request):
         user = super(CustomSignupForm, self).save(request)
         user.user_type = self.cleaned_data['user_type']
+        print(user)
+        print(self.cleaned_data['phone_number'])
+        print("self.cleaned_data['phone_number']")
         user.phone_number = self.cleaned_data['phone_number']
     
         user.save()

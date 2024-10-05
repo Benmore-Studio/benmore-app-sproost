@@ -8,6 +8,8 @@ import cloudinary.api
 
 
 from decouple import config
+from datetime import timedelta
+
 
 
 SECRET = config('SECRET')
@@ -62,6 +64,13 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.google',
     'cloudinary_storage',
     'cloudinary',
+
+    'rest_framework',
+    'rest_framework.authtoken',
+    'dj_rest_auth',
+    "dj_rest_auth.registration",
+
+    'drf_spectacular',
 ]
 
 MIDDLEWARE = [
@@ -207,6 +216,26 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+
+    'EXCEPTION_HANDLER': 'settings.utils.custom_exception_handler', 
+
+}
+
+print("BASE_DR")
+print(BASE_DIR)
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'My API',
+    'DESCRIPTION': 'A sample API',
+    'VERSION': '1.0.0',
+}
+
+
 SOCIALACCOUNT_PROVIDERS = {
     "google": {
         # For each OAuth based provider, either add a ``SocialApp``
@@ -261,4 +290,12 @@ CORS_ALLOW_METHODS = [
     'DELETE',
     'OPTIONS',
 ]
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),  # Customize token lifetime
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),    # Customize refresh token lifetime
+    'ROTATE_REFRESH_TOKENS': True,                  # Rotate refresh tokens
+    'BLACKLIST_AFTER_ROTATION': True,               # Blacklist old refresh tokens
+    'AUTH_HEADER_TYPES': ('Bearer',),               # Header prefix for JWT tokens
+}
 
