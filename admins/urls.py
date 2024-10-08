@@ -4,8 +4,8 @@ from . import views
 
 app_name = 'admins'
 urlpatterns = [
-    path('dashboard/', views.adminDashboard, name="dashboard"),
-    path('contractors/', views.contractorsListView, name="contractors"),
+    path('dashboard/', views.AdminDashboardAPIView.as_view(), name="dashboard"),
+    path('contractors/', views.ContractorsListAPIView.as_view(), name="contractors"),
     path('contractors/update/<int:pk>', views.updateContractor.as_view(), name="update_contractor"),
     path('home-owner/update/<int:pk>', views.updateHomeOwner.as_view(), name="update_home_owner"),
     path('agent/update/<int:pk>', views.UpdateAgent.as_view(), name="update_agent"),

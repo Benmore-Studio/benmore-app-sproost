@@ -18,57 +18,78 @@ from django.contrib import messages
 
 User = get_user_model()
 
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from django.db.models import Count, Case, When
+from quotes.models import Project, QuoteRequest
+from rest_framework.generics import GenericAPIView, ListAPIView
+from profiles.serializers import ContractorSerializer
+from rest_framework.pagination import PageNumberPagination
 
 
-@login_required
-def adminDashboard(request):
-    if request.user.user_type in ['HO', 'AG', 'CO']:
-        return redirect('main:home')
+class AdminDashboardAPIView(GenericAPIView):
+    """
+    API View for Admin Dashboard.
+    only admins can access it
+    """
     
-    counts = User.objects.aggregate(
-        home_owner_count=Count(Case(When(user_type='HO', then=1), output_field=CharField())),
-        agent_count=Count(Case(When(user_type='AG', then=1), output_field=CharField())),
-        contractor_count=Count(Case(When(user_type='CO', then=1), output_field=CharField())),
-    )
-    active_projects = Project.objects.filter(is_approved=True).count()
-    
-    
-    recent_home_owners = User.objects.filter(user_type='HO').prefetch_related('quote_requests').order_by('-id')[:4]
-    recent_agents = User.objects.filter(user_type='AG').annotate(
-            total_projects=Count('assigned_properties_to__assigned_by__quote_requests__quote_project'),
-    ).order_by('-id')[:4]
-    recent_quote_requests = QuoteRequest.objects.select_related("user").order_by('-id')[:4]
-    recent_contractors = User.objects.filter(user_type='CO').select_related("contractor_profile").order_by('-id')[:4]
-    
-    overall_stats = [
-        {'title':'Home Owners', 'project_counts': counts['home_owner_count'], 'action':'View owners', 'link' : reverse('admins:homeowners')},
-        {'title':'Agents', 'project_counts': counts['agent_count'], 'action':'View agents', 'link' : reverse('admins:agents')},
-        {'title':'Contractors', 'project_counts': counts['contractor_count'], 'action':'View contractors', 'link' : reverse('admins:contractors')},
-        {'title':'Active Projects', 'project_counts': active_projects, 'action':'View projects', 'link' : reverse('admins:active-projects')},
-    ]
-    context ={'recent_home_owners': recent_home_owners, 'recent_agents':recent_agents,
-              'recent_contractors': recent_contractors, 'recent_quote_requests': recent_quote_requests, 'overall_stats': overall_stats,
-              }  
-    return render(request, 'user_admin/dashboard.html', context)
-
-@login_required
-def contractorsListView(request):
-    query = request.GET.get('q')
-    contractors = User.objects.filter(user_type='CO').select_related("contractor_profile").order_by('-id')
-    if query:
-        #search by company_name, email, address
-        contractors = contractors.filter(
-            Q(contractor_profile__company_name__icontains=query) |
-            Q(email__icontains=query) 
+    def get(self, request, *args, **kwargs):
+        # Ensure only admin users can access this
+        if request.user.user_type in ['HO', 'AG', 'CO']:
+            return Response({'error': 'Unauthorized access'}, status=status.HTTP_403_FORBIDDEN)
+        
+        # Aggregations
+        counts = User.objects.aggregate(
+            home_owner_count=Count(Case(When(user_type='HO', then=1))),
+            agent_count=Count(Case(When(user_type='AG', then=1))),
+            contractor_count=Count(Case(When(user_type='CO', then=1))),
         )
-    
-    # Pagination
-    paginator = Paginator(contractors, 10)  # Show 10 orders per page.
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-    
-    context = {'contractors': page_obj}
-    return render(request, 'user_admin/contractors.html', context)
+        active_projects = Project.objects.filter(is_approved=True).count()
+
+        # Recent Data
+        recent_home_owners = User.objects.filter(user_type='HO').order_by('-id')[:4]
+        recent_agents = User.objects.filter(user_type='AG').annotate(
+            total_projects=Count('assigned_properties_to__assigned_by__quote_requests__quote_project'),
+        ).order_by('-id')[:4]
+        recent_contractors = User.objects.filter(user_type='CO').order_by('-id')[:4]
+        recent_quote_requests = QuoteRequest.objects.select_related("user").order_by('-id')[:4]
+
+        data = {
+            'counts': counts,
+            'active_projects': active_projects,
+            'recent_home_owners': recent_home_owners,
+            'recent_agents': recent_agents,
+            'recent_contractors': recent_contractors,
+            'recent_quote_requests': recent_quote_requests,
+        }
+
+        return Response(data, status=status.HTTP_200_OK)
+
+
+
+
+class ContractorsListAPIView(ListAPIView):
+    """
+    API View for listing contractors with pagination and search.
+    """
+    serializer_class = ContractorSerializer
+    pagination_class = PageNumberPagination
+
+    def get_queryset(self):
+        queryset = User.objects.filter(user_type='CO').select_related("contractor_profile").order_by('-id')
+        print(queryset)
+        query = self.request.GET.get('q')
+        print("query")
+        print(query)
+        if query:
+            return queryset.filter(
+                Q(contractor_profile__company_name__icontains=query) |
+                Q(email__icontains=query)
+            )
+        return self.queryset
+
+
 
 @login_required
 def homeOwnersListView(request):

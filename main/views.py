@@ -109,9 +109,6 @@ class HomeView(GenericAPIView):
     )
 
     def get(self, request, *args, **kwargs):
-        if not request.user.is_authenticated:
-            return redirect('account_login')
-
         user_type = request.user.user_type
         if user_type == "HO":
             context = home_owner_function(request, request.user)
@@ -141,13 +138,13 @@ class HomeView(GenericAPIView):
             signup_url = reverse('account_signup')
             referral_link = request.build_absolute_uri(f'{signup_url}?ref={referral.code}')
             context = {
-                "quote_count": quotes.count(),
-                "projects_count": projects.count(),
-                "accounts": accounts,
-                "accounts_len": len(accounts),
+                "quote_count": len(serialized_quotes),
+                "projects_count": len(serialized_projects),
+                "accounts": serialized_accounts,
+                "accounts_len": len(serialized_accounts),
                 'url': URL,
-                'proj': proj,
-                'quotes': quotes,
+                'proj': serialized_proj,
+                'quotes': serialized_quotes,
                 'referral_link': referral_link
             }
             return Response(context, status=status.HTTP_200_OK)
@@ -169,9 +166,6 @@ class AssignedProjectsView(APIView):
     """
 
     def get(self, request, *args, **kwargs):
-        if not request.user.is_authenticated:
-            return redirect('account_login')
-
         quotes = QuoteRequest.objects.filter(user=request.user)
         projects = Project.objects.filter(quote_request__user=request.user)
         proj = Project.objects.filter(admin=request.user)
@@ -246,216 +240,5 @@ class AssignAgentAPIView(GenericAPIView):
 
         # 400 Bad Request - Invalid data in the request
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-
-
-# the vieew to route the home owner with slug
-def home_owner_with_slug_name(request, name):
-    user = User.objects.get(slug=name)
-    context = home_owner_function(request, user)
-    context['name'] = name
-    return render(request, "user/home.html", context)
-
-
-# mains
-
-def home(request):
-    if not request.user.is_authenticated:
-        return redirect('account_login')
-    else:
-        if request.user.user_type == "HO":
-            context = home_owner_function(request, request.user)
-            return render(request, "user/home.html", context)
-        elif request.user.user_type == "CO":
-            return redirect("profile:contractor_profile")
-        elif request.user.user_type == "AG":
-            URL = get_base_url(request)
-            quotes = QuoteRequest.objects.filter(created_by_agent=request.user) 
-            projects = Project.objects.filter(quote_request__user=request.user)
-            proj = Project.objects.filter(admin=request.user)
-            accounts = AssignedAccount.objects.filter(assigned_to=request.user).order_by('-id').select_related(
-                "assigned_by", "assigned_to")
-            # print(projects)
-            agent = User.objects.get(pk=request.user.pk)
-            agent_profile = AgentProfile.objects.get(user=agent)
-            referral, created = Referral.objects.get_or_create(referrer=request.user)
-            if created:
-                if agent_profile.registration_ID:
-                    referral.code = agent_profile.registration_ID
-                    referral.save()
-
-            signup_url = reverse('account_signup')
-            referral_link = request.build_absolute_uri(f'{signup_url}?ref={referral.code}')
-            context = {
-                "quote_count": quotes.count(),
-                "projects_count": projects.count(),
-                "accounts": accounts,
-                "accounts_len": len(accounts),
-                'url':URL,
-                'proj':proj,
-                'quotes':quotes,
-                # 'onboarding_message': agent_profile.has_seen_onboarding_message,
-                'referral_link': referral_link
-            }
-            return render(request, "user/agent_home.html", context)
-        else:
-            return redirect("admins:dashboard")
-        
-def Assigned_projects(request):
-    if not request.user.is_authenticated:
-        return redirect('account_login')
-
-    else:
-        quotes = QuoteRequest.objects.filter(user=request.user)
-        projects = Project.objects.filter(quote_request__user=request.user)
-        proj = Project.objects.filter(admin=request.user)
-        accounts = AssignedAccount.objects.filter(assigned_to=request.user).order_by('-id').select_related(
-            "assigned_by", "assigned_to")
-
-        context = {
-            "quote_count": quotes.count(),
-            "projects_count": projects.count(),
-            "accounts": accounts,
-            'proj':proj,
-            "accounts_len": len(accounts),
-            
-        }
-        return render(request, "user/agent_assignor.html", context)
-       
-
-class AssignAgentView(LoginRequiredMixin, View):
-    template_name = 'user/assignAgent.html'
-    form_class = AgentAssignmentForm
-
-    def get(self, request):
-        if not request.user.user_type == 'HO':
-            return redirect('main:home')
-        
-        agents = User.objects.filter(user_type='AG')
-        context = {
-            'agents': agents,
-            'form' : self.form_class()
-        }
-        return render(request, self.template_name, context)
-
-    def post(self, request):
-        
-        form = self.form_class(request.POST)
-        if form.is_valid():
-            regID = form.cleaned_data.get('registration_id')
-            try:
-                
-                agent = AgentProfile.objects.get(registration_ID=regID)
-                if AssignedAccount.objects.filter(assigned_by=request.user, assigned_to=agent.user).exists():
-                    messages.warning(request, 'Agent already assigned. Awaiting agent confirmation')
-                    return redirect('main:assign-agent')
-                
-                AssignedAccount.objects.get_or_create(
-                    assigned_to=agent.user,
-                    assigned_by=request.user,
-                    is_approved=True
-                )
-                # send_mail(
-                #     'mail/assign_agent.tpl',
-                #     {'first_name': agent.user.first_name, "base_url": get_base_url(request)},
-                #     settings.EMAIL_HOST_USER,
-                #     [agent.user.email]
-                # )
-
-                messages.success(request, 'Agent assigned successfully. Awaiting agent confirmation')
-                return redirect('main:home')
-            except AgentProfile.DoesNotExist:
-                messages.error(request, f'No Agent exists with such liscense ID: {regID}')
-        else:
-            pass
-        return redirect('main:assign-agent')
-
-
-
-# unused functions
-# def homeOwners(request):
-#     project_feed = [
-#         {
-#             'title': 'Number of Uploaded projects', 'status': 'uploaded', 'count': 3,
-#         },
-#         {
-#             'title': 'Number of Quotes Requested', 'status': 'quotes', 'count': 3,
-#         },
-#         {
-#             'title': 'Number of completed projects', 'status': 'completed', 'count': 0,
-#         }
-#     ]
-
-#     project_history = [
-#         {'name': 'Bungalow Renovation', 'quotation_status': 'pending',
-#          'home_owner': {'name': 'Olivia Rhye', 'image': '/static/images/ownerAvatar.png'},
-#          'location': 'New Yersey, Newark', 'created_date': 'Jan 28, 2024'},
-#         {'name': 'Bungalow Renovation', 'quotation_status': 'pending',
-#          'home_owner': {'name': 'Olivia Rhye', 'image': '/static/images/ownerAvatar.png'},
-#          'location': 'New Yersey, Newark', 'created_date': 'Jan 28, 2024'},
-#         {'name': 'Bungalow Renovation', 'quotation_status': 'pending',
-#          'home_owner': {'name': 'Olivia Rhye', 'image': '/static/images/ownerAvatar.png'},
-#          'location': 'New Yersey, Newark', 'created_date': 'Jan 28, 2024'},
-#     ]
-
-#     context = {'project_feed': project_feed, 'project_history': project_history, 'loggedInUser': loggedInUser}
-#     return render(request, 'user/home.html', context)
-
-
-
-# def requestQuotes(request):
-#     context = {
-#         'loggedInUser': loggedInUser
-#     }
-#     return render(request, 'user/request_quotes.html', context)
-
- 
-def QuotationReturn(request):
-    context = {
-        'loggedInUser': loggedInUser
-    }
-    return render(request, 'user/quotation_returns.html', context)
-
-
-def MenuList(request):
-    context = {
-        'loggedInUser': loggedInUser
-    }
-    return render(request, 'user/menu.html', context)
-
-
-def contractors(request):
-    searchResults = [
-        {'name': 'Olivia Rhye', 'profession': 'plumber', 'phone': '+1 834 955 0920', 'email': 'olivia@untitledui.com'},
-        {'name': 'Phoenix Baker', 'profession': 'electrician', 'phone': '+1 834 955 0920',
-         'email': 'olivia@untitledui.com'},
-        {'name': 'Lana Steiner', 'profession': 'carpenter', 'phone': '+1 834 955 0920',
-         'email': 'olivia@untitledui.com'},
-        {'name': 'Demi Wilkinson', 'profession': 'interior designer', 'phone': '+1 834 955 0920',
-         'email': 'olivia@untitledui.com'},
-        {'name': 'Candice Wua', 'profession': 'painter', 'phone': '+1 834 955 0920', 'email': 'olivia@untitledui.com'},
-        {'name': 'Natali Craig', 'profession': 'carpenter', 'phone': '+1 834 955 0920',
-         'email': 'olivia@untitledui.com'},
-        {'name': 'Drew Cano', 'profession': 'painter', 'phone': '+1 834 955 0920', 'email': 'olivia@untitledui.com'},
-        {'name': 'Phoenix Baker', 'profession': 'electrician', 'phone': '+1 834 955 0920',
-         'email': 'olivia@untitledui.com'},
-        {'name': 'Lana Steiner', 'profession': 'carpenter', 'phone': '+1 834 955 0920',
-         'email': 'olivia@untitledui.com'},
-        {'name': 'Demi Wilkinson', 'profession': 'interior designer', 'phone': '+1 834 955 0920',
-         'email': 'olivia@untitledui.com'},
-    ]
-    context = {
-        'contractors': searchResults,
-        'loggedInUser': loggedInUser
-    }
-    return render(request, 'user/contractors.html', context)
-
-
-def contractorDetail(request, profession):
-    context = {
-        'loggedInUser': loggedInUser
-    }
-    return render(request, 'user/contractorDetail.html', context)
 
 
