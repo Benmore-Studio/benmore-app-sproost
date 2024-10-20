@@ -1,217 +1,181 @@
 
-from django.shortcuts import render, redirect, get_object_or_404
 from profiles.models import ContractorProfile, UserProfile, AgentProfile
-from django.urls import reverse
-from django.contrib import messages
 from django.db.models import Q
-from django.utils import timezone
 
 
 from profiles.services.contractor import ContractorService
-from .forms import ContractorProfileForm, HomeOwnersEditForm, AgentEditForm, ProfilePictureForm
-from django.views.generic.edit import UpdateView
-from django.views.generic import DetailView
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth.mixins import LoginRequiredMixin
-from main.models import Media
 from django.contrib.auth import get_user_model
-from django.http import JsonResponse
+
+
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from rest_framework import status
+from rest_framework.generics import  ListAPIView
+
+from django.shortcuts import get_object_or_404
+
+from profiles.models import ContractorProfile
+from quotes.models import QuoteRequest, Project
+from .serializers import (ContractorProfileSerializer, 
+                          ProfilePictureSerializer, 
+                          HomeOwnerProfileSerializer, 
+                          AgentProfileSerializer, 
+                          ContractorSerializer,
+                        )
+from profiles.services.contractor import ContractorService
+
+
+
+
 
 
 User = get_user_model()
 
-@login_required
-def contractor_profile_view(request):
-    if request.user.user_type != 'CO':
-        return redirect('main:home')
-    
-    if request.method == "POST":
-        if request.FILES:
-            media = request.FILES.getlist("upload-media")
-            data = {
-                "media": media
-            }
-            contractor_service = ContractorService(request=request)
-            add_media, error = contractor_service.add_media(data)
+def home_owner_function(request, value):
+    quotes = QuoteRequest.objects.filter(user=value)
+    projects = Project.objects.filter(quote_request__user=value)
+    projs = Project.objects.filter(admin=value)
+    context ={
+        "quotes": quotes,
+        "projects": projects,
+        'projs':projs,
+        "quote_count": quotes.count(),
+        "projects_count": projects.count(),
+        "home_owner_slug": request.user.slug
+    }
+    return context
 
-            if error:
-                messages.error(request, error)
-            else:
-                messages.success(request, add_media)
+
+
+# # the vieew to route the home owner with slug
+# class HomeOwnerWithSlugNameView(APIView):
+#     """
+#     Retrieves home owner details using slug and returns their projects and quotes.
+
+#     ----------------------------
+#     INPUT PARAMETERS:
+#     - name: str (slug of the user)
+
+#     -----------------------------
+#     OUTPUT PARAMETERS:
+#     Returns home owner data and associated projects and quotes.
+#     """
+    
+#     @extend_schema(
+#         responses={
+#             200: OpenApiResponse(description="Homeowner data and associated projects and quotes"),
+#             404: OpenApiResponse(description="Homeowner not found"),
+#         }
+#     )
+
+#     def get(self, request, name, *args, **kwargs):
+#         user = get_object_or_404(User, slug=name)
+#         context = home_owner_function(request, user)
+#         context['name'] = name
+#         return Response(context, status=status.HTTP_200_OK)
+
+
+# class ContractorProfileAPIView(APIView):
+#     """
+#     API View to handle contractor profile view and media uploads. to be used in main app
+#     """
+#     permission_classes = [IsAuthenticated]
+
+#     def get(self, request):
+#         """
+#         Retrieve the contractor's profile details.
+#         """
+#         if request.user.user_type != 'CO':
+#             return Response({'error': 'Unauthorized access'}, status=status.HTTP_403_FORBIDDEN)
+
+#         try:
+#             profile = User.objects.get(id=request.user.id)
+#             serializer = ContractorSerializer(profile) 
+#             return Response(serializer.data, status=status.HTTP_200_OK)
+#         except ContractorProfile.DoesNotExist:
+#             return Response({'error': 'Contractor profile not found'}, status=status.HTTP_404_NOT_FOUND)
+
+
+
+class EditUsersProfileAPIView(APIView):
+    """
+    API View to handle the update of user profiles (Home Owner, Contractors and Agent) using PATCH for partial updates.
+    """
+    permission_classes = [IsAuthenticated]
+
+    def patch(self, request):
+        user = request.user
+
+        if user.user_type == 'HO':
+            user_profile = get_object_or_404(UserProfile, user=user)
+            serializer_class = HomeOwnerProfileSerializer
+        elif user.user_type == 'AG':
+            user_profile = get_object_or_404(AgentProfile ,user=user)
+            serializer_class = AgentProfileSerializer
+        elif user.user_type == 'CO':
+            user_profile = get_object_or_404(ContractorProfile ,user=user)
+            serializer_class = ContractorProfileSerializer
         else:
-            messages.error(request, "No file found!")
-        
-        return redirect("profile:contractor_profile")  
-    else:
-        # profile = ContractorProfile.objects.get(user=request.user)
-        # form = ProfilePictureForm(instance = profile)
-        try:
-            profile = ContractorProfile.objects.get(user=request.user)
-            form = ProfilePictureForm(instance = profile)
-            context = {
-                'profile' : profile,
-                "form": form
-            }
-        except:
-            context = {}
-            # return redirect('account_signup')
-    return render(request, 'user/contractor_home.html', context)
+            return Response({'error': 'User type not found for profile update.'}, status=status.HTTP_400_BAD_REQUEST)
 
-class contractorDetails(DetailView):
-    """ for viewing contractor profile details"""
-    model = ContractorProfile
-    template_name = 'user/contractor_home.html'
-    context_object_name = 'profile'
+        serializer = serializer_class(user_profile, data=request.data, partial=True)
 
-    def get_object(self):
-        try:
-            return ContractorProfile.objects.get(pk=self.kwargs['pk'])
-        except ContractorProfile.DoesNotExist:
-            # return to page user came from if profile doesn't exist
-            return redirect('profile:contractor_profile')
+        if serializer.is_valid():
+            serializer.save()
 
-
-# refactored this view so that only one view handles all the edit profile for differennt users
-@login_required
-def editProfile(request):
-    user = request.user
-    # render CO edit page if user type is CO
-    if request.user.user_type == 'CO': 
-        contractorProfile = get_object_or_404(ContractorProfile, user=user.id)
-        form = ContractorProfileForm(instance = contractorProfile, initial={'email' : user.email, 'phone_number' : user.phone_number})
-        return render(request, 'user/editprofiles/contractor_edit_profile.html', {"details":contractorProfile,'form' :form})
-    
-    elif request.user.user_type == 'AG':
-        agent_profile = get_object_or_404(AgentProfile, user=user.id)
-        form = AgentEditForm(instance = agent_profile, initial={'email' : user.email, 'phone_number' : user.phone_number})
-        return render(request, 'user/editprofiles/agents_edit_profile.html', {'form' :form})
-    
-    elif request.user.user_type == 'HO':
-        user_profile = get_object_or_404(UserProfile, user=user.id)
-        form = HomeOwnersEditForm(instance = user_profile, initial={'email' : user.email, 'phone_number' : user.phone_number})
-        return render(request, 'user/editprofiles/home_owners_edit_profile.html', {"details":user_profile, 'form' :form})
-    else:
-        return redirect('main:dashboard')
-
-
-@login_required
-def editHomeOwnerProfileRequest(request):
-    user = User.objects.get(id=request.user.id)
-    user_profile = UserProfile.objects.get_or_create(user=request.user)[0]
-    if request.method == 'POST':
-        form = HomeOwnersEditForm(request.POST, instance=user_profile)
-        if form.is_valid():
-            form.save()
-            user.phone_number = form.cleaned_data['phone_number']
-            user.email = form.cleaned_data['email']
+            if 'phone_number' in serializer.validated_data:
+                user.phone_number = serializer.validated_data['phone_number']
+            if 'email' in serializer.validated_data:
+                user.email = serializer.validated_data['email']
+            if 'image' in request.FILES:
+                user.image = request.FILES['image']
             user.save()
-            messages.success(request, 'Profile updated successfully!')
-            return redirect('main:home')
-        else:
-            return render(request, 'user/editprofiles/home_owners_edit_profile.html', {'form': form})
-    return redirect('profile:edit-profile')
 
-@login_required
-def editAgentProfile(request):
-    user = request.user
-    user_profile = AgentProfile.objects.get_or_create(user=request.user)[0]
-    if request.method == 'POST':
-        form = AgentEditForm(request.POST, instance=user_profile)
+            return Response({'message': 'Profile updated successfully!'}, status=status.HTTP_200_OK)
+
+        # Debugging for error messages
+        print("Serializer errors:", serializer.errors)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ContractorSearchAPIView(ListAPIView):
+    """
+    API View to search contractor profiles based on query.
+    """
+    permission_classes = [IsAuthenticated]
+    serializer_class = ContractorProfileSerializer
+
+    def get_queryset(self):
+        query = self.request.GET.get('query', '')
+        queryset = ContractorProfile.objects.all()
+        if query:
+            queryset = queryset.filter(
+                Q(company_name__icontains=query) |
+                Q(specialization__icontains=query) |
+                Q(user__phone_number__icontains=query) |
+                Q(user__email__icontains=query)
+            )
+        return queryset
+
+
+class ChangeProfilePictureAPIView(APIView):
+    """
+    API View to change profile pictures based on user type.
+    """
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        form = ProfilePictureSerializer(data=request.data)
         if form.is_valid():
-            form.save()
-            user.phone_number = form.cleaned_data['phone_number']
-            user.email = form.cleaned_data['email']
-            user.save()
-            messages.success(request, 'Profile updated successfully!')
-            return redirect('main:home')
-        else:
-            return render(request, 'user/editprofiles/agents_edit_profile.html', {'form': form})
-    return redirect('profile:edit-profile')
+            image_instance = form.validated_data['image']
+            if image_instance is None:
+                print("jjj")
+                return Response({'error': 'Please select an image'}, status=status.HTTP_400_BAD_REQUEST)
 
 
-@login_required
-def ContractorProfileEditView(request):
-    user = request.user
-    contractor_profile = ContractorProfile.objects.get_or_create(user=user)[0]
-
-    if request.method == 'POST':
-        profile_form = ContractorProfileForm(request.POST, instance=contractor_profile)
-        if profile_form.is_valid():
-            profile_form.save()
-
-            user.phone_number = profile_form.cleaned_data['phone_number']
-            user.email = profile_form.cleaned_data['email']
-            user.save()
-            messages.success(request, 'Profile updated successfully!')
-            return redirect('profile:contractor_profile')
-        else:
-            return render(request, 'user/editprofiles/contractor_edit_profile.html', {'form': profile_form})
-    
-    return redirect('profile:contractor_profile')
-
-    
-
-
-@login_required
-def search_view(request):
-    query = request.GET.get('query')
-    results = ContractorProfile.objects.all()
-    
-    if query:
-        # Perform search based on Title, Speciality, Email, and Phone number
-        results = ContractorProfile.objects.filter(
-            Q(company_name__icontains=query) |
-            Q(specialization__icontains=query) |
-            Q(user__phone_number__icontains=query)|
-            Q(user__email__icontains=query) 
-        )   
-    context = {'results': results}
-    return render(request, 'user/search_results.html', context)
-
-@login_required
-def upload_image(request):
-    return redirect('profile:contractor_profile')
-
-
-# def change_profile_pics_view(request):
-#     if request.method == 'POST':
-#         form = ProfilePictureForm(request.POST, request.FILES)
-#         if form.is_valid():
-#             # Get the uploaded image
-#             image_instance = form.cleaned_data['image']
-            
-#             # Constructing a new filename
-#             new_filename = f"{request.user.username}_profilepic_{request.user.id}.jpg"
-            
-#             # Check if a media instance with the new filename exists
-#             existing_media_instance = Media.objects.filter(image__icontains=new_filename).first()
-            
-#             if existing_media_instance:
-#                 # If an instance with the new filename exists, update its image
-#                 existing_media_instance.image = image_instance
-#                 existing_media_instance.upload_date = timezone.now()
-#                 existing_media_instance.save()
-#             else:
-#                 # If no instance with the new filename exists, create a new one
-#                 media_instance = Media.objects.create(
-#                     content_object=request.user.contractor_profile,
-#                     image=image_instance,
-#                     upload_date=timezone.now()
-#                 )
-            
-#             # Redirect to the user's profile page
-#             return redirect('profile')
-#     else:
-#         form = ProfilePictureForm()
-#     return render(request, 'change_profile_picture.html', {'form': form})
-
-
-def change_profile_pics_view(request):
-    if request.method == 'POST':
-        form = ProfilePictureForm(request.POST, request.FILES)
-        if form.is_valid():
-            image_instance = form.cleaned_data['image']
-            # Get or create the ContractorProfile instance for the current user
+            # Get or create the profile based on the user type
             if request.user.user_type == 'CO':
                 contractor_profile = ContractorProfile.objects.get(user=request.user)
                 contractor_profile.image = image_instance
@@ -220,40 +184,92 @@ def change_profile_pics_view(request):
                 home_owner_profile = UserProfile.objects.get(user=request.user)
                 home_owner_profile.image = image_instance
                 home_owner_profile.save()
-                messages.success(request, 'picture changed successfully')
             elif request.user.user_type == 'AG':
                 agent_profile = AgentProfile.objects.get(user=request.user)
                 agent_profile.image = image_instance
                 agent_profile.save()
-                messages.success(request, 'picture changed successfully')
-            
-            # Redirect to the user's profile page
-            return redirect('main:home')
+            else:
+                return Response({'error': 'Invalid user type'}, status=status.HTTP_400_BAD_REQUEST)
+
+            return Response({'message': 'Profile picture changed successfully!'}, status=status.HTTP_200_OK)
         else:
+            # Handle errors
+            print("ff")
             image_errors = form.errors.get('image', [])
-            for i in image_errors:
-                if i == 'This field is required':
-                    messages.error(request, f"Please select an image")
+            for error in image_errors:
+                if error == 'This field is required':
+                    return Response({'error': 'Please select an image'}, status=status.HTTP_400_BAD_REQUEST)
                 else:
-                    messages.error(request, f"An Error Occurred, {i}")
-            return redirect('main:home')
-    else:
-        form = ProfilePictureForm()
-    return render(request, 'user/contractor_home.html', {'form': form})
+                    return Response({'error': f'An Error Occurred, {error}'}, status=status.HTTP_400_BAD_REQUEST)
 
-def show_agent_menu_view(request):
-    return render(request, 'user/agent_menu.html', {})
 
-def show_agent_message_view(request):
-    return render(request, 'user/agent_message.html', {})
+class UploadApiView(APIView):
+    """
+    API View to handle contractor media uploads.
+    """
+    permission_classes = [IsAuthenticated]
 
-def update_onboarding_status(request):
-    if request.method == 'POST':
-        pass
-        # Get the current user's AgentProfile instance
-        # agent_profile = request.user.agent_profile
-        # agent_profile.has_seen_onboarding_message = True
-        # agent_profile.save()      
-        # return JsonResponse({'message': 'Onboarding status updated successfully'}, status=200)
-    else:
-        return JsonResponse({'error': 'Invalid request'}, status=400)
+    def post(self, request):
+        """
+        Handle media uploads for contractor profiles.
+        """
+        if request.user.user_type != 'CO':
+            return Response({'error': 'Unauthorized access'}, status=status.HTTP_403_FORBIDDEN)
+
+        if request.FILES:
+            media = request.FILES.getlist("upload-media")
+            data = {"media": media}
+            contractor_service = ContractorService(request=request)
+            add_media, error = contractor_service.add_media(data)
+
+            if error:
+                return Response({'error': error}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'message': add_media}, status=status.HTTP_200_OK)
+        
+        return Response({'error': 'No file found!'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+# class EditProfileAPIView(APIView):
+#     """
+#     API View to edit user profiles based on user type (CO, AG, HO), this returns initial data to prefill the form with.
+#     """
+#     permission_classes = [IsAuthenticated]
+
+#     def get(self, request):
+#         user = request.user
+#         if user.user_type == 'CO':
+#             profile = ContractorProfile.objects.get(user=user)
+#             serializer = ContractorProfileSerializer(profile)
+#         elif user.user_type == 'AG':
+#             profile = AgentProfile.objects.get(user=user)
+#             serializer = AgentProfileSerializer(profile)
+#         elif user.user_type == 'HO':
+#             profile = UserProfile.objects.get(user=user)
+#             serializer = HomeOwnerProfileSerializer(profile)
+#         else:
+#             return Response({'error': 'Invalid user type'}, status=status.HTTP_400_BAD_REQUEST)
+        
+#         return Response(serializer.data, status=status.HTTP_200_OK)
+
+#     def post(self, request):
+#         user = request.user
+#         if user.user_type == 'CO':
+#             profile = ContractorProfile.objects.get(user=user)
+#             serializer = ContractorProfileSerializer(profile, data=request.data)
+#         elif user.user_type == 'AG':
+#             profile = AgentProfile.objects.get(user=user)
+#             serializer = AgentProfileSerializer(profile, data=request.data)
+#         elif user.user_type == 'HO':
+#             profile = UserProfile.objects.get(user=user)
+#             serializer = HomeOwnerProfileSerializer(profile, data=request.data)
+#         else:
+#             return Response({'error': 'Invalid user type'}, status=status.HTTP_400_BAD_REQUEST)
+
+#         if serializer.is_valid():
+#             serializer.save()
+#             return Response({'message': 'Profile updated successfully!'}, status=status.HTTP_200_OK)
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+    
+

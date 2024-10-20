@@ -3,9 +3,8 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import View
 from django.contrib import messages
 
-from accounts.models import UserTypes, User
+from accounts.models import User
 from accounts.services.user import UserService
-from quotes.forms import QuoteRequestForm
 from quotes.services import QuoteService
 from services.utils import CustomRequestUtil
 
@@ -116,8 +115,6 @@ class QuotesAPIView(GenericAPIView):
             if 'media' in request.FILES:
                 uploaded_files = request.FILES.getlist("media")
                 form_data["media"] = uploaded_files
-
-            print("Form Data:", form_data)
 
             # Process the quote request using the QuoteService
             quote_service = QuoteService(request)

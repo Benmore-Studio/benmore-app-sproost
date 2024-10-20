@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import Project
-from quotes.models import QuoteRequest
+from quotes.models import QuoteRequest, QuoteRequestStatus
 from main.models import Media
 from django.contrib.contenttypes.models import ContentType
 
@@ -79,3 +79,6 @@ class QuoteRequestSerializer(serializers.ModelSerializer):
 
             return quote_request
 
+
+class QuoteStatusSerializer(serializers.Serializer):
+    status = serializers.ChoiceField(choices=QuoteRequestStatus.choices, required=True)
