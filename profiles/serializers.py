@@ -38,6 +38,7 @@ class AgentProfileSerializer(serializers.ModelSerializer):
         model = AgentProfile
         fields = '__all__' 
 
+
 class AgentSerializer(serializers.ModelSerializer):
     """
     Serializer for User model, with nested AgentProfileSerializer.
@@ -52,3 +53,8 @@ class ProfilePictureSerializer(serializers.ModelSerializer):
     class Meta:
         model = ContractorProfile
         fields = ['image']
+
+    def validate_image(self, value):
+        if not value:
+            raise None
+        return value

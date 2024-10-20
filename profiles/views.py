@@ -169,10 +169,11 @@ class ChangeProfilePictureAPIView(APIView):
     def post(self, request):
         form = ProfilePictureSerializer(data=request.data)
         if form.is_valid():
-            image_instance = form.validated_data['image']
+            image_instance = image_instance = form.validated_data.get('image', None)
+
             if image_instance is None:
-                print("jjj")
                 return Response({'error': 'Please select an image'}, status=status.HTTP_400_BAD_REQUEST)
+
 
 
             # Get or create the profile based on the user type
@@ -194,6 +195,7 @@ class ChangeProfilePictureAPIView(APIView):
             return Response({'message': 'Profile picture changed successfully!'}, status=status.HTTP_200_OK)
         else:
             # Handle errors
+            self.stdout.write('ff')
             print("ff")
             image_errors = form.errors.get('image', [])
             for error in image_errors:
