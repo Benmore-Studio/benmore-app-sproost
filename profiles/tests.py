@@ -4,6 +4,8 @@ from django.contrib.auth import get_user_model
 from profiles.models import UserProfile, ContractorProfile, AgentProfile
 from quotes.models import QuoteRequest, Project
 from django.urls import reverse
+from django.core.files.uploadedfile import SimpleUploadedFile
+
 
 import os
 from django.conf import settings
@@ -180,3 +182,70 @@ class ChangeProfilePictureAPIViewTest(APITestCase):
         self.assertIn('Please select an image', response.json()['error'])
 
 
+class UploadApiViewTest(APITestCase):
+
+    def setUp(self):
+        self.client = APIClient()
+
+        # Create a contractor user
+        self.contractor_user = User.objects.create_user(
+            username='contractor',
+            email='contractor@example.com',
+            password='password',
+            user_type='CO'  # CO for contractor
+        )
+        self.contractor_profile = ContractorProfile.objects.create(user=self.contractor_user)
+
+        # Create a non-contractor user
+        self.non_contractor_user = User.objects.create_user(
+            username='non-contractor',
+            email='non-contractor@example.com',
+            password='password',
+            user_type='AG'  # AG for non-contractor user
+        )
+
+        # URL for the upload API
+        self.url = reverse('profile:upload')  # Adjust 'profile:upload' to your actual URL name
+
+    def test_upload_media_success(self):
+        """
+        Test successful media upload for a contractor.
+        """
+        self.client.force_authenticate(user=self.contractor_user)
+
+        # Simulate a valid image file (realistic binary content)
+        with open('static/images/agent.png', 'rb') as img:
+            file = SimpleUploadedFile(img.name, img.read(), content_type='image/jpeg')
+
+            # Send the POST request with the file
+            response = self.client.post(self.url, {'upload-media': [file]}, format='multipart')
+
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            self.assertIn('message', response.data)
+
+    def test_upload_media_no_file(self):
+        """
+        Test media upload with no file.
+        """
+        self.client.force_authenticate(user=self.contractor_user)
+
+        # Send the POST request without any file
+        response = self.client.post(self.url, {}, format='multipart')
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data['error'], 'No file found!')
+
+    def test_upload_media_unauthorized(self):
+        """
+        Test media upload with a non-contractor user (unauthorized).
+        """
+        self.client.force_authenticate(user=self.non_contractor_user)
+
+        # Simulate a valid image file
+        file = SimpleUploadedFile("test_image.jpg", b"file_content", content_type="image/jpeg")
+
+        # Send the POST request with the file
+        response = self.client.post(self.url, {'upload-media': [file]}, format='multipart')
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.data['error'], 'Unauthorized access')

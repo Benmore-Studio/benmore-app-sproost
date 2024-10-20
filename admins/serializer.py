@@ -32,7 +32,6 @@ class UpdateContractorProfileSerializer(serializers.ModelSerializer):
         return email
     
     def update(self, instance, validated_data):
-        print('home_owner', instance)
 
         # Update User fields
         instance.first_name = validated_data.get('first_name', instance.first_name)
@@ -110,7 +109,7 @@ class UpdateAgentSerializer(serializers.ModelSerializer):
     """
     Serializer for User model, with nested AgentProfileSerializer.
     """
-    # agent_profile = AgentProfileSerializer()
+    agent_profile = AgentProfileSerializer()
 
     class Meta:
         model = User
@@ -118,10 +117,11 @@ class UpdateAgentSerializer(serializers.ModelSerializer):
 
     def validate_email(self, value):
         email = value.lower()
-        user_id = self.instance.user.id if self.instance.user else None
+        user_id = self.instance.id if self.instance else None  # Access `id` directly from `self.instance`
         if User.objects.exclude(id=user_id).filter(email=email).exists():
             raise serializers.ValidationError('This email address is already in use.')
         return email
+
 
     def update(self, instance, validated_data):
         print('agent', instance)
@@ -138,7 +138,7 @@ class UpdateAgentSerializer(serializers.ModelSerializer):
         
 
         # updating the nested contractor
-        agent_profile = AgentProfile.objects.get(user=instance)
+        agent_profile = instance.agent_profile 
 
         agent_profile.company_name = request_data.get('address', agent_profile.address)
         agent_profile.registration_ID = request_data.get('registration_ID', agent_profile.registration_ID)

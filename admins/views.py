@@ -19,7 +19,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.reverse import reverse as api_reverse
 from django.http import Http404
 from .serializer import UpdateContractorProfileSerializer,UpdateHomeOwnerSerializer,UpdateAgentSerializer
-from settings.permissions import IsAdminUserCustom
+from django.shortcuts import get_object_or_404
 
 
 
@@ -323,9 +323,9 @@ class UpdateHomeOwnerAPIView(RetrieveUpdateAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_object(self):
-        user = User.objects.get(id=self.kwargs.get('pk'))
-        obj, created = UserProfile.objects.get_or_create(user=user)
-        return obj
+        home_owner = get_object_or_404(UserProfile.objects.select_related('user'), user__id=self.kwargs.get('pk'))
+
+        return home_owner.user
 
 
 class UpdateAgentAPIView(RetrieveUpdateAPIView):
@@ -337,7 +337,6 @@ class UpdateAgentAPIView(RetrieveUpdateAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_object(self):
-        user = User.objects.get(id=self.kwargs.get('pk'))
-        obj, created = AgentProfile.objects.get_or_create(user=user)
-        return obj
+        agent_profile = get_object_or_404(AgentProfile.objects.select_related('user'), user__id=self.kwargs.get('pk'))
+        return agent_profile.user 
 

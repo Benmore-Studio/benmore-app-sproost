@@ -323,11 +323,51 @@ class ProjectRequestDetailAPITest(APITestCase):
         self.assertEqual(data['property_address'], '123 Test St')
 
 
+class ChangeQuoteStatusAPITest(APITestCase):
+    def setUp(self):
+        self.client = APIClient()
+
+        # Create a user and authenticate
+        self.admin_user = User.objects.create_user(
+            username='admin',
+            email='admin@example.com',
+            password='adminpass',
+            user_type='AD'
+        )
+        self.client.force_authenticate(user=self.admin_user)
+
+        # Create a project and quote request
+        self.quote_request = QuoteRequest.objects.create(
+            user=self.admin_user,
+            title='Test Quote Request',
+            summary='Test summary',
+            contact_phone='1234567890',
+            contact_username='admin',
+            property_address='123 Test St',
+            status=QuoteRequestStatus.pending
+        )
+
+    def test_change_quote_status(self):
+        # Use the correct status value from QuoteRequestStatus
+        data = {'status': QuoteRequestStatus.approved}
+
+        quote_id = self.quote_request.id
+        url = reverse('admins:change-quote', kwargs={'pk': quote_id})
+        response = self.client.put(url, data, format='json')
+        response_data = response.json()
+
+        # Check that the response status code is 200 OK
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Verify the status change
+        self.quote_request.refresh_from_db()
+        self.assertEqual(self.quote_request.status, QuoteRequestStatus.approved)
+
+
 class UpdateUsersAPITest(APITestCase):
     def setUp(self):
         self.client = APIClient()
 
-        # Create a contractor user and authenticate
         self.user = User.objects.create_user(
             username='contractor',
             email='contractor@example.com',
@@ -347,12 +387,13 @@ class UpdateUsersAPITest(APITestCase):
             password='contractorpass',
             user_type='HO'
         )
+        
         self.contractor_profile = ContractorProfile.objects.create(user=self.user)
         self.user_profile = UserProfile.objects.create(user=self.home_owner_user)
         self.agent_profile = AgentProfile.objects.create(user=self.agent_user)
-        # self.client.force_authenticate(user=self.user)
+        self.client.force_authenticate(user=self.user)
         self.client.force_authenticate(user=self.agent_user)
-        # self.client.force_authenticate(user=self.home_owner_user)
+        self.client.force_authenticate(user=self.home_owner_user)
 
     def test_update_contractor_profile(self):
         contractor_id = self.user.id
@@ -387,7 +428,6 @@ class UpdateUsersAPITest(APITestCase):
 
 
     def test_update_agent_profile(self):
-        print('tt',self.agent_user)
         contractor_id = self.agent_user.id
 
         data = {
@@ -443,43 +483,3 @@ class UpdateUsersAPITest(APITestCase):
     #     self.assertEqual(self.user.email, 'updated_email@example.com')
     #     self.assertEqual(self.user.user_profile.address, 'Updated address')
 
-
-class ChangeQuoteStatusAPITest(APITestCase):
-    def setUp(self):
-        self.client = APIClient()
-
-        # Create a user and authenticate
-        self.admin_user = User.objects.create_user(
-            username='admin',
-            email='admin@example.com',
-            password='adminpass',
-            user_type='AD'
-        )
-        self.client.force_authenticate(user=self.admin_user)
-
-        # Create a project and quote request
-        self.quote_request = QuoteRequest.objects.create(
-            user=self.admin_user,
-            title='Test Quote Request',
-            summary='Test summary',
-            contact_phone='1234567890',
-            contact_username='admin',
-            property_address='123 Test St',
-            status=QuoteRequestStatus.pending
-        )
-
-    def test_change_quote_status(self):
-        # Use the correct status value from QuoteRequestStatus
-        data = {'status': QuoteRequestStatus.approved}
-
-        quote_id = self.quote_request.id
-        url = reverse('admins:change-quote', kwargs={'pk': quote_id})
-        response = self.client.put(url, data, format='json')
-        response_data = response.json()
-
-        # Check that the response status code is 200 OK
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-        # Verify the status change
-        self.quote_request.refresh_from_db()
-        self.assertEqual(self.quote_request.status, QuoteRequestStatus.approved)
