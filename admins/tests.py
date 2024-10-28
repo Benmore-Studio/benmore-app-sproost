@@ -368,7 +368,7 @@ class UpdateUsersAPITest(APITestCase):
     def setUp(self):
         self.client = APIClient()
 
-        self.user = User.objects.create_user(
+        self.contractor = User.objects.create_user(
             username='contractor',
             email='contractor@example.com',
             password='contractorpass',
@@ -388,15 +388,15 @@ class UpdateUsersAPITest(APITestCase):
             user_type='HO'
         )
         
-        self.contractor_profile = ContractorProfile.objects.create(user=self.user)
+        self.contractor_profile = ContractorProfile.objects.create(user=self.contractor)
         self.user_profile = UserProfile.objects.create(user=self.home_owner_user)
         self.agent_profile = AgentProfile.objects.create(user=self.agent_user)
-        self.client.force_authenticate(user=self.user)
+        self.client.force_authenticate(user=self.contractor)
         self.client.force_authenticate(user=self.agent_user)
         self.client.force_authenticate(user=self.home_owner_user)
 
     def test_update_contractor_profile(self):
-        contractor_id = self.user.id
+        contractor_id = self.contractor_profile.id
 
         # Flat data structure for the update request
         data = {
@@ -421,14 +421,14 @@ class UpdateUsersAPITest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         # Verify that the contractor's data was updated in the database
-        self.user.refresh_from_db()
-        self.assertEqual(self.user.first_name, 'Updated Name')
-        self.assertEqual(self.user.email, 'updated_email@example.com')
-        self.assertEqual(self.user.contractor_profile.company_name, 'Updated Company')
+        self.contractor.refresh_from_db()
+        self.assertEqual(self.contractor.first_name, 'Updated Name')
+        self.assertEqual(self.contractor.email, 'updated_email@example.com')
+        self.assertEqual(self.contractor.contractor_profile.company_name, 'Updated Company')
 
 
     def test_update_agent_profile(self):
-        contractor_id = self.agent_user.id
+        contractor_id = self.agent_profile.id
 
         data = {
             'username': "username",
@@ -436,7 +436,6 @@ class UpdateUsersAPITest(APITestCase):
             'last_name': 'Updated Last',
             'email': 'updated_email@example.com',
             'user_type': 'AG',
-            'company_name': 'Updated Company',
             'registration_ID': '75875767674546', 
             'address': 'er',
           
@@ -457,29 +456,31 @@ class UpdateUsersAPITest(APITestCase):
         # self.assertEqual(self.user.agent_profile.address, 'er')
 
     
-    # def test_update_homeowners_profile(self):
-    #     contractor_id = self.user.id
+    def test_update_homeowners_profile(self):
+        home_owner_id = self.user_profile.id
 
-    #     data = {
-    #         'username': "username",
-    #         'first_name': 'Updated Name',
-    #         'last_name': 'Updated Last',
-    #         'email': 'updated_email@example.com',
-    #         'user_type': 'HO',
-    #         'address': 'Updated address',
+        data = {
+            'username': "username",
+            'first_name': 'Updated Name',
+            'last_name': 'Updated Last',
+            'email': 'updated_email@example.com',
+            'user_type': 'HO',
+            'address': 'Updated address',
             
-    #     }
+        }
 
-    #     # Generate the URL for the update view
-    #     url = reverse('admins:update-contractor', kwargs={'pk': contractor_id})
-    #     response = self.client.patch(url, data, format='json', partial=True)
+        # Generate the URL for the update view
+        url = reverse('admins:update-home_owner', kwargs={'pk': home_owner_id})
+        response = self.client.patch(url, data, format='json', partial=True)
 
-    #     # Check that the response status code is 200 OK
-    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
+        # Check that the response status code is 200 OK
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-    #     # Verify that the contractor's data was updated in the database
-    #     self.user.refresh_from_db()
-    #     self.assertEqual(self.user.first_name, 'Updated Name')
-    #     self.assertEqual(self.user.email, 'updated_email@example.com')
-    #     self.assertEqual(self.user.user_profile.address, 'Updated address')
+        # Verify that the contractor's data was updated in the database
+        self.home_owner_user.refresh_from_db()
+        self.assertEqual(self.home_owner_user.first_name, 'Updated Name')
+        self.assertEqual(self.home_owner_user.email, 'updated_email@example.com')
+        self.assertEqual(self.home_owner_user.user_profile.address, 'Updated address')
+
+
 

@@ -323,7 +323,7 @@ class UpdateHomeOwnerAPIView(RetrieveUpdateAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_object(self):
-        home_owner = get_object_or_404(UserProfile.objects.select_related('user'), user__id=self.kwargs.get('pk'))
+        home_owner = get_object_or_404(UserProfile.objects.select_related('user'), id=self.kwargs.get('pk'))
 
         return home_owner.user
 
@@ -337,6 +337,6 @@ class UpdateAgentAPIView(RetrieveUpdateAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_object(self):
-        agent_profile = get_object_or_404(AgentProfile.objects.select_related('user'), user__id=self.kwargs.get('pk'))
+        agent_profile = get_object_or_404(AgentProfile.objects.select_related('user'), id=self.kwargs.get('pk'))
         return agent_profile.user 
 
