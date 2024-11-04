@@ -5,8 +5,8 @@ from phonenumber_field.modelfields import PhoneNumberField
 from quotes.models import Project
 
 class AssignedAccount(models.Model):
-    assigned_by = models.ForeignKey('accounts.User', on_delete=models.SET_NULL, null=True, blank=True,  related_name='assigned_properties_by')
-    assigned_to = models.ForeignKey('accounts.User', on_delete=models.SET_NULL, null=True, blank=True,  related_name='assigned_properties_to')
+    assigned_by = models.ForeignKey('accounts.User', on_delete=models.CASCADE, null=True, blank=True,  related_name='assigned_properties_by')
+    assigned_to = models.ForeignKey('accounts.User', on_delete=models.CASCADE, null=True, blank=True,  related_name='assigned_properties_to')
     is_approved = models.BooleanField(default=False)
 
     

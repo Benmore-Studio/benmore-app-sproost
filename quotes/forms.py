@@ -9,7 +9,7 @@ class QuoteRequestForm(forms.ModelForm):
 
     class Meta:
         model = QuoteRequest
-        fields = ["title", "summary", "contact_phone", "contact_username", "property_address",'created_by_agent', 'media']
+        fields = ["title", "summary", "contact_phone", "contact_username", "property_address",'quote_for', 'media']
 
     def __init__(self, *args, **kwargs):
         super(QuoteRequestForm, self).__init__(*args, **kwargs)

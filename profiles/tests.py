@@ -1,193 +1,251 @@
-# Create your tests here.
+from rest_framework.test import APITestCase, APIClient
+from rest_framework import status
 from django.contrib.auth import get_user_model
-from django.test import TestCase
+from profiles.models import UserProfile, ContractorProfile, AgentProfile
+from quotes.models import QuoteRequest, Project
 from django.urls import reverse
-from .models import UserProfile, ContractorProfile, AgentProfile
-from .forms import HomeOwnersEditForm
+from django.core.files.uploadedfile import SimpleUploadedFile
 
-User= get_user_model()
 
-class UserEditTestCase(TestCase):
+import os
+from django.conf import settings
+
+User = get_user_model()
+
+class HomeOwnerWithSlugNameViewTest(APITestCase):
     def setUp(self):
-        # Create a User instance
-        self.user = User.objects.create_user(username='testuser', email='test@example.com', password='testpassword123')
+        self.client = APIClient()
 
-        self.client.force_login(self.user)  # Authenticate the user for the test
+        # Create a home owner and their profile
+        self.home_owner = User.objects.create_user(username='homeowner', email='homeowner@example.com', password='password', user_type='HO', slug='homeowner-slug')
+        UserProfile.objects.create(user=self.home_owner, city="City", state_province="State")
 
-        # Create a userProfile instance for the user
-        self.user_profile= UserProfile.objects.create(
-            user=self.user,
-            address='Test Company Address',
-            city='Test City',
-        )
+        # Create a QuoteRequest (which contains the title)
+        self.quote = QuoteRequest.objects.create(user=self.home_owner, title='Test Quote')
+
+        # Create a project linked to the QuoteRequest
+        self.project = Project.objects.create(admin=self.home_owner, quote_request=self.quote)
+
+        # Authenticate the client as the home_owner
+        self.client.force_authenticate(user=self.home_owner)
+
+
+    def test_homeowner_slug_view_success(self):
+        # Accessing the view using the slug
+        url = reverse('main:homeview-bypk', kwargs={'pk': self.home_owner.id})
+        response = self.client.get(url) 
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.json()
+        print('ddd', data)
         
-        # Create a agentProfile instance for the user
-        self.agent_profile = AgentProfile.objects.create(
-            user=self.user,
-            address='Test Company Address',
-            registration_ID='111111DH',
-        )
-        
-        # Create a ContractorProfile instance for the user
-        self.contractor_profile = ContractorProfile.objects.create(
-            user=self.user,
-            company_name='Test Company',
-            specialization='Test Specialization',
-            company_address='Test Company Address',
-            city='Test City',
-        )
+        # Ensure the quotes and projects data is returned
+        self.assertEqual(data['quote_count'], 1)
+        self.assertEqual(data['projects_count'], 1)
+        self.assertEqual(data['home_owner_slug'], 'homeowner-slug')
+
+    def test_homeowner_slug_view_not_found(self):
+        response = self.client.get('/api/homeowners/invalid-slug/')
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
 
-    def test_edit_userprofile_success(self):
-        # Make a POST request to the edit profile view with updated data
-        valid_data = {
-            'email' : 'test@gmail.com',
-            'phone_number_0' : "NG" , # for the phone field
-            'phone_number_1' : "7058985430",
-            'address': '456 Avenue',
-        }
-        response = self.client.post(reverse('profile:edit-homeowners-profile'), valid_data)
-
-        # Checking if the response is a redirect 
-        self.assertEqual(response.status_code, 302)
-
-        # Check if the redirect location matches the expected URL
-        self.assertEqual(response.url, '/')
-
-        # Refreshing the database
-        self.user.refresh_from_db()
-
-        # Checking if the user profile fields have been updated correctly
-        self.assertEqual(self.user.email, 'test@gmail.com')
-        self.assertEqual(self.user.user_profile.address.raw, '456 Avenue')
-
-    # checking for validation
-    def test_edit_profile_validation(self):
-        # Making a POST request to the edit profile view with invalid data
-        response = self.client.post(reverse('profile:edit-homeowners-profile'), {
-        })
-
-        # Checking ifresponse is 200, which means the form was returned 
-        self.assertEqual(response.status_code, 200)
-        
-    def test_edit_agentprofile_success(self):
-        # Make a POST request to the edit profile view with updated data
-        valid_data = {
-            'email' : 'test@gmail.com',
-            'phone_number_0' : "NG" , # for the phone field
-            'phone_number_1' : "7058985430",
-            'address': '456 Avenue',
-            'registration_ID' : "232434GH"
-        }
-        response = self.client.post(reverse('profile:edit-agent-profile'), valid_data)
-
-        # Checking if the response is a redirect 
-        self.assertEqual(response.status_code, 302)
-
-        # Check if the redirect location matches the expected URL
-        self.assertEqual(response.url, '/')
-
-        # Refreshing the database
-        self.user.refresh_from_db()
-
-        # Checking if the user profile fields have been updated correctly
-        self.assertEqual(self.user.email, 'test@gmail.com')
-        self.assertEqual(self.user.agent_profile.registration_ID, '232434GH')
-
-    # checking for validation
-    def test_edit_agentprofile_validation(self):
-        # Making a POST request to the edit profile view with invalid data
-        response = self.client.post(reverse('profile:edit-agent-profile'), {
-        })
-
-        # Checking ifresponse is 200, which means the form was returned 
-        self.assertEqual(response.status_code, 200)
-
-    # checking authentication of the edit page
-    def test_edit_profile_authentication(self):
-        self.client.logout()
-        # Making a GET request to the edit profile view
-        response = self.client.get(reverse('profile:edit-profile'))
-        # Checking that the response is a redirect (unauthenticated users are redirected)
-        self.assertEqual(response.status_code, 302)
-        self.assertRedirects(response, '/accounts/login/?next=/profiles/edit-profile/')
-
-    # contractor section
-    def test_edit_contractorprofile_success(self):
-        # Make a POST request to the edit profile view with updated data
-        valid_data = {
-            'email' : 'test@gmail.com',
-            'phone_number_0' : "NG" , # for the phone field
-            'phone_number_1' : "7058985430",
-            'company_name': 'Avenue',
-            'registration_number': '1',
-            'company_address': '456 Avenue',
-            'city': 'Test City',
-            'specialization':'coding',
-        }
-        response = self.client.post(reverse('profile:edit-contractor-profile'), valid_data)
-
-        # Checking if the response is a redirect 
-        self.assertEqual(response.status_code, 302)
-
-        # Check if the redirect location matches the expected URL
-        self.assertEqual(response.url, '/profiles/')
-
-        # Refreshing the database
-        self.user.refresh_from_db()
-
-        # Checking if the user profile fields have been updated correctly
-        self.assertEqual(self.user.contractor_profile.city, 'Test City')
-        self.assertEqual(self.user.contractor_profile.specialization, 'coding')
-
-    # checking for validation
-    def test_edit_contractorprofile_validation(self):
-        # Making a POST request to the edit profile view with invalid data
-        response = self.client.post(reverse('profile:edit-contractor-profile'), {
-        })
-
-        # Checking ifresponse is 200, which means the form was returned 
-        self.assertEqual(response.status_code, 200)
-
-    # checking authentication of the edit page
-    def test_edit_contractorprofile_authentication(self):
-        self.client.logout()
-        # Making a GET request to the edit profile view
-        response = self.client.get(reverse('profile:edit-profile'))
-        # Checking that the response is a redirect (unauthenticated users are redirected)
-        self.assertEqual(response.status_code, 302)
-        self.assertRedirects(response, '/accounts/login/?next=/profiles/edit-profile/')
-
-
-class SearchTestCase(TestCase):
+class ContractorProfileAPIViewTest(APITestCase):
     def setUp(self):
-        # Create test users and profiles
-        self.user_co = User.objects.create_user(username='emmanuel', email='emmanuel@g.com', password='123pass?%@', user_type='CO')
-        
-        # Create ContractorProfile instances
-        self.profile_co_1 = ContractorProfile.objects.create(user=self.user_co, company_name='Company',company_address ='enugu', specialization='Specialization', city='City 1')
-        self.client.force_login(self.user_co) 
-    # search section
-    def test_search_results(self):
-        # Search for a term that matches multiple fields
-        query = 'City 1'
-        response = self.client.get(f'{reverse("profile:search_contractor")}?query={query}')
-        self.assertEqual(response.status_code, 200)
-        # to ensure my seach functionality is beaving as expectd
-        self.assertNotContains(response, 'Company')
-        self.assertNotContains(response, 'enugu')
+        self.client = APIClient()
 
-    # def test_empty_query(self):
-    #     # Search with an empty query
-    #     response = self.client.get(reverse("profile:search_contractor"))
-    #     print("search2", response)
-    #     self.assertEqual(response.status_code, 200)
-    #     self.assertContains(response, 'No results found.')
+        # Create a contractor user
+        self.contractor = User.objects.create_user(
+            username='contractor', email='contractor@example.com', password='password', user_type='CO'
+        )
+        ContractorProfile.objects.create(user=self.contractor, company_name='Test Company', city='Test City')
 
-    def test_search_fields(self):
-        # Search for a term that matches specific fields
-        query = 'ho@example.com'
-        response = self.client.get(f'{reverse("profile:search_contractor")}?query={query}')
-        self.assertEqual(response.status_code, 200)
-        self.assertNotContains(response, 'Company 1')
-        self.assertNotContains(response, 'Company 2')
+        # Create a home owner for unauthorized test
+        self.home_owner = User.objects.create_user(
+            username='homeowner', email='homeowner@example.com', password='password', user_type='HO'
+        )
+
+    def test_contractor_profile_view_success(self):
+        self.client.force_authenticate(user=self.contractor)
+        url = reverse('main:home')
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.json()
+        self.assertEqual(data['contractor_profile']['company_name'], 'Test Company')
+        self.assertEqual(data['contractor_profile']['city'], 'Test City')
+
+    def test_contractor_profile_view_unauthorized(self):
+        # self.client.force_authenticate(user=self.home_owner)
+        url = reverse('main:home')
+        response = self.client.get(url)
+
+        # Since the user is unauthorized, expect a 401 UNAUTHORIZED status code
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertIn('You are not authorized. Please provide valid credentials.', response.json()['error'])
+
+
+class EditUsersProfileAPIViewTest(APITestCase):
+    def setUp(self):
+        self.client = APIClient()
+
+        # Create a contractor user and profile
+        self.contractor = User.objects.create_user(username='contractor', email='contractor@example.com', password='password', user_type='CO')
+        self.contractor_profile = ContractorProfile.objects.create(user=self.contractor, company_name='Test Company', city='Test City')
+
+        # Authenticate the user
+        self.client.force_authenticate(user=self.contractor)
+
+    def test_edit_contractor_profile_success(self):
+        valid_data = {
+            'company_name': 'Updated Company',
+            'city': 'Updated City'
+        }
+        url = reverse('profile:edit-users-profile')
+        response = self.client.patch(url, valid_data, format='json') 
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn('Profile updated successfully!', response.json()['message'])
+
+        # Verify that the profile was updated
+        self.contractor_profile.refresh_from_db()
+        self.assertEqual(self.contractor_profile.company_name, 'Updated Company')
+        self.assertEqual(self.contractor_profile.city, 'Updated City')
+
+    def test_edit_profile_invalid_data(self):
+        invalid_data = {'company_name': ''}
+        url = reverse('profile:edit-users-profile')
+        response = self.client.patch(url, invalid_data, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('This field may not be blank.', response.json()['company_name'])
+
+
+class ContractorSearchAPIViewTest(APITestCase):
+    def setUp(self):
+        self.client = APIClient()
+
+        # Create a contractor user and profile
+        self.contractor1 = User.objects.create_user(username='contractor1', email='contractor1@example.com', password='password', user_type='CO')
+        self.contractor_profile1 = ContractorProfile.objects.create(user=self.contractor1, company_name='Company One', specialization='Specialization One', city='City One')
+
+        self.contractor2 = User.objects.create_user(username='contractor2', email='contractor2@example.com', password='password', user_type='CO')
+        self.contractor_profile2 = ContractorProfile.objects.create(user=self.contractor2, company_name='Company Two', specialization='Specialization Two', city='City Two')
+
+        # Authenticate the user
+        self.client.force_authenticate(user=self.contractor1)
+
+    def test_search_contractor_success(self):
+        query = 'Company One'
+        url = reverse('profile:search_contractor') + f'?query={query}'
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.json()
+        self.assertEqual(len(data), 1)  # Check the length of the list directly
+        self.assertEqual(data[0]['company_name'], 'Company One')
+
+    def test_search_no_results(self):
+        query = 'Non-existing Company'
+        url = reverse('profile:search_contractor') + f'?query={query}'
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.json()
+        self.assertEqual(len(data), 0)  # Check if the list is empty
+
+
+class ChangeProfilePictureAPIViewTest(APITestCase):
+    def setUp(self):
+        self.client = APIClient()
+
+        # Create a contractor user and profile
+        self.contractor = User.objects.create_user(username='contractor', email='contractor@example.com', password='password', user_type='CO')
+        self.contractor_profile = ContractorProfile.objects.create(user=self.contractor)
+
+        # Authenticate the user
+        self.client.force_authenticate(user=self.contractor)
+
+    def test_change_profile_picture_success(self):
+        image_path = os.path.join(settings.BASE_DIR, 'static/images/agent.png')
+        with open(image_path, 'rb') as img:
+            data = {'image': img}
+            url = reverse('profile:change-dp-request')
+            response = self.client.post(url, data, format='multipart')
+
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            self.assertIn('Profile picture changed successfully!', response.json()['message'])
+
+    def test_change_profile_picture_no_file(self):
+        url = reverse('profile:change-dp-request')
+        response = self.client.post(url, {}, format='multipart')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('Please select an image', response.json()['error'])
+
+
+class UploadApiViewTest(APITestCase):
+
+    def setUp(self):
+        self.client = APIClient()
+
+        # Create a contractor user
+        self.contractor_user = User.objects.create_user(
+            username='contractor',
+            email='contractor@example.com',
+            password='password',
+            user_type='CO'  # CO for contractor
+        )
+        self.contractor_profile = ContractorProfile.objects.create(user=self.contractor_user)
+
+        # Create a non-contractor user
+        self.non_contractor_user = User.objects.create_user(
+            username='non-contractor',
+            email='non-contractor@example.com',
+            password='password',
+            user_type='AG'  # AG for non-contractor user
+        )
+
+        # URL for the upload API
+        self.url = reverse('profile:upload')  # Adjust 'profile:upload' to your actual URL name
+
+    def test_upload_media_success(self):
+        """
+        Test successful media upload for a contractor.
+        """
+        self.client.force_authenticate(user=self.contractor_user)
+
+        # Simulate a valid image file (realistic binary content)
+        with open('static/images/agent.png', 'rb') as img:
+            file = SimpleUploadedFile(img.name, img.read(), content_type='image/jpeg')
+
+            # Send the POST request with the file
+            response = self.client.post(self.url, {'upload-media': [file]}, format='multipart')
+
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            self.assertIn('message', response.data)
+
+    def test_upload_media_no_file(self):
+        """
+        Test media upload with no file.
+        """
+        self.client.force_authenticate(user=self.contractor_user)
+
+        # Send the POST request without any file
+        response = self.client.post(self.url, {}, format='multipart')
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data['error'], 'No file found!')
+
+    def test_upload_media_unauthorized(self):
+        """
+        Test media upload with a non-contractor user (unauthorized).
+        """
+        self.client.force_authenticate(user=self.non_contractor_user)
+
+        # Simulate a valid image file
+        file = SimpleUploadedFile("test_image.jpg", b"file_content", content_type="image/jpeg")
+
+        # Send the POST request with the file
+        response = self.client.post(self.url, {'upload-media': [file]}, format='multipart')
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.data['error'], 'Unauthorized access')

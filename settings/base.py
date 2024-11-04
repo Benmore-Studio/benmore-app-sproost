@@ -8,6 +8,8 @@ import cloudinary.api
 
 
 from decouple import config
+from datetime import timedelta
+
 
 
 SECRET = config('SECRET')
@@ -62,6 +64,13 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.google',
     'cloudinary_storage',
     'cloudinary',
+
+    'rest_framework',
+    'rest_framework.authtoken',
+    'dj_rest_auth',
+    "dj_rest_auth.registration",
+
+    'drf_spectacular',
 ]
 
 MIDDLEWARE = [
@@ -190,8 +199,8 @@ SOCIALACCOUNT_QUERY_EMAIL = True
 
 ACCOUNT_LOGOUT_REDIRECT_URL = reverse_lazy('account_login')
 LOGIN_REDIRECT_URL = reverse_lazy('main:home')
-ACCOUNT_SIGNUP_REDIRECT_URL = reverse_lazy('verify_email')
-ACCOUNT_FORMS = {'signup': 'accounts.forms.CustomSignupForm'}
+ACCOUNT_SIGNUP_REDIRECT_URL = reverse_lazy('main:home')
+# ACCOUNT_FORMS = {'signup': 'accounts.forms.CustomSignupForm'}
 
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'  # Use database-backed sessions
 SESSION_COOKIE_AGE = 1209600  # Two weeks in seconds
@@ -206,6 +215,26 @@ EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+
+    'EXCEPTION_HANDLER': 'settings.utils.custom_exception_handler', 
+
+}
+
+print("BASE_DR")
+print(BASE_DIR)
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'My API',
+    'DESCRIPTION': 'A sample API',
+    'VERSION': '1.0.0',
+}
+
 
 SOCIALACCOUNT_PROVIDERS = {
     "google": {
@@ -261,4 +290,12 @@ CORS_ALLOW_METHODS = [
     'DELETE',
     'OPTIONS',
 ]
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),  # Customize token lifetime
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),    # Customize refresh token lifetime
+    'ROTATE_REFRESH_TOKENS': True,                  # Rotate refresh tokens
+    'BLACKLIST_AFTER_ROTATION': True,               # Blacklist old refresh tokens
+    'AUTH_HEADER_TYPES': ('Bearer',),               # Header prefix for JWT tokens
+}
 

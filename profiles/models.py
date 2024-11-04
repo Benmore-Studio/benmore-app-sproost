@@ -17,23 +17,19 @@ def image_upload_location_contractor(instance, filename):
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name = 'user_profile')
-    address = AddressField(null = True)
+    address = models.CharField(max_length = 50,null = True)
     city = models.CharField(max_length = 50, null = True, blank = True)
     state_province = models.CharField(max_length = 50, null = True, blank = True)
     image = models.ImageField(upload_to=image_upload_location_home_owner, null=True) 
-    # slug = models.SlugField(
-    #     blank=True,
-    #     null=True,
-    #     unique=True, 
-    #     max_length=100, 
-    #     allow_unicode=True)   
+   
     
     def __str__(self):
         return self.user.email
 
+
 class AgentProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name = 'agent_profile')
-    address = AddressField(null = True)
+    address = models.CharField(max_length = 50, null = True)
     registration_ID = models.CharField(max_length = 225, null = True, blank = True, unique=True, verbose_name="license number", help_text='Also known as licences_ID')
     image = models.ImageField(upload_to=image_upload_location_agent, null=True)
     # has_seen_onboarding_message = models.BooleanField(default=False)
@@ -47,7 +43,7 @@ class ContractorProfile(models.Model):
     company_name = models.CharField(max_length = 255)
     registration_number = models.CharField(max_length = 225)
     specialization = models.CharField(max_length = 225, null = True, blank = True)
-    company_address = AddressField(null =True)
+    company_address = models.CharField(max_length = 50,null =True)
     website = models.URLField(max_length=255, null=True)
     city = models.CharField(max_length = 50)
     media_paths = GenericRelation("main.Media")

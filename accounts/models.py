@@ -8,11 +8,11 @@ from phonenumber_field.modelfields import PhoneNumberField
 from quotes.models import Project
 
 
-class UserTypes(models.TextChoices):
-    home_owner = "home-owner"
-    contractor = "contractor"
-    agent = "agent"
-    investor = "investor"
+# class UserTypes(models.TextChoices):
+#     home_owner = "home-owner"
+#     contractor = "contractor"
+#     agent = "agent"
+#     investor = "investor"
 
 USER_TYPE_CHOICES = (
         ('HO', 'Home Owner'),
@@ -22,7 +22,7 @@ USER_TYPE_CHOICES = (
     )
  
 class User(AbstractUser):
-    phone_number = PhoneNumberField(null=False, blank=False)
+    phone_number = PhoneNumberField(null=True, blank=True)
     user_type = models.CharField(max_length = 3, choices = USER_TYPE_CHOICES)
     date_joined = models.DateTimeField(auto_now_add=True)
     slug = models.SlugField(
@@ -31,7 +31,7 @@ class User(AbstractUser):
         unique=True, 
         max_length=100, 
         allow_unicode=True) 
-    email = models.EmailField(null=True, blank=True, db_index=True)
+    email = models.EmailField(null=True, blank=True, db_index=True, unique=True)
 
     def save(self, *args, **kwargs):
         if not self.slug:
@@ -45,3 +45,4 @@ class User(AbstractUser):
             self.slug = unique_slug
         
         super().save(*args, **kwargs)
+

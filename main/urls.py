@@ -4,13 +4,13 @@ from . import views
 
 app_name = 'main'
 urlpatterns = [
-    path('', views.home, name="home"),
-    path('home-owners/<str:name>/', views.home_owner_with_slug_name, name="home_owner_with_slug_name"),
-    path('menu/', views.MenuList, name="menu"),
-    path('quotes-summary/', views.QuotationReturn, name="quotes-summary"),
-    path('assign-agent/', views.AssignAgentView.as_view(), name="assign-agent"),
-    path('contractors/', views.contractors, name="contractors"),
-    path('contractors/<str:profession>/', views.contractorDetail, name="contractors"),
-    path('assigned-projects/', views.Assigned_projects, name="assigned-projects"),
+    path('', views.HomeView.as_view(), name="home"),
+    path('homeview-bypk/<int:pk>/', views.HomeViewByPkAPIView.as_view(), name='homeview-bypk'),
+    # path('home-owners/<str:name>/', views.HomeOwnerWithSlugNameView.as_view(), name="home_owner_with_slug_name"),
+    path('assign-agent/', views.AssignAgentAPIView.as_view(), name="assign-agent"),
+    path('assigned-projects/', views.AssignedProjectsView.as_view(), name="assigned-projects"),
+    # path('menu/', views.MenuList, name="menu"),
+    # path('quotes-summary/', views.QuotationReturn, name="quotes-summary"),
+    # path('contractors/', views.contractors, name="contractors"),
 ]
 
