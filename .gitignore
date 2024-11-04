@@ -3,12 +3,18 @@
 *.pot
 *.pyc
 __pycache__
+*/__pycache__
 db9.sqlite3
-db.sqlite3
 db.sqlite3
 virtualenv/ 
 media
-*migrations
+media_cdn
+
+
+# pages
+SproostApp/settings.py
+/SproostApp/settings.py
+
 
 # Backup files # 
 *.bak 

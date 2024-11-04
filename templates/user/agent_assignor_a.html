@@ -1,0 +1,66 @@
+{% extends "user/base.html" %} 
+{% load static %} 
+{% load form_tags %} 
+{% block topNav %} 
+    {% include "user/top-navigation.html" %} 
+{% endblock topNav %} 
+{% block content %}
+
+<div class="bg-gray-100">
+     <!-- go back arrow -->
+     <div class="w-full p-4 flex items-center gap-8 border-b border-neutral-150">
+        <img onclick="goBack()" src="{% static 'svgs/chevron-left.svg' %}" alt="" class="cursor-pointer" />
+        <h3 class="text-xl text-gray-900 font-medium">Assigned projects</h3>
+    </div>
+
+    <!-- client -->
+    <div class="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden md:max-w-2xl">
+        <div class="flex items-center justify-between p-4 bg-green-500">
+            <input type="text" placeholder="Search My Listings" class="p-2 rounded-md w-full">
+        </div>
+        <div class="p-4">
+            <div class="bg-blue-100 p-4 rounded-md text-center mb-4">
+                <button class="bg-blue-500 text-white py-2 px-4 rounded-md">UPLOAD New Listing</button>
+                <p class="text-sm text-blue-700 mt-2">Receive A Virtual Quote With The Pictures You Upload!</p>
+            </div>
+            <h2 class="text-lg font-semibold mb-2">Most Recent</h2>
+            <div class="rounded-lg overflow-hidden mb-4">
+                <img src="{% static 'images/your-image.jpg' %}" alt="Most Recent" class="w-full h-auto">
+            </div>
+            <h2 class="text-lg font-semibold mb-2">All Listings</h2>
+            <div class="flex overflow-x-auto space-x-4 pb-4">
+                <div class="flex-shrink-0 w-40 bg-white rounded-lg p-4 shadow-md">
+                    <h3 class="text-sm font-semibold">GOALS</h3>
+                    <p class="text-xs">Total balance</p>
+                    <p class="text-lg font-bold">$0.00</p>
+                </div>
+                <div class="flex-shrink-0 w-40 bg-white rounded-lg p-4 shadow-md">
+                    <h3 class="text-sm font-semibold">GOALS</h3>
+                    <p class="text-xs">Total balance</p>
+                    <p class="text-lg font-bold">$0.00</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="fixed bottom-0 w-full bg-white flex justify-between p-4">
+        <button class="flex-1 text-center text-gray-500">Home</button>
+        <button class="flex-1 text-center text-gray-500">My Listings</button>
+        <button class="flex-1 text-center text-gray-500">Upload</button>
+        <button class="flex-1 text-center text-gray-500">Notifications</button>
+        <button class="flex-1 text-center text-gray-500">More</button>
+    </div>
+</div>
+
+
+{% endblock %}
+{% block bottomNav %}
+    {% include "user/bottom_nav_agent.html" %} 
+{% endblock bottomNav %} 
+{% block extraScripts %}
+    <script src="{% static 'js/agent.js' %}"></script>
+    <script>
+        function goBack() {
+            history.back()
+        }
+    </script>
+{% endblock extraScripts %}

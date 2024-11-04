@@ -1,0 +1,121 @@
+{% extends "user/base.html" %} {% load static %} {% block content %}
+{% load form_tags %}
+  <style>
+    .fab {
+      position: fixed;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+  </style>
+
+<div class="w-full h-full bg-gray-100">
+    <!-- go back arrow -->
+    <div class="w-full p-4 flex items-center pt-8">
+        <div onclick="goBack()">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 cursor-pointer">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
+            </svg>
+        </div>
+        <h3 class="w-full text-xl mr-[48px] text-center text-gray-900 font-medium">Property List</h3>
+    </div>
+
+     <!-- Floating Action Button (FAB) -->
+  <div class="w-full flex justify-center mt-[21px] mb-4">
+    <button class="inline-flex items-center w-[70%] md:w-[50%] justify-center p-3 rounded-3xl bg-black text-white border border-neutral-150 shadow-sm font-semibold">Add New Property</button>
+  </div>
+
+  <!-- Listings Count -->
+  <div class="p-4">
+    <p class="text-xl font-bold text-gray-800">140 listings</p>
+  </div>
+
+  <!-- Property Cards -->
+  <div class="p-4 grid grid-cols-1 justify-center items-center gap-4 sm:grid-cols-2 lg:grid-cols-3 pb-[100px] sm:pb-[120px] md:pb-[140px]">
+    <!-- Property Card 1 -->
+    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+      <img src="{% static 'images/bannerAfter.png' %}" alt="Property Image" class="w-full h-40 object-cover">
+      <div class="p-4">
+        <h2 class="text-lg font-bold text-gray-800">Bungalow Renovation</h2>
+        <div class="flex justify-between mt-2">
+          <p class="text-sm text-gray-600">Created Date</p>
+          <p class="text-sm text-gray-600">Jan 28, 2024</p>
+        </div>
+        <div class="flex justify-between mt-2">
+          <p class="text-sm text-gray-600">Project Duration</p>
+          <p class="text-sm text-gray-600">3 Months</p>
+        </div>
+        <div class="flex justify-between mt-2">
+          <p class="text-sm text-gray-600">Home Owner</p>
+          <div class="flex items-center">
+            <img src="owner-image.jpg" alt="Owner Image" class="w-6 h-6 rounded-full">
+            <p class="text-sm text-gray-600 ml-2">Olivia Rhye</p>
+          </div>
+        </div>
+        <div class="flex justify-between mt-2">
+          <p class="text-sm text-gray-600">Home Location</p>
+          <p class="text-sm text-gray-600">35st California road, off 5th New York</p>
+        </div>
+        <div class="flex justify-between mt-2">
+          <p class="text-sm text-gray-600">Quotation Status</p>
+          <div class="flex gap-1 items-center bg-yellow-100 rounded-full px-2 py-1">
+              <div class="w-[10px] h-[10px] rounded-full bg-yellow-500 "></div>
+              <div class="text-sm text-yellow-500">Pending</div>
+          </div>
+        </div>
+        <div class="text-center">
+            <button class="inline-flex items-center w-[70%] md:w-[50%] justify-center p-3 rounded-3xl bg-black text-white border border-neutral-150 shadow-sm font-semibold mt-[19px]">View More</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Property Card 2 (Duplicate for demo) -->
+    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+      <img src="{% static 'images/bannerBefore.png' %}" alt="Property Image" class="w-full h-40 object-cover">
+      <div class="p-4">
+        <h2 class="text-lg font-bold text-gray-800">Bungalow Renovation</h2>
+        <div class="flex justify-between mt-2">
+          <p class="text-sm text-gray-600">Created Date</p>
+          <p class="text-sm text-gray-600">Jan 28, 2024</p>
+        </div>
+        <div class="flex justify-between mt-2">
+          <p class="text-sm text-gray-600">Project Duration</p>
+          <p class="text-sm text-gray-600">3 Months</p>
+        </div>
+        <div class="flex justify-between mt-2">
+          <p class="text-sm text-gray-600">Home Owner</p>
+          <div class="flex items-center">
+            <img src="owner-image.jpg" alt="Owner Image" class="w-6 h-6 rounded-full">
+            <p class="text-sm text-gray-600 ml-2">Olivia Rhye</p>
+          </div>
+        </div>
+        <div class="flex justify-between mt-2">
+          <p class="text-sm text-gray-600">Home Location</p>
+          <p class="text-sm text-gray-600">35st California road, off 5th New York</p>
+        </div>
+        <div class="flex justify-between mt-2">
+          <p class="text-sm text-gray-600">Quotation Status</p>
+          <div class="flex gap-1 items-center bg-yellow-100 rounded-full px-2 py-1">
+            <div class="w-[10px] h-[10px] rounded-full bg-yellow-500 "></div>
+            <div class="text-sm text-yellow-500">Pending</div>
+        </div>
+        </div>
+        <div class="text-center">
+            <button class="inline-flex items-center w-[70%] md:w-[50%] justify-center p-3 rounded-3xl bg-black text-white border border-neutral-150 shadow-sm font-semibold mt-[19px]">View More</button>
+        </div>
+      </div>
+    </div>
+  </div>
+    
+</div>
+{% endblock %}
+{% block bottomNav %}
+    {% include "user/bottom_nav_agent.html" %}
+{% endblock bottomNav %} 
+{% block extraScripts %}
+    <script>
+        function goBack() {
+            history.back()
+        }
+    </script>
+{% endblock extraScripts %}

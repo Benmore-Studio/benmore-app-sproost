@@ -60,5 +60,4 @@
     </button>
   </div>
 </main>
-{% endblock %}{% block bottomNav %}{% if loggedInUser == 'agent' %}{% include "user/bottom_nav_agent.html" %}{% elif loggedInUser == 'contractor' %} 
-{% include "user/bottom_nav_contractor.html"%} {% else %}{% include "user/bottom_nav.html" %} {% endif %} {% endblock bottomNav %}
+{% endblock %}{% block bottomNav %}{% include "user/bottom_nav_agent.html" %} {% endblock bottomNav %}

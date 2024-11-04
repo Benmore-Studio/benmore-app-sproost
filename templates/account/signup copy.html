@@ -1,0 +1,544 @@
+{% extends 'account/base.html'%} 
+{% load static %} 
+{% load socialaccount %}
+{% load form_tags %}
+{% block title %} Sign Up {% endblock %}
+ {% block authContent %}
+  <style>
+    .step {
+        display: none;
+    }
+    
+    .step-contractor {
+        display: none;
+    }
+    
+    .step-agent {
+        display: none;
+    }
+    
+    #container-check input:checked~div .checkmark {
+        display: block;
+    }
+    
+    #container-check.active {
+        background-color: #EAF7E6;
+        border: 1px solid black;
+    }
+
+     /* Hide arrows in number input fields */
+     input::-webkit-outer-spin-button,
+     input::-webkit-inner-spin-button {
+       -webkit-appearance: none;
+       margin: 0;
+     }
+ 
+     input[type=number] {
+       -moz-appearance: textfield;
+     }
+  </style>
+
+  <div>
+    {{form.media}}
+    {% comment %} {{form}} {% endcomment %}
+    <form id="signupForm"  method="POST">
+        {% csrf_token %}
+        <div class="step step-contractor step-agent w-full p-4 pt-8" id="step1">
+            <div class="w-full">
+                <div class="flex flex-col gap-8 items-center justify-center">
+                    <div class="flex flex-col items-center justify-center">
+                        <h3 class="text-gray-900 font-semibold text-xl">Create an account</h3>
+                        <p class="text-gray-600 text-center text-base">Which Account would you want to create.</p>
+                    </div>
+                    {% include 'account/partials/sign_up_errors.html' %}
+                    <div class="flex flex-col gap-4 w-full">
+                        <label for="onboard-owner" class="w-full cursor-pointer">
+                          <div id="container-check" class="tab flex flex-col text-flex-start justify-center border bg-gray-200 bg-#F8F9F8 hover:border-black rounded-lg shadow-sm lg:h-[80px] h-[60px] pt-[16px] pl-[16px]">
+                            <div class="flex gap-2 justify-start items-center">
+                              <div class="w-[44px] h-[44px] flex justify-center items-center rounded-full bg-graybg ">
+                                <img src="{% static 'images/verified.png' %}" alt="" class="text-black w-[24px] h-[24px]">
+                              </div>
+                              <div class="flex flex-col items-start justify-center">
+                                <h3 class="text-gray-600 text-sm">Home Owner </h3>
+                                <p class="text-gray-600 text-sm">Investor </p>
+                              </div>
+                            </div>
+                            <div class = "absolute right-3 h-full flex items-center">
+                              <input type="radio" name="user_type" value = "HO" id="onboard-owner" class="w-4 h-4 hidden rounded-full border border-neutral-100" />
+                            </div>
+                          </div>
+                        </label>
+
+                        <label for="onboard-contractor" class="w-full cursor-pointer">
+                          <div id="container-check" class="tab flex flex-col text-flex-start justify-center border bg-gray-200 bg-#F8F9F8 hover:border-black rounded-lg shadow-sm lg:h-[80px] h-[60px] pt-[16px] pl-[16px]">
+                           <div class="flex gap-2 justify-start items-center">
+                              <div class="w-[44px] h-[44px] flex justify-center items-center rounded-full bg-graybg ">
+                                <img src="{% static 'images/verified.png' %}" alt="" class="text-black w-[24px] h-[24px]">
+                              </div>
+                              <div class="flex flex-col items-start justify-center">
+                                <h3 class="text-gray-600 text-sm">contractor </h3>
+                                <p class="text-gray-600 text-sm">Investor </p>
+                              </div>
+                            </div>
+                            <div class = "absolute right-3 h-full flex items-center">
+                              <input type="radio" value = "CO" name="user_type" id="onboard-contractor"  class="w-4 h-4 hidden rounded-full border border-neutral-100" />
+                            </div>
+                          </div>
+                        </label>
+
+                        <label for="onboard-agent" class="w-full cursor-pointer">
+                          <div id="container-check" class="tab flex flex-col text-flex-start justify-center border bg-gray-200 bg-#F8F9F8 hover:border-black rounded-lg shadow-sm lg:h-[80px] h-[60px] pt-[16px] pl-[16px]">
+                            <div class="flex gap-2 justify-start items-center">
+                              <div class="w-[44px] h-[44px] flex justify-center items-center rounded-full bg-graybg ">
+                                <img src="{% static 'images/verified.png' %}" alt="" class="text-black w-[24px] h-[24px]">
+                              </div>
+                              <div class="flex flex-col items-start justify-center">
+                                <h3 class="text-gray-600 text-sm">Agent </h3>
+                                <p class="text-gray-600 text-sm">Investor </p>
+                              </div>
+                            </div>
+                            <div class = "absolute right-3 h-full flex items-center">
+                              <input value = "AG" type="radio" name="user_type" id="onboard-agent" class="w-4 h-4 hidden rounded-full border border-neutral-100" />
+                            </div>
+                          </div>
+                        </label>
+
+                        <label for="onboard-investor" class="checkmark w-full cursor-pointer">
+                          <div id="container-check" class="tab flex flex-col text-flex-start justify-center border bg-gray-200 bg-#F8F9F8 hover:border-black rounded-lg shadow-sm lg:h-[80px] h-[60px] pt-[16px] pl-[16px]">  
+                            <div class="flex gap-2 justify-start items-center">
+                              <div class="w-[44px] h-[44px] flex justify-center items-center rounded-full bg-graybg ">
+                                <img src="{% static 'images/verified.png' %}" alt="" class="text-black w-[24px] h-[24px]">
+                              </div>
+                              <div class="flex flex-col items-start justify-center">
+                                <h3 class="text-gray-600 text-sm">Investor </h3>
+                                <p class="text-gray-600 text-sm">Investor </p>
+                              </div>
+                            </div>
+                            <div class = "absolute right-3 h-full flex items-center">
+                              <input value = "IV" type="radio" name="user_type" id="onboard-investor" class="w-4 h-4 hidden rounded-full border border-neutral-100" />
+                            </div>
+                          </div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        
+        <!-- Step 2 -->
+        <div class="step p-4 pt-8" id = "step2-others">
+            <div class="w-full flex items-center justify-center mb-8">
+                <div class="w-[200px] flex items-center gap-2 justify-center">
+                    <div class="w-3 h-3 rounded-full bg-black"></div>
+                    <div class="line w-12 bg-neutral-200 h-[2px]"></div>
+                    <div class="w-3 h-3 rounded-full bg-transparent border border-neutral-300"></div>
+                    <div class="line w-12 bg-neutral-200 h-[2px]"></div>
+                    <div class="w-3 h-3 rounded-full bg-transparent border border-neutral-300"></div>
+                </div>
+            </div>
+            <div class="flex flex-col items-center justify-center mb-5">
+                <h3 class="text-gray-900 font-semibold text-xl">Tell us about you</h3>
+                <p class="text-gray-600 text-center text-base">Please fill the form below, so we can get to know you</p>
+            </div>
+            {% include 'account/partials/sign_up_errors.html' %}
+            <div class="flex flex-col gap-4 w-full">
+              <div class="w-full">
+                <label for="{{form.first_name.auto_id}}" class="text-black font-medium text-sm">First Name</label>
+                <div class="border border-gray-300 rounded-3xl p-2 mt-1 h-[60px] pl-6">
+                    <input
+                        type="text"
+                        name="first_name"
+                        id="first_name"
+                        class="w-full rounded-3xl h-full focus:outline-none bg-transparent border-none focus:border-gray-500"
+                        placeholder="Enter your first name"
+                    />
+                </div>
+              </div>
+              <div class="w-full">
+                <label for="{{form.last_name.auto_id}}" class="text-black font-medium text-sm">Last Name</label>
+                <div class="border border-gray-300 rounded-3xl p-2 mt-1 h-[60px] pl-6">
+                    <input
+                        type="text"
+                        name="last_name"
+                        id="last_name"
+                        class="w-full rounded-3xl h-full focus:outline-none bg-transparent border-none focus:border-gray-500"
+                        placeholder="Enter your last name"
+                    />
+                </div>
+              </div>
+              <div class="w-full">
+                <label for="id_address" class="text-black font-medium text-sm">Home Address</label>
+                <div class="border border-gray-300 rounded-3xl p-2 mt-1 h-[60px] pl-6">
+                    <input
+                        type="text"
+                        name="address"
+                        id="id_address"
+                        class="w-full rounded-3xl h-full focus:outline-none bg-transparent border-none focus:border-gray-500"
+                        placeholder="Enter your address"
+                    />
+                </div>
+              </div>
+            </div>
+        </div>
+
+        <!-- Step 2 for agents -->
+        <div class="step-agent p-4 pt-8" id = "step2-others">
+            <div class="w-full flex items-center justify-center mb-8">
+                <div class="w-[200px] flex items-center gap-2 justify-center">
+                    <div class="w-3 h-3 rounded-full bg-black"></div>
+                    <div class="line w-12 bg-neutral-200 h-[2px]"></div>
+                    <div class="w-3 h-3 rounded-full bg-transparent border border-neutral-300"></div>
+                    <div class="line w-12 bg-neutral-200 h-[2px]"></div>
+                    <div class="w-3 h-3 rounded-full bg-transparent border border-neutral-300"></div>
+                </div>
+            </div>
+            <div class="flex flex-col items-center justify-center mb-5">
+                <h3 class="text-gray-900 font-semibold text-xl">Tell us about you</h3>
+                <p class="text-gray-600 text-center text-base">Provide some more basic information to set up your account.</p>
+            </div>
+            {% include 'account/partials/sign_up_errors.html' %}
+            <div class="flex flex-col gap-4 w-full">
+              <div class="w-full">
+                  <label for="{{form.agent_first_name.auto_id}}" class="text-black font-medium text-sm">First Name</label>
+                  <div class="border border-gray-300 rounded-3xl p-2 mt-1 h-[60px] pl-6">
+                      <input
+                          type="text"
+                          name="agent_first_name"
+                          id="agent_first_name"
+                          class="w-full rounded-3xl h-full focus:outline-none bg-transparent border-none focus:border-gray-500"
+                          placeholder="Enter your first name"
+                      />
+                  </div>
+              </div>
+              <div class="w-full">
+                <label for="{{form.agent_last_name.auto_id}}" class="text-black font-medium text-sm">Last Name</label>
+                <div class="border border-gray-300 rounded-3xl p-2 mt-1 h-[60px] pl-6">
+                    <input
+                        type="text"
+                        name="agent_last_name"
+                        id="agent_last_name"
+                        class="w-full rounded-3xl h-full focus:outline-none bg-transparent border-none focus:border-gray-500"
+                        placeholder="Enter your last name"
+                    />
+                </div>
+              </div>
+              <div class="w-full">
+                <label for="registration_ID" class="text-black font-medium text-sm">Licence ID</label>
+                <div class="border border-gray-300 rounded-3xl p-2 mt-1 h-[60px] pl-6">
+                    <input
+                        type="text"
+                        name="registration_ID"
+                        id="registration_ID"
+                        class="w-full rounded-3xl h-full focus:outline-none bg-transparent border-none focus:border-gray-500"
+                        placeholder="Enter your Licence ID"
+                    />
+                </div>
+            </div>
+              <p id = "reg-id-error" class = "text-red-500 font-medium text-sm mx-1"></p>
+              <div class="w-full">
+                  <label for="{{form.agent_address.auto_id}}" class="text-black font-medium text-sm">Address</label>
+                  <div class="border border-gray-300 rounded-3xl p-2 mt-1 h-[60px] pl-6">
+                      <input
+                          type="text"
+                          name="agent_address"
+                          id="agent_address"
+                          class="w-full rounded-3xl h-full focus:outline-none bg-transparent border-none focus:border-gray-500"
+                          placeholder="Enter your address"
+                      />
+                  </div>
+              </div>
+            </div>
+        </div>
+        
+        
+        <!-- Step 2 for contractor -->
+        <div class="step-contractor p-4 pt-8" id = "step2-contractor">
+          <div class="w-full flex items-center justify-center mb-8">
+              <div class="w-[200px] flex items-center gap-2 justify-center">
+                  <div class="w-3 h-3 rounded-full bg-black"></div>
+                  <div class="line w-12 bg-neutral-200 h-[2px]"></div>
+                  <div class="w-3 h-3 rounded-full bg-transparent border border-neutral-300"></div>
+                  <div class="line w-12 bg-neutral-200 h-[2px]"></div>
+                  <div class="w-3 h-3 rounded-full bg-transparent border border-neutral-300"></div>
+              </div>
+          </div>
+          <div class="flex flex-col items-center justify-center mb-5">
+              <h3 class="text-gray-900 font-semibold text-xl">Create an account</h3>
+              <p class="text-gray-600 text-center text-base">Provide some basic information to set up your account.</p>
+          </div>
+          {% include 'account/partials/sign_up_errors.html' %}
+          <div class="flex flex-col gap-4 w-full">
+            <div class="w-full">
+              <label for="{{form.company_name.auto_id}}" class="text-black font-medium text-sm">Company Name</label>
+              <div class="border border-gray-300 rounded-3xl p-2 mt-1 h-[60px] pl-6">
+                  <input
+                      type="text"
+                      name="company_name"
+                      id="company_name"
+                      class="w-full rounded-3xl h-full focus:outline-none bg-transparent border-none focus:border-gray-500"
+                      placeholder="Enter your company name"
+                  />
+              </div>
+            </div>
+            <div class="w-full">
+              <label for="{{form.company_address.auto_id}}" class="text-black font-medium text-sm">Company Address</label>
+              <div class="border border-gray-300 rounded-3xl p-2 mt-1 h-[60px] pl-6">
+                  <input
+                      type="text"
+                      name="company_address"
+                      id="company_address"
+                      class="w-full rounded-3xl h-full focus:outline-none bg-transparent border-none focus:border-gray-500"
+                      placeholder="Enter your company address"
+                  />
+              </div>
+            </div>
+            <div class="w-full">
+              <label for="{{form.specialization.auto_id}}" class="text-black font-medium text-sm">Specialization</label>
+              <div class="border border-gray-300 rounded-3xl p-2 mt-1 h-[60px] pl-6">
+                  <input
+                      type="text"
+                      name="specialization"
+                      id="specialization"
+                      class="w-full rounded-3xl h-full focus:outline-none bg-transparent border-none focus:border-gray-500"
+                      placeholder="Enter your Specialization"
+                  />
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Step 3 -->
+        <div class="step step-contractor step-agent p-4 pt-8">
+          <div class="w-full flex items-center justify-center mb-8">
+              <div class="w-[200px] flex items-center gap-2 justify-center">
+                  <div class="w-3 h-3 rounded-full bg-black"></div>
+                  <div class="line w-12 bg-neutral-200 h-[2px]"></div>
+                  <div class="w-3 h-3 rounded-full bg-black"></div>
+                  <div class="line w-12 bg-neutral-200 h-[2px]"></div>
+                  <div class="w-3 h-3 rounded-full bg-transparent border border-neutral-300"></div>
+              </div>
+          </div>
+          <div class="flex flex-col items-center justify-center mb-5">
+              <h3 class="text-gray-900 font-semibold text-xl">Create an account</h3>
+              <p class="text-gray-600 text-center text-base">Provide some basic information to set up your account.</p>
+          </div>
+          {% include 'account/partials/sign_up_errors.html' %}
+          <div class="flex flex-col gap-4 w-full mb-4">        
+            <div class="w-full">
+              <label for="username" class="text-black font-medium text-sm">Username</label>
+              <div class="border border-gray-300 rounded-3xl p-2 mt-1 h-[60px] pl-6">
+                  <input
+                      type="text"
+                      name="username"
+                      id="username"
+                      autocomplete="username" 
+                      maxlength="320"
+                      class="w-full rounded-3xl h-full focus:outline-none bg-transparent border-none focus:border-gray-500"
+                      placeholder="Enter your username"
+                      required
+                  />
+              </div>
+                <p class = "text-red-500 p-2" id = "email-error"></p>
+            </div>       
+          </div>
+
+          <div class="flex flex-col gap-4 w-full">
+            <div class="w-full">
+              <label for="{{form.phone_number.auto_id}}" class="text-gray-700 font-medium text-sm">Phone number</label>
+              <div id = "phone-field" class="flex gap-2 p-2 border border-gray-300 p-2 border border-gray-300 rounded-md">
+                {{form.phone_number|addattrs:"class=w-full p-2 border border-gray-300 rounded-md focus:outline-none mt-1 focus:border-gray-500,placeholder=Enter your number"}}
+              </div>
+              <p class = "text-red-500 p-2" id = "phone-error"></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 4 -->
+        <div class="step step-contractor step-agent p-4 pt-8">
+          <div class="w-full flex items-center justify-center mb-8">
+              <div class="w-[200px] flex items-center gap-2 justify-center">
+                  <div class="w-3 h-3 rounded-full bg-black"></div>
+                  <div class="line w-12 bg-neutral-200 h-[2px]"></div>
+                  <div class="w-3 h-3 rounded-full bg-black"></div>
+                  <div class="line w-12 bg-neutral-200 h-[2px]"></div>
+                  <div class="w-3 h-3 rounded-full bg-black"></div>
+              </div>
+          </div>
+          <div class="flex flex-col items-center justify-center mb-5">
+              <h3 class="text-gray-900 font-semibold text-xl">Create an account</h3>
+              <p class="text-gray-600 text-center text-base">Provide some basic information to set up your account.</p>
+          </div>
+          {% include 'account/partials/sign_up_errors.html' %}
+          <div class="flex flex-col gap-4 w-full">
+            <div class="w-full">
+              <label for="id_password1" class="text-black font-medium text-sm">Password</label>
+              <div class="border border-gray-300 rounded-3xl p-2 mt-1 h-[60px] pl-6 relative">
+                  <input
+                      type="password"
+                      name="password1"
+                      aria-describedby="id_password1_helptext" 
+                      id="id_password1"
+                      autocomplete="new-password"
+                      class="w-full rounded-3xl h-full focus:outline-none bg-transparent border-none focus:border-gray-500"
+                      placeholder="Enter your password"
+                      required 
+                  />
+                  <span id="passwordshow" class="absolute right-0 pr-[10px] bottom-4 cursor-pointer"><i class="fa fa-eye" aria-hidden="true"></i></span>
+              </div>
+            </div>
+            <div class="w-full">
+              <label for="{{form.password2.auto_id}}" class="text-black font-medium text-sm">Confirm Password</label>
+              <div class="border border-gray-300 rounded-3xl p-2 mt-1 h-[60px] pl-6 relative">
+                  <input
+                      type="password"
+                      name="password2"
+                      aria-describedby="id_password2_helptext" 
+                      id="id_password2"
+                      autocomplete="new-password"
+                      required
+                      class="w-full rounded-3xl h-full focus:outline-none bg-transparent border-none focus:border-gray-500"
+                      placeholder="Confirm password"
+                  />
+                  <span id="passwordshow2" class="absolute right-0 pr-[10px] bottom-4 cursor-pointer"><i class="fa fa-eye" aria-hidden="true"></i></span>
+              </div>
+            </div>
+              
+            <p id = "password-error" class = "text-red-500 font-medium text-sm mx-2"></p>
+          </div>
+        </div>
+
+        <!-- step 5 didnt get-->
+        <div class="step step-contractor step-agent p-4 pt-8">
+          <div class="w-full flex items-center justify-center mb-8">
+              <div class="w-[200px] flex items-center gap-2 justify-center">
+                  <div class="w-3 h-3 rounded-full bg-black"></div>
+                  <div class="line w-12 bg-neutral-200 h-[2px]"></div>
+                  <div class="w-3 h-3 rounded-full bg-black"></div>
+                  <div class="line w-12 bg-neutral-200 h-[2px]"></div>
+                  <div class="w-3 h-3 rounded-full bg-black"></div>
+              </div>
+          </div>
+          <div class="flex flex-col items-center justify-center mb-5">
+            <h2 class="text-2xl font-bold text-gray-800 mb-2">We have sent you an email</h2>
+            <p class="text-sm text-gray-600 mb-6">Your e-mail address will be verified in the next step</p>
+          </div>
+          {% include 'account/partials/sign_up_errors.html' %}
+          <div class="flex flex-col gap-4 w-full">        
+            <div class="w-full">
+              <label for="id_email" class="text-black font-medium text-sm">Email</label>
+              <div class="border border-gray-300 rounded-3xl p-2 mt-1 h-[60px] pl-6">
+                  <input
+                      type="email"
+                      name="email"
+                      id="id_email"
+                      autocomplete="email" 
+                      maxlength="320"
+                      class="w-full rounded-3xl h-full focus:outline-none bg-transparent border-none focus:border-gray-500"
+                      placeholder="Enter your email"
+                      required
+                  />
+              </div>
+                <p class = "text-red-500 p-2" id = "email-error"></p>
+            </div>       
+          </div>
+        </div>
+
+        <!-- step 6 -->
+        <div class="step step-contractor step-agent p-4 pt-8">
+          <div class="w-full flex items-center justify-center mb-8">
+              <div class="w-[200px] flex items-center gap-2 justify-center">
+                  <div class="w-3 h-3 rounded-full bg-black"></div>
+                  <div class="line w-12 bg-neutral-200 h-[2px]"></div>
+                  <div class="w-3 h-3 rounded-full bg-black"></div>
+                  <div class="line w-12 bg-neutral-200 h-[2px]"></div>
+                  <div class="w-3 h-3 rounded-full bg-black"></div>
+              </div>
+          </div>
+          <div class="flex flex-col items-center justify-center mb-5">
+            <h2 class="text-2xl font-bold text-gray-800 mb-2">We have sent you an email</h2>
+            <p class="text-sm text-gray-600 mb-6">Your e-mail address will be verified in the next step</p>
+          </div>
+          {% include 'account/partials/sign_up_errors.html' %}
+            <div class="w-full flex justify-center">
+              <div class="w-[236px] h-[236px]">
+                <img src="{% static 'images/megaphone.png' %}" alt="" class="w-full h-auto">
+              </div>
+          </div>
+        </div>
+
+        <!-- step 7 -->
+        <div class="step step-contractor step-agent p-4 pt-8">
+          <div class="w-full flex items-center justify-center mb-8">
+              <div class="w-[200px] flex items-center gap-2 justify-center">
+                  <div class="w-3 h-3 rounded-full bg-black"></div>
+                  <div class="line w-12 bg-neutral-200 h-[2px]"></div>
+                  <div class="w-3 h-3 rounded-full bg-black"></div>
+                  <div class="line w-12 bg-neutral-200 h-[2px]"></div>
+                  <div class="w-3 h-3 rounded-full bg-black"></div>
+              </div>
+          </div>
+          <div class="flex flex-col items-center justify-center mb-5">
+            <!-- Verification Text -->
+            <h2 class="text-2xl font-bold text-gray-800 mb-2">Verify your e-mail address</h2>
+            <p class="text-sm text-gray-600 mb-6">Enter the 6-digit OTP that was sent to Bethelofuyatan1@gmail.com</p>
+          </div>
+          {% include 'account/partials/sign_up_errors.html' %}
+          <div class="flex flex-col gap-4 w-full">        
+            <!-- OTP Input Boxes -->
+            <div class="flex justify-between mb-4" id="otp-inputs">
+              <input type="number" maxlength="1" class="otp-input w-12 h-12 text-center border rounded-lg text-xl focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              <input type="number" maxlength="1" class="otp-input w-12 h-12 text-center border rounded-lg text-xl focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              <input type="number" maxlength="1" class="otp-input w-12 h-12 text-center border rounded-lg text-xl focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              <input type="number" maxlength="1" class="otp-input w-12 h-12 text-center border rounded-lg text-xl focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              <input type="number" maxlength="1" class="otp-input w-12 h-12 text-center border rounded-lg text-xl focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              <input type="number" maxlength="1" class="otp-input w-12 h-12 text-center border rounded-lg text-xl focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+
+            <!-- OTP Expiry Notice -->
+            <div class="flex items-center justify-center text-gray-600 mb-4">
+              <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h1m0-4h-.01m6 4a6 6 0 11-12 0 6 6 0 0112 0z"></path>
+              </svg>
+              <p>OTP expires in 5:00</p>
+            </div>
+        
+          </div>
+        </div>
+
+
+        <div class="p-4 pt-8">
+            <div class="flex flex-col items-center gap-4 w-full">
+                <button id="nextBtn" onclick="nextPrev(1)" type="button" class="inline-flex items-center w-[70%] md:w-[50%] justify-center p-3 rounded-3xl bg-black text-white border border-neutral-150 shadow-sm font-semibold"></button>
+                <button id="prevBtn" onclick="nextPrev(-1)" type="button" class="inline-flex items-center w-[70%] md:w-[50%] justify-center p-3 rounded-3xl bg-[#FFDEDE] text-red-500 border border-neutral-150 shadow-sm font-semibold">Back</button>
+
+            </div>
+            <div class="flex items-center justify-center text-sm gap-2 mt-4">
+                <span class="text-gray-600">Already have an account?</span>
+                <a href="{% url 'account_login' %}" class="text-primary font-semibold">Log in</a>
+            </div>
+        </div>
+    </form>
+  </div>
+
+{% endblock %} 
+{% block extraScripts %}
+  <!-- <script src="{% static 'js/accounts/signup.js' %}"></script> -->
+  <script src="{% static 'js/signup_register.js' %}"></script>
+  <script>
+    const inputs = document.querySelectorAll('.otp-input');
+
+    inputs.forEach((input, index) => {
+      input.addEventListener('input', (e) => {
+        if (input.value.length > 0 && index < inputs.length - 1) {
+          inputs[index + 1].focus();
+        }
+      });
+
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Backspace' && input.value.length === 0 && index > 0) {
+          inputs[index - 1].focus();
+        }
+      });
+    });
+  </script>
+{% endblock %}

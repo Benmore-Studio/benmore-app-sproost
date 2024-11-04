@@ -3,6 +3,7 @@ from django.contrib.auth.models import AnonymousUser
 from django.contrib import messages
 from typing import Union, TypeVar
 
+
 T = TypeVar("T")
 
 
@@ -61,7 +62,10 @@ class CustomRequestUtil:
         if error_detail:
             messages.error(self.request, error_detail)
             if self.template_on_error:
-                return redirect(self.template_on_error)
+                if isinstance(self.template_on_error, str):
+                    return redirect(self.template_on_error)
+                elif isinstance(self.template_on_error, tuple):
+                    return redirect(self.template_on_error[0], self.template_on_error[1])
         else:
             if isinstance(response, str):
                 messages.success(self.request, response)
@@ -72,3 +76,14 @@ class CustomRequestUtil:
             return render(self.request, self.template_name, self.context)
 
         return redirect(target_view)
+    
+
+def user_type_required(user_types):
+    ''' check if user is of a certain type '''
+    def decorator(view_func):
+        def _wrapped_view(request, *args, **kwargs):
+            if request.user.user_type not in user_types:
+                return redirect('main:home')
+            return view_func(request, *args, **kwargs)
+        return _wrapped_view
+    return decorator

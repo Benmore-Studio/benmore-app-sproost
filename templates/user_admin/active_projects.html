@@ -1,0 +1,84 @@
+{% extends "user_admin/base.html" %} {% load static %} {% block navbar %} {% include "user_admin/navbar.html" %} {% endblock navbar %} {% block content %}
+<main class="w-full px-[1rem] md:px-[4rem] flex flex-col gap-8 my-8">
+    <div class="">
+        <div class="mb-4">
+            <h1 class="text-2xl font-semibold text-gray-700">Project Request</h1>
+        </div>
+        <div class="w-full flex items-center justify-between">
+            <div class="w-1/3 group border border-gray-300 rounded-md gap-2 p-2 mt-1">
+                <form class = "flex items-center ">
+                    <input type="text" name="q" id="search" placeholder="Search" class="w-full h-full outline-none group-focus:outline-none mt-1 focus-visible:border-none border-none" />
+                    <button type = "submit">
+                        <img src="{% static 'svgs/search.svg' %}" alt="" class="w-[20px] h-[20px] object-contain" />
+                    </button>
+                </form>
+            </div>
+            {% comment %} <div class="group border border-gray-300 rounded-md flex items-center justify-center gap-2 p-2 mt-1">
+                <img src="{% static 'svgs/Filterlines.svg' %}" alt="" class="w-[20px] h-[20px] object-contain" />
+                <span class="text-gray-700 font-semibold text-sm">Filters</span>
+            </div> {% endcomment %}
+        </div>
+    </div>
+    <div class="">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6">
+            {% for project in projects %}
+            <div class="w-full flex flex-col gap-4 p-4 border text-xs border-neutral-150 rounded-md shadow-sm">
+                <div class="w-full flex items-center justify-between">
+                    <div class="text-xs flex flex-col gap-2">
+                        <span class="text-gray-500 font-medium">Project Name</span>
+                        <h3 class="text-gray-600 font-semibold">{{project.quote_request.title}}</h3>
+                    </div>
+                    {% comment %} <span class="">
+                        <img src="{% static 'svgs/more-vertical.svg' %}" alt="" class="" />
+                    </span> {% endcomment %}
+                </div>
+                <div class="flex items-start gap-12 w-full">
+                    <div class="">
+                        <span class="text-gray-500 font-medium">Home Owner</span>
+                        <div class="flex items-center gap-4 mt-2">
+<!--                            <img src="{{project.user.image.url}}" alt="" class="w-8 h-8 object-contain" />-->
+                            <span class="text-gray-900 font-medium">{{project.quote_request.user.first_name}} {{project.quote_request.user.last_name}}</span>
+                            <img src="{% static 'svgs/chat-msg.svg' %}" alt="" />
+                        </div>
+                    </div>
+                    <div class="text-xs flex flex-col gap-2">
+                        <span class="text-gray-500 font-medium">Created Date</span>
+                        <h3 class="text-gray-600 font-semibold mt-2">{{project.quote_request.upload_date|date:"F j, Y"}}</h3>
+                    </div>
+                </div>
+                <div class="flex items-start gap-14 w-full">
+                    <div class="text-xs flex flex-col gap-2">
+                        <span class="text-gray-500 font-medium">Location</span>
+                        <h3 class="text-gray-600 font-semibold mt-2">{{project.quote_request.property_address}}</h3>
+                    </div>
+                    <div class="text-xs flex flex-col gap-2">
+                        <span class="text-gray-500 font-medium">Quotation Status</span>
+                        <div class="inline-flex p-1 px-2 bg-gray-200 bg-opacity-50 items-center w-fit gap-2 border border-neutral-150 rounded-xl">
+                            <div class="w-2 h-2 {% if project.quote_request.status|lower == "pending" %} bg-blue-600 {% elif project.quote_request.status|lower == "approved" %} bg-green-600 {% else %} bg-red-600  {% endif %}rounded-full"></div>
+                            <span class="text-[10px]">{{project.quote_request.status}}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="flex items-center justify-between p-4 border-t mt-4 border-neutral-150">
+             {% if projects.has_previous %}
+
+                <button class="inline-flex items-center justify-center border border-neutral-150 rounded-md p-2 outline-none shadow-sm">
+                    <a href="?page={{ projects.previous_page_number }}"><img src="{%  static 'svgs/arrow-left.svg' %}" alt="" class="" /></a>
+
+                </button>
+            {% endif %}
+
+            <span class="text-gray-700  text-sm font-medium">Page {{ projects.number }} of {{ projects.paginator.num_pages }}</span>
+            {% if projects.has_next %}
+                <button class="inline-flex items-center justify-center border border-neutral-150 rounded-md p-2 outline-none shadow-sm">
+                    <a href="?page={{ projects.next_page_number }}"><img src="{%  static 'svgs/arrow-right.svg' %}" alt="" class="" /></a>
+                </button>
+            {% endif %}
+
+        </div>
+    </div>
+</main>
+{% endblock %}

@@ -1,3 +1,2 @@
 
-{% load i18n %}
-{% blocktrans %}Successfully signed in{% endblocktrans %}
+

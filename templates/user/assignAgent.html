@@ -1,59 +1,50 @@
-{% extends "user/base.html" %} {% load static %} 
-{% include "user/bottom_navigation.html" %}
-
+{% extends "user/base.html" %} 
+{% load form_tags %}
+{% load static %} 
+{% include "user/bottom_navigation.html" %} 
 {% block content %}
 <div class="w-full">
     <!-- header -->
-    <div class="w-full p-4 flex items-center gap-8 mt-4 border-b border-neutral-150">
-        <img onclick="goBack()" src="{% static 'svgs/chevron-left.svg' %}" alt="" class="cursor-pointer" />
-        <h3 class="text-xl text-gray-900 font-medium">Assign Agent</h3>
+    <div class="w-full p-4 flex items-center mb-[18px]">
+        <div onclick="goBack()">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 cursor-pointer">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
+            </svg>
+        </div>
+        <h3 class="w-full text-xl mr-[48px] text-center text-gray-900 font-medium">Assign Agent</h3>
     </div>
 
     <div class="w-full p-4">
-        <form action="" class="w-full mt-4 flex flex-col gap-4">
+        <form method="POST" class="w-full mt-4 flex flex-col gap-4">
+            {% csrf_token %}
             <div class="w-full">
-                <label for="agentName" class="text-gray-700 font-medium text-sm">Agent Name</label>
-                <select name="agentName" id="agentName" class="w-full p-2 border border-gray-300 rounded-md focus:outline-none mt-1 focus:border-gray-500">
-                    <option value="">Select an Agent</option>
-                    <option value="agent1">Agent 1</option>
-                    <option value="agent2">Agent 2</option>
-                    <option value="agent3">Agent 3</option>
-                    <!-- Add more <option> tags as needed for each agent -->
-                </select>
-            </div>
-            
-            <div class="w-full">
-                <label for="regNumber" class="text-gray-700 font-medium text-sm">Registration Number</label>
-                <input type="text" name="regNumber" id="regNumber" placeholder="Type here" class="w-full p-2 border border-gray-300 rounded-md focus:outline-none mt-1 focus:border-gray-500" />
-            </div>
-            {% comment %} <div class="w-full">
-                <label for="title" class="text-gray-700 font-medium text-sm">Email</label>
-                <div class="group border border-gray-300 rounded-md flex items-center gap-2 p-2 mt-1">
-                    <img src="{% static 'svgs/mail.svg' %}" alt="" class="fill-gray-500 w-[20px] h-[20px] text-gray-500" />
-                    <input type="text" name="title" id="title" placeholder="Type here" class="w-full h-full outline-none group-focus:outline-none mt-1 focus-visible:border-none border-none" />
+                <label for="registration_ID" class="text-black font-medium text-sm">Agent License Number</label>
+                <div class="border border-gray-300 rounded-3xl p-2 mt-1 h-[60px] pl-6">
+                    <input
+                        type="text"
+                        name="registration_id"
+                        id="registration_ID"
+                        class="w-full rounded-3xl h-full focus:outline-none bg-transparent border-none focus:border-gray-500"
+                        placeholder="Type here"
+                    />
                 </div>
-            </div> {% endcomment %}
+            </div>
 
-            <div class="flex w-full flex-col gap-4 border-t border-neutral-150 pt-5">
-                <button onclick="gotoPropertyList()" type="button" class="flex items-center w-full justify-center p-3 rounded-lg bg-primary text-white border border-neutral-150 shadow-sm font-semibold">
-          Assign Agent
-        </button>
-                <button type="button" onclick="goBack()" class="flex p-3 w-full rounded-lg items-center justify-center bg-white border border-neutral-150 shadow-sm font-semibold">Cancel</button>
+
+            <div class="flex w-full flex-col gap-4 items-center pt-[21px]">
+                <button type="submit" class="inline-flex items-center w-[70%] md:w-[50%] justify-center p-3 rounded-3xl bg-black text-white border border-neutral-150 shadow-sm font-semibold">
+                    Assign Agent
+                </button>
+                <a href = '{% url "main:home" %}' class="inline-flex items-center w-[70%] md:w-[50%] justify-center p-3 rounded-3xl bg-[#FFDEDE] text-red-500 border border-neutral-150 shadow-sm font-semibold">Cancel</a>
             </div>
         </form>
     </div>
 </div>
-{% endblock %}
-
-{% block bottomNav %}{% if request.user == 'AG' %}{% include "user/bottom_nav_agent.html" %}{% elif request.user == 'CO' %}{% include "user/bottom_nav_contractor.html"%}{% else %}{% include "user/bottom_nav.html" %} {% endif %}
-{% endblock bottomNav %} {% block extraScripts %}
-<script>
-    function goBack() {
-        history.back()
-    }
-
-    function gotoPropertyList() {
-        window.location.href = "/property-list/"
-    }
-</script>
+{% endblock %} 
+{% block extraScripts %}
+    <script>
+        function goBack() {
+            history.back()
+        }
+    </script>
 {% endblock extraScripts %}

@@ -1,66 +1,152 @@
 from django.shortcuts import render, redirect
+from django.views import View
+from django.contrib.auth import get_user_model
+from django.conf import settings
+from django.contrib import messages
+from django.contrib.sites.shortcuts import get_current_site
+from .forms import AgentAssignmentForm
 
+from mail_templated import send_mail
 from quotes.models import QuoteRequest, Project
+from property.models import AssignedAccount
+from profiles.models import AgentProfile, Referral
+from django.contrib.auth.mixins import LoginRequiredMixin
+from utils.views import get_base_url
 
+from django.urls import reverse
 
+User = get_user_model()
 
+# general function to be called in other functions
+def home_owner_function(request, value):
+    quotes = QuoteRequest.objects.filter(user=value)
+    projects = Project.objects.filter(quote_request__user=value)
+    projs = Project.objects.filter(admin=value)
+    context ={
+        "quotes": quotes,
+        "projects": projects,
+        'projs':projs,
+        "quote_count": quotes.count(),
+        "projects_count": projects.count(),
+        "home_owner_slug": request.user.slug
+    }
+    return context
 
-# authentication
+# the vieew to route the home owner with slug
+def home_owner_with_slug_name(request, name):
+    user = User.objects.get(slug=name)
+    context = home_owner_function(request, user)
+    context['name'] = name
+    return render(request, "user/home.html", context)
 
-# loggedInUser = 'home-owner'| 'agent'| 'contractor'| 'investor', this is used to switch between bottom navigation, default navigation is home-owner, so need to add it.
+def get_base_url(request):
+    # Use 'get_current_site' to get the domain
+    domain = get_current_site(request).domain
+    # Use 'request.is_secure' to determine the scheme (http or https)
+    scheme = 'https' if request.is_secure() else 'http'
+    # Construct the base URL
+    base_url = f"{scheme}://{domain}"
+    return base_url
+
 
 loggedInUser = 'contractor'
 
+
 # mains
 def homeOwners(request):
-    project_feed= [
+    project_feed = [
         {
-            'title':'Number of Uploaded projects',  'status': 'uploaded',  'count': 3, 
+            'title': 'Number of Uploaded projects', 'status': 'uploaded', 'count': 3,
         },
         {
-            'title': 'Number of Quotes Requested',  'status': 'quotes', 'count': 3, 
+            'title': 'Number of Quotes Requested', 'status': 'quotes', 'count': 3,
         },
         {
-            'title':'Number of completed projects', 'status': 'completed', 'count': 0, 
+            'title': 'Number of completed projects', 'status': 'completed', 'count': 0,
         }
     ]
-    
+
     project_history = [
-        {'name':'Bungalow Renovation', 'quotation_status': 'pending', 'home_owner': {'name':'Olivia Rhye', 'image':'/static/images/ownerAvatar.png'}, 'location': 'New Yersey, Newark', 'created_date': 'Jan 28, 2024'},
-        {'name':'Bungalow Renovation', 'quotation_status': 'pending', 'home_owner': {'name':'Olivia Rhye', 'image':'/static/images/ownerAvatar.png'}, 'location': 'New Yersey, Newark', 'created_date': 'Jan 28, 2024'},
-        {'name':'Bungalow Renovation', 'quotation_status': 'pending', 'home_owner': {'name':'Olivia Rhye', 'image':'/static/images/ownerAvatar.png'}, 'location': 'New Yersey, Newark', 'created_date': 'Jan 28, 2024'},
+        {'name': 'Bungalow Renovation', 'quotation_status': 'pending',
+         'home_owner': {'name': 'Olivia Rhye', 'image': '/static/images/ownerAvatar.png'},
+         'location': 'New Yersey, Newark', 'created_date': 'Jan 28, 2024'},
+        {'name': 'Bungalow Renovation', 'quotation_status': 'pending',
+         'home_owner': {'name': 'Olivia Rhye', 'image': '/static/images/ownerAvatar.png'},
+         'location': 'New Yersey, Newark', 'created_date': 'Jan 28, 2024'},
+        {'name': 'Bungalow Renovation', 'quotation_status': 'pending',
+         'home_owner': {'name': 'Olivia Rhye', 'image': '/static/images/ownerAvatar.png'},
+         'location': 'New Yersey, Newark', 'created_date': 'Jan 28, 2024'},
     ]
-    
+
     context = {'project_feed': project_feed, 'project_history': project_history, 'loggedInUser': loggedInUser}
     return render(request, 'user/home.html', context)
-
 
 
 def home(request):
     if not request.user.is_authenticated:
         return redirect('account_login')
-    
     else:
-        print("user type === ", request.user.user_type)
         if request.user.user_type == "HO":
-            quotes = QuoteRequest.objects.filter(user=request.user, is_quote=True)
-            projects = Project.objects.filter(quote_request__user=request.user)
-            context = {
-                "quotes": quotes,
-                "projects": projects,
-                "quote_count": quotes.count(),
-                "projects_count": projects.count()
-            }
+            context = home_owner_function(request, request.user)
             return render(request, "user/home.html", context)
         elif request.user.user_type == "CO":
-            return render(request, "user/contractor_home.html")
+            return redirect("profile:contractor_profile")
         elif request.user.user_type == "AG":
-            return render(request, "user/agent_home.html")
+            URL = get_base_url(request)
+            quotes = QuoteRequest.objects.filter(created_by_agent=request.user) 
+            projects = Project.objects.filter(quote_request__user=request.user)
+            proj = Project.objects.filter(admin=request.user)
+            accounts = AssignedAccount.objects.filter(assigned_to=request.user).order_by('-id').select_related(
+                "assigned_by", "assigned_to")
+            # print(projects)
+            agent = User.objects.get(pk=request.user.pk)
+            agent_profile = AgentProfile.objects.get(user=agent)
+            referral, created = Referral.objects.get_or_create(referrer=request.user)
+            if created:
+                if agent_profile.registration_ID:
+                    referral.code = agent_profile.registration_ID
+                    referral.save()
+
+            signup_url = reverse('account_signup')
+            referral_link = request.build_absolute_uri(f'{signup_url}?ref={referral.code}')
+            context = {
+                "quote_count": quotes.count(),
+                "projects_count": projects.count(),
+                "accounts": accounts,
+                "accounts_len": len(accounts),
+                'url':URL,
+                'proj':proj,
+                'quotes':quotes,
+                # 'onboarding_message': agent_profile.has_seen_onboarding_message,
+                'referral_link': referral_link
+            }
+            return render(request, "user/agent_home.html", context)
         else:
-            return render(request, "user_admin/dashboard.html")
-    
+            return redirect("admins:dashboard")
+        
+def Assigned_projects(request):
+    if not request.user.is_authenticated:
+        return redirect('account_login')
+
+    else:
+        quotes = QuoteRequest.objects.filter(user=request.user)
+        projects = Project.objects.filter(quote_request__user=request.user)
+        proj = Project.objects.filter(admin=request.user)
+        accounts = AssignedAccount.objects.filter(assigned_to=request.user).order_by('-id').select_related(
+            "assigned_by", "assigned_to")
+
+        context = {
+            "quote_count": quotes.count(),
+            "projects_count": projects.count(),
+            "accounts": accounts,
+            'proj':proj,
+            "accounts_len": len(accounts),
+            
+        }
+        return render(request, "user/agent_assignor.html", context)
+       
 # def home(request):
-    
+
 #     if loggedInUser == 'agent':
 #         context = {
 #         'loggedInUser': loggedInUser
@@ -71,204 +157,108 @@ def home(request):
 
 
 def requestQuotes(request):
-    context ={
+    context = {
         'loggedInUser': loggedInUser
     }
     return render(request, 'user/request_quotes.html', context)
 
-def assignAgent(request):
-    context ={
-        'loggedInUser': loggedInUser
-    }
-    return render(request, 'user/assignAgent.html', context)
 
-def propertyList(request):
-    properties =[
-        {'name':"Daine Homes", 'address':"4600 East Washington Street, Suite 305"},
-        {'name':"Golden Homes", 'address':"No. 17 November Street. 10343 NY"},
-        {'name':"Grand-Stay Homes", 'address':"No. 10 Silints Street. 42333 LA"},
-        {'name':"Safe Homes", 'address':"No. 10 Silints Street. 42333 LA"},
-    ]
-    context ={
-        'properties': properties,
-        'loggedInUser': loggedInUser
-    }
-    return render(request, 'user/propertyList.html', context)
+class AssignAgentView(LoginRequiredMixin, View):
+    template_name = 'user/assignAgent.html'
+    form_class = AgentAssignmentForm
+
+    def get(self, request):
+        if not request.user.user_type == 'HO':
+            return redirect('main:home')
+        
+        agents = User.objects.filter(user_type='AG')
+        context = {
+            'agents': agents,
+            'form' : self.form_class()
+        }
+        return render(request, self.template_name, context)
+
+    def post(self, request):
+        
+        form = self.form_class(request.POST)
+        if form.is_valid():
+            regID = form.cleaned_data.get('registration_id')
+            try:
+                
+                agent = AgentProfile.objects.get(registration_ID=regID)
+                if AssignedAccount.objects.filter(assigned_by=request.user, assigned_to=agent.user).exists():
+                    messages.warning(request, 'Agent already assigned. Awaiting agent confirmation')
+                    return redirect('main:assign-agent')
+                
+                AssignedAccount.objects.get_or_create(
+                    assigned_to=agent.user,
+                    assigned_by=request.user,
+                    is_approved=True
+                )
+                # send_mail(
+                #     'mail/assign_agent.tpl',
+                #     {'first_name': agent.user.first_name, "base_url": get_base_url(request)},
+                #     settings.EMAIL_HOST_USER,
+                #     [agent.user.email]
+                # )
+
+                messages.success(request, 'Agent assigned successfully. Awaiting agent confirmation')
+                return redirect('main:home')
+            except AgentProfile.DoesNotExist:
+                messages.error(request, f'No Agent exists with such liscense ID: {regID}')
+        else:
+            pass
+        return redirect('main:assign-agent')
+
+
+
+# unused functions
 
 def QuotationReturn(request):
-    context ={
+    context = {
         'loggedInUser': loggedInUser
     }
     return render(request, 'user/quotation_returns.html', context)
 
+
 def MenuList(request):
-    context ={
+    context = {
         'loggedInUser': loggedInUser
     }
     return render(request, 'user/menu.html', context)
 
+
 def contractors(request):
     searchResults = [
         {'name': 'Olivia Rhye', 'profession': 'plumber', 'phone': '+1 834 955 0920', 'email': 'olivia@untitledui.com'},
-        {'name': 'Phoenix Baker', 'profession': 'electrician', 'phone': '+1 834 955 0920', 'email': 'olivia@untitledui.com'},
-        {'name': 'Lana Steiner', 'profession': 'carpenter', 'phone': '+1 834 955 0920', 'email': 'olivia@untitledui.com'},
-        {'name': 'Demi Wilkinson', 'profession': 'interior designer', 'phone': '+1 834 955 0920', 'email': 'olivia@untitledui.com'},
+        {'name': 'Phoenix Baker', 'profession': 'electrician', 'phone': '+1 834 955 0920',
+         'email': 'olivia@untitledui.com'},
+        {'name': 'Lana Steiner', 'profession': 'carpenter', 'phone': '+1 834 955 0920',
+         'email': 'olivia@untitledui.com'},
+        {'name': 'Demi Wilkinson', 'profession': 'interior designer', 'phone': '+1 834 955 0920',
+         'email': 'olivia@untitledui.com'},
         {'name': 'Candice Wua', 'profession': 'painter', 'phone': '+1 834 955 0920', 'email': 'olivia@untitledui.com'},
-        {'name': 'Natali Craig', 'profession': 'carpenter', 'phone': '+1 834 955 0920', 'email': 'olivia@untitledui.com'},
+        {'name': 'Natali Craig', 'profession': 'carpenter', 'phone': '+1 834 955 0920',
+         'email': 'olivia@untitledui.com'},
         {'name': 'Drew Cano', 'profession': 'painter', 'phone': '+1 834 955 0920', 'email': 'olivia@untitledui.com'},
-        {'name': 'Phoenix Baker', 'profession': 'electrician', 'phone': '+1 834 955 0920', 'email': 'olivia@untitledui.com'},
-        {'name': 'Lana Steiner', 'profession': 'carpenter', 'phone': '+1 834 955 0920', 'email': 'olivia@untitledui.com'},
-        {'name': 'Demi Wilkinson', 'profession': 'interior designer', 'phone': '+1 834 955 0920', 'email': 'olivia@untitledui.com'},
+        {'name': 'Phoenix Baker', 'profession': 'electrician', 'phone': '+1 834 955 0920',
+         'email': 'olivia@untitledui.com'},
+        {'name': 'Lana Steiner', 'profession': 'carpenter', 'phone': '+1 834 955 0920',
+         'email': 'olivia@untitledui.com'},
+        {'name': 'Demi Wilkinson', 'profession': 'interior designer', 'phone': '+1 834 955 0920',
+         'email': 'olivia@untitledui.com'},
     ]
-    context ={
+    context = {
         'contractors': searchResults,
         'loggedInUser': loggedInUser
     }
     return render(request, 'user/contractors.html', context)
- 
+
+
 def contractorDetail(request, profession):
-    context ={
+    context = {
         'loggedInUser': loggedInUser
     }
     return render(request, 'user/contractorDetail.html', context)
 
-def addProperty(request):
-    context ={
-        'loggedInUser': loggedInUser
-    }
-    return render(request, 'user/add_property.html', context)
 
-
-
-# web based admin- applications
-
-def loginAdmin(request):
-  context ={}  
-  return render(request, 'admin/login.html', context) 
-
-def adminDashboard(request):
-    recent_home_owners =[
-        {
-            'name':'Olivia Rhye', 'photo':'/static/images/ownerAvatar.png', 'phone': '+1 834 955 0920', 'email':'olivia@untitledui.com', 'project_name':'Project title', 'quotation_status':"accepted"
-        },
-        {
-            'name':'Olivia Rhye', 'photo':'/static/images/ownerAvatar.png', 'phone': '+1 834 955 0920', 'email':'olivia@untitledui.com', 'project_name':'Project title', 'quotation_status':"rejected"
-        },
-        {
-            'name':'Olivia Rhye', 'photo':'/static/images/ownerAvatar.png', 'phone': '+1 834 955 0920', 'email':'olivia@untitledui.com', 'project_name':'Project title', 'quotation_status':"accepted"
-        },
-        {
-            'name':'Olivia Rhye', 'photo':'/static/images/ownerAvatar.png', 'phone': '+1 834 955 0920', 'email':'olivia@untitledui.com', 'project_name':'Project title', 'quotation_status':"pending"
-        },
-    ]
-    recent_agents =[
-        {
-            'name':'Olivia Rhye', 'phone': '+1 834 955 0920', 'email':'olivia@untitledui.com', 'project_name':'Project title', 'quotation_status':"accepted", 'rating':4, 'total_project':5
-        },
-        {
-            'name':'Olivia Rhye', 'phone': '+1 834 955 0920', 'email':'olivia@untitledui.com', 'project_name':'Project title', 'quotation_status':"rejected", 'total_project':2
-        },
-        {
-            'name':'Olivia Rhye', 'phone': '+1 834 955 0920', 'email':'olivia@untitledui.com', 'project_name':'Project title', 'quotation_status':"accepted", 'total_project':1
-        },
-        {
-            'name':'Olivia Rhye', 'phone': '+1 834 955 0920', 'email':'olivia@untitledui.com', 'project_name':'Project title', 'quotation_status':"pending",'total_project':10       
-            },
-    ]
-    recent_contractors =[
-        {
-            'name':'Olivia Rhye', 'phone': '+1 834 955 0920', 'email':'olivia@untitledui.com', 'project_name':'Project title', 'quotation_status':"accepted", 'rating':4, 'total_project':5
-        },
-        {
-            'name':'Olivia Rhye', 'phone': '+1 834 955 0920', 'email':'olivia@untitledui.com', 'project_name':'Project title', 'quotation_status':"rejected", 'rating':4, 'total_project':2
-        },
-        {
-            'name':'Olivia Rhye', 'phone': '+1 834 955 0920', 'email':'olivia@untitledui.com', 'project_name':'Project title', 'quotation_status':"accepted", 'rating':4, 'total_project':1
-        },
-        {
-            'name':'Olivia Rhye', 'phone': '+1 834 955 0920', 'email':'olivia@untitledui.com', 'project_name':'Project title', 'quotation_status':"pending", 'rating':4, 'total_project':10       
-            },
-    ]
-    project_history = [
-        {'name':'Bungalow Renovation', 'quotation_status': 'pending', 'home_owner': {'name':'Olivia Rhye', 'image':'/static/images/ownerAvatar.png'}, 'location': 'New Yersey, Newark', 'created_date': 'Jan 28, 2024'},
-        {'name':'Bungalow Renovation', 'quotation_status': 'pending', 'home_owner': {'name':'Olivia Rhye', 'image':'/static/images/ownerAvatar.png'}, 'location': 'New Yersey, Newark', 'created_date': 'Jan 28, 2024'},
-        {'name':'Bungalow Renovation', 'quotation_status': 'pending', 'home_owner': {'name':'Olivia Rhye', 'image':'/static/images/ownerAvatar.png'}, 'location': 'New Yersey, Newark', 'created_date': 'Jan 28, 2024'},
-        {'name':'Bungalow Renovation', 'quotation_status': 'pending', 'home_owner': {'name':'Olivia Rhye', 'image':'/static/images/ownerAvatar.png'}, 'location': 'New Yersey, Newark', 'created_date': 'Jan 28, 2024'},
-    ]
-    
-    overall_stats = [
-        {'title':'Home Owners', 'project_counts': 316, 'increased_by':'20%', 'action':'View owners'},
-        {'title':'Agents', 'project_counts': 316, 'increased_by':'10%', 'action':'View agents'},
-        {'title':'Contractors', 'project_counts': 316, 'increased_by':'10%', 'action':'View contractors'},
-        {'title':'Active Projects', 'project_counts': 316, 'increased_by':'40%', 'action':'View projects'},
-    ]
-    context ={'recent_home_owners': recent_home_owners, 'recent_agents':recent_agents,
-              'recent_contractors': recent_contractors, 'project_history': project_history, 'overall_stats': overall_stats }  
-    return render(request, 'admin/dashboard.html', context)
-
-def projectRequest(request):
-    project_history = [
-        {'id':1,'name':'Bungalow Renovation', 'quotation_status': 'pending', 'home_owner': {'name':'Olivia Rhye', 'image':'/static/images/ownerAvatar.png'}, 'location': 'New Yersey, Newark', 'created_date': 'Jan 28, 2024'},
-        {'id':2,'name':'Bungalow Renovation', 'quotation_status': 'pending', 'home_owner': {'name':'Olivia Rhye', 'image':'/static/images/ownerAvatar.png'}, 'location': 'New Yersey, Newark', 'created_date': 'Jan 28, 2024'},
-        {'id':3,'name':'Bungalow Renovation', 'quotation_status': 'pending', 'home_owner': {'name':'Olivia Rhye', 'image':'/static/images/ownerAvatar.png'}, 'location': 'New Yersey, Newark', 'created_date': 'Jan 28, 2024'},
-        {'id':4,'name':'Bungalow Renovation', 'quotation_status': 'pending', 'home_owner': {'name':'Olivia Rhye', 'image':'/static/images/ownerAvatar.png'}, 'location': 'New Yersey, Newark', 'created_date': 'Jan 28, 2024'},
-        {'id':5,'name':'Bungalow Renovation', 'quotation_status': 'pending', 'home_owner': {'name':'Olivia Rhye', 'image':'/static/images/ownerAvatar.png'}, 'location': 'New Yersey, Newark', 'created_date': 'Jan 28, 2024'},
-        {'id':6,'name':'Bungalow Renovation', 'quotation_status': 'pending', 'home_owner': {'name':'Olivia Rhye', 'image':'/static/images/ownerAvatar.png'}, 'location': 'New Yersey, Newark', 'created_date': 'Jan 28, 2024'},
-        {'id':7,'name':'Bungalow Renovation', 'quotation_status': 'pending', 'home_owner': {'name':'Olivia Rhye', 'image':'/static/images/ownerAvatar.png'}, 'location': 'New Yersey, Newark', 'created_date': 'Jan 28, 2024'},
-        {'id':8,'name':'Bungalow Renovation', 'quotation_status': 'pending', 'home_owner': {'name':'Olivia Rhye', 'image':'/static/images/ownerAvatar.png'}, 'location': 'New Yersey, Newark', 'created_date': 'Jan 28, 2024'},
-        {'id':9,'name':'Bungalow Renovation', 'quotation_status': 'pending', 'home_owner': {'name':'Olivia Rhye', 'image':'/static/images/ownerAvatar.png'}, 'location': 'New Yersey, Newark', 'created_date': 'Jan 28, 2024'},
-        {'id':10,'name':'Bungalow Renovation', 'quotation_status': 'pending', 'home_owner': {'name':'Olivia Rhye', 'image':'/static/images/ownerAvatar.png'}, 'location': 'New Yersey, Newark', 'created_date': 'Jan 28, 2024'},
-        {'id':11,'name':'Bungalow Renovation', 'quotation_status': 'pending', 'home_owner': {'name':'Olivia Rhye', 'image':'/static/images/ownerAvatar.png'}, 'location': 'New Yersey, Newark', 'created_date': 'Jan 28, 2024'},
-        {'id':12,'name':'Bungalow Renovation', 'quotation_status': 'pending', 'home_owner': {'name':'Olivia Rhye', 'image':'/static/images/ownerAvatar.png'}, 'location': 'New Yersey, Newark', 'created_date': 'Jan 28, 2024'},
-    ]
-    context ={'project_history': project_history}  
-    return render(request, 'admin/project_request.html', context)
-
-
-def projectRequestDetail(request, id):
-    quotation_items =[
-        {'name': 'Building Material', 'price':'20,000'},
-        {'name': 'Rentals', 'price':'5000'},
-        {'name': 'Cleaning', 'price':'8000'},
-        {'name': 'Cleaning', 'price':'8000'},
-        {'name': 'Labour', 'price':'10,000'},
-    ]
-    quotation_history =[
-        {'date': 'Jan 16, 2024', 'contractor_name':'Olivia Rhye', 'price':'$43,000', 'status':'pending' },
-        {'date': 'Jan 16, 2024', 'contractor_name':'Olivia Rhye', 'price':'$43,000', 'status':'pending' },
-        {'date': 'Jan 16, 2024', 'contractor_name':'Olivia Rhye', 'price':'$43,000', 'status':'pending' },
-    ]
-    quotation_history_length = len(quotation_history)
-    # Quotation history length greater than 0 will change the UI under quotations history, defaulted to 0 at the beginning
-    context ={'quotation_items':quotation_items, 'quotation_history_length': 0, 'quotation_history':quotation_history}
-    return render(request, 'admin/project_request_detail.html', context)
-
-def contractorsAdmin(request):
-    contractors_search_result = [
-        {
-            'name':'Olivia Rhye', 'phone': '+1 834 955 0920', 'email':'olivia@untitledui.com', 'projects_handled':5, 'location':"New jersey, Newark", 'rating':4, 'action':'#'
-        },
-        {
-            'name':'Olivia Rhye', 'phone': '+1 834 955 0920', 'email':'olivia@untitledui.com', 'projects_handled':5, 'location':"New jersey, Newark", 'rating':4, 'action':'#'
-        },
-        {
-            'name':'Olivia Rhye', 'phone': '+1 834 955 0920', 'email':'olivia@untitledui.com', 'projects_handled':5, 'location':"New jersey, Newark", 'rating':4, 'action':'#'
-        },
-        {
-            'name':'Olivia Rhye', 'phone': '+1 834 955 0920', 'email':'olivia@untitledui.com', 'projects_handled':5, 'location':"New jersey, Newark", 'rating':4, 'action':'#'     
-            },
-        {
-            'name':'Olivia Rhye', 'phone': '+1 834 955 0920', 'email':'olivia@untitledui.com', 'projects_handled':5, 'location':"New jersey, Newark", 'rating':4, 'action':'#'
-        },
-        {
-            'name':'Olivia Rhye', 'phone': '+1 834 955 0920', 'email':'olivia@untitledui.com', 'projects_handled':5, 'location':"New jersey, Newark", 'rating':4, 'action':'#'
-        },
-        {
-            'name':'Olivia Rhye', 'phone': '+1 834 955 0920', 'email':'olivia@untitledui.com', 'projects_handled':5, 'location':"New jersey, Newark", 'rating':4, 'action':'#'
-        },
-        {
-            'name':'Olivia Rhye', 'phone': '+1 834 955 0920', 'email':'olivia@untitledui.com', 'projects_handled':5, 'location':"New jersey, Newark", 'rating':4, 'action':'#'     
-            },
-    ]
-    context = {'contractors_search_results': contractors_search_result}
-    return render(request, 'admin/contractors.html', context)

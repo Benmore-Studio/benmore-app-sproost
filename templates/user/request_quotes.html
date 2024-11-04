@@ -1,165 +1,304 @@
-{% extends "user/base.html" %} {% load static %} {% block content %}
+{% extends "user/base.html" %} 
+{% load static %} 
+{% block content %}
 
 <style>
   #step {
     display: none;
   }
+
+video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 88%;
+  object-fit: cover;
+}
+
+.container {
+    padding: 20px;
+    text-align: center;
+}
+
+video {
+    width: 100%;
+    max-width: 400px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+.controls {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.button {
+    background-color: white;
+    border: 1px gray solid;
+    color: black;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+.button:hover {
+    background-color: #45a049;
+    transform: scale(1.05);
+}
+
+.button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+.download-link {
+    display: block;
+    margin-top: 10px;
+    color: #333;
+    text-decoration: none;
+    font-size: 14px;
+}
+
 </style>
 <div class="w-full">
   <!-- content -->
   <div id="step" class="w-full">
-    <!-- header -->
-    <div
-      class="w-full p-4 flex items-center gap-8 mt-4 border-b border-neutral-150"
-    >
-      <img
-        onclick="goBack()"
-        src="{% static 'svgs/chevron-left.svg' %}"
-        alt=""
-        class="cursor-pointer"
-      />
-      <h3 class="text-xl text-gray-900 font-medium">Request Quote</h3>
-    </div>
+   <!-- go back -->
+        <div class="w-full p-4 flex items-center mb-[18px] cursor-pointer">
+            <div onclick="goBacks()">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 cursor-pointer">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
+            </svg>
+            </div>
+            <h3 class="w-full text-xl mr-[48px] text-center text-gray-900 font-medium">Request Quotes</h3>
+        </div>
 
     <div class="w-full p-4">
       <form method="post" enctype="multipart/form-data" id="quoteRequestForm" class="w-full mt-4 flex flex-col gap-4">
         {% csrf_token %}
-        <div class="w-full">
-          <span class="text-sm text-gray-700 font-medium"
-            >Upload Pictures & Videos</span
-          >
-          <p class="text-sm text-gray-500">
-            This will be sent to the contractor to create a quotation
-          </p>
-        </div>
-        <label for="upload-quote">
-          <div
-            class="w-full min-h-[150px] rounded-md border border-neutral-150 shadow-sm mt-4 flex flex-col gap-4 items-center justify-center"
-          >
-            <div
-              class="w-12 h-12 flex items-center justify-center rounded-full bg-gray-200 bg-opacity-50 p-2"
-            >
-              <img src="{% static 'svgs/upload-cloud.svg' %}" alt="" class="" />
-            </div>
-            <p class="text-center text-sm text-gray-500">
-              <span class="text-primary font-semibold">Click to upload</span> or
-              drag and drop <br />
-              SVG, PNG, JPG or GIF (max. 800x400px)
-            </p>
+        {% if form.non_field_errors %}
+          <div class="bg-red-400 rounded-md text-center border border-red-700">
+              {% for error in form.non_field_errors %}
+                  <p>{{ error }}</p>
+              {% endfor %}
           </div>
-          <input
-            type="file"
-            id="upload-quote"
-            multiple
-            name="upload-quote"
-            class="hidden"
-          />
-        </label>
-      
-        <div id="file-container" class="w-full flex items-center my-4 gap-4">
-          <!-- dynamic render -->
+        {% endif %}
+        <div class="w-full">
+          <span class="text-sm text-black font-medium">Upload Pictures & Videos</span>
+          <p class="text-sm text-gray-500">This will be sent to the contractor to create a quotation</p>
+        </div>
+        <div class="w-full border border-neutral-150 shadow-sm mt-4 pb-4">
+          <label for="upload-quote">
+            <div class="w-full min-h-[150px] rounded-md flex flex-col gap-4 items-center justify-center">
+              <div class="w-12 h-12 flex items-center justify-center rounded-full bg-gray-200 bg-opacity-50 p-2">
+                <img src="{% static 'svgs/upload-cloud.svg' %}" alt="" class="" />
+              </div>
+              <p class="text-center text-sm text-gray-500">
+                <span class="text-black font-semibold cursor-pointer">Click to upload</span> or drag and drop <br />
+                SVG, PNG, JPG or GIF (max. 800x400px)
+              </p>
+            </div>
+            <input type="file" id="upload-quote" accept="image/*,video/*,application/pdf" multiple name="media" class="hidden" />
+          </label>
+          <div class="flex w-full justify-center gap-4">
+            <div class="container">
+              <video class="hidden" id="videoPreview" autoplay muted></video>
+              <div class="controls">
+                  <button id="startRecording" class="button start ">🔴 Start Recording</button>
+                  <button id="stopRecording" class="button stop" disabled>⏹️ Stop Recording</button>
+              </div>
+              <div id="uploadStatus" class="upload-status"></div>
+            </div>
+          </div>
         </div>
 
+        <input type="file" id="recordedVideoInput" name="media" class="hidden">
+
+
+        <!-- recent quotes -->
+        <div class="tab w-full flex flex-col text-flex-start justify-center bg-[#EFEEEE] rounded-lg shadow-md h-[72px] py-[50px]">
+          <div class="flex justify-between">
+            <div class="flex items-center pl-[16px] gap-[12px]">
+              <img src="" alt="" class="h-[58px] w-[58px] rounded-lg">
+              <div class="flex flex-col items-start">
+                <p class="text-black font-semibold">Property-2</p>
+                <p class="text-center text-sm text-gray-500">200kb</p>
+              </div>
+            </div>
+            <div class="mr-[16px] ">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+              <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+            </svg>
+          </div>
+          </div>
+        </div>
+
+
+      <div class="w-full flex flex-row gap-4">
+        <div id="file-container" class="flex flex-row items-center my-4 gap-4">
+          <!-- dynamic render -->
+        </div>
+        <div id="file-container-capture" class="flex flex-row items-center my-4 gap-4">
+
+        </div>
+      </div>
         <!-- instruction -->
         <div class="border-t border-neutral-150 pt-5 mt-5 flex flex-col gap-4">
           <div class="w-full">
-            <span class="text-sm text-gray-700 font-medium">Instruction</span>
+            <span class="text-sm text-black font-medium">Instruction</span>
             <p class="text-sm text-gray-500">Write a short instruction</p>
           </div>
-            <div class="w-full">
-              <label for="title" class="text-gray-700 font-medium text-sm">Title</label>
-              {{ form.title }}
-            </div>
-
-            <div class="w-full">
-              <label for="Summary" class="text-gray-700 font-medium text-sm">Summary</label>
-              {{ form.summary }}
-              <small class="text-gray-500">257 characters left</small>
-            </div>
-
-            <div class="w-full">
-              <span class="text-sm text-gray-700 font-medium">Contact Info</span>
-              <p class="text-sm text-gray-500">Provide your contact details</p>
-            </div>
-
-            <div class="w-full">
-              <label for="email" class="text-gray-700 font-medium text-sm">Phone number</label>
-              <div class="flex gap-2 p-2 border border-gray-300 p-2 mt-1 border border-gray-300 rounded-md">
-                <select
-                  name="country"
-                  id="country"
-                  class="w-2/12 rounded-md focus:outline-none mt-1 disabled:bg-transparent bg-transparent outline-none border-none focus:border-gray-500"
-                >
-                  <option value="" disabled selected>US</option>
-                  <option value="USA">US</option>
-                  <option value="Canada">Canada</option>
-                  <option value="UK">UK</option>
-                  <!-- Add more country options here -->
-                </select>
-                {{ form.contact_phone }}
-              </div>
-            </div>
-            <div class="w-full">
-              <label for="title" class="text-gray-700 font-medium text-sm">Email</label>
-              <div class="group border border-gray-300 rounded-md flex items-center gap-2 p-2 mt-1">
-                <img
-                  src="{% static 'svgs/mail.svg' %}"
-                  alt=""
-                  class="w-[20px] h-[20px] object-contain"
+          <div class="w-full">
+            <label for="property_address" class="text-black font-medium text-sm">Title</label>
+            <div class="border border-gray-300 rounded-3xl p-2 mt-1 h-[60px] pl-6">
+                <input
+                    type="text"
+                    name="title"
+                    id="title"
+                    class="input w-full h-full rounded-3xl focus:outline-none bg-transparent border-none focus:border-gray-500"
+                    placeholder="Type here"
+                    required
                 />
-                {{ form.contact_email }}
-              </div>
             </div>
+            {% if form.title.errors %}
+                <div class = "w-full py-1 rounded text-red-500">
+                    {{form.title.errors}}
+                </div>
+            {% endif %}
+          </div>
 
-            <div class="w-full">
-              <label for="house-address" class="text-gray-700 font-medium text-sm">House Address</label>
-              {{ form.property_address }}
-            </div>
+        
 
-            <div class="flex justify-end gap-4 border-t border-neutral-150 pt-5">
-              <button
-                type="button"
-                onclick="goBack()"
-                class="inline-flex p-3 rounded-lg items-center justify-center bg-white border border-neutral-150 shadow-sm font-semibold"
-              >
-                Cancel
-              </button>
-              <button
-                id="nextBtn"
-                onclick="nextPrev(1)"
-                type="button"
-                class="inline-flex items-center justify-center p-3 rounded-lg bg-primary text-white border border-neutral-150 shadow-sm font-semibold"
-              >
-                Request Quote
-              </button>
+          <div class="w-full">
+            <label for="Summary" class="text-black font-medium text-sm">Summary</label> 
+            {{ form.summary }}
+            <small class="text-gray-500">257 characters left</small>
+            {% if form.summary.errors %}
+                <div class = "w-full py-1 rounded text-red-500">
+                    {{form.summary.errors}}
+                </div>
+            {% endif %}
+          </div>
+
+          <div class="w-full">
+            <span class="text-sm text-black font-medium">Contact Info</span>
+            <p class="text-sm text-gray-500">Provide your contact details</p>
+          </div>
+
+        <div class="w-full hidden">
+            <label for="phone" class="text-black font-medium text-sm">Phone Number</label>
+            <div class="flex items-center gap-4 mt-1">
+              <div class="flex items-center border border-gray-300 rounded-3xl p-2 h-[60px]">
+                <select
+                    name="country"
+                    id="country"
+                    class="w-full rounded-l-3xl h-full focus:outline-none bg-transparent border-none"
+                >
+                <option value="" disabled selected>US</option>
+                <option value="USA">US</option>
+                <option value="Canada">Canada</option>
+                <option value="UK">UK</option>
+                    <!-- Add more country options here -->
+                </select>
             </div>
+                <input
+                    type="text"
+                    name="contact_phone"
+                    id="contact_phone"
+                    class="w-[100%] rounded-3xl focus:outline-none bg-transparent border border-gray-300 focus:border-gray-500 h-[60px] pl-6"
+                    placeholder="Enter 11 digits number"
+                    value='{{ form.initial.contact_phone|slice:"4:" }}'
+                />
+            </div>
+            {% if form.contact_phone.errors %}
+                <div class = "w-full py-1 rounded text-red-500">
+                    {{form.contact_phone.errors}}
+                </div>
+            {% endif %}
+        </div>
+        
+        <div class="w-full">
+            <label for="contact_username" class="text-black font-medium text-sm">Username</label>
+            <div class="border border-gray-300 rounded-3xl p-2 mt-1 h-[60px] pl-6">
+                <input
+                    type="text"
+                    name="contact_username"
+                    id="contact_username"
+                    class="w-full rounded-3xl focus:outline-none bg-transparent border-none focus:border-gray-500 h-full"
+                    placeholder="Type here"
+                    value = '{{ form.initial.contact_username }}'
+                />
+            </div>
+            {% if form.contact_email.errors %}
+                <div class = "w-full py-1 rounded text-red-500">
+                    {{form.contact_email.errors}}
+                </div>
+            {% endif %}
+        </div>
+        
+        <div class="w-full">
+            <label for="property_address" class="text-black font-medium text-sm">House Address</label>
+            <div class="border border-gray-300 rounded-3xl p-2 mt-1 h-[60px] pl-6">
+                <input
+                    type="text"
+                    name="property_address"
+                    id="property_address"
+                    class="w-full rounded-3xl h-full focus:outline-none bg-transparent border-none focus:border-gray-500"
+                    placeholder="Type here"
+                    value="{{ form.initial.property_address }}"
+
+                />
+            </div>
+            {% if form.property_address.errors %}
+                <div class = "w-full py-1 rounded text-red-500">
+                    {{form.property_address.errors}}
+                </div>
+            {% endif %}
+        </div>
+        
+          <div class="flex flex-col justify-center items-center gap-4 pt-5 pb-[130px]">
+            <button
+            id="nextBtn"
+            onclick="nextPrev(1)"
+            type="button"
+            class="inline-flex items-center w-[70%] md:w-[50%] justify-center p-3 rounded-3xl bg-black text-white border border-neutral-150 shadow-sm font-semibold"
+          >
+            Request Quote
+          </button>
+            <button
+              type="button"
+              onclick="goBack()"
+              class="inline-flex items-center w-[70%] md:w-[50%] justify-center p-3 rounded-3xl bg-[#FFDEDE] text-red-500 border border-neutral-150 shadow-sm font-semibold"
+              >
+              Cancel
+            </button>
+          </div>
         </div>
       </form>
     </div>
   </div>
+  
   <!-- step 2 -->
   <div id="step" class="w-full">
     <div class="w-full p-4 flex items-center justify-center h-screen">
       <div class="w-full flex flex-col gap-10 items-center justify-center">
-        <div
-          class="bg-[#FEF0C7] bg-opacity-80 p-2 rounded-full w-12 h-12 flex items-center justify-center"
-        >
+        <div class="bg-[#FEF0C7] bg-opacity-80 p-2 rounded-full w-12 h-12 flex items-center justify-center">
           <img src="{% static 'svgs/alert-triangle.svg' %}" alt="" class="" />
         </div>
-        <div class="w-full">
-          <span class="text-lg mb-2 text-gray-900 font-semibold"
-            >Request Quotes</span
-          >
-          <p class="text-sm text-gray-500">
-            Please make sure that there are two angles of each room.
-          </p>
+        <div class="w-full text-center">
+          <span class="text-lg mb-2 text-gray-900 font-semibold">Request Quotes</span>
+          <p class="text-sm text-gray-500">Please make sure that there are two angles of each room.</p>
         </div>
-        <div class="w-full flex flex-col gap-3">
+        <div class="w-full flex flex-col items-center gap-3 smphone:pb-8 xsm:pb-4">
           <button
             id="nextBtn"
             onclick="submitQuote()"
             type="button"
-            class="items-center w-full justify-center p-3 rounded-lg bg-primary text-white border border-neutral-150 shadow-sm font-semibold"
+            class="inline-flex items-center w-[70%] md:w-[50%] justify-center p-3 rounded-3xl bg-black text-white border border-neutral-150 shadow-sm font-semibold"
           >
             Confirm
           </button>
@@ -167,7 +306,7 @@
             type="button"
             id="prevBtn"
             onclick="nextPrev(-1)"
-            class="p-3 rounded-lg w-full items-center justify-center bg-white border border-neutral-150 shadow-sm font-semibold"
+            class="inline-flex items-center w-[70%] md:w-[50%] justify-center p-3 rounded-3xl  text-black border border-neutral-150 shadow-sm font-semibold"
           >
             Back
           </button>
@@ -183,28 +322,306 @@
           <img src="{% static 'svgs/success-tada.svg' %}" alt="" class="" />
         </div>
         <div class="w-full text-center">
-          <span class="text-xl mb-2 text-gray-900 font-bold"
-            >Thank you for your submission</span
-          >
-          <p class="text-sm text-gray-700">
-            Our team will be in contact with you within 24-48hrs.
-          </p>
+          <span class="text-xl mb-2 text-gray-900 font-bold">Thank you for your submission</span>
+          <p class="text-sm text-black">Our team will be in contact with you within 24-48hrs.</p>
         </div>
       </div>
     </div>
   </div>
 </div>
 
-{% endblock %}
-{% block bottomNav %}
-    {% if request.user.user_type == 'AG' %}
-        {% include "user/bottom_nav_agent.html" %}
-    {% elif request.user.user_type == 'CO' %}
-        {% include "user/bottom_nav_contractor.html" %}
-    {% else %}
-        {% include "user/bottom_nav.html"%} 
-    {% endif %}
-{% endblock bottomNav %} 
+{% endblock %} 
 {% block extraScripts %}
-    <script src="{% static 'js/requestQuotes.js' %}"></script>
+<script>
+  var currentStep = 0 // Current tab is set to be the first tab (0)
+window.addEventListener("DOMContentLoaded", () => {
+showStep(currentStep)
+uploadFiles()
+validateForm()
+})
+
+
+function validateForm() {
+// This function deals with validation of the form fields
+var x,
+  y,
+  i,
+  valid = false
+x = document.querySelectorAll("#step")
+y = x[currentStep].getElementsByTagName("input")
+let requiredInputs = document.getElementsByClassName("input")
+let requiredInputsResult = Array.from(requiredInputs);
+valid = [...requiredInputsResult].every((input) => input.value !== "")
+
+return valid // return the valid status
+}
+
+
+
+function showStep(n) {
+// This function will display the specified tab of the form...
+var x = document.querySelectorAll("#step")
+
+x[n].style.display = "block"
+//... and fix the Previous/Next buttons:
+if (n === 0) {
+  document.getElementById("prevBtn").style.display = "none"
+} else {
+  document.getElementById("prevBtn").style.display = "block"
+}
+if (n == x.length - 1) {
+  document.getElementById("nextBtn").innerHTML = "Confirm"
+  clearSuccessMsg()
+} else if (n === 0) {
+  document.getElementById("nextBtn").textContent = "Request Quotes"
+} else {
+  document.getElementById("nextBtn").textContent = "Next"
+}
+}
+
+
+
+function nextPrev(n) {
+// This function will figure out which tab to display
+var x = document.querySelectorAll("#step")
+//   if (n == 1 && !validateForm()) return false
+// Hide the current tab:
+x[currentStep].style.display = "none"
+// Increase or decrease the current tab by 1:
+
+// if you have reached the end of the form...
+if (currentStep <= 0) {
+  if(!validateForm()){
+    currentStep = currentStep + 0
+    Toastify({
+          text: 'Please make sure title and summary fields are filled out before proceeding',
+          duration: 3000,
+          close: true,
+          gravity: "top",
+          position: "left",
+          stopOnFocus: true,
+          style: {
+              background: "orange",
+              maxWidth: "100%",
+          },
+      }).showToast();
+  }else{
+    currentStep = currentStep + n
+  }
+}else{
+  currentStep = currentStep + n
+}
+if (currentStep >= x.length) {
+  // ... the form gets submitted:
+  document.getElementById("quoteRequestForm").submit()
+  return false
+}
+showStep(currentStep)
+}
+
+function submitQuote() {
+document.getElementById("quoteRequestForm").submit()
+return false
+}
+
+function goBacks() {
+history.back()
+}
+
+function clearSuccessMsg() {
+setTimeout(() => {
+  location.href = "/"
+}, 2000)
+}
+
+let selectedFileList = []
+
+function uploadFiles() {
+const fileContainer = document.getElementById("file-container") 
+const fileContainerCapture = document.getElementById("file-container-capture") 
+const quoteRequestForm = document.getElementById("quoteRequestForm")
+
+let captureInputId = 1
+
+// Function to handle camera capture
+// document.getElementById('captureButton').addEventListener('click', function() {
+//   // Trigger the file input click event
+
+//   // Create the capture input element
+//   var captureInput = document.createElement('input');
+//   captureInput.setAttribute('type', 'file');
+//   captureInput.setAttribute('id', `upload-capture-${captureInputId}`);
+//   captureInput.setAttribute('accept', 'image/*');
+//   captureInput.setAttribute('multiple', 'multiple');
+//   captureInput.setAttribute('name', 'upload-capture');
+//   captureInput.setAttribute('capture', 'environment');
+//   captureInput.classList.add('hidden');
+
+//   // Append the file input element to the form
+//   quoteRequestForm.appendChild(captureInput);
+
+//   captureInputId += 1
+
+//   captureInput.click();
+
+// captureInput.addEventListener('change', function(event) {
+//   const newFiles = event.target.files;
+
+//   if (newFiles && newFiles.length > 0) {
+//     let photo = newFiles[0]
+
+//     fileContainerCapture.innerHTML += `
+//       <div class="w-[74px] h-[74px] relative rounded-md">
+//       <a href='${URL.createObjectURL(photo)}' download>
+//           <img src="${URL.createObjectURL(photo)}" alt="" class="w-full h-full object-cover rounded-md">
+//       </a>
+//       <img src="/static/images/remove.png" alt="" class="w-[16px] h-[16px] -top-2 -right-2 absolute object-cover rounded-full" onclick="removeFile(this)">
+//       </div>
+//       `
+//     }
+
+//   })
+// });
+
+document.getElementById("upload-quote").addEventListener("change", function () {
+  let fileInput = document.getElementById("upload-quote")
+  let selectedFiles = fileInput.files
+
+  let photos = []
+  let videos = []
+  let pdfs = []
+
+  // Clear the fileContainer before adding new files
+  fileContainer.innerHTML = '';
+
+  for (var i = 0; i < selectedFiles.length; i++) {
+    selectedFileList.push(selectedFiles[i])
+  }
+
+  if (selectedFileList.length > 0) {
+    photos = selectedFileList.filter((file) => file.type.startsWith("image/"))
+    videos = selectedFileList.filter((file) => file.type.startsWith("video/"))
+    pdfs = selectedFileList.filter((file) => file.type.startsWith("application/pdf"))
+
+    photos.forEach(function (photo) {
+      fileContainer.innerHTML += `
+              <div class="w-[74px] h-[74px] relative rounded-md">
+              <a href='${URL.createObjectURL(photo)}' download>
+                  <img src="${URL.createObjectURL(photo)}" alt="" class="w-full h-full object-cover rounded-md">
+              </a>
+              <img src="/static/images/remove.png" alt="" class="w-[16px] h-[16px] -top-2 -right-2 absolute object-cover rounded-full" onclick="removeFile(this)">
+              </div>
+              `
+    })
+
+    videos.forEach(function (video) {
+      fileContainer.innerHTML += `
+              <div class="w-[74px] h-[74px] rounded-md relative">
+                  <img src="/static/images/vid-play-bg.jpg" alt="" class="w-full h-full object-cover rounded-md">
+                  <a href='${URL.createObjectURL(video)}' class="absolute top-5 left-5 right-5" download >
+                  <img src="/static/svgs/Play-button.svg" alt="">
+                  </a>
+                  <img src="/static/images/remove.png" alt="" class="w-[16px] h-[16px] -top-2 -right-2 absolute object-cover rounded-full" onclick="removeFile(this)">
+              </div>
+             `
+    })
+
+    pdfs.forEach(function (pdf) {
+      fileContainer.innerHTML += `
+              <div class="w-[74px] h-[74px] rounded-md relative">
+                  <img src="/static/images/pdf-icon.png" alt="" class="w-full h-full object-cover rounded-md">
+                  <a href='${URL.createObjectURL(pdf)}' class="absolute top-5 left-5 right-5" download >PDF</a>
+                  <img src="/static/images/remove.png" alt="" class="w-[16px] h-[16px] -top-2 -right-2 absolute object-cover rounded-full" onclick="removeFile(this)">
+              </div>
+             `
+    })
+  }
+  selectedFileList = []
+})
+}
+
+function removeFile(removeIcon) {
+// Get the parent container of the remove image
+var container = removeIcon.parentElement
+
+// Remove the parent container
+container.remove()
+}
+
+// recording video
+
+const videoPreview = document.getElementById("videoPreview");
+const startRecordingButton = document.getElementById("startRecording");
+const stopRecordingButton = document.getElementById("stopRecording");
+const uploadVideoButton = document.getElementById("uploadVideo");
+const uploadStatus = document.getElementById("uploadStatus");
+const videoInput = document.getElementById('recordedVideoInput');
+
+let mediaRecorder;
+let recordedChunks = [];
+let stream;
+
+startRecordingButton.addEventListener("click", startRecording);
+stopRecordingButton.addEventListener("click", stopRecording);
+uploadVideoButton.addEventListener("click", handleRecordedVideo);
+
+async function startRecording() {
+  try {
+    videoPreview.style.display = 'block'
+      stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      videoPreview.srcObject = stream;
+      mediaRecorder = new MediaRecorder(stream);
+
+      mediaRecorder.ondataavailable = (event) => {
+          if (event.data.size > 0) {
+              recordedChunks.push(event.data);
+          }
+      };
+
+      mediaRecorder.onstop = () => {
+          const videoBlob = new Blob(recordedChunks, { type: "video/webm" });
+          recordedChunks = [];
+          const videoFile = new File([videoBlob], 'recorded-video.webm', { type: "video/webm" });
+
+          // Create a DataTransfer object to hold the video file
+          const dataTransfer = new DataTransfer();
+          dataTransfer.items.add(videoFile);
+
+          // Assign the video file to the hidden input
+          videoInput.files = dataTransfer.files;
+
+          // uploadVideoButton.disabled = false;
+          uploadStatus.textContent = 'Video attached successfully!';
+          uploadStatus.style.color = 'green';
+      };
+
+      mediaRecorder.start();
+      startRecordingButton.disabled = true;
+      stopRecordingButton.disabled = false;
+  } catch (error) {
+      console.error("Error starting recording:", error);
+  }
+}
+
+function stopRecording() {
+  if (mediaRecorder && mediaRecorder.state === "recording") {
+      mediaRecorder.stop();
+      stream.getTracks().forEach(track => track.stop());
+      videoPreview.srcObject = null;
+      startRecordingButton.disabled = false;
+      stopRecordingButton.disabled = true;
+  }
+  videoPreview.style.display = 'none'
+}
+
+function handleRecordedVideo() {
+  // The video file is already attached to the hidden input
+}
+
+
+</script>
 {% endblock extraScripts %}
+
+<!-- <script src="{% static 'js/requestQuotes.js' %}"></script> -->
+<!-- <script src="{% static 'js/requestQuotes2.js' %}"></script>  -->
+
