@@ -39,12 +39,18 @@ class CustomSignupSerializer(serializers.ModelSerializer):
             'registration_ID', 'agent_first_name', 'agent_last_name', 'agent_address', 'email', 'password'
         ]
 
+        extra_kwargs = {
+            'password': {'write_only': True},  # Ensures 'password' is only used for writing, not for reading
+        }
+
+
     def to_representation(self, instance):
         """
         Convert phone number to string format during serialization.
         """
         representation = super().to_representation(instance)
         # Ensure phone_number is serialized as a string (E.164 format)
+        representation.pop('password', None)  # Remove password from the response
         if instance.phone_number:
             representation['phone_number'] = str(instance.phone_number)
         return representation
