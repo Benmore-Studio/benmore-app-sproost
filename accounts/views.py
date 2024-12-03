@@ -17,10 +17,17 @@ from .serializers import CustomSignupSerializer, GoogleSignUpSerializer
 
 from drf_spectacular.utils import extend_schema, OpenApiResponse
 
+import random
+from .models import OTP
+from django.core.mail import send_mail, BadHeaderError
+from django.http import HttpResponse
+from django.conf import settings
+from django.utils.timezone import now
+from datetime import timedelta
+from rest_framework.generics import GenericAPIView
+from .serializers import SendOTPSerializer, VerifyOTPSerializer
 
-
-
-
+import random
 
 
 import json
@@ -196,6 +203,75 @@ class LogoutView(APIView):
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
+
+class SendOTPView(GenericAPIView):
+    """
+    Generates and sends OTP to the user's email.
+    """
+    serializer_class = SendOTPSerializer
+
+    def post(self, request):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        email = serializer.validated_data['email']
+        user = User.objects.filter(email=email).first()
+
+        if not user:
+            return Response({"error": "User with this email does not exist."}, status=status.HTTP_404_NOT_FOUND)
+
+        # Generate OTP
+        otp_code = f"{random.randint(100000, 999999)}"
+        otp = OTP.objects.create(
+            user=user,
+            otp_code=otp_code,
+            expires_at=now() + timedelta(minutes=10)  # OTP expires in 10 minutes
+        )
+
+        # Send OTP via email
+        try:
+            send_mail(
+                subject="Your OTP Code",
+                message=f"Your OTP code is: {otp_code}. It expires in 10 minutes.",
+                from_email= 'no-reply@yourdomain.com',
+                recipient_list=[user.email],
+            )
+        except BadHeaderError:
+            return Response({'error': 'Invalid header found.'}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({'error': f"Error sending email: {e}"}, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response({"message": "OTP sent to your email."}, status=status.HTTP_200_OK)
+
+
+class VerifyOTPView(GenericAPIView):
+    """
+    Verifies the OTP sent to the user's email.
+    """
+    serializer_class = VerifyOTPSerializer
+
+    def post(self, request):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        email = serializer.validated_data['email']
+        otp_code = serializer.validated_data['otp_code']
+
+        # Find the user
+        user = User.objects.filter(email=email).first()
+        if not user:
+            return Response({"error": "User with this email does not exist."}, status=status.HTTP_404_NOT_FOUND)
+
+        # Check if a valid OTP exists
+        otp = OTP.objects.filter(user=user, otp_code=otp_code).first()
+        if not otp:
+            return Response({"error": "Invalid OTP."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Check if the OTP is expired
+        if not otp.is_valid():
+            return Response({"error": "OTP has expired."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # OTP is valid
+        otp.delete()  # Delete the OTP after successful verification
+        return Response({"message": "OTP verified successfully."}, status=status.HTTP_200_OK)
 
 # def validate_phone_numbers(request):
 #     phone_number = request.GET.get('phone')

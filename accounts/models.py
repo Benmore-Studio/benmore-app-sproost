@@ -7,23 +7,22 @@ from django.utils.crypto import get_random_string
 from phonenumber_field.modelfields import PhoneNumberField
 from quotes.models import Project
 
+from django.utils.timezone import now
+from datetime import timedelta
 
-# class UserTypes(models.TextChoices):
-#     home_owner = "home-owner"
-#     contractor = "contractor"
-#     agent = "agent"
-#     investor = "investor"
 
-USER_TYPE_CHOICES = (
+
+USER_TYPE_CHOICES_FOR_ACCOUNT_CREATION = (
         ('HO', 'Home Owner'),
         ('CO', 'Contractor'),
         ('AG', 'Agent'),
         ('IV', 'Investor')
     )
  
+
 class User(AbstractUser):
     phone_number = PhoneNumberField(null=True, blank=True)
-    user_type = models.CharField(max_length = 3, choices = USER_TYPE_CHOICES)
+    user_type = models.CharField(max_length = 3, choices = USER_TYPE_CHOICES_FOR_ACCOUNT_CREATION)
     date_joined = models.DateTimeField(auto_now_add=True)
     slug = models.SlugField(
         blank=True,
@@ -46,3 +45,16 @@ class User(AbstractUser):
         
         super().save(*args, **kwargs)
 
+
+class OTP(models.Model):
+    user = models.ForeignKey('accounts.User', on_delete=models.CASCADE, related_name="otps")
+    otp_code = models.CharField(max_length=6)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+
+    def is_valid(self):
+        """Check if OTP is still valid."""
+        return now() <= self.expires_at
+    
+    def __str__(self):
+        return f'{self.user.first_name}-{self.otp_code}'
