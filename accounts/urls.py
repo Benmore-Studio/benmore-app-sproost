@@ -17,7 +17,7 @@ urlpatterns = [
 
     path('login/', MyTokenObtainPairView.as_view(), name='login'),
     path('google-signup/', GoogleSignUp.as_view(), name='google_signup'),
-    path('account/manual_signup/', ManualSignupView.as_view(), name='manual_signup'),
+    path('manual_signup/', ManualSignupView.as_view(), name='manual_signup'),
     # path('validate-phone', validate_phone_numbers , name='validate_number'),
     path('logout/', csrf_exempt(LogoutView.as_view()), name='logout'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),

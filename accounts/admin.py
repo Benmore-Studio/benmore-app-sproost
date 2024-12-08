@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import User
+from .models import User, OTP
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 
 class UserAdmin(BaseUserAdmin):
@@ -23,4 +23,5 @@ class UserAdmin(BaseUserAdmin):
     search_fields = ('username', 'first_name', 'last_name', 'email', 'phone_number', 'slug')
     ordering = ('username',)
 
-admin.site.register(User, UserAdmin)
+admin.site.register(User,UserAdmin)
+admin.site.register(OTP)

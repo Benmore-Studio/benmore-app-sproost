@@ -70,13 +70,14 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
 
         return token
 
+
 class MyTokenObtainPairView(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer
+    
 
 class ManualSignupView(CreateAPIView):
     serializer_class = CustomSignupSerializer
     def create(self, request, *args, **kwargs):
-        print("Incoming request data:", request.data)
         return super().create(request, *args, **kwargs)
 
 
@@ -97,7 +98,6 @@ def authenticate_google_token(token):
     # If the response is valid and the token is verified
     if response.status_code == 200:
         token_info = response.json()
-        print(token_info)
 
         # Example token payload structure:
         # {
@@ -216,13 +216,13 @@ class SendOTPView(GenericAPIView):
         email = serializer.validated_data['email']
         user = User.objects.filter(email=email).first()
 
-        if not user:
-            return Response({"error": "User with this email does not exist."}, status=status.HTTP_404_NOT_FOUND)
+        if user:
+            return Response({"error": "User with this email already exist."}, status=status.HTTP_409_CONFLICT)
 
         # Generate OTP
         otp_code = f"{random.randint(100000, 999999)}"
-        otp = OTP.objects.create(
-            user=user,
+        OTP.objects.create(
+            email = email,
             otp_code=otp_code,
             expires_at=now() + timedelta(minutes=10)  # OTP expires in 10 minutes
         )
@@ -233,14 +233,14 @@ class SendOTPView(GenericAPIView):
                 subject="Your OTP Code",
                 message=f"Your OTP code is: {otp_code}. It expires in 10 minutes.",
                 from_email= 'no-reply@yourdomain.com',
-                recipient_list=[user.email],
+                recipient_list=[email],
             )
         except BadHeaderError:
             return Response({'error': 'Invalid header found.'}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response({'error': f"Error sending email: {e}"}, status=status.HTTP_400_BAD_REQUEST)
 
-        return Response({"message": "OTP sent to your email."}, status=status.HTTP_200_OK)
+        return Response({"message": f"OTP sent to your email. otp_code-{otp_code}"}, status=status.HTTP_200_OK)
 
 
 class VerifyOTPView(GenericAPIView):
@@ -255,13 +255,13 @@ class VerifyOTPView(GenericAPIView):
         email = serializer.validated_data['email']
         otp_code = serializer.validated_data['otp_code']
 
-        # Find the user
-        user = User.objects.filter(email=email).first()
-        if not user:
-            return Response({"error": "User with this email does not exist."}, status=status.HTTP_404_NOT_FOUND)
+        # # Find the user
+        # user = User.objects.filter(email=email).first()
+        # if not user:
+        #     return Response({"error": "User with this email does not exist."}, status=status.HTTP_404_NOT_FOUND)
 
         # Check if a valid OTP exists
-        otp = OTP.objects.filter(user=user, otp_code=otp_code).first()
+        otp = OTP.objects.filter(email=email, otp_code=otp_code).first()
         if not otp:
             return Response({"error": "Invalid OTP."}, status=status.HTTP_400_BAD_REQUEST)
 

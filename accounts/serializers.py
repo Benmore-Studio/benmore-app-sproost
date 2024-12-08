@@ -12,12 +12,12 @@ User = get_user_model()
 class CustomSignupSerializer(serializers.ModelSerializer):
     first_name = serializers.CharField(max_length=30, required=False)
     last_name = serializers.CharField(max_length=30, required=False)
-    phone_number = PhoneNumberField(required=False)  # Use this for input validation
+    phone_number = PhoneNumberField(required=False) 
 
     address = serializers.CharField(required=False)
     city = serializers.CharField(max_length=100, required=False)
     state = serializers.CharField(max_length=100, required=False)
-    user_type = serializers.ChoiceField(choices=[('HO', 'Home Owner'), ('AG', 'Agent'), ('CO', 'Contractor')])
+    user_type = serializers.ChoiceField(choices=[('HO', 'Home Owner'), ('AG', 'Agent'), ('CO', 'Contractor')], required=True)
     referral_code = serializers.CharField(max_length=100, required=False)
 
     # Contractor Info
@@ -26,7 +26,7 @@ class CustomSignupSerializer(serializers.ModelSerializer):
     company_address = serializers.CharField(max_length=255, required=False)
 
     # Agent Info
-    registration_ID = serializers.CharField(max_length=225, required=False)
+    Real_estate_license= serializers.CharField(source='registration_ID', help_text='registration_ID', max_length=225, required=False)
     agent_first_name = serializers.CharField(max_length=30, required=False)
     agent_last_name = serializers.CharField(max_length=30, required=False)
     agent_address = serializers.CharField(max_length=255, required=False)
@@ -36,11 +36,12 @@ class CustomSignupSerializer(serializers.ModelSerializer):
         fields = [
             'first_name', 'last_name', 'phone_number', 'address', 'city', 'state', 'user_type',
             'referral_code', 'company_name', 'specialization', 'company_address',
-            'registration_ID', 'agent_first_name', 'agent_last_name', 'agent_address', 'email', 'password'
+            'Real_estate_license', 'agent_first_name', 'agent_last_name', 'agent_address', 'email', 'password'
         ]
 
         extra_kwargs = {
             'password': {'write_only': True},  # Ensures 'password' is only used for writing, not for reading
+            
         }
 
 
@@ -55,21 +56,47 @@ class CustomSignupSerializer(serializers.ModelSerializer):
             representation['phone_number'] = str(instance.phone_number)
         return representation
 
-    def validate_registration_ID(self, value):
-        user_type = self.initial_data.get('user_type')
-        email = self.initial_data.get('email')
-        if user_type == 'AG' and not value:
-            raise serializers.ValidationError("Registration ID is required for Agents.")
-        if AgentProfile.objects.filter(registration_ID=value).exists():
-            raise serializers.ValidationError("An agent with this registration ID already exists.")
+
+    def validate(self, data):
+        # Retrieve the fields for cross-validation
+        user_type = data.get('user_type')
+        email = data.get('email')
+        registration_ID = data.get('registration_ID', None) 
+        phone_number = data.get('phone_number', None)  # Ensure this defaults to None if not provided
+        if not phone_number:
+            raise serializers.ValidationError({"phone_number": "Phone Number is required."})
+
+        # Validate email field globally
         if not email:
             raise serializers.ValidationError({"email": "This field is required."})
-        return value
+
+        # Validate registration_ID based on user_type
+        if user_type == 'AG':
+            if not registration_ID:
+                raise serializers.ValidationError({"registration_ID": "Registration ID is required for Agents."})
+            if AgentProfile.objects.filter(registration_ID=registration_ID).exists():
+                raise serializers.ValidationError({"registration_ID": "An agent with this registration ID already exists."})
+
+        return data
+
+
+    # def validate_registration_ID(self, value):
+    #     user_type = self.initial_data.get('user_type')
+    #     email = self.initial_data.get('email')
+    #     if user_type == 'AG' and not value:
+    #         raise serializers.ValidationError("Registration ID is required for Agents.")
+    #     if AgentProfile.objects.filter(registration_ID=value).exists():
+    #         raise serializers.ValidationError("An agent with this registration ID already exists.")
+    #     if not email:
+    #         raise serializers.ValidationError({"email": "This field is required."})
+    #     return value
+
 
     def validate_email(self, value):
         if not value:
             raise serializers.ValidationError("This field is required.")
         return value
+    
 
     def create(self, validated_data):
         username = validated_data.get('email')
@@ -125,6 +152,7 @@ class CustomSignupSerializer(serializers.ModelSerializer):
             )
 
         return user
+
 
 
 class GoogleSignUpSerializer(serializers.Serializer):

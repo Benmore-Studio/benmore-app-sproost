@@ -47,7 +47,7 @@ class User(AbstractUser):
 
 
 class OTP(models.Model):
-    user = models.ForeignKey('accounts.User', on_delete=models.CASCADE, related_name="otps")
+    email = models.EmailField(unique=True)
     otp_code = models.CharField(max_length=6)
     created_at = models.DateTimeField(auto_now_add=True)
     expires_at = models.DateTimeField()
@@ -57,4 +57,4 @@ class OTP(models.Model):
         return now() <= self.expires_at
     
     def __str__(self):
-        return f'{self.user.first_name}-{self.otp_code}'
+        return f'{self.otp_code}'

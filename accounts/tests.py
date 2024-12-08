@@ -33,7 +33,6 @@ class AccountAPITestCase(APITestCase):
         """
         # Perform the POST request with valid signup d7386
         response = self.client.post(self.manual_signup_url, data=self.manual_signup_data, format='json')
-        print(response)
 
 
         # Check that the response status code is 201 Created
