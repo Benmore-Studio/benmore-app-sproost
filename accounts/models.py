@@ -46,6 +46,7 @@ class User(AbstractUser):
         super().save(*args, **kwargs)
 
 
+
 class OTP(models.Model):
     email = models.EmailField(unique=True)
     otp_code = models.CharField(max_length=6)

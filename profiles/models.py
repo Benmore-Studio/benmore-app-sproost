@@ -29,10 +29,10 @@ class UserProfile(models.Model):
 
 class AgentProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name = 'agent_profile')
-    address = models.CharField(max_length = 50, null = True)
-    registration_ID = models.CharField(max_length = 225, null = True, blank = True, unique=True, verbose_name="license number", help_text='Also known as licences_ID')
+    address = models.CharField(max_length = 50, default='Nigeria')
+    registration_ID = models.CharField(max_length = 225, default='12345678', unique=True, verbose_name="license number", help_text='Also known as licences_ID')
     image = models.ImageField(upload_to=image_upload_location_agent, null=True)
-    # has_seen_onboarding_message = models.BooleanField(default=False)
+    country= models.CharField(max_length=500, default='Nigeria')
     
     def __str__(self):
         return self.user.email
@@ -40,12 +40,26 @@ class AgentProfile(models.Model):
 
 class ContractorProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name = 'contractor_profile')
-    company_name = models.CharField(max_length = 255)
-    registration_number = models.CharField(max_length = 225)
-    specialization = models.CharField(max_length = 225, null = True, blank = True)
-    company_address = models.CharField(max_length = 50,null =True)
+    company_name = models.CharField(max_length = 255, default='belize')
+    specialization = models.CharField(max_length = 225, default='coding')
+    company_address = models.CharField(max_length = 50, default='Nigeria')
+    insurance_number = models.CharField(max_length=255, default='12345678')
+    license_number= models.CharField(max_length=225, default='12345678')
+    country= models.CharField(max_length=225, default='Nigeria')
     website = models.URLField(max_length=255, null=True)
-    city = models.CharField(max_length = 50)
+    city = models.CharField(max_length = 50, null = True, blank = True)
+    media_paths = GenericRelation("main.Media")
+    image = models.ImageField(upload_to=image_upload_location_contractor, null=True)
+
+    def __str__(self):
+        return self.user.email
+    
+class InvestorProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name = 'investor_profile')
+    company_name = models.CharField(max_length = 255)
+    specialization = models.CharField(max_length = 225)
+    company_address = models.CharField(max_length = 50)
+    country= models.CharField(max_length=225)
     media_paths = GenericRelation("main.Media")
     image = models.ImageField(upload_to=image_upload_location_contractor, null=True)
 

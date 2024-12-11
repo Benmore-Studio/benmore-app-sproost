@@ -76,6 +76,10 @@ class MyTokenObtainPairView(TokenObtainPairView):
     
 
 class ManualSignupView(CreateAPIView):
+    '''
+    substitute Real_estate_license with registration_ID in the data you send,    
+    substitute brokerage_address with agent_address in the data you send for agents
+    '''
     serializer_class = CustomSignupSerializer
     def create(self, request, *args, **kwargs):
         return super().create(request, *args, **kwargs)
@@ -129,42 +133,45 @@ def authenticate_google_token(token):
     return None
 
 
-class GoogleSignUp(generics.GenericAPIView):
+class GoogleTokenAuthenticateView(APIView):
     """
-    View to receive Google OAuth2 tokens, create new user accounts, or link to existing ones.
+    Authenticates the Google OAuth2 token and returns user details.
     """
     serializer_class = GoogleSignUpSerializer
+    def post(self, request):
+        # Extract the token from the request data
+        token = request.data.get('token')
+        if not token:
+            return Response({'error': 'Token is required'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Authenticate the Google token
+        user_info = authenticate_google_token(token)
+        if user_info:
+            return Response(
+                {'message': 'Token authenticated successfully', 'user_info': user_info},
+                status=status.HTTP_200_OK
+            )
+        else:
+            return Response({'error': 'Invalid or expired token'}, status=status.HTTP_401_UNAUTHORIZED)
+
+
+class CompleteSignupView(GenericAPIView):
+    """
+    Completes the user registration after receiving all user details from the frontend.
+    """
+    serializer_class = CustomSignupSerializer
 
     def post(self, request):
-        # Use the GoogleSignUpSerializer to validate the incoming data
+        # Validate and process the data using the CustomSignupSerializer
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
-            # Retrieve the validated token from the serializer
-            token = serializer.validated_data.get('token')
-            
-            # Authenticate the Google token and get user information
-            user_info = authenticate_google_token(token)
-            
-            if user_info:
-                # Populate the CustomSignupSerializer with the Google-provided data
-                signup_serializer = CustomSignupSerializer(data={
-                    'first_name': user_info.get('first_name'),
-                    'last_name': user_info.get('last_name'),
-                    'email': user_info.get('email'),
-                    'password': 'defaultpassword',  # Handle password securely
-                    'user_type': 'HO',  # Assign a default user type for example
-                })
-
-                if signup_serializer.is_valid():
-                    signup_serializer.save()
-                    return Response({'message': 'User created successfully', 'user': signup_serializer.data}, status=status.HTTP_201_CREATED)
-                else:
-                    return Response(signup_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-            return Response({'message': 'Invalid token'}, status=status.HTTP_401_UNAUTHORIZED)
-        
-        # If the token is invalid, return validation errors
+            serializer.save()
+            return Response(
+                {'message': 'User created successfully', 'user': serializer.data},
+                status=status.HTTP_201_CREATED
+            )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 # @method_decorator(csrf_exempt, name='dispatch') 
 class LogoutView(APIView):

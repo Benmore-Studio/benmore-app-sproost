@@ -20,13 +20,17 @@ class CustomSignupSerializer(serializers.ModelSerializer):
     user_type = serializers.ChoiceField(choices=[('HO', 'Home Owner'), ('AG', 'Agent'), ('CO', 'Contractor')], required=True)
     referral_code = serializers.CharField(max_length=100, required=False)
 
+
     # Contractor Info
     company_name = serializers.CharField(max_length=255, required=False)
     specialization = serializers.CharField(max_length=225, required=False)
     company_address = serializers.CharField(max_length=255, required=False)
+    insurance_number = serializers.CharField(max_length=255, required=False)
+    license_number= serializers.CharField(max_length=225, required=False)
+    country= serializers.CharField(max_length=225, required=False)
 
     # Agent Info
-    Real_estate_license= serializers.CharField(source='registration_ID', help_text='registration_ID', max_length=225, required=False)
+    registration_ID= serializers.CharField(help_text='registration_ID', max_length=225, required=False)
     agent_first_name = serializers.CharField(max_length=30, required=False)
     agent_last_name = serializers.CharField(max_length=30, required=False)
     agent_address = serializers.CharField(max_length=255, required=False)
@@ -36,7 +40,7 @@ class CustomSignupSerializer(serializers.ModelSerializer):
         fields = [
             'first_name', 'last_name', 'phone_number', 'address', 'city', 'state', 'user_type',
             'referral_code', 'company_name', 'specialization', 'company_address',
-            'Real_estate_license', 'agent_first_name', 'agent_last_name', 'agent_address', 'email', 'password'
+            'registration_ID',  'insurance_number', 'license_number', 'country', 'agent_first_name', 'agent_last_name', 'agent_address', 'email', 'password'
         ]
 
         extra_kwargs = {
@@ -59,10 +63,10 @@ class CustomSignupSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         # Retrieve the fields for cross-validation
+        print('du', data)
         user_type = data.get('user_type')
         email = data.get('email')
-        registration_ID = data.get('registration_ID', None) 
-        phone_number = data.get('phone_number', None)  # Ensure this defaults to None if not provided
+        phone_number = data.get('phone_number', None) 
         if not phone_number:
             raise serializers.ValidationError({"phone_number": "Phone Number is required."})
 
@@ -72,10 +76,35 @@ class CustomSignupSerializer(serializers.ModelSerializer):
 
         # Validate registration_ID based on user_type
         if user_type == 'AG':
-            if not registration_ID:
-                raise serializers.ValidationError({"registration_ID": "Registration ID is required for Agents."})
-            if AgentProfile.objects.filter(registration_ID=registration_ID).exists():
+            Real_estate_license = data.get('registration_ID', None) 
+            brokerage_address = data.get('agent_address', None) 
+
+            if not Real_estate_license:
+                raise serializers.ValidationError({"Real_estate_license": "Real Estate License is required for Agents."})
+            if not brokerage_address:
+                raise serializers.ValidationError({"brokerage_address": "brokerage Address is required for Agents."})
+            if AgentProfile.objects.filter(registration_ID=Real_estate_license).exists():
                 raise serializers.ValidationError({"registration_ID": "An agent with this registration ID already exists."})
+            
+        if user_type == 'CO':
+            insurance_number = data.get('insurance_number', None) 
+            license_number = data.get('license_number', None) 
+            company_name = data.get('company_name', None) 
+            company_address = data.get('company_address', None) 
+            specialization = data.get('specialization', None) 
+            if not insurance_number:
+                raise serializers.ValidationError({"insurance_number": "Insurance Number is required for Contractors."})
+            if not company_name:
+                raise serializers.ValidationError({"company_name": "Company Name is required for Contractors."})
+            if not company_address:
+                raise serializers.ValidationError({"company_address": "Company Address is required for Contractors."})
+            if not license_number:
+                raise serializers.ValidationError({"license_number": "License Number is required for Contractors."})
+            if not specialization:
+                raise serializers.ValidationError({"specialization": "Specialization is required for Contractors."})
+            if ContractorProfile.objects.filter(license_number=license_number).exists():
+                raise serializers.ValidationError({"license_number": "A Contractor with this License ID already exists."})
+        
 
         return data
 
@@ -148,7 +177,9 @@ class CustomSignupSerializer(serializers.ModelSerializer):
                 company_name=validated_data.get('company_name'),
                 specialization=validated_data.get('specialization'),
                 company_address=validated_data.get('company_address'),
-                city=validated_data.get('city'),
+                country=validated_data.get('country'),
+                license_number=validated_data.get('license_number'),
+                insurance_number=validated_data.get('insurance_number'),
             )
 
         return user
@@ -156,7 +187,7 @@ class CustomSignupSerializer(serializers.ModelSerializer):
 
 
 class GoogleSignUpSerializer(serializers.Serializer):
-    token = serializers.CharField(max_length=500, required=True)
+    token = serializers.CharField(max_length=5000, required=True)
 
 
 class SendOTPSerializer(serializers.Serializer):
