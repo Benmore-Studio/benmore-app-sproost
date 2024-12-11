@@ -227,8 +227,11 @@ class SendOTPView(GenericAPIView):
             return Response({"error": "User with this email already exist."}, status=status.HTTP_409_CONFLICT)
         else:
             # Generate OTP
-            otp = OTP.objects.get(email=email)
-            otp.delete()
+            try:
+                otp = OTP.objects.get(email=email)
+                otp.delete()
+            except:
+                pass
             otp_code = f"{random.randint(100000, 999999)}"
 
             OTP.objects.create(
