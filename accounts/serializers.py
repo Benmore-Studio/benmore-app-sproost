@@ -168,7 +168,7 @@ class CustomSignupSerializer(serializers.ModelSerializer):
         if user.user_type == "HO":
             UserProfile.objects.create(
                 user=user,
-                address=validated_data.get('address')
+                home_owner_address=validated_data.get('address')
             )
             referral_code = validated_data.get('referral_code')
             if referral_code:
@@ -190,7 +190,7 @@ class CustomSignupSerializer(serializers.ModelSerializer):
         elif user.user_type == "AG":
             AgentProfile.objects.create(
                 user=user,
-                address=validated_data.get('agent_address'),
+                agent_address=validated_data.get('agent_address'),
                 registration_ID=validated_data.get('registration_ID'),
             )
 
@@ -208,10 +208,10 @@ class CustomSignupSerializer(serializers.ModelSerializer):
         elif user.user_type == "IN":
             InvestorProfile.objects.create(
                 user=user,
-                investor_company_name=validated_data.get('investor_company_name'),
-                investor_specialization=validated_data.get('investor_specialization'),
-                investor_company_address=validated_data.get('investor_company_address'),
-                investor_country=validated_data.get('investor_country'),
+                company_name=validated_data.get('investor_company_name'),
+                specialization=validated_data.get('investor_specialization'),
+                company_address=validated_data.get('investor_company_address'),
+                country=validated_data.get('investor_country'),
             )
 
         return user
