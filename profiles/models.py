@@ -17,7 +17,7 @@ def image_upload_location_contractor(instance, filename):
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name = 'user_profile')
-    address = models.CharField(max_length = 50,null = True)
+    home_owner_address = models.CharField(max_length = 50,null = True)
     city = models.CharField(max_length = 50, null = True, blank = True)
     state_province = models.CharField(max_length = 50, null = True, blank = True)
     image = models.ImageField(upload_to=image_upload_location_home_owner, null=True) 
@@ -29,7 +29,7 @@ class UserProfile(models.Model):
 
 class AgentProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name = 'agent_profile')
-    address = models.CharField(max_length = 50, default='Nigeria')
+    agent_address = models.CharField(max_length = 50, default='Nigeria')
     registration_ID = models.CharField(max_length = 225, default='12345678', unique=True, verbose_name="license number", help_text='Also known as licences_ID')
     image = models.ImageField(upload_to=image_upload_location_agent, null=True)
     country= models.CharField(max_length=500, default='Nigeria')

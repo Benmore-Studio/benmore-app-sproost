@@ -225,29 +225,32 @@ class SendOTPView(GenericAPIView):
 
         if user:
             return Response({"error": "User with this email already exist."}, status=status.HTTP_409_CONFLICT)
+        else:
+            # Generate OTP
+            otp = OTP.objects.get(email=email)
+            otp.delete()
+            otp_code = f"{random.randint(100000, 999999)}"
 
-        # Generate OTP
-        otp_code = f"{random.randint(100000, 999999)}"
-        OTP.objects.create(
-            email = email,
-            otp_code=otp_code,
-            expires_at=now() + timedelta(minutes=10)  # OTP expires in 10 minutes
-        )
-
-        # Send OTP via email
-        try:
-            send_mail(
-                subject="Your OTP Code",
-                message=f"Your OTP code is: {otp_code}. It expires in 10 minutes.",
-                from_email= 'no-reply@yourdomain.com',
-                recipient_list=[email],
+            OTP.objects.create(
+                email = email,
+                otp_code=otp_code,
+                expires_at=now() + timedelta(minutes=10)  # OTP expires in 10 minutes
             )
-        except BadHeaderError:
-            return Response({'error': 'Invalid header found.'}, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
-            return Response({'error': f"Error sending email: {e}"}, status=status.HTTP_400_BAD_REQUEST)
 
-        return Response({"message": f"OTP sent to your email. otp_code-{otp_code}"}, status=status.HTTP_200_OK)
+            # Send OTP via email
+            try:
+                send_mail(
+                    subject="Your OTP Code",
+                    message=f"Your OTP code is: {otp_code}. It expires in 10 minutes.",
+                    from_email= 'no-reply@yourdomain.com',
+                    recipient_list=[email],
+                )
+            except BadHeaderError:
+                return Response({'error': 'Invalid header found.'}, status=status.HTTP_400_BAD_REQUEST)
+            except Exception as e:
+                return Response({'error': f"Error sending email: {e}"}, status=status.HTTP_400_BAD_REQUEST)
+
+            return Response({"message": f"OTP sent to your email. otp_code-{otp_code}"}, status=status.HTTP_200_OK)
 
 
 class VerifyOTPView(GenericAPIView):
