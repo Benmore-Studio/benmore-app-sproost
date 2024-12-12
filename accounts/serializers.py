@@ -74,9 +74,7 @@ class CustomSignupSerializer(serializers.ModelSerializer):
         email = data.get('email')
         phone_number = data.get('phone_number', None) 
         home_owner_address = data.get('home_owner_address', None) 
-
-        if not home_owner_address:
-            raise serializers.ValidationError({"home_owner_address": "Home Address required."})
+        
         if not phone_number:
             raise serializers.ValidationError({"phone_number": "Phone Number is required."})
 
@@ -84,6 +82,10 @@ class CustomSignupSerializer(serializers.ModelSerializer):
         if not email:
             raise serializers.ValidationError({"email": "This field is required."})
 
+        if user_type == "HO":
+            if not home_owner_address:
+                raise serializers.ValidationError({"home_owner_address": "Home Address required."})
+        
         # Validate registration_ID based on user_type
         if user_type == 'AG':
             Real_estate_license = data.get('registration_ID', None) 
