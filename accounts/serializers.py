@@ -69,7 +69,6 @@ class CustomSignupSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         # Retrieve the fields for cross-validation
-        print('du', data)
         user_type = data.get('user_type')
         email = data.get('email')
         phone_number = data.get('phone_number', None) 
