@@ -1,16 +1,16 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views.generic import View
-from django.contrib import messages
 
 from accounts.models import User
+from django.contrib.auth.mixins import LoginRequiredMixin
 from accounts.services.user import UserService
-from quotes.services import QuoteService
+from django.views.generic import View
+from django.contrib import messages
 from services.utils import CustomRequestUtil
+from quotes.services import QuoteService
 
 from rest_framework import viewsets
-from .models import Project
-from .serializers import ProjectSerializer, QuoteRequestSerializer
+from .models import Project, Property, QuoteRequest
+from .serializers import ProjectSerializer, QuoteRequestSerializer, PropertySerializer, MediaSerializer
 from rest_framework.views import APIView
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.response import Response
@@ -19,8 +19,16 @@ from django.contrib.auth import get_user_model
 from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import IsAuthenticated
 
+from profiles.models import UserProfile, AgentProfile
+
+from django.db.models import Prefetch
+
+from django.core.serializers import serialize
 
 
+
+
+import json
 
 class ProjectViewSet(viewsets.ModelViewSet):
     queryset = Project.objects.all()
@@ -30,6 +38,124 @@ class ProjectViewSet(viewsets.ModelViewSet):
 
 
 User = get_user_model()
+
+class PropertyAPIView(GenericAPIView):
+    """
+    API View to handle quote requests and file uploads.
+
+    ----------------------------
+    INPUT PARAMETERS:
+    - GET: Fetch initial form data for quote requests based on user type.
+    - POST: Submit quote request data, including media files (if any).
+
+    -----------------------------
+    OUTPUT PARAMETERS:
+    - GET: Returns initial data for the quote request.
+    - POST: Returns success or error messages upon submission.
+    """
+    serializer_class = PropertySerializer
+    parser_classes = [MultiPartParser, FormParser]
+    permission_classes = [IsAuthenticated] 
+    # user_profile = UserProfile.objects.get(user= payload["user"])
+
+    def get_user(self, user):
+        return User.objects.prefetch_related(Prefetch('property_owner', queryset=Property.objects.all())).get(id=user.id)
+    
+    def get_initial_data(self, user):
+        """
+        Get initial data for the form based on the user type (HO or AG).
+        """
+        home_owner_properties = self.get_user(user)
+        property_data = json.loads(serialize('json', home_owner_properties.property_owner.all()))
+        if user.user_type == 'HO':
+            return {
+                'contact_phone': str(user.phone_number),
+                'custom_home_owner_id': user.pk,
+                'created_by_agent': user.pk,
+                "property": property_data
+            }
+        elif user.user_type == 'AG':
+            print("agent")
+            return {
+                'contact_phone': str(user.phone_number),
+                'property':property_data
+            }
+        else:
+            return {}
+
+
+
+    def handle_no_permission(self):
+        """
+        Custom response for unauthenticated requests.
+        """
+        return Response({'error': 'You are not authenticated. Please log in and try again.'}, status=status.HTTP_401_UNAUTHORIZED)
+
+    def get(self, request, *args, **kwargs):
+        """
+        Handle GET request to return initial form data.
+        """
+        user = request.user
+        if not user.is_authenticated:  # Check if the user is authenticated
+            return self.handle_no_permission()
+        
+
+
+        initial_data = self.get_initial_data(user)
+        return Response(initial_data, status=status.HTTP_200_OK)
+
+
+    def post(self, request, *args, **kwargs):
+        """
+        Handle POST request to submit quote request data, including media files.
+        """
+        user = request.user
+        if not user.is_authenticated:  # Check if the user is authenticated
+            return self.handle_no_permission()
+
+        # Initialize the serializer with data from the request
+        if request.user.user_type == "HO" or request.user.user_type == "AG":
+            user_profile = self.get_user(user)
+        else:
+            return Response({"error": "user not allowed to upload"}, status=status.HTTP_400_BAD_REQUEST)
+        data_copy = request.data.copy()
+        data_copy['property_owner'] = user_profile.id
+        print("data_copy",data_copy)
+        serializer = self.get_serializer(data=data_copy) 
+        if serializer.is_valid():
+            form_data = serializer.validated_data
+            # form_data['user'] = user
+            # form_data['associated_user'] = user
+
+            # Handle media file uploads
+            form_data['media'] = None
+            if 'media' in request.FILES:
+                uploaded_files = request.FILES.getlist("media")
+                form_data["media"] = uploaded_files
+
+            # Process the quote request using the QuoteService
+            user_profile = self.get_user(user)
+            quote_service = QuoteService(request, user_profile)
+            result, error = quote_service.create(form_data, user_profile, model_passed=Property)
+
+            # serializer = MediaSerializer()
+            # created_media, errors = serializer.create_many(content_type, object_id, files, images, videos)
+
+            # if errors:
+            #     event.delete()
+            #     return Response({"error": errors}, status=status.HTTP_400_BAD_REQUEST)
+
+            if result:
+                return Response({'message': 'request successfull',
+                                #  "result":json.loads(result),
+                                 }, status=status.HTTP_201_CREATED)
+            else:
+                return Response({'error': 'Request unsuccessful'}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            print(serializer.errors)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
 
 class QuotesAPIView(GenericAPIView):
     """
@@ -48,26 +174,31 @@ class QuotesAPIView(GenericAPIView):
     serializer_class = QuoteRequestSerializer
     parser_classes = [MultiPartParser, FormParser]
     permission_classes = [IsAuthenticated] 
+    # user_profile = UserProfile.objects.get(user= payload["user"])
+
+    def get_user(self, user):
+        return User.objects.prefetch_related(Prefetch('quote_requests', queryset=QuoteRequest.objects.all())).get(id=user.id)
 
     def get_initial_data(self, user):
         """
         Get initial data for the form based on the user type (HO or AG).
         """
+        user_quotes = self.get_user(user)
+        home_owner_quotes = self.get_user(user)
+        quotes_data = json.loads(serialize('json', home_owner_quotes.quote_requests.all()))
         if user.user_type == 'HO':
             return {
-                'contact_username': user.username,
-                'contact_phone': user.phone_number,
-                'property_address': user.user_profile.address,
+                'contact_phone': str(user.phone_number),
                 'custom_home_owner_id': user.pk,
-                'created_by_agent': user.pk
+                'created_by_agent': user.pk,
+                "quotes": quotes_data
             }
         elif user.user_type == 'AG':
             return {
-                'contact_username': user.username,
                 'contact_phone': user.phone_number,
-                'property_address': user.agent_profile.address
             }
         return {}
+
 
     def handle_no_permission(self):
         """
@@ -94,6 +225,7 @@ class QuotesAPIView(GenericAPIView):
         initial_data = self.get_initial_data(user)
         return Response(initial_data, status=status.HTTP_200_OK)
 
+
     def post(self, request, *args, **kwargs):
         """
         Handle POST request to submit quote request data, including media files.
@@ -104,7 +236,7 @@ class QuotesAPIView(GenericAPIView):
             return self.handle_no_permission()
 
         # Initialize the serializer with data from the request
-        serializer = self.get_serializer(data=request.data)
+        serializer = self.get_serializer(data=request.data) 
         if serializer.is_valid():
             form_data = serializer.validated_data
             form_data['user'] = user
@@ -117,16 +249,21 @@ class QuotesAPIView(GenericAPIView):
                 form_data["media"] = uploaded_files
 
             # Process the quote request using the QuoteService
-            quote_service = QuoteService(request)
-            # print('quote_service')
+            print(request.data, "lord")
+            # request_data = request.data.copy()
+            user_profile = self.get_user(user)
+            quote_service = QuoteService(request, user_profile)
             # print(quote_service)
-            result, error = quote_service.create(form_data)
+            result, error = quote_service.create(form_data, user_profile, model_passed=QuoteRequest)
 
             if result:
-                return Response({'message': 'Quote request created successfully'}, status=status.HTTP_201_CREATED)
+                return Response({'message': 'Quote request created successfully',
+                                #  "result":json.loads(result),
+                                 }, status=status.HTTP_201_CREATED)
             else:
                 return Response({'error': 'Failed to create quote request'}, status=status.HTTP_400_BAD_REQUEST)
         else:
+            print(serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 

@@ -1,17 +1,22 @@
 from  .utils import CustomRequestUtil
+from profiles.models import UserProfile
+from accounts.models import User
+from quotes.models import Property
 
 
 class ModelAction(CustomRequestUtil):
-    def __init__(self, request):
+    def __init__(self, request, user_profile):
         self.request = request
 
-    def create_model_instance(self, model=None, payload={}):
+    def create_model_instance(self, model=None, payload={}, user_profile=""):
         try:
             if model is None:
                 error = "Invalid model instance"
                 return None, self.make_error(error=error)
 
-            # print('model object', **payload)
+            print("hello", model)
+            # if model == User:
+            #     payload["user"] = user_profile
             main_object = model.objects.create(**payload)
             main_object.save()
 

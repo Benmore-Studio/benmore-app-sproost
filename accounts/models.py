@@ -12,6 +12,7 @@ from datetime import timedelta
 
 
 
+
 USER_TYPE_CHOICES_FOR_ACCOUNT_CREATION = (
         ('HO', 'Home Owner'),
         ('CO', 'Contractor'),
@@ -31,6 +32,7 @@ class User(AbstractUser):
         max_length=100, 
         allow_unicode=True) 
     email = models.EmailField(null=True, blank=True, db_index=True, unique=True)
+
 
     def save(self, *args, **kwargs):
         if not self.slug:
@@ -59,3 +61,5 @@ class OTP(models.Model):
     
     def __str__(self):
         return f'{self.otp_code}'
+
+

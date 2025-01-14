@@ -67,6 +67,7 @@ INSTALLED_APPS = [
 
     'rest_framework',
     'rest_framework.authtoken',
+    'rest_framework_simplejwt.token_blacklist',
     'dj_rest_auth',
     "dj_rest_auth.registration",
 
@@ -302,5 +303,6 @@ SIMPLE_JWT = {
     'ROTATE_REFRESH_TOKENS': True,                  # Rotate refresh tokens
     'BLACKLIST_AFTER_ROTATION': True,               # Blacklist old refresh tokens
     'AUTH_HEADER_TYPES': ('Bearer',),               # Header prefix for JWT tokens
+    'BLACKLIST_AFTER_ROTATION': True, 
 }
 

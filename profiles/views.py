@@ -7,6 +7,8 @@ from profiles.services.contractor import ContractorService
 from django.contrib.auth import get_user_model
 
 
+from rest_framework.parsers import MultiPartParser
+
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -16,13 +18,13 @@ from rest_framework.generics import  ListAPIView
 
 from django.shortcuts import get_object_or_404
 
-from profiles.models import ContractorProfile
-from quotes.models import QuoteRequest, Project
+from quotes.models import QuoteRequest, Project,Review, UserPoints, Bid,ProjectPictures 
 from .serializers import (ContractorProfileSerializer, 
                           ProfilePictureSerializer, 
                           HomeOwnerProfileSerializer, 
                           AgentProfileSerializer, 
                           ContractorSerializer,
+                          
                         )
 from profiles.services.contractor import ContractorService
 
@@ -47,6 +49,11 @@ def home_owner_function(request, value):
     }
     return context
 
+def award_points(user, points):
+    if hasattr(user, 'points'):
+        user.points.add_points(points)
+    else:
+        UserPoints.objects.create(user=user, total_points=points)
 
 
 # # the vieew to route the home owner with slug
@@ -229,6 +236,82 @@ class UploadApiView(APIView):
             return Response({'message': add_media}, status=status.HTTP_200_OK)
         
         return Response({'error': 'No file found!'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UploadPicturesView(APIView):
+    parser_classes = [MultiPartParser]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        pictures = request.FILES.getlist('pictures')
+        project_id = request.data.get('project_id')
+
+        if not project_id:
+            return Response({"error": "Project ID is required."}, status=400)
+
+        if not pictures:
+            return Response({"error": "No pictures were uploaded."}, status=400)
+
+        # Save uploaded pictures
+        for picture in pictures:
+            ProjectPictures.objects.create(user=request.user, project_id=project_id, image=picture)
+
+        # Count total pictures uploaded by the user for the project
+        total_pictures = ProjectPictures.objects.filter(user=request.user, project_id=project_id).count()
+
+        # Award points if total pictures reach or exceed 9
+        if total_pictures >= 9:
+            award_points(request.user, 3000)  # e.g., 3000 points for 9+ pictures
+
+        return Response({"message": "Pictures uploaded successfully.", "total_pictures": total_pictures})
+
+
+class WinBidView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        bid_id = request.data.get('bid_id')
+
+        if not bid_id:
+            return Response({"error": "Bid ID is required."}, status=400)
+
+        # Retrieve the bid and check if it's a winning bid for the requesting user
+        bid = Bid.objects.filter(id=bid_id, user=request.user).first()
+
+        if not bid:
+            return Response({"error": "Bid not found or does not belong to you."}, status=404)
+
+        if not bid.is_winner:
+            return Response({"error": "This bid is not marked as a winner."}, status=400)
+
+        # Award points for winning the bid
+        award_points(request.user, 5000)  # e.g., 5000 points for winning a bid
+        return Response({"message": "Points awarded for winning the bid."})
+
+
+class RateContractorView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        contractor_id = request.data.get('contractor_id')
+        rating = request.data.get('rating')
+        comments = request.data.get('comments', '')
+
+        if not contractor_id or not rating:
+            return Response({"error": "Contractor ID and rating are required."}, status=400)
+
+        # Create the review
+        Review.objects.create(
+            user=request.user,
+            contractor_id=contractor_id,
+            rating=rating,
+            comments=comments
+        )
+
+        # Award points for reviewing a contractor
+        award_points(request.user, 1000)  # e.g., 1000 points for reviewing a contractor
+
+        return Response({"message": "Review submitted successfully."})
 
 
 # class EditProfileAPIView(APIView):

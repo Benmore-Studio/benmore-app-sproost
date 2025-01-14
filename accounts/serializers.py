@@ -17,7 +17,7 @@ class CustomSignupSerializer(serializers.ModelSerializer):
     home_owner_address = serializers.CharField(required=False)
     city = serializers.CharField(max_length=100, required=False)
     state = serializers.CharField(max_length=100, required=False)
-    user_type = serializers.ChoiceField(choices=[('HO', 'Home Owner'), ('AG', 'Agent'), ('CO', 'Contractor')], required=True)
+    user_type = serializers.ChoiceField(choices=[('HO', 'Home Owner'), ('AG', 'Agent'), ('CO', 'Contractor'), ('IV', 'Investor')], required=True)
     referral_code = serializers.CharField(max_length=100, required=False)
 
 
@@ -39,13 +39,14 @@ class CustomSignupSerializer(serializers.ModelSerializer):
     investor_specialization = serializers.CharField(max_length=225, required=False)
     investor_company_address = serializers.CharField(max_length=255, required=False)
     investor_country= serializers.CharField(max_length=225, required=False)
+    image= serializers.ImageField(required=False)
 
     class Meta:
         model = User
         fields = [
             'first_name', 'last_name', 'phone_number', 'home_owner_address', 'city', 'state', 'user_type',
             'referral_code', 'company_name', 'specialization', 'company_address',
-            'registration_ID',  'insurance_number', 'license_number', 'country','agent_address', 'email', 'password',
+            'registration_ID',  'insurance_number', 'license_number', 'country','agent_address', 'email', 'password', 'image',
             'investor_company_name','investor_specialization','investor_company_address','investor_country'
         ]
 
@@ -69,14 +70,11 @@ class CustomSignupSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         # Retrieve the fields for cross-validation
-        print('du', data)
         user_type = data.get('user_type')
         email = data.get('email')
         phone_number = data.get('phone_number', None) 
         home_owner_address = data.get('home_owner_address', None) 
-
-        if not home_owner_address:
-            raise serializers.ValidationError({"home_owner_address": "Home Address required."})
+        
         if not phone_number:
             raise serializers.ValidationError({"phone_number": "Phone Number is required."})
 
@@ -84,6 +82,10 @@ class CustomSignupSerializer(serializers.ModelSerializer):
         if not email:
             raise serializers.ValidationError({"email": "This field is required."})
 
+        if user_type == "HO":
+            if not home_owner_address:
+                raise serializers.ValidationError({"home_owner_address": "Home Address required."})
+        
         # Validate registration_ID based on user_type
         if user_type == 'AG':
             Real_estate_license = data.get('registration_ID', None) 
@@ -102,6 +104,7 @@ class CustomSignupSerializer(serializers.ModelSerializer):
             company_name = data.get('company_name', None) 
             company_address = data.get('company_address', None) 
             specialization = data.get('specialization', None) 
+            image = data.get('image', None) 
             if not insurance_number:
                 raise serializers.ValidationError({"insurance_number": "Insurance Number is required for Contractors."})
             if not company_name:
@@ -112,10 +115,12 @@ class CustomSignupSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError({"license_number": "License Number is required for Contractors."})
             if not specialization:
                 raise serializers.ValidationError({"specialization": "Specialization is required for Contractors."})
+            if not image:
+                raise serializers.ValidationError({"image": "image is required for Contractors."})
             if ContractorProfile.objects.filter(license_number=license_number).exists():
                 raise serializers.ValidationError({"license_number": "A Contractor with this License ID already exists."})
         
-        if user_type == 'IN':
+        if user_type == 'IV':
             investor_company_name = data.get('investor_company_name', None) 
             investor_company_address = data.get('investor_company_address', None) 
             investor_specialization = data.get('investor_specialization', None) 
@@ -203,9 +208,10 @@ class CustomSignupSerializer(serializers.ModelSerializer):
                 country=validated_data.get('country'),
                 license_number=validated_data.get('license_number'),
                 insurance_number=validated_data.get('insurance_number'),
+                image=validated_data.get('image'),
             )
 
-        elif user.user_type == "IN":
+        elif user.user_type == "IV":
             InvestorProfile.objects.create(
                 user=user,
                 company_name=validated_data.get('investor_company_name'),

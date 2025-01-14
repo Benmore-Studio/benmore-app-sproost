@@ -26,6 +26,12 @@ from django.utils.timezone import now
 from datetime import timedelta
 from rest_framework.generics import GenericAPIView
 from .serializers import SendOTPSerializer, VerifyOTPSerializer
+from django.contrib.auth import authenticate
+
+
+from rest_framework.permissions import IsAuthenticated
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
 
 import random
 
@@ -173,8 +179,9 @@ class CompleteSignupView(GenericAPIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-# @method_decorator(csrf_exempt, name='dispatch') 
-class LogoutView(APIView):
+
+@method_decorator(csrf_exempt, name='dispatch') 
+class CustomLogoutView(APIView):
     """
     Handles logout by blacklisting the refresh token.
     """
@@ -210,22 +217,19 @@ class LogoutView(APIView):
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
-
 class SendOTPView(GenericAPIView):
     """
     Generates and sends OTP to the user's email.
     """
     serializer_class = SendOTPSerializer
 
-    def post(self, request):
+    def post(self, request, otp_type):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         email = serializer.validated_data['email']
         user = User.objects.filter(email=email).first()
 
-        if user:
-            return Response({"error": "User with this email already exist."}, status=status.HTTP_409_CONFLICT)
-        else:
+        if otp_type == 'password':
             # Generate OTP
             try:
                 otp = OTP.objects.get(email=email)
@@ -254,6 +258,40 @@ class SendOTPView(GenericAPIView):
                 return Response({'error': f"Error sending email: {e}"}, status=status.HTTP_400_BAD_REQUEST)
 
             return Response({"message": f"OTP sent to your email. otp_code-{otp_code}"}, status=status.HTTP_200_OK)
+
+
+        elif otp_type == 'registration':
+            if user:
+                return Response({"error": "User with this email already exist."}, status=status.HTTP_409_CONFLICT)
+            else:
+                # Generate OTP
+                try:
+                    otp = OTP.objects.get(email=email)
+                    otp.delete()
+                except:
+                    pass
+                otp_code = f"{random.randint(100000, 999999)}"
+
+                OTP.objects.create(
+                    email = email,
+                    otp_code=otp_code,
+                    expires_at=now() + timedelta(minutes=10)  # OTP expires in 10 minutes
+                )
+
+                # Send OTP via email
+                try:
+                    send_mail(
+                        subject="Your OTP Code",
+                        message=f"Your OTP code is: {otp_code}. It expires in 10 minutes.",
+                        from_email= 'no-reply@yourdomain.com',
+                        recipient_list=[email],
+                    )
+                except BadHeaderError:
+                    return Response({'error': 'Invalid header found.'}, status=status.HTTP_400_BAD_REQUEST)
+                except Exception as e:
+                    return Response({'error': f"Error sending email: {e}"}, status=status.HTTP_400_BAD_REQUEST)
+
+                return Response({"message": f"OTP sent to your email. otp_code-{otp_code}"}, status=status.HTTP_200_OK)
 
 
 class VerifyOTPView(GenericAPIView):
@@ -285,6 +323,74 @@ class VerifyOTPView(GenericAPIView):
         # OTP is valid
         otp.delete()  # Delete the OTP after successful verification
         return Response({"message": "OTP verified successfully."}, status=status.HTTP_200_OK)
+
+
+class ChangePasswordView(APIView):
+    """
+    View to change the password of an authenticated user.
+    """
+    permission_classes = [IsAuthenticated]
+    @extend_schema(
+        request={
+            "application/json": {
+                "type": "object",
+                "properties": {
+                    "current_password": {
+                        "type": "string",
+                        "description": "The current password of the user.",
+                    },
+                    "new_password": {
+                        "type": "string",
+                        "description": "The new password the user wants to set.",
+                    },
+                    "confirm_password": {
+                        "type": "string",
+                        "description": "Confirmation of the new password.",
+                    },
+                },
+                "required": ["current_password", "new_password", "confirm_password"],
+            }
+        },
+        responses={
+            200: {"description": "Password changed successfully."},
+            400: {"description": "Bad Request (e.g., incorrect current password or validation error)."},
+        },
+    )
+
+    def post(self, request):
+        user = request.user
+        data = request.data
+
+        # Retrieve data from the request
+        current_password = data.get('current_password')
+        new_password = data.get('new_password')
+        confirm_password = data.get('confirm_password')
+
+        # Validate current password
+        if not user.check_password(current_password):
+            return Response({"error": "Current password is incorrect."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Validate new password and confirmation
+        if new_password != confirm_password:
+            return Response({"error": "New password and confirmation do not match."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Validate the new password against Django's password validators
+        try:
+            validate_password(new_password, user=user)
+        except ValidationError as e:
+            return Response({"error": e.messages}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Update the user's password
+        logger.info(f"Before password change: {user.username}, {user.email}, {user.password}")
+        user.set_password(new_password)
+        user.save()
+        logger.info(f"After password change: {user.username}, {user.email}, {user.password}")
+
+        return Response({"message": "Password changed successfully."}, status=status.HTTP_200_OK)
+
+        
+
+
 
 # def validate_phone_numbers(request):
 #     phone_number = request.GET.get('phone')

@@ -46,8 +46,12 @@ class ContractorProfile(models.Model):
     insurance_number = models.CharField(max_length=255, default='12345678')
     license_number= models.CharField(max_length=225, default='12345678')
     country= models.CharField(max_length=225, default='Nigeria')
+    bio= models.CharField(max_length=500, null = True, blank = True)
+    tags= models.CharField(max_length=500, null = True, blank = True)
     website = models.URLField(max_length=255, null=True)
-    city = models.CharField(max_length = 50, null = True, blank = True)
+    address = models.CharField(max_length = 50, null = True, blank = True)
+    hired = models.IntegerField(default=0)
+    employees = models.IntegerField(default=0)
     media_paths = GenericRelation("main.Media")
     image = models.ImageField(upload_to=image_upload_location_contractor, null=True)
 
@@ -100,4 +104,17 @@ class Referral(models.Model):
         return self.referrer.email
 
 
+class Message(models.Model):
+    content = models.TextField(max_length=512)
+    sender= models.ForeignKey(User, on_delete=models.CASCADE, related_name="messagesender")
+    receiver= models.ForeignKey(User, on_delete=models.CASCADE, related_name="messagereceiver")
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['sender', 'receiver'])
+        ]
+
+    def __str__(self):
+        return f'{self.content}'
 

@@ -6,24 +6,25 @@ from services.utils import CustomRequestUtil
 
 
 class QuoteService(CustomRequestUtil):
-    def __init__(self, request):
+    def __init__(self, request, user_profile):
         super().__init__(request)
 
-    def create(self, payload):
+    def create(self, payload, user_profile, model_passed):
         try:
             media = payload.pop("media")
-
-            print("Media:", media)
 
             image_types = {'jpg', 'png', 'svg', 'jpeg'}
             file_types = {'pdf'}
             video_types = {'mp4', 'mkv', 'webm'}
 
-            model_action_service = ModelAction(self.request)
-            quote, error = model_action_service.create_model_instance(model=QuoteRequest, payload=payload)
+            
+            # print(user_profile,"payload")
+            model_action_service = ModelAction(self.request, user_profile)
+            print(model_passed, "again")
+            quote, error = model_action_service.create_model_instance(model=model_passed, payload=payload,user_profile=user_profile )
     
             if error:
-                # print("Error during QuoteRequest creation:", error)
+                print("Error during creation:", error)
                 return None, error
 
             # print("QuoteRequest created:", quote)
