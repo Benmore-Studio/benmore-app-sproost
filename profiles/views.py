@@ -27,6 +27,9 @@ from .serializers import (ContractorProfileSerializer,
                           
                         )
 from profiles.services.contractor import ContractorService
+from profiles.serializers import UserSerializer
+from drf_spectacular.utils import extend_schema, OpenApiResponse, OpenApiExample
+
 
 
 
@@ -35,19 +38,32 @@ from profiles.services.contractor import ContractorService
 
 User = get_user_model()
 
-def home_owner_function(request, value):
-    quotes = QuoteRequest.objects.filter(user=value)
-    projects = Project.objects.filter(quote_request__user=value)
-    projs = Project.objects.filter(admin=value)
-    context ={
-        "quotes": quotes,
-        "projects": projects,
-        'projs':projs,
-        "quote_count": quotes.count(),
-        "projects_count": projects.count(),
-        "home_owner_slug": request.user.slug
-    }
-    return context
+
+def get_user_data(request):
+    user = (
+        User.objects
+        .select_related('user_profile')  
+        
+        # Prefetch the reverse/Many relationships:
+        .prefetch_related(
+           'property_owner','quote_requests','user_profile__home_owner_invited_agents',
+                'user_profile__home_owner_associated_contarctors'
+            
+            # Prefetch(
+            #     'property_owner__quote_properties',  # chain: user -> property_owner -> quote_properties
+            #     # Optional custom queryset, e.g. to filter only certain quotes:
+            #     queryset=QuoteRequest.objects.all()
+            # ),
+            
+         
+        )
+        .get(id=request.user.id)
+    )
+   
+    serializer = UserSerializer(user)
+    return serializer.data
+
+
 
 def award_points(user, points):
     if hasattr(user, 'points'):
@@ -56,32 +72,32 @@ def award_points(user, points):
         UserPoints.objects.create(user=user, total_points=points)
 
 
-# # the vieew to route the home owner with slug
-# class HomeOwnerWithSlugNameView(APIView):
-#     """
-#     Retrieves home owner details using slug and returns their projects and quotes.
+# the vieew to route the home owner with slug
+class HomeOwnerWithSlugNameView(APIView):
+    """
+    Retrieves home owner details using slug and returns their projects and quotes.
 
-#     ----------------------------
-#     INPUT PARAMETERS:
-#     - name: str (slug of the user)
+    ----------------------------
+    INPUT PARAMETERS:
+    - name: str (slug of the user)
 
-#     -----------------------------
-#     OUTPUT PARAMETERS:
-#     Returns home owner data and associated projects and quotes.
-#     """
+    -----------------------------
+    OUTPUT PARAMETERS:
+    Returns home owner data and associated projects and quotes.
+    """
     
-#     @extend_schema(
-#         responses={
-#             200: OpenApiResponse(description="Homeowner data and associated projects and quotes"),
-#             404: OpenApiResponse(description="Homeowner not found"),
-#         }
-#     )
+    @extend_schema(
+        responses={
+            200: OpenApiResponse(description="Homeowner data and associated projects and quotes"),
+            404: OpenApiResponse(description="Homeowner not found"),
+        }
+    )
 
-#     def get(self, request, name, *args, **kwargs):
-#         user = get_object_or_404(User, slug=name)
-#         context = home_owner_function(request, user)
-#         context['name'] = name
-#         return Response(context, status=status.HTTP_200_OK)
+    def get(self, request, name, *args, **kwargs):
+        user = get_object_or_404(User, slug=name)
+        context = home_owner_function(request, user)
+        context['name'] = name
+        return Response(context, status=status.HTTP_200_OK)
 
 
 # class ContractorProfileAPIView(APIView):
@@ -188,14 +204,6 @@ class ChangeProfilePictureAPIView(APIView):
                 contractor_profile = ContractorProfile.objects.get(user=request.user)
                 contractor_profile.image = image_instance
                 contractor_profile.save()
-            elif request.user.user_type == 'HO':
-                home_owner_profile = UserProfile.objects.get(user=request.user)
-                home_owner_profile.image = image_instance
-                home_owner_profile.save()
-            elif request.user.user_type == 'AG':
-                agent_profile = AgentProfile.objects.get(user=request.user)
-                agent_profile.image = image_instance
-                agent_profile.save()
             else:
                 return Response({'error': 'Invalid user type'}, status=status.HTTP_400_BAD_REQUEST)
 

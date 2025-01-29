@@ -2,6 +2,8 @@ import uuid
 from django.db import models
 from phonenumber_field.modelfields import PhoneNumberField
 from django.contrib.contenttypes.fields import GenericRelation
+from django.utils.translation import gettext_lazy as _
+
 # from profiles.models import AgentProfile, UserProfile
 
 
@@ -16,9 +18,13 @@ RENOVATION_CHOICES=(
     ('exterior', 'Exterior'),
     )
 
-PROJECT_STATUS=(
-        ('pending','Pending'),
-        )
+QUOTE_REQUEST_TYPE=(
+    ('RTS','Renovate To Sell'),
+    ('RTR', 'ExterioRenovate To Rent'),
+    ('RTO', 'ExterioRenovate To Own'),
+    )
+
+
 
 GARAGE_CHOICES=(
     ('pending','Pending'),
@@ -30,10 +36,7 @@ class QuoteRequestStatus(models.TextChoices):
     approved = "Approved"
     rejected = "Rejected"
 
-class QuoteRequestManager(models.Manager):
-    @property
-    def latest_quote(self):
-        return self.order_by('-id').first()
+
     
 class Renovation(models.Model):
     type = models.CharField(max_length=50, choices=RENOVATION_CHOICES)
@@ -43,7 +46,9 @@ class Renovation(models.Model):
 
 
 class Property(models.Model):
+    tittle = models.CharField(max_length=255)
     property_owner = models.ForeignKey("accounts.User", on_delete=models.CASCADE, related_name='property_owner')
+    home_owner_agents = models.ManyToManyField("accounts.User", blank=True, related_name='home_owner_agents')
     address = models.CharField(max_length=255)
     half_bath = models.PositiveIntegerField(null=True, blank=True)
     full_bath = models.PositiveIntegerField(null=True, blank=True)
@@ -52,11 +57,16 @@ class Property(models.Model):
     total_square_footage = models.PositiveIntegerField(null=True, blank=True)
     lot_size = models.PositiveIntegerField(null=True, blank=True)
     taxes = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-    status = models.CharField(max_length=50, choices=PROJECT_STATUS, default='pending')
     basement_details = models.TextField(null=True, blank=True)
     garage = models.CharField(max_length=50, choices=GARAGE_CHOICES, null=True, blank=True)
     media_paths = GenericRelation("main.Media")
     date_created = models.DateField(auto_now_add=True)
+    likes = models.ManyToManyField(
+        "accounts.User",
+        related_name="liked_properties",
+        blank=True,
+        help_text=_("investors who have liked this properties.")
+    )
 
     def __str__(self):
         return f"{self.property_owner} - {self.address}"
@@ -73,16 +83,14 @@ class QuoteRequest(models.Model):
     title = models.CharField(max_length=255, )
     summary = models.TextField(null=False, max_length=257)
     status = models.CharField(max_length=255, choices=QuoteRequestStatus.choices, default=QuoteRequestStatus.pending)
+    quote_type = models.CharField(max_length=355, choices=QUOTE_REQUEST_TYPE)
     contact_phone = models.CharField(max_length=20, null=False)
     upload_date = models.DateTimeField(auto_now_add=True, null=False)
     is_quote = models.BooleanField(default=True)
     media_paths = GenericRelation("main.Media")
-    file = models.FileField(upload_to=upload_location_quote, null=True, blank=True)
+    file = models.FileField(upload_to=upload_location_quote, null=True, blank=True)    
     
-    # created_by_homeowner = models.Forei/gnKey(UserProfile, on_delete=models.SET_NULL, blank=True, null=True, related_name='homeowner_quote_requests')
-    
-    
-    objects = QuoteRequestManager()
+    # objects = QuoteRequestManager()
     
     def __str__(self) -> str:
         return self.title
@@ -193,6 +201,11 @@ class Review(models.Model):
     def __str__(self):
         return f"Review by {self.user.username} for {self.contractor.user.username}"
 
+
+class QuoteRequestManager(models.Manager):
+    @property
+    def latest_quote(self):
+        return self.order_by('-id').first()
 
 #region property comment
 # class Property(models.Model):

@@ -17,6 +17,8 @@ def image_upload_location_contractor(instance, filename):
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name = 'user_profile')
+    home_owner_invited_agents = models.ManyToManyField(User, related_name = 'invited_agents', blank=True)
+    home_owner_associated_contarctors = models.ManyToManyField(User, related_name = 'associated_contarctors', blank=True)
     home_owner_address = models.CharField(max_length = 50,null = True)
     city = models.CharField(max_length = 50, null = True, blank = True)
     state_province = models.CharField(max_length = 50, null = True, blank = True)
@@ -29,6 +31,8 @@ class UserProfile(models.Model):
 
 class AgentProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name = 'agent_profile')
+    agent_invited_home_owners = models.ForeignKey(User, on_delete=models.CASCADE, related_name = 'invited_home_owners')
+    agent_associated_contarctors = models.ForeignKey(User, on_delete=models.CASCADE, related_name = 'agent_associated_contarctors')
     agent_address = models.CharField(max_length = 50, default='Nigeria')
     registration_ID = models.CharField(max_length = 225, default='12345678', unique=True, verbose_name="license number", help_text='Also known as licences_ID')
     image = models.ImageField(upload_to=image_upload_location_agent, null=True)
@@ -57,6 +61,7 @@ class ContractorProfile(models.Model):
 
     def __str__(self):
         return self.user.email
+    
     
 class InvestorProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name = 'investor_profile')

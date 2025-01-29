@@ -1,13 +1,10 @@
-from django.shortcuts import render, redirect
 from django.contrib.auth import get_user_model
-from django.contrib.sites.shortcuts import get_current_site
 
 from quotes.models import QuoteRequest, Project
 from property.models import AssignedAccount
-from profiles.views import home_owner_function
+from profiles.views import get_user_data
 from profiles.models import AgentProfile, UserProfile, ContractorProfile
-from profiles.serializers import HomeOwnerSerializer,AgentSerializer,ContractorSerializer
-from utils.views import get_base_url
+from profiles.serializers import HomeOwnerSerializer,AgentSerializer,ContractorSerializer, ContractorProfileSerializer
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -36,90 +33,11 @@ from django.urls import reverse
 
 User = get_user_model()
 
-def get_base_url(request):
-    # Use 'get_current_site' to get the domain
-    domain = get_current_site(request).domain
-    # Use 'request.is_secure' to determine the scheme (http or https)
-    scheme = 'https' if request.is_secure() else 'http'
-    # Construct the base URL
-    base_url = f"{scheme}://{domain}"
-    return base_url
 
 loggedInUser = 'contractor'
 
 # general function to be called in other functions
         
-
-
-
-# class HomeView(GenericAPIView):
-#     """
-#     Returns home data based on user type (Homeowner, Contractor, or Agent).
-
-#     ----------------------------
-#     INPUT PARAMETERS:
-#     - None
-
-#     -----------------------------
-#     OUTPUT PARAMETERS:
-#     Returns home-related data such as projects and quotes based on the user type.
-#     """
-#     permission_classes = [IsAuthenticated] 
-
-#     @extend_schema(
-#         responses={
-#             200: OpenApiResponse(description="Home data for the authenticated user"),
-#             302: OpenApiResponse(description="Redirects if the user is not authenticated or other cases"),
-#         },
-#     )
-
-#     def get(self, request, *args, **kwargs):
-#         user_type = request.user.user_type
-#         if user_type == "HO":
-#             context = home_owner_function(request, request.user)
-#             return Response(context)
-#         elif user_type == "CO":
-#             try:
-#                 profile = User.objects.get(id=request.user.id)
-#                 serializer = ContractorSerializer(profile) 
-#                 return Response(serializer.data, status=status.HTTP_200_OK)
-#             except ContractorProfile.DoesNotExist:
-#                 return Response({'error': 'Contractor profile not found'}, status=status.HTTP_404_NOT_FOUND)
-#         elif user_type == "AG":
-#             URL = get_base_url(request)
-#             quotes = QuoteRequest.objects.filter(user=request.user)
-#             projects = Project.objects.filter(quote_request__user=request.user)
-#             proj = Project.objects.filter(admin=request.user)
-#             accounts = AssignedAccount.objects.filter(assigned_to=request.user).order_by('-id').select_related("assigned_by", "assigned_to")
-#             agent = User.objects.get(pk=request.user.pk)
-#             agent_profile = AgentProfile.objects.get(user=agent)
-
-#             serialized_quotes = QuoteRequestAllSerializer(quotes, many=True).data
-#             serialized_projects = ProjectSerializer(projects, many=True).data
-#             serialized_proj = ProjectSerializer(proj, many=True).data
-#             serialized_accounts = AssignedAccountSerializer(accounts, many=True).data
-
-#             referral, created = Referral.objects.get_or_create(referrer=request.user)
-#             if created:
-#                 if agent_profile.registration_ID:
-#                     referral.code = agent_profile.registration_ID
-#                     referral.save()
-
-#             signup_url = reverse('account_signup')
-#             referral_link = request.build_absolute_uri(f'{signup_url}?ref={referral.code}')
-#             context = {
-#                 "quote_count": len(serialized_quotes),
-#                 "projects_count": len(serialized_projects),
-#                 "accounts": serialized_accounts,
-#                 "accounts_len": len(serialized_accounts),
-#                 'url': URL,
-#                 'proj': serialized_proj,
-#                 'quotes': serialized_quotes,
-#                 'referral_link': referral_link
-#             }
-#             return Response(context, status=status.HTTP_200_OK)
-#         else:
-#             raise PermissionDenied("Unauthorized access")
 
 
 
@@ -147,64 +65,18 @@ class HomeView(GenericAPIView):
     def get(self, request, *args, **kwargs):
         user = request.user
         user_type = user.user_type
-        if user != request.user:
-            raise PermissionDenied("Unauthorized access")
-
-        if user_type == "HO":
-            if user != request.user:
-                raise PermissionDenied("Unauthorized access")
-            context = home_owner_function(request, user)
+    
+        if user_type == "HO" or user_type == "AG":
+            context = get_user_data(request)
             return Response(context, status=status.HTTP_200_OK)
 
         elif user_type == "CO":
-            if user != request.user:
-                raise PermissionDenied("Unauthorized access")
-            contractor_profile = get_object_or_404(User, id=user.id)
+            contractor_profile =  User.objects.select_related('contractor_profile') .prefetch_related(
+                 'property_owner').get(id=request.user.id)
             serializer = ContractorSerializer(contractor_profile)
             return Response(serializer.data, status=status.HTTP_200_OK)
-
-        elif user_type == "AG":
-
-            URL = get_base_url(request)
-
-            quotes = QuoteRequest.objects.filter(user=user).select_related('user')
-            projects = Project.objects.filter(quote_request__user=user).select_related('quote_request', 'admin')
-            proj = Project.objects.filter(admin=user).select_related('admin')
-            accounts = AssignedAccount.objects.filter(assigned_to=user).select_related('assigned_by', 'assigned_to')
-
-            # Retrieve agent profile, or raise a 404 if it doesn't exist
-            agent_profile = get_object_or_404(AgentProfile, user=user)
-
-            # Serializing data
-            serialized_quotes = QuoteRequestAllSerializer(quotes, many=True).data
-            serialized_projects = ProjectSerializer(projects, many=True).data
-            serialized_proj = ProjectSerializer(proj, many=True).data
-            serialized_accounts = AssignedAccountSerializer(accounts, many=True).data
-
-            # Get or create referral code for the agent
-            referral, created = Referral.objects.get_or_create(referrer=user)
-            if created and agent_profile.registration_ID:
-                referral.code = agent_profile.registration_ID
-                referral.save()
-
-            signup_url = reverse('account_signup')
-            referral_link = request.build_absolute_uri(f'{signup_url}?ref={referral.code}')
-            context = {
-                "quote_count": len(serialized_quotes),
-                "projects_count": len(serialized_projects),
-                "accounts": serialized_accounts,
-                "accounts_len": len(serialized_accounts),
-                'url': URL,
-                'proj': serialized_proj,
-                'quotes': serialized_quotes,
-                'referral_link': referral_link
-            }
-            return Response(context, status=status.HTTP_200_OK)
-
         else:
             raise PermissionDenied("Unauthorized access")
-
-
 
 
 class HomeViewByPkAPIView(RetrieveAPIView):
@@ -282,6 +154,17 @@ class HomeViewByPkAPIView(RetrieveAPIView):
             # You can add similar logic for other user types
             serializer = self.get_serializer(user)
             return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class ContractorListAPIView(ListAPIView):
+    """
+    API View view all contractor profiles.
+    """
+    permission_classes = [IsAuthenticated]
+    serializer_class = ContractorSerializer
+    queryset = ContractorProfile.objects.all()
+
+
 
 
 class AssignedProjectsView(APIView):

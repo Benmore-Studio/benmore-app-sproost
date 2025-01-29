@@ -11,6 +11,6 @@ urlpatterns = [
     path('assigned-projects/', views.AssignedProjectsView.as_view(), name="assigned-projects"),
     # path('menu/', views.MenuList, name="menu"),
     # path('quotes-summary/', views.QuotationReturn, name="quotes-summary"),
-    # path('contractors/', views.contractors, name="contractors"),
+    path('list-contractors/', views.ContractorListAPIView.as_view(), name="list-contractors"),
 ]
 
