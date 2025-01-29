@@ -49,6 +49,11 @@ class PropertyAPIView(GenericAPIView):
     OUTPUT PARAMETERS:
     - GET: Returns initial data for the quote request.
     - POST: Returns success or error messages upon submission.
+
+    send your request in this format-properties:{"tittle": "Sample Property",
+    "address": "123 Sample St",
+    "status": "pending",
+    "home_owner_agents": [1, 2, 4]},images:image files, videos:video inputs, files(pdf):file_input
     """
     serializer_class = PropertySerializer
     parser_classes = [MultiPartParser, FormParser]
