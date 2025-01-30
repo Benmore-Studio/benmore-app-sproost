@@ -1,7 +1,7 @@
 from django.shortcuts import get_object_or_404
 
 from accounts.models import User
-
+from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiTypes
 from quotes.services import QuoteService
 
 from django.contrib.auth import get_user_model
@@ -53,7 +53,11 @@ class PropertyAPIView(GenericAPIView):
     send your request in this format-properties:{"tittle": "Sample Property",
     "address": "123 Sample St",
     "status": "pending",
-    "home_owner_agents": [1, 2, 4]},images:image files, videos:video inputs, files(pdf):file_input
+    "home_owner_agents": [1, 2, 4]
+    },
+    images:image files, 
+    videos:video inputs, 
+    files(pdf):file_input
     """
     serializer_class = PropertySerializer
     parser_classes = [MultiPartParser, FormParser]
@@ -108,6 +112,26 @@ class PropertyAPIView(GenericAPIView):
         return Response(initial_data, status=status.HTTP_200_OK)
 
 
+    @extend_schema(
+        summary="Upload Property with Media Files",
+        description="""
+        Allows users to submit property data along with associated media files.
+
+        **Required Fields:**
+        - `properties` (JSON String): Property details including title, address, etc.
+        - `images` (File): One or multiple image files.
+        - `videos` (File): One or multiple video files.
+        - `files` (File): PDFs or other document files.
+        """,
+        parameters=[
+            OpenApiParameter(name="properties", type=OpenApiTypes.STR, required=True, description="Property details in JSON string."),
+            OpenApiParameter(name="images", type=OpenApiTypes.STR, required=False, description="Multiple image files."),
+            OpenApiParameter(name="videos", type=OpenApiTypes.STR, required=False, description="Multiple video files."),
+            OpenApiParameter(name="files", type=OpenApiTypes.STR, required=False, description="Multiple document files (PDFs, etc.)."),
+        ],
+        
+        responses={201: OpenApiTypes.OBJECT},
+    )
     def post(self, request, *args, **kwargs):
         """
         Handle POST request to submit quote request data, including media files.
@@ -133,15 +157,16 @@ class PropertyAPIView(GenericAPIView):
             property_created = serializer.save()
             media_serializer={}
             if request.FILES:
+                print("request.FILES", request.FILES)
                 content_type = ContentType.objects.get_for_model(property_created)
                 bulk_media_data = {
                     "content_type_id": content_type.id,
                     "object_id": property_created.id,
                     "files": request.FILES.getlist('files', []),
                     "images": request.FILES.getlist('images', []),
-                    "videos": request.FILES.getlist('video', []),
+                    "videos": request.FILES.getlist('videos', []),
                 }
-                media_serializer = BulkMediaSerializer(data=bulk_media_data, many=True)
+                media_serializer = BulkMediaSerializer(data=bulk_media_data)
                 if media_serializer.is_valid():
                     media_serializer.save() 
             return Response({'message': 'request successfull', "property":serializer.data}, status=status.HTTP_201_CREATED)
@@ -214,6 +239,34 @@ class QuotesAPIView(GenericAPIView):
         else:
             return Response({"errors":"User type has no quotes"}, status=status.HTTP_400_BAD_REQUEST)
 
+    @extend_schema(
+        summary="Submit a Quote Request",
+        description="""
+        Allows **Home Owners (`HO`)** and **Agents (`AG`)** to submit a quote request.
+
+        **Required Fields:**
+        - `title` (String) - Title of the quote request.
+        - `summary` (String) - Description of the quote request.
+        - `property` (Integer) - ID of the associated property.
+        - `quote_type` (String) - Type of quote request.
+        - `contact_phone` (String) - Contact phone number.
+
+        **Optional Fields:**
+        - `media` (File Upload - Multiple Files Allowed) - Images, videos, or document files.
+
+        **Restrictions:**
+        - Only **Home Owners (`HO`)** and **Agents (`AG`)** can create quotes.
+        """,
+        parameters=[
+            OpenApiParameter(name="title", type=OpenApiTypes.STR, required=True, description="Title of the quote request."),
+            OpenApiParameter(name="summary", type=OpenApiTypes.STR, required=True, description="Summary of the quote request."),
+            OpenApiParameter(name="property", type=OpenApiTypes.INT, required=True, description="ID of the associated property."),
+            OpenApiParameter(name="quote_type", type=OpenApiTypes.STR, required=True, description="Type of quote request."),
+            OpenApiParameter(name="contact_phone", type=OpenApiTypes.STR, required=True, description="Contact phone number."),
+            OpenApiParameter(name="media", type=OpenApiTypes.STR, required=False, description="Multiple media files (images, videos, documents)."),
+        ],
+        responses={201: OpenApiTypes.OBJECT, 400: OpenApiTypes.OBJECT},
+    )
 
     def post(self, request, *args, **kwargs):
         """
@@ -260,9 +313,10 @@ class QuotesAPIView(GenericAPIView):
 
 class PropertySearchView(ListAPIView):
     """
-    GET /api/properties/?search=<query>
+    GET /api/properties/?search=<query>, 
+    search_fields = ['address', 'property_owner__username', 'basement_details', 'tittle']
     """
-    queryset = Property.objects.all()
+    queryset = Property.objects.all().order_by("id")
     serializer_class = PropertySerializer
     filter_backends = [filters.SearchFilter]
     # Adjust these fields to whatever you want to enable searching on

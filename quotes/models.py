@@ -49,6 +49,13 @@ class Property(models.Model):
     tittle = models.CharField(max_length=255)
     property_owner = models.ForeignKey("accounts.User", on_delete=models.CASCADE, related_name='property_owner')
     home_owner_agents = models.ManyToManyField("accounts.User", blank=True, related_name='home_owner_agents')
+    contractors = models.ManyToManyField(
+        "accounts.User",
+        blank=True,
+        related_name="assigned_contractors",
+        help_text=_("Contractors assigned to this property.")
+    )
+    renovation = models.OneToOneField(Renovation, on_delete=models.CASCADE, related_name='renovations', null=True, blank=True)
     address = models.CharField(max_length=255)
     half_bath = models.PositiveIntegerField(null=True, blank=True)
     full_bath = models.PositiveIntegerField(null=True, blank=True)
@@ -72,11 +79,9 @@ class Property(models.Model):
         return f"{self.property_owner} - {self.address}"
 
 
-
 class QuoteRequest(models.Model):
     user = models.ForeignKey("accounts.User", on_delete=models.CASCADE, related_name="quote_requests", help_text='the user who created the quote')
     contractors = models.ForeignKey("profiles.ContractorProfile", null=True, blank=True, on_delete=models.PROTECT, related_name="quote_contractors")
-    renovation = models.OneToOneField(Renovation, on_delete=models.CASCADE, related_name='renovations', null=True, blank=True)
     property = models.ForeignKey(Property, on_delete=models.CASCADE, related_name="quote_properties")
     property_type = models.CharField(max_length=50, choices=RENOVATION_CHOICES)
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
@@ -88,7 +93,20 @@ class QuoteRequest(models.Model):
     upload_date = models.DateTimeField(auto_now_add=True, null=False)
     is_quote = models.BooleanField(default=True)
     media_paths = GenericRelation("main.Media")
-    file = models.FileField(upload_to=upload_location_quote, null=True, blank=True)    
+    file = models.FileField(upload_to=upload_location_quote, null=True, blank=True)  
+
+    def assign_contractor(self, contractor):
+        """Assign a contractor and update the property status to 'in_progress'."""
+        self.contractors = contractor
+        self.save()
+        self.property.contractors.add(contractor)
+        self.property.status = "in_progress"
+        self.property.save()
+
+    def complete_project(self):
+        """Mark the property as completed."""
+        self.property.status = "completed"
+        self.property.save()  
     
     # objects = QuoteRequestManager()
     
@@ -107,19 +125,6 @@ def upload_location(instance, filename):
     # file will be uploaded to MEDIA_ROOT/projects/<project_id>/<filename>
     return 'projects/{0}/{1}'.format(instance.id, filename)
 
-class Listing(models.Model):
-    user = models.ForeignKey("accounts.User", on_delete=models.CASCADE, null=False, related_name="listings")
-    uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
-    title = models.CharField(max_length=255, null=False)
-    summary = models.TextField(null=False, max_length=257)
-    status = models.CharField(max_length=255, choices=QuoteRequestStatus.choices, default=QuoteRequestStatus.pending, null=False)
-    contact_phone = models.CharField(max_length=20, null=False)
-    contact_username = models.CharField(max_length=255, null=False)
-    property_address = models.CharField(max_length=255, null=False)
-    upload_date = models.DateTimeField(auto_now_add=True, null=False)
-    is_quote = models.BooleanField(default=True)
-    media_paths = GenericRelation("main.Media")
-    file = models.FileField(upload_to=upload_location_quote, null=True, blank=True)
 
 
 

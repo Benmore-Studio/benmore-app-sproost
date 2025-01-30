@@ -1,6 +1,8 @@
 
 from profiles.models import ContractorProfile, UserProfile, AgentProfile
 from django.db.models import Q
+from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiTypes
+
 
 
 from profiles.services.contractor import ContractorService
@@ -100,63 +102,103 @@ class HomeOwnerWithSlugNameView(APIView):
         return Response(context, status=status.HTTP_200_OK)
 
 
-# class ContractorProfileAPIView(APIView):
-#     """
-#     API View to handle contractor profile view and media uploads. to be used in main app
-#     """
-#     permission_classes = [IsAuthenticated]
-
-#     def get(self, request):
-#         """
-#         Retrieve the contractor's profile details.
-#         """
-#         if request.user.user_type != 'CO':
-#             return Response({'error': 'Unauthorized access'}, status=status.HTTP_403_FORBIDDEN)
-
-#         try:
-#             profile = User.objects.get(id=request.user.id)
-#             serializer = ContractorSerializer(profile) 
-#             return Response(serializer.data, status=status.HTTP_200_OK)
-#         except ContractorProfile.DoesNotExist:
-#             return Response({'error': 'Contractor profile not found'}, status=status.HTTP_404_NOT_FOUND)
-
-
 
 class EditUsersProfileAPIView(APIView):
     """
-    API View to handle the update of user profiles (Home Owner, Contractors and Agent) using PATCH for partial updates.
+    API View to handle the update of user profiles (Home Owner, Contractors, and Agent) using PATCH for partial updates.
     """
     permission_classes = [IsAuthenticated]
+
+    @extend_schema(
+        summary="Edit User Profile",
+        description="""
+        Allows authenticated users (`Home Owner`, `Agent`, `Contractor`) to update their profile information.
+
+        **User Types Supported:**
+        - `HO` (Home Owner)
+        - `AG` (Agent)
+        - `CO` (Contractor)
+
+        **Fields That Can Be Updated:**
+        - `phone_number`
+        - `email`
+        - `first_name`
+        - `last_name`
+        - `image` (Profile Picture)
+
+        **User Type-Based Profile Updates:**
+        - Home Owners → `UserProfile`
+        - Agents → `AgentProfile`
+        - Contractors → `ContractorProfile`
+        """,
+        parameters=[
+            OpenApiParameter(name="phone_number", type=OpenApiTypes.STR, required=False, description="User's phone number."),
+            OpenApiParameter(name="email", type=OpenApiTypes.STR, required=False, description="User's email address."),
+            OpenApiParameter(name="first_name", type=OpenApiTypes.STR, required=False, description="User's first name."),
+            OpenApiParameter(name="last_name", type=OpenApiTypes.STR, required=False, description="User's last name."),
+            OpenApiParameter(name="image", type=OpenApiTypes.STR, required=False, description="User's profile picture."),
+        ],
+    
+        responses={
+            200: OpenApiTypes.OBJECT,
+            400: OpenApiTypes.OBJECT,
+        },
+    )
 
     def patch(self, request):
         user = request.user
 
+        # Determine the user profile and serializer based on user type
         if user.user_type == 'HO':
             user_profile = get_object_or_404(UserProfile, user=user)
             serializer_class = HomeOwnerProfileSerializer
         elif user.user_type == 'AG':
-            user_profile = get_object_or_404(AgentProfile ,user=user)
+            user_profile = get_object_or_404(AgentProfile, user=user)
             serializer_class = AgentProfileSerializer
         elif user.user_type == 'CO':
-            user_profile = get_object_or_404(ContractorProfile ,user=user)
+            user_profile = get_object_or_404(ContractorProfile, user=user)
             serializer_class = ContractorProfileSerializer
         else:
             return Response({'error': 'User type not found for profile update.'}, status=status.HTTP_400_BAD_REQUEST)
 
+        # Update user model fields before saving
+        user_data_updated = False
+        if 'phone_number' in request.data:
+            user.phone_number = request.data['phone_number']
+            user_data_updated = True
+        if 'email' in request.data:
+            user.email = request.data['email']
+            user_data_updated = True
+        if 'first_name' in request.data:
+            user.first_name = request.data['first_name']
+            user_data_updated = True
+        if 'last_name' in request.data:
+            user.last_name = request.data['last_name']
+            user_data_updated = True
+        if 'image' in request.FILES:
+            user.image = request.FILES['image']
+            user_data_updated = True
+
+        if user_data_updated:
+            user.save()  
+
+        # Update the profile model
         serializer = serializer_class(user_profile, data=request.data, partial=True)
 
         if serializer.is_valid():
             serializer.save()
 
-            if 'phone_number' in serializer.validated_data:
-                user.phone_number = serializer.validated_data['phone_number']
-            if 'email' in serializer.validated_data:
-                user.email = serializer.validated_data['email']
-            if 'image' in request.FILES:
-                user.image = request.FILES['image']
-            user.save()
-
-            return Response({'message': 'Profile updated successfully!'}, status=status.HTTP_200_OK)
+            # Return updated user and profile data
+            return Response({
+                'message': 'Profile updated successfully!',
+                'user': {
+                    'email': user.email,
+                    'first_name': user.first_name,
+                    'last_name': user.last_name,
+                    'phone_number': str(user.phone_number), 
+                },
+                'profile': serializer.data 
+            }, status=status.HTTP_200_OK)
 
         # Debugging for error messages
         print("Serializer errors:", serializer.errors)
@@ -189,6 +231,33 @@ class ChangeProfilePictureAPIView(APIView):
     """
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(
+        summary="Change Profile Picture",
+        description="""
+        Allows authenticated **contractors** (`user_type='CO'`) to upload a new profile picture.
+
+        **Required Fields:**
+        - `image` (Single File Upload): The new profile picture.
+
+        **Restrictions:**
+        - Only **contractors** (`user_type='CO'`) can update their profile pictures.
+        """,
+        parameters=[
+            OpenApiParameter(
+                name="image",
+                type=OpenApiTypes.STR,
+                required=True,
+                description="The new profile picture (image file)."
+            ),
+        ],
+
+        responses={
+            200: OpenApiTypes.OBJECT,
+            400: OpenApiTypes.OBJECT,
+            403: OpenApiTypes.OBJECT,
+        },
+    )
+
     def post(self, request):
         form = ProfilePictureSerializer(data=request.data)
         if form.is_valid():
@@ -220,11 +289,37 @@ class ChangeProfilePictureAPIView(APIView):
                     return Response({'error': f'An Error Occurred, {error}'}, status=status.HTTP_400_BAD_REQUEST)
 
 
-class UploadApiView(APIView):
+class ContractorUploadApiView(APIView):
     """
-    API View to handle contractor media uploads.
+    API View to handle contractor media/project uploads.
     """
     permission_classes = [IsAuthenticated]
+
+    @extend_schema(
+        summary="Upload Contractor Media",
+        description="""
+        Allows authenticated contractors to upload project media files.
+
+        **Required Fields:**
+        - `media` (File Upload - Multiple Files Allowed): Images, videos, or document files.
+        
+        **Restrictions:**
+        - Only users with `user_type='CO'` (Contractors) can upload.
+        """,
+        parameters=[
+            OpenApiParameter(
+                name="media",
+                type=OpenApiTypes.STR,
+                required=True,
+                description="Multiple media files (images, videos, documents)."
+            ),
+        ],
+        responses={
+            200: OpenApiTypes.OBJECT,
+            400: OpenApiTypes.OBJECT,
+            403: OpenApiTypes.OBJECT,
+        },
+    )
 
     def post(self, request):
         """
@@ -234,7 +329,7 @@ class UploadApiView(APIView):
             return Response({'error': 'Unauthorized access'}, status=status.HTTP_403_FORBIDDEN)
 
         if request.FILES:
-            media = request.FILES.getlist("upload-media")
+            media = request.FILES.getlist("media")
             data = {"media": media}
             contractor_service = ContractorService(request=request)
             add_media, error = contractor_service.add_media(data)
@@ -320,49 +415,4 @@ class RateContractorView(APIView):
         award_points(request.user, 1000)  # e.g., 1000 points for reviewing a contractor
 
         return Response({"message": "Review submitted successfully."})
-
-
-# class EditProfileAPIView(APIView):
-#     """
-#     API View to edit user profiles based on user type (CO, AG, HO), this returns initial data to prefill the form with.
-#     """
-#     permission_classes = [IsAuthenticated]
-
-#     def get(self, request):
-#         user = request.user
-#         if user.user_type == 'CO':
-#             profile = ContractorProfile.objects.get(user=user)
-#             serializer = ContractorProfileSerializer(profile)
-#         elif user.user_type == 'AG':
-#             profile = AgentProfile.objects.get(user=user)
-#             serializer = AgentProfileSerializer(profile)
-#         elif user.user_type == 'HO':
-#             profile = UserProfile.objects.get(user=user)
-#             serializer = HomeOwnerProfileSerializer(profile)
-#         else:
-#             return Response({'error': 'Invalid user type'}, status=status.HTTP_400_BAD_REQUEST)
-        
-#         return Response(serializer.data, status=status.HTTP_200_OK)
-
-#     def post(self, request):
-#         user = request.user
-#         if user.user_type == 'CO':
-#             profile = ContractorProfile.objects.get(user=user)
-#             serializer = ContractorProfileSerializer(profile, data=request.data)
-#         elif user.user_type == 'AG':
-#             profile = AgentProfile.objects.get(user=user)
-#             serializer = AgentProfileSerializer(profile, data=request.data)
-#         elif user.user_type == 'HO':
-#             profile = UserProfile.objects.get(user=user)
-#             serializer = HomeOwnerProfileSerializer(profile, data=request.data)
-#         else:
-#             return Response({'error': 'Invalid user type'}, status=status.HTTP_400_BAD_REQUEST)
-
-#         if serializer.is_valid():
-#             serializer.save()
-#             return Response({'message': 'Profile updated successfully!'}, status=status.HTTP_200_OK)
-#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-    
 

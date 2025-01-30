@@ -165,8 +165,6 @@ class ContractorListAPIView(ListAPIView):
     queryset = ContractorProfile.objects.all()
 
 
-
-
 class AssignedProjectsView(APIView):
     """
     Returns data for assigned projects and related accounts.
