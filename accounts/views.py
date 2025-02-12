@@ -27,9 +27,11 @@ from datetime import timedelta
 from rest_framework.generics import GenericAPIView
 from .serializers import SendOTPSerializer, VerifyOTPSerializer
 from django.contrib.auth import authenticate
+from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiTypes
 
 
-from rest_framework.permissions import IsAuthenticated
+
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 
@@ -87,6 +89,7 @@ class ManualSignupView(CreateAPIView):
     substitute brokerage_address with agent_address in the data you send for agents
     '''
     serializer_class = CustomSignupSerializer
+    permission_classes = [AllowAny]
     def create(self, request, *args, **kwargs):
         return super().create(request, *args, **kwargs)
 
@@ -222,7 +225,44 @@ class SendOTPView(GenericAPIView):
     Generates and sends OTP to the user's email.
     """
     serializer_class = SendOTPSerializer
+    @extend_schema(
+    summary="Generate and Send OTP",
+    description="""
+    Generates and sends a One-Time Password (OTP) to the specified email address.
 
+    **Path Parameter:**
+    
+    - **otp_type** (String, required): Determines the context of the OTP.
+      - **password**: Generates an OTP for resetting a password.
+      - **registration**: Generates an OTP for user registration.  
+        In this case, if a user with the provided email already exists, a **409 Conflict** is returned.
+    
+    **Request Body:**
+    
+    - **email** (String, required): The email address to which the OTP will be sent.
+    
+    **Responses:**
+    
+    - **200 OK**: OTP successfully sent. The response contains a confirmation message (and for debugging purposes the OTP code may be included).
+    - **400 Bad Request**: An error occurred when sending the OTP (e.g., invalid email header or other sending errors).
+    - **409 Conflict**: For a registration OTP request, if a user with the provided email already exists.
+    """,
+    parameters=[
+        OpenApiParameter(
+            name="otp_type",
+            location=OpenApiParameter.PATH,
+            type=OpenApiTypes.STR,
+            required=True,
+            description="Type of OTP requested: 'password' for password reset or 'registration' for new user registration."
+        )
+    ],
+    request=SendOTPSerializer,
+    responses={
+        200: OpenApiTypes.OBJECT,
+        400: OpenApiTypes.OBJECT,
+        409: OpenApiTypes.OBJECT,
+    }
+)
     def post(self, request, otp_type):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)

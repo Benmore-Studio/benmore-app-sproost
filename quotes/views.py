@@ -268,6 +268,7 @@ class QuotesAPIView(GenericAPIView):
         responses={201: OpenApiTypes.OBJECT, 400: OpenApiTypes.OBJECT},
     )
 
+
     def post(self, request, *args, **kwargs):
         """
         Handle POST request to submit quote request data, including media files.
