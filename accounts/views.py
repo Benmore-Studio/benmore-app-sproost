@@ -367,6 +367,7 @@ class VerifyOTPView(GenericAPIView):
 
 class ChangePasswordView(APIView):
     """
+    First send and verify otp.
     View to change the password of an authenticated user.
     """
     permission_classes = [IsAuthenticated]

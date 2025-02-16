@@ -1,6 +1,6 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import ProjectViewSet, PropertyAPIView, QuotesAPIView, PropertySearchView
+from .views import PropertyAPIView, QuotesAPIView, PropertySearchView
 
 app_name = 'quotes'
 

@@ -72,10 +72,8 @@ class QuoteRequestSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = QuoteRequest
-        fields = [
-            'title', 'summary', 'contact_phone', 
-            'contractors','property', 'media'
-        ]
+        fields = "__all__"
+    
     def create(self, validated_data):
         """
         Handles the creation of a new quote request, including file uploads.

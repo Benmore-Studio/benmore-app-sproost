@@ -2,9 +2,9 @@ from rest_framework import serializers
 from accounts.models import User
 from profiles.models import ContractorProfile, AgentProfile, UserProfile
 from profiles.serializers import (
-    ContractorProfileSerializer,
-    HomeOwnerProfileSerializer,
-    AgentProfileSerializer
+    SimpleContractorProfileSerializer,
+    SimpleHomeOwnerProfileSerializer,
+    SimpleAgentProfileSerializer
 )
 
 class BaseProfileSerializer(serializers.ModelSerializer):
@@ -42,7 +42,7 @@ class BaseProfileSerializer(serializers.ModelSerializer):
 
 
 class UpdateContractorProfileSerializer(BaseProfileSerializer):
-    contractor_profile = ContractorProfileSerializer()
+    contractor_profile = SimpleContractorProfileSerializer()
 
     class Meta:
         model = User
@@ -62,7 +62,7 @@ class UpdateContractorProfileSerializer(BaseProfileSerializer):
 
 
 class UpdateHomeOwnerSerializer(BaseProfileSerializer):
-    user_profile = HomeOwnerProfileSerializer()
+    user_profile = SimpleHomeOwnerProfileSerializer()
 
     class Meta:
         model = User
@@ -82,7 +82,7 @@ class UpdateHomeOwnerSerializer(BaseProfileSerializer):
 
 
 class UpdateAgentSerializer(BaseProfileSerializer):
-    agent_profile = AgentProfileSerializer()
+    agent_profile = SimpleAgentProfileSerializer()
 
     class Meta:
         model = User

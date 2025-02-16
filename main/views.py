@@ -2,9 +2,11 @@ from django.contrib.auth import get_user_model
 
 from quotes.models import QuoteRequest, Project
 from property.models import AssignedAccount
-from profiles.views import get_user_data
 from profiles.models import AgentProfile, UserProfile, ContractorProfile
-from profiles.serializers import HomeOwnerSerializer,AgentSerializer,ContractorSerializer, ContractorProfileSerializer
+from profiles.serializers import (HomeOwnerSerializer,AgentSerializer,
+                                  ContractorSerializer, SimpleContractorProfileSerializer,
+                                  UserSerializer, HomeViewUserSerializer
+                                )
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -66,17 +68,22 @@ class HomeView(GenericAPIView):
         user = request.user
         user_type = user.user_type
     
-        if user_type == "HO" or user_type == "AG":
-            context = get_user_data(request)
-            return Response(context, status=status.HTTP_200_OK)
+        if user_type == "HO":
+            context = User.objects.select_related('user_profile').prefetch_related("property_owner").get(id=request.user.id)
+            
+        elif user_type == "AG":
+            context = User.objects.select_related('agent_profile').prefetch_related("property_owner").get(id=request.user.id)
 
         elif user_type == "CO":
-            contractor_profile =  User.objects.select_related('contractor_profile') .prefetch_related(
+            context =  User.objects.select_related('contractor_profile').prefetch_related(
                  'property_owner').get(id=request.user.id)
-            serializer = ContractorSerializer(contractor_profile)
-            return Response(serializer.data, status=status.HTTP_200_OK)
         else:
             raise PermissionDenied("Unauthorized access")
+        
+        serializer = HomeViewUserSerializer(context)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+        
+            
 
 
 class HomeViewByPkAPIView(RetrieveAPIView):
@@ -154,15 +161,6 @@ class HomeViewByPkAPIView(RetrieveAPIView):
             # You can add similar logic for other user types
             serializer = self.get_serializer(user)
             return Response(serializer.data, status=status.HTTP_200_OK)
-
-
-class ContractorListAPIView(ListAPIView):
-    """
-    API View view all contractor profiles.
-    """
-    permission_classes = [IsAuthenticated]
-    serializer_class = ContractorSerializer
-    queryset = ContractorProfile.objects.all()
 
 
 class AssignedProjectsView(APIView):

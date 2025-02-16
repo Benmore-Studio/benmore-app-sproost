@@ -1,37 +1,31 @@
 
-from profiles.models import ContractorProfile, UserProfile, AgentProfile
-from django.db.models import Q
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiTypes
 
-
-
-from profiles.services.contractor import ContractorService
-from django.contrib.auth import get_user_model
-
-
 from rest_framework.parsers import MultiPartParser
-
-
+from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from rest_framework.generics import  ListAPIView
 
+from django.db.models import Q
+from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 
-from quotes.models import QuoteRequest, Project,Review, UserPoints, Bid,ProjectPictures 
-from .serializers import (ContractorProfileSerializer, 
-                          ProfilePictureSerializer, 
-                          HomeOwnerProfileSerializer, 
-                          AgentProfileSerializer, 
-                          ContractorSerializer,
+from profiles.models import ContractorProfile, UserProfile, AgentProfile
+from profiles.services.contractor import ContractorService
+
+from quotes.models import QuoteRequest, Project,Review, UserPoints, Bid,ProjectPictures, Property 
+from .serializers import (SimpleContractorProfileSerializer, 
+                          ProfilePictureSerializer, UserSerializer,
+                          SimpleHomeOwnerProfileSerializer, 
+                          SimpleAgentProfileSerializer, AgentSerializer,
+                          ContractorSerializer,SimplePropertySerializer,HomeOwnerSerializer,
+                          PolymorphicUserSerializer
+
                           
                         )
-from profiles.services.contractor import ContractorService
-from profiles.serializers import UserSerializer
-from drf_spectacular.utils import extend_schema, OpenApiResponse, OpenApiExample
-
 
 
 
@@ -41,67 +35,63 @@ from drf_spectacular.utils import extend_schema, OpenApiResponse, OpenApiExample
 User = get_user_model()
 
 
-def get_user_data(request):
-    user = (
-        User.objects
-        .select_related('user_profile')  
-        
-        # Prefetch the reverse/Many relationships:
-        .prefetch_related(
-           'property_owner','quote_requests','user_profile__home_owner_invited_agents',
-                'user_profile__home_owner_associated_contarctors'
-            
-            # Prefetch(
-            #     'property_owner__quote_properties',  # chain: user -> property_owner -> quote_properties
-            #     # Optional custom queryset, e.g. to filter only certain quotes:
-            #     queryset=QuoteRequest.objects.all()
-            # ),
-            
-         
-        )
-        .get(id=request.user.id)
-    )
-   
-    serializer = UserSerializer(user)
-    return serializer.data
+class GetUserListingsOrProperties(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = SimplePropertySerializer
 
-
-
-def award_points(user, points):
-    if hasattr(user, 'points'):
-        user.points.add_points(points)
-    else:
-        UserPoints.objects.create(user=user, total_points=points)
-
-
-# the vieew to route the home owner with slug
-class HomeOwnerWithSlugNameView(APIView):
-    """
-    Retrieves home owner details using slug and returns their projects and quotes.
-
-    ----------------------------
-    INPUT PARAMETERS:
-    - name: str (slug of the user)
-
-    -----------------------------
-    OUTPUT PARAMETERS:
-    Returns home owner data and associated projects and quotes.
-    """
+    def get_queryset(self):
+        return Property.objects.filter(property_owner=self.request.user)
     
-    @extend_schema(
-        responses={
-            200: OpenApiResponse(description="Homeowner data and associated projects and quotes"),
-            404: OpenApiResponse(description="Homeowner not found"),
-        }
-    )
+    
+class GetUserClientsOrAgents(ListAPIView):
+    """List of invited agents (if user is HO) or invited homeowners (if user is AG)."""
 
-    def get(self, request, name, *args, **kwargs):
-        user = get_object_or_404(User, slug=name)
-        context = home_owner_function(request, user)
-        context['name'] = name
-        return Response(context, status=status.HTTP_200_OK)
+    permission_classes = [IsAuthenticated]  
 
-
+    def get_queryset(self):
+        user = self.request.user
+        query_type = self.kwargs.get('query_type')
+        if user.user_type == 'HO':
+            if query_type == "AG":
+                print(2)
+                return (
+                    user.user_profile
+                    .home_owner_invited_agents
+                    .select_related("agent_profile")
+                    .all()
+                )
+            elif query_type == "CO":
+                return (
+                    user.user_profile
+                    .home_owner_associated_contarctors
+                    .select_related("contractor_profile")
+                    .all()
+                )
+            else:
+                raise ValidationError("Invalid query_type for the requesting user type.")
+        elif user.user_type == 'AG':
+            if query_type == "HO":
+                return (
+                    user.agent_profile
+                    .agent_invited_home_owners
+                    .select_related("user_profile")
+                    .all()
+                )
+            elif query_type == "CO":
+                return (
+                    user.agent_profile
+                    .agent_associated_contarctors
+                    .select_related("user_profile")
+                    .all()
+                )
+            else:
+                raise ValidationError("Invalid query_type for the requesting user type.")
+        else:
+            return User.objects.none()
+    def get_serializer_class(self):
+        # Always return the polymorphic serializer
+        return PolymorphicUserSerializer
+        
 
 class EditUsersProfileAPIView(APIView):
     """
@@ -151,13 +141,13 @@ class EditUsersProfileAPIView(APIView):
         # Determine the user profile and serializer based on user type
         if user.user_type == 'HO':
             user_profile = get_object_or_404(UserProfile, user=user)
-            serializer_class = HomeOwnerProfileSerializer
+            serializer_class = SimpleHomeOwnerProfileSerializer
         elif user.user_type == 'AG':
             user_profile = get_object_or_404(AgentProfile, user=user)
-            serializer_class = AgentProfileSerializer
+            serializer_class = SimpleAgentProfileSerializer
         elif user.user_type == 'CO':
             user_profile = get_object_or_404(ContractorProfile, user=user)
-            serializer_class = ContractorProfileSerializer
+            serializer_class = SimpleContractorProfileSerializer
         else:
             return Response({'error': 'User type not found for profile update.'}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -210,7 +200,7 @@ class ContractorSearchAPIView(ListAPIView):
     API View to search contractor profiles based on query.
     """
     permission_classes = [IsAuthenticated]
-    serializer_class = ContractorProfileSerializer
+    serializer_class = SimpleContractorProfileSerializer
 
     def get_queryset(self):
         query = self.request.GET.get('query', '')
@@ -369,6 +359,32 @@ class UploadPicturesView(APIView):
         return Response({"message": "Pictures uploaded successfully.", "total_pictures": total_pictures})
 
 
+class AllAgents(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = SimpleAgentProfileSerializer
+    queryset = AgentProfile.objects.all()
+
+
+class ContractorListAPIView(ListAPIView):
+    """
+    API View view all contractor profiles.
+    """
+    permission_classes = [IsAuthenticated]
+    serializer_class = ContractorSerializer
+
+    def get_queryset(self):
+        return User.objects.select_related("contractor_profile").filter(user_type="CO", contractor_profile__isnull=False)
+    
+
+def award_points(user, points):
+    if hasattr(user, 'points'):
+        user.points.add_points(points)
+    else:
+        UserPoints.objects.create(user=user, total_points=points)
+
+
+
+
 class WinBidView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -415,4 +431,31 @@ class RateContractorView(APIView):
         award_points(request.user, 1000)  # e.g., 1000 points for reviewing a contractor
 
         return Response({"message": "Review submitted successfully."})
+
+# the vieew to route the home owner with slug
+# class HomeOwnerWithSlugNameView(APIView):
+#     """
+#     Retrieves home owner details using slug and returns their projects and quotes.
+
+#     ----------------------------
+#     INPUT PARAMETERS:
+#     - name: str (slug of the user)
+
+#     -----------------------------
+#     OUTPUT PARAMETERS:
+#     Returns home owner data and associated projects and quotes.
+#     """
+    
+#     @extend_schema(
+#         responses={
+#             200: OpenApiResponse(description="Homeowner data and associated projects and quotes"),
+#             404: OpenApiResponse(description="Homeowner not found"),
+#         }
+#     )
+
+#     def get(self, request, name, *args, **kwargs):
+#         user = get_object_or_404(User, slug=name)
+#         context = home_owner_function(request, user)
+#         context['name'] = name
+#         return Response(context, status=status.HTTP_200_OK)
 

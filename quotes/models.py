@@ -33,16 +33,10 @@ GARAGE_CHOICES=(
 
 class QuoteRequestStatus(models.TextChoices):
     pending = "Pending"
-    approved = "Approved"
+    returned = "Returned"
+    accepted = "Accepted"
     rejected = "Rejected"
 
-
-    
-class Renovation(models.Model):
-    type = models.CharField(max_length=50, choices=RENOVATION_CHOICES)
-    status = models.CharField(max_length=50, choices=[('ongoing', 'Ongoing'), ('completed', 'Completed')])
-    budget = models.IntegerField()
-    timeline = models.CharField(max_length=500, null=True, blank=True)
 
 
 class Property(models.Model):
@@ -55,7 +49,6 @@ class Property(models.Model):
         related_name="assigned_contractors",
         help_text=_("Contractors assigned to this property.")
     )
-    renovation = models.OneToOneField(Renovation, on_delete=models.CASCADE, related_name='renovations', null=True, blank=True)
     address = models.CharField(max_length=255)
     half_bath = models.PositiveIntegerField(null=True, blank=True)
     full_bath = models.PositiveIntegerField(null=True, blank=True)
@@ -79,6 +72,7 @@ class Property(models.Model):
         return f"{self.property_owner} - {self.address}"
 
 
+
 class QuoteRequest(models.Model):
     user = models.ForeignKey("accounts.User", on_delete=models.CASCADE, related_name="quote_requests", help_text='the user who created the quote')
     contractors = models.ForeignKey("profiles.ContractorProfile", null=True, blank=True, on_delete=models.PROTECT, related_name="quote_contractors")
@@ -86,9 +80,12 @@ class QuoteRequest(models.Model):
     property_type = models.CharField(max_length=50, choices=RENOVATION_CHOICES)
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     title = models.CharField(max_length=255, )
+    proprosed_budget = models.IntegerField()
+    returned_budget = models.IntegerField(null=True, blank=True)
+    renovation_type = models.CharField(max_length=50, choices=RENOVATION_CHOICES, null=True, blank=True)
     summary = models.TextField(null=False, max_length=257)
     status = models.CharField(max_length=255, choices=QuoteRequestStatus.choices, default=QuoteRequestStatus.pending)
-    quote_type = models.CharField(max_length=355, choices=QUOTE_REQUEST_TYPE)
+    quote_type = models.CharField(max_length=355, choices=QUOTE_REQUEST_TYPE, default="RTS")
     contact_phone = models.CharField(max_length=20, null=False)
     upload_date = models.DateTimeField(auto_now_add=True, null=False)
     is_quote = models.BooleanField(default=True)

@@ -10,7 +10,7 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.response import Response
 from rest_framework import status, filters
 from rest_framework.views import APIView
-from rest_framework.generics import GenericAPIView, ListAPIView
+from rest_framework.generics import GenericAPIView, ListAPIView, UpdateAPIView
 from rest_framework.permissions import IsAuthenticated
 
 from profiles.models import UserProfile, AgentProfile
@@ -21,17 +21,7 @@ from .serializers import ProjectSerializer, QuoteRequestSerializer,BulkMediaSeri
 from django.db.models import Prefetch
 from django.contrib.contenttypes.models import ContentType
 from django.core.serializers import serialize
-
-
-
-
 import json
-
-class ProjectViewSet(viewsets.ModelViewSet):
-    queryset = Project.objects.all()
-    serializer_class = ProjectSerializer
-
-
 
 
 User = get_user_model()
@@ -279,7 +269,9 @@ class QuotesAPIView(GenericAPIView):
 
         # Initialize the serializer with data from the request
         if request.user.user_type == 'AG' or request.user.user_type == 'HO':
-            serializer = self.get_serializer(data=request.data) 
+            data_copy = request.data.copy()
+            data_copy['user'] = user.id
+            serializer = self.get_serializer(data=data_copy) 
             if serializer.is_valid():
                 form_data = serializer.validated_data
                 form_data['user'] = user
@@ -310,6 +302,31 @@ class QuotesAPIView(GenericAPIView):
         else:
             return Response({"errors":"User type not allowed to create quotes"}, status=status.HTTP_400_BAD_REQUEST)
 
+
+class ReturnedQuotes(ListAPIView):
+    permission_classes = [IsAuthenticated] 
+    serializer_class = QuoteRequestSerializer
+     
+    def get_queryset(self):
+        return QuoteRequest.objects.filter(user = self.request.user, status = "returned")
+
+
+class AcceptOrRejectQuotes(UpdateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = QuoteRequestSerializer
+     
+    def get_object(self):
+        quote_id = self.kwargs.get("id")
+        request_type = self.kwargs.get("request_type")
+        if request_type == "accept":
+            quote =   QuoteRequest.objects.get(id = quote_id)
+            quote.status ='accepted'
+            quote.save()
+            return Response("Quote accepted", status=status.HTTP_200_OK)
+        elif request_type == "reject":
+            quote =   QuoteRequest.objects.get(id = quote_id)
+            quote.status ='rejected'
+            quote.save()
 
 
 class PropertySearchView(ListAPIView):
