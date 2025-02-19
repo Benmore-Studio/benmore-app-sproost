@@ -30,8 +30,6 @@ from .serializers import (SimpleContractorProfileSerializer,
 
 
 
-
-
 User = get_user_model()
 
 

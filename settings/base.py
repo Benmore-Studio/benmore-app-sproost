@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'profiles',
     'admins',
     'property',
+    'chat',
     
     'address',
     'mail_templated',

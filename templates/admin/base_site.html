@@ -22,6 +22,57 @@
       </svg>
     </div>
 
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+    </svg>
+    
+
+
+    <!-- Button to open the modal -->
+  <button id="openModalBtn" class="bg-blue-500 text-white px-4 py-2 rounded">Create Group Chat</button>
+
+  <!-- Modal (hidden by default) -->
+  <div id="chatModal" class="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 hidden">
+    <div class="bg-white rounded-lg shadow-lg w-full max-w-md">
+      <!-- Modal Header -->
+      <div class="px-6 py-4 border-b border-gray-200">
+        <h3 class="text-xl font-semibold">Create Group Chat</h3>
+      </div>
+      <!-- Modal Body -->
+      <div class="px-6 py-4">
+        <!-- Room Name Input -->
+        <div class="mb-4">
+          <label for="roomName" class="block text-gray-700 text-sm font-bold mb-2">Room Name</label>
+          <input id="roomName" type="text" placeholder="Enter room name" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+        </div>
+        <!-- User Search Input -->
+        <div class="mb-4">
+          <label for="userSearch" class="block text-gray-700 text-sm font-bold mb-2">Add Users</label>
+          <input id="userSearch" type="text" placeholder="Search for users..." class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" onkeyup="liveSearchUsers()">
+        </div>
+        <!-- Search Results -->
+        <div id="searchResults" class="mb-4">
+          <!-- Live search results will appear here -->
+        </div>
+        <!-- No user found message -->
+        <div id="noUserFound" class="hidden text-red-500 text-sm">
+          Oops, user not found.
+          <button id="sendInviteBtn" class="underline text-blue-500 ml-2">Send Invite</button>
+        </div>
+        <!-- Selected Users -->
+        <div id="selectedUsers" class="mb-4">
+          <h4 class="text-gray-700 font-bold mb-2">Selected Users:</h4>
+          <!-- Selected users will be appended here -->
+        </div>
+      </div>
+      <!-- Modal Footer -->
+      <div class="px-6 py-4 border-t border-gray-200 flex justify-end">
+        <button id="closeModalBtn" class="bg-gray-500 text-white px-4 py-2 rounded mr-2">Cancel</button>
+        <button id="createRoomBtn" class="bg-blue-500 text-white px-4 py-2 rounded">Create Room</button>
+      </div>
+    </div>
+  </div>
+
 
     <!-- Dropdown panel (initially hidden) -->
     <div id="chatDropdown" class="hidden" style="position: absolute;  height: 80%; right: 0; margin-top: 8px; width: 380px; background-color: #fff; border: 1px solid #ccc; border-radius: 4px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); z-index: 50;">
@@ -96,5 +147,79 @@
           input.value = '';
         }
       }
+
+    // Modal open and close logic
+    document.getElementById('openModalBtn').addEventListener('click', () => {
+      document.getElementById('chatModal').classList.remove('hidden');
+    });
+    document.getElementById('closeModalBtn').addEventListener('click', () => {
+      document.getElementById('chatModal').classList.add('hidden');
+    });
+
+    // Live search for users
+    function liveSearchUsers(){
+      const query = document.getElementById('userSearch').value;
+      const resultsDiv = document.getElementById('searchResults');
+      const noUserDiv = document.getElementById('noUserFound');
+      
+      if (query.length < 2) {
+        resultsDiv.innerHTML = '';
+        noUserDiv.classList.add('hidden');
+        return;
+      }
+      
+      fetch(`/api/user-search/?q=${encodeURIComponent(query)}`)
+        .then(response => response.json())
+        .then(data => {
+          resultsDiv.innerHTML = '';
+          if (data.users && data.users.length > 0) {
+            noUserDiv.classList.add('hidden');
+            data.users.forEach(user => {
+              const userDiv = document.createElement('div');
+              userDiv.className = 'flex items-center justify-between border-b border-gray-200 py-2';
+              userDiv.innerHTML = `
+                <span>${user.username} (${user.email})</span>
+                <button onclick="addUserToRoom('${user.id}', '${user.username}')" class="text-blue-500 hover:text-blue-700">Add</button>
+              `;
+              resultsDiv.appendChild(userDiv);
+            });
+          } else {
+            resultsDiv.innerHTML = '';
+            noUserDiv.classList.remove('hidden');
+          }
+        })
+        .catch(error => {
+          console.error('Error searching users:', error);
+        });
+    }
+
+    // Keep track of selected user IDs
+    let addedUserIds = [];
+
+    // Add user to selected list
+    function addUserToRoom(userId, username) {
+      if (addedUserIds.includes(userId)) return;
+      addedUserIds.push(userId);
+      
+      const selectedUsersDiv = document.getElementById('selectedUsers');
+      const userEntry = document.createElement('div');
+      userEntry.className = 'flex items-center justify-between p-2 bg-gray-100 rounded mt-2';
+      userEntry.innerHTML = `
+        <span>${username}</span>
+        <button onclick="removeUserFromRoom('${userId}', this)" class="text-red-500 hover:text-red-700">Remove</button>
+      `;
+      selectedUsersDiv.appendChild(userEntry);
+      
+      // Optionally, clear search results and input
+      document.getElementById('searchResults').innerHTML = '';
+      document.getElementById('userSearch').value = '';
+    }
+
+    // Remove a user from selected list
+    function removeUserFromRoom(userId, btn) {
+      addedUserIds = addedUserIds.filter(id => id !== userId);
+      btn.parentElement.remove();
+    }
+
     </script>
 {% endblock footer %}
