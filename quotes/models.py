@@ -43,6 +43,7 @@ class Property(models.Model):
     tittle = models.CharField(max_length=255)
     property_owner = models.ForeignKey("accounts.User", on_delete=models.CASCADE, related_name='property_owner')
     home_owner_agents = models.ManyToManyField("accounts.User", blank=True, related_name='home_owner_agents')
+    has_quotes = models.BooleanField(default=False)
     contractors = models.ManyToManyField(
         "accounts.User",
         blank=True,

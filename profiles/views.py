@@ -42,48 +42,48 @@ class GetUserListingsOrProperties(ListAPIView):
 
     
 
-
-@extend_schema_view(
-    list=extend_schema(
-        summary="Get User Clients or Agents",
-        description="""
-Retrieves a list based on the authenticated user’s type:
-
-- **Home Owners (HO):**
-  - `query_type=AG`: Returns invited agents.
-  - `query_type=CO`: Returns associated contractors.
-
-- **Agents (AG):**
-  - `query_type=HO`: Returns invited homeowners.
-  - `query_type=CO`: Returns associated contractors.
-
-Provide the appropriate `query_type` in the URL. If an invalid value is supplied for the user type, a validation error is raised.
-""",
-        parameters=[
-            OpenApiParameter(
-                name="query_type",
-                type=OpenApiTypes.STR,
-                required=True,
-                description="Allowed values: 'AG', 'HO', or 'CO'."
-            )
-        ],
-        responses={
-            200: OpenApiTypes.OBJECT,
-            400: OpenApiTypes.OBJECT,
-        },
-    )
-)   
 class GetUserClientsOrAgents(ListAPIView):
-    """List of invited agents (if user is HO) or invited homeowners (if user is AG).
-      The query types are different users-(AG,CO and HO). if you are trying to see the
-      agents associated to house owners, query type = AG,  if you are trying to see the
-      house owners associated to agents, query type = HO,  if you are trying to see the
-      contractors associated to house owners, query type = CO and vice versa
-      """
+    """
+    List of invited agents (if user is HO) or invited homeowners (if user is AG). 
+    The query types are different users-(AG,CO and HO). 
+    if you are trying to see the agents associated to house owners, query type = AG, 
+    if you are trying to see the house owners associated to agents, query type = HO, 
+    if you are trying to see the contractors associated to house owners, query type = CO and vice versa
+      
+    """
 
     permission_classes = [IsAuthenticated] 
 
+    @extend_schema(
+    summary="Get User Clients or Agents",
+    description="""
+        **List of invited agents (if user is HO) or invited homeowners (if user is AG).**
 
+        - **Home Owners (HO):**
+        - `query_type=AG` → Returns invited agents
+        - `query_type=CO` → Returns associated contractors
+
+        - **Agents (AG):**
+        - `query_type=HO` → Returns invited homeowners
+        - `query_type=CO` → Returns associated contractors
+
+        Provide the appropriate `query_type` in the **URL** (or query param). 
+        If an invalid value is supplied for the user type, a validation error is raised.
+        """,
+    parameters=[
+        OpenApiParameter(
+            name="query_type",
+            type=OpenApiTypes.STR,
+            location=OpenApiParameter.PATH,  # or QUERY if you're using ?query_type=...
+            required=True,
+            description="Allowed values: 'AG', 'HO', or 'CO'."
+        )
+    ],
+    responses={
+        200: OpenApiTypes.OBJECT,
+        400: OpenApiTypes.OBJECT,
+    },
+)
     def get_queryset(self):
         user = self.request.user
         query_type = self.kwargs.get('query_type')
@@ -156,13 +156,18 @@ class EditUsersProfileAPIView(APIView):
         - Agents → `AgentProfile`
         - Contractors → `ContractorProfile`
         """,
-        parameters=[
-            OpenApiParameter(name="phone_number", type=OpenApiTypes.STR, required=False, description="User's phone number."),
-            OpenApiParameter(name="email", type=OpenApiTypes.STR, required=False, description="User's email address."),
-            OpenApiParameter(name="first_name", type=OpenApiTypes.STR, required=False, description="User's first name."),
-            OpenApiParameter(name="last_name", type=OpenApiTypes.STR, required=False, description="User's last name."),
-            OpenApiParameter(name="image", type=OpenApiTypes.STR, required=False, description="User's profile picture."),
-        ],
+        request={
+        "application/json": {
+            "type": "object",
+            "properties": {
+                "phone_number": {"type": "string", "description": "User's phone number"},
+                "email": {"type": "string", "description": "User's email address"},
+                "first_name": {"type": "string", "description": "User's first name"},
+                "last_name": {"type": "string", "description": "User's last name"},
+                "image": {"type": "string", "format": "binary", "description": "User's profile picture"},
+            }
+        }
+        },
     
         responses={
             200: OpenApiTypes.OBJECT,

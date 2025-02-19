@@ -303,6 +303,9 @@ class QuotesAPIView(GenericAPIView):
                 result, error = quote_service.create(form_data, user_profile, model_passed=QuoteRequest)
 
                 if result:
+                    user_property = Property.objects.get(id = data_copy['property'])
+                    user_property.has_quotes = True
+                    user_property.save()
                     return Response({'message': 'Quote request created successfully',
                                     #  "result":json.loads(result),
                                     }, status=status.HTTP_201_CREATED)
