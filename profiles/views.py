@@ -38,8 +38,10 @@ class GetUserListingsOrProperties(ListAPIView):
     serializer_class = SimplePropertySerializer
 
     def get_queryset(self):
-        return Property.objects.filter(property_owner=self.request.user)
+        return Property.objects.filter(property_owner=self.request.user).prefetch_related('media_paths')
+
     
+
 
 @extend_schema_view(
     list=extend_schema(

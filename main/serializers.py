@@ -126,3 +126,17 @@ class BulkMediaSerializer(serializers.Serializer):
         return new_media_objects
 
 
+
+class MediaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Media
+        fields = [
+            'id',
+            'file_url',
+            'public_id',
+            'media_type',
+            'image',
+            'file',
+            'video',
+            'upload_date',
+        ]
