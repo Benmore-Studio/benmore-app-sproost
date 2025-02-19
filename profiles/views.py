@@ -16,7 +16,7 @@ from django.shortcuts import get_object_or_404
 from profiles.models import ContractorProfile, UserProfile, AgentProfile
 from profiles.services.contractor import ContractorService
 
-from quotes.models import QuoteRequest, Project,Review, UserPoints, Bid,ProjectPictures, Property 
+from quotes.models import QuoteRequest, Review, UserPoints, Bid,ProjectPictures, Property 
 from .serializers import (SimpleContractorProfileSerializer, 
                           ProfilePictureSerializer, UserSerializer,
                           SimpleHomeOwnerProfileSerializer, 
@@ -304,7 +304,6 @@ class ChangeProfilePictureAPIView(APIView):
         else:
             # Handle errors
             self.stdout.write('ff')
-            print("ff")
             image_errors = form.errors.get('image', [])
             for error in image_errors:
                 if error == 'This field is required':
