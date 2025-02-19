@@ -157,9 +157,21 @@ class PropertyAPIView(GenericAPIView):
                     "videos": request.FILES.getlist('videos', []),
                 }
                 media_serializer = BulkMediaSerializer(data=bulk_media_data)
-                if media_serializer.is_valid():
-                    media_serializer.save() 
-            return Response({'message': 'request successfull', "property":serializer.data}, status=status.HTTP_201_CREATED)
+                media_serializer.is_valid(raise_exception=True)
+
+                # Instead of `media_serializer.save()`:
+                created_media_objs = media_serializer.create(
+                    media_serializer.validated_data
+                )
+
+            return Response({'message': 'request successfull', "property":serializer.data, "media": [
+                        {
+                            "id": m.id,
+                            "media_type": m.media_type,
+                            "file_url": m.file_url,
+                        }
+                        for m in created_media_objs
+                    ],}, status=status.HTTP_201_CREATED)
             
         else:
             print(serializer.errors)

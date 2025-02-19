@@ -271,9 +271,9 @@ GOOGLE_API_KEY = "AIzaSyBIMv62jBi-MjrYXsARUfy8S5xZwKqeGqc"
 CSRF_TRUSTED_ORIGINS = ['https://fdb9-105-113-33-126.ngrok-free.app']
 
 CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': 'dnggljofw',
-    'API_KEY': '586111527832668',
-    'API_SECRET': 'WmY1BwTV7RHirzWinywslKg3tXU'
+    'CLOUD_NAME': config("CLOUD_NAME"),
+    'API_KEY': config("API_KEY"),
+    'API_SECRET': config("API_SECRET")
 }
 
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'

@@ -10,7 +10,7 @@ from rest_framework.exceptions import APIException
 class SimpleUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = '__all__'
+        fields = ['id', 'email', 'first_name','phone_number','user_type', 'last_name', 'agent_profile', 'date_joined'] 
 
 
 class SimpleContractorProfileSerializer(serializers.ModelSerializer):
@@ -43,6 +43,21 @@ class PropertySerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class ContractorUserSerializer(serializers.ModelSerializer):
+    contractor_profile = SimpleContractorProfileSerializer(read_only=True)
+    property_owner = PropertySerializer(many=True, read_only=True)
+
+    class Meta:
+        model = User
+        fields = [
+            'id',
+            'username',
+            'email',
+            'contractor_profile',
+            'property_owner',
+        ]
+
+
 class ContractorSerializer(serializers.ModelSerializer):
     contractor_profile = SimpleContractorProfileSerializer(read_only=True)
     property_owner = PropertySerializer(many=True, read_only=True)
@@ -69,6 +84,16 @@ class HomeOwnerSerializer(serializers.ModelSerializer):
         fields = ['id', 'email', 'first_name','phone_number','user_type', 'last_name', 'user_profile'] 
 
 
+
+class AgentUserSerializer(serializers.ModelSerializer):
+    """
+    Serializer for User model, with nested AgentProfileSerializer.
+    """
+    user = SimpleUserSerializer()
+
+    class Meta:
+        model = AgentProfile
+        fields = [ 'user', 'agent_address','registration_ID','image', 'country'] 
 
 class AgentSerializer(serializers.ModelSerializer):
     """

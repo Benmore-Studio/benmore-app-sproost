@@ -22,12 +22,10 @@ from .serializers import (SimpleContractorProfileSerializer,
                           SimpleHomeOwnerProfileSerializer, 
                           SimpleAgentProfileSerializer, AgentSerializer,
                           ContractorSerializer,SimplePropertySerializer,HomeOwnerSerializer,
-                          PolymorphicUserSerializer
+                          PolymorphicUserSerializer, AgentUserSerializer
 
                           
                         )
-
-
 
 
 
@@ -44,16 +42,48 @@ class GetUserListingsOrProperties(ListAPIView):
     
     
 class GetUserClientsOrAgents(ListAPIView):
-    """List of invited agents (if user is HO) or invited homeowners (if user is AG)."""
+    """List of invited agents (if user is HO) or invited homeowners (if user is AG).
+      The query types are different users-(AG,CO and HO). if you are trying to see the
+      agents associated to house owners, query type = AG,  if you are trying to see the
+      house owners associated to agents, query type = HO,  if you are trying to see the
+      contractors associated to house owners, query type = CO and vice versa
+      """
 
-    permission_classes = [IsAuthenticated]  
+    permission_classes = [IsAuthenticated] 
+
+    @extend_schema(
+        summary="Get User Clients or Agents",
+        description="""
+        Retrieves a list based on the authenticated user’s type:
+
+        - **Home Owners (HO):**
+        - `query_type` **AG**: Returns invited agents.
+        - `query_type` **CO**: Returns associated contractors.
+        - **Agents (AG):**
+        - `query_type` **HO**: Returns invited homeowners.
+        - `query_type` **CO**: Returns associated contractors.
+
+        Provide the appropriate `query_type` in the URL. If an invalid value is supplied for the user type, a validation error is raised.
+        """,
+        parameters=[
+            OpenApiParameter(
+                name="query_type",
+                type=OpenApiTypes.STR,
+                required=True,
+                description="Query type. Allowed values: 'AG', 'HO', or 'CO'."
+            )
+        ],
+        responses={
+            200: OpenApiTypes.OBJECT,
+            400: OpenApiTypes.OBJECT,
+        },
+    ) 
 
     def get_queryset(self):
         user = self.request.user
         query_type = self.kwargs.get('query_type')
         if user.user_type == 'HO':
             if query_type == "AG":
-                print(2)
                 return (
                     user.user_profile
                     .home_owner_invited_agents
@@ -134,6 +164,7 @@ class EditUsersProfileAPIView(APIView):
             400: OpenApiTypes.OBJECT,
         },
     )
+
 
     def patch(self, request):
         user = request.user
@@ -361,7 +392,7 @@ class UploadPicturesView(APIView):
 
 class AllAgents(ListAPIView):
     permission_classes = [IsAuthenticated]
-    serializer_class = SimpleAgentProfileSerializer
+    serializer_class = AgentUserSerializer
     queryset = AgentProfile.objects.all()
 
 

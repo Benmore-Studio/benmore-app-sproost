@@ -4,6 +4,8 @@ from quotes.models import QuoteRequest, QuoteRequestStatus, Property
 from main.models import Media
 from django.contrib.contenttypes.models import ContentType
 from accounts.models import User
+import cloudinary.uploader
+
 
  
 
@@ -235,6 +237,7 @@ class BulkMediaSerializer(serializers.Serializer):
             err = validate_file(f, "file")
             if err:
                 errors.setdefault("files", []).append(err)
+                
 
         # Validate images
         for img in attrs.get("images", []):
@@ -254,6 +257,19 @@ class BulkMediaSerializer(serializers.Serializer):
 
         return attrs
 
+    def upload_to_cloudinary(self, file_obj, media_type):
+        """
+        Upload file_obj to Cloudinary and return (secure_url, public_id).
+        Use resource_type='auto' so Cloudinary auto-detects (image/video/etc.).
+        """
+        result = cloudinary.uploader.upload(
+            file_obj,
+            resource_type="auto",  # or 'image'/'video' if you want to be strict
+            folder="your_folder_name"  # optional folder structure
+        )
+        return result["secure_url"], result["public_id"]
+
+  
     def create(self, validated_data):
         """
         Bulk-create all Media objects after validation passes.
@@ -269,26 +285,47 @@ class BulkMediaSerializer(serializers.Serializer):
         
         new_media_objects = []
 
-        # Prepare file-based media
+            # Handle "files"
         for f in validated_data.get("files", []):
-            new_media_objects.append(
-                Media(content_type=ct, object_id=object_id, media_type="File", file=f)
-            )
+            secure_url, public_id = self.upload_to_cloudinary(f, "File")
+            new_media_objects.append(Media(
+                content_type=ct,
+                object_id=object_id,
+                media_type="File",
+                file_url=secure_url,
+                public_id=public_id
+            ))
 
+        # Handle "images"
         for img in validated_data.get("images", []):
-            new_media_objects.append(
-                Media(content_type=ct, object_id=object_id, media_type="Image", image=img)
-            )
+            secure_url, public_id = self.upload_to_cloudinary(img, "Image")
+            new_media_objects.append(Media(
+                content_type=ct,
+                object_id=object_id,
+                media_type="Image",
+                file_url=secure_url,
+                public_id=public_id
+            ))
 
+        # Handle "videos"
         for vid in validated_data.get("videos", []):
-            new_media_objects.append(
-                Media(content_type=ct, object_id=object_id, media_type="Video", video=vid)
-            )
+            secure_url, public_id = self.upload_to_cloudinary(vid, "Video")
+            new_media_objects.append(Media(
+                content_type=ct,
+                object_id=object_id,
+                media_type="Video",
+                file_url=secure_url,
+                public_id=public_id
+            ))
 
-        # Now do a single bulk_create
-        Media.objects.bulk_create(new_media_objects)
+            # Now do a single bulk_create
+        if new_media_objects:
+            Media.objects.bulk_create(new_media_objects)
 
         # Return the list of created objects
         return new_media_objects
 
+        # Helper to upload to Cloudinary
+    
 
+    

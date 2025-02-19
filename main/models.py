@@ -18,11 +18,14 @@ class MediaTypes(models.TextChoices):
     FILE = "File", _("File")
     VIDEO = "Video", _("Video")
 
+   
+    
 class Media(models.Model):
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, related_name="media")
     object_id = models.PositiveIntegerField()
     content_object = GenericForeignKey()
-
+    file_url = models.URLField(max_length=1024, blank=True, null=True)
+    public_id = models.CharField(max_length=255, blank=True, null=True)
     media_type = models.CharField(max_length=10, choices=MediaTypes.choices, default=MediaTypes.IMAGE)
     image = models.ImageField(upload_to=image_upload_location, null=True, blank=True)
     file = models.FileField(upload_to=file_upload_location, null=True, blank=True, storage=RawMediaCloudinaryStorage())
@@ -31,3 +34,5 @@ class Media(models.Model):
 
     def __str__(self):
         return f"{self.content_object} - Media"
+
+
