@@ -10,7 +10,7 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.response import Response
 from rest_framework import status, filters
 from rest_framework.views import APIView
-from rest_framework.generics import GenericAPIView, ListAPIView, UpdateAPIView
+from rest_framework.generics import GenericAPIView, ListAPIView, UpdateAPIView, RetrieveAPIView 
 from rest_framework.permissions import IsAuthenticated
 
 from profiles.models import UserProfile, AgentProfile
@@ -316,6 +316,18 @@ class QuotesAPIView(GenericAPIView):
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         else:
             return Response({"errors":"User type not allowed to create quotes"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ViewIndividualQuote(RetrieveAPIView ):
+    """
+    Returns all QuoteRequest objects linked to a given Property (by ID).
+    """
+    serializer_class = QuoteRequestSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        property_id = self.kwargs.get("property_id")
+        return QuoteRequest.objects.filter(property_id=property_id)
 
 
 class ReturnedQuotes(ListAPIView):

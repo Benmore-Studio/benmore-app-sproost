@@ -73,7 +73,6 @@ class Property(models.Model):
         return f"{self.property_owner} - {self.address}"
 
 
-
 class QuoteRequest(models.Model):
     user = models.ForeignKey("accounts.User", on_delete=models.CASCADE, related_name="quote_requests", help_text='the user who created the quote')
     contractors = models.ForeignKey("profiles.ContractorProfile", null=True, blank=True, on_delete=models.PROTECT, related_name="quote_contractors")
