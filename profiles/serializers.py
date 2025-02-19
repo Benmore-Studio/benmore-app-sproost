@@ -1,9 +1,9 @@
 from rest_framework import serializers
 from .models import ContractorProfile, UserProfile, AgentProfile
-from quotes.models import Property
 from main.serializers import MediaSerializer
 from accounts.models import User
 from quotes.serializers import  QuoteRequestAllSerializer
+from quotes.models import Property, QuoteRequest
 from rest_framework.exceptions import APIException
 
 
@@ -189,7 +189,12 @@ class HomeViewUserSerializer(serializers.ModelSerializer):
         # Default case (maybe None or an empty dict)
         return None
 
+class QuotePropertySerializer(serializers.ModelSerializer):
+    property = SimplePropertySerializer(read_only=True)
 
+    class Meta:
+        model = QuoteRequest
+        fields =  fields = ['id', 'property']
 
 class PolymorphicUserSerializer(serializers.Serializer):
     """

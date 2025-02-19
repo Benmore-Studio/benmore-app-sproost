@@ -14,7 +14,7 @@ from rest_framework.generics import GenericAPIView, ListAPIView, UpdateAPIView, 
 from rest_framework.permissions import IsAuthenticated
 
 from profiles.models import UserProfile, AgentProfile
-from profiles.serializers import PropertySerializer
+from profiles.serializers import PropertySerializer, QuotePropertySerializer
 from .models import Project, Property, QuoteRequest
 from .serializers import ProjectSerializer, QuoteRequestSerializer,BulkMediaSerializer, MediaSerializer
 
@@ -22,6 +22,8 @@ from django.db.models import Prefetch
 from django.contrib.contenttypes.models import ContentType
 from django.core.serializers import serialize
 import json
+from django.core.exceptions import ValidationError
+
 
 
 User = get_user_model()
@@ -193,31 +195,26 @@ class QuotesAPIView(GenericAPIView):
     - GET: Returns initial data for the quote request.
     - POST: Returns success or error messages upon submission.
     """
-    serializer_class = QuoteRequestSerializer
     parser_classes = [MultiPartParser, FormParser]
     permission_classes = [IsAuthenticated] 
-    # user_profile = UserProfile.objects.get(user= payload["user"])
 
     def get_user(self, user):
-        return User.objects.prefetch_related(Prefetch('quote_requests', queryset=QuoteRequest.objects.all())).get(id=user.id)
+        return User.objects.prefetch_related('quote_requests').get(id=user.id)
 
     def get_initial_data(self, user):
         """
         Get initial data for the form based on the user type (HO or AG).
         """
         home_owner_quotes = self.get_user(user)
-        quotes_data = json.loads(serialize('json', home_owner_quotes.quote_requests.all()))
-        if user.user_type == 'HO':
-            return {
-                'contact_phone': str(user.phone_number),
-                'custom_home_owner_id': user.pk,
-                'created_by_agent': user.pk,
-                "quotes": quotes_data
-            }
-        elif user.user_type == 'AG':
-            return {
-                'contact_phone': user.phone_number,
-            }
+        tt = home_owner_quotes.quote_requests.all()
+        print(home_owner_quotes)
+        print("home_owner_quotes")
+        print(tt)
+        # print(tt.property)
+        serializer = QuotePropertySerializer(tt, many = True)
+
+        if user.user_type == 'HO' or user.user_type == 'AG':
+            return serializer.data
         return {}
 
 
@@ -240,6 +237,7 @@ class QuotesAPIView(GenericAPIView):
             return Response(initial_data, status=status.HTTP_200_OK)
         else:
             return Response({"errors":"User type has no quotes"}, status=status.HTTP_400_BAD_REQUEST)
+
 
     @extend_schema(
         summary="Submit a Quote Request",
@@ -318,18 +316,20 @@ class QuotesAPIView(GenericAPIView):
             return Response({"errors":"User type not allowed to create quotes"}, status=status.HTTP_400_BAD_REQUEST)
 
 
-class ViewIndividualQuote(RetrieveAPIView ):
+class ListQuotesForPropertyView(ListAPIView):
     """
-    Returns all QuoteRequest objects linked to a given Property (by ID).
+    Returns all QuoteRequest objects linked to a given Property.
     """
     serializer_class = QuoteRequestSerializer
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         property_id = self.kwargs.get("property_id")
+        if property_id is None:
+            raise ValidationError("Property ID is required.")
         return QuoteRequest.objects.filter(property_id=property_id)
-
-
+    
+    
 class ReturnedQuotes(ListAPIView):
     permission_classes = [IsAuthenticated] 
     serializer_class = QuoteRequestSerializer

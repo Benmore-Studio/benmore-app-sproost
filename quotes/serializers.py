@@ -49,8 +49,6 @@ class QuoteRequestAllSerializer(serializers.ModelSerializer):
 
 
 
-
-
 class QuoteRequestSerializer(serializers.ModelSerializer):
     """
     Serializer for Quote Requests, handling media file uploads as well.
@@ -89,8 +87,7 @@ class QuoteRequestSerializer(serializers.ModelSerializer):
         return quote_request
 
 
-class QuoteStatusSerializer(serializers.Serializer):
-    status = serializers.ChoiceField(choices=QuoteRequestStatus.choices, required=True)
+
 
 
 class MediaSerializer(serializers.ModelSerializer):

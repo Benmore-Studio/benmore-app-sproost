@@ -9,7 +9,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from django.db.models import Count, Case, When
-from quotes.serializers import QuoteRequestAllSerializer,ProjectSerializer, QuoteStatusSerializer
+from quotes.serializers import QuoteRequestAllSerializer,ProjectSerializer
 from quotes.models import Project, QuoteRequest, QuoteRequestStatus
 from rest_framework.generics import GenericAPIView, ListAPIView, UpdateAPIView, RetrieveUpdateAPIView
 from profiles.serializers import ContractorSerializer, HomeOwnerSerializer, AgentSerializer
@@ -240,40 +240,40 @@ class ActiveProjectListAPIView(ListAPIView):
         return queryset
     
 
-class ChangeQuoteStatusAPIView(UpdateAPIView):
-    """
-    API View to change the status of a quote.
-    """
-    permission_classes = [IsAuthenticated]
-    serializer_class = QuoteStatusSerializer 
-    permission_classes = [IsAuthenticated]
+# class ChangeQuoteStatusAPIView(UpdateAPIView):
+#     """
+#     API View to change the status of a quote.
+#     """
+#     permission_classes = [IsAuthenticated]
+#     serializer_class = QuoteStatusSerializer 
+#     permission_classes = [IsAuthenticated]
 
-    def get_object(self):
-        try:
-            return QuoteRequest.objects.get(pk=self.kwargs.get('pk'))
-        except QuoteRequest.DoesNotExist:
-            raise Http404("Quote not found")
+#     def get_object(self):
+#         try:
+#             return QuoteRequest.objects.get(pk=self.kwargs.get('pk'))
+#         except QuoteRequest.DoesNotExist:
+#             raise Http404("Quote not found")
 
-    def update(self, request, *args, **kwargs):
-        quote = self.get_object()
-        serializer = self.get_serializer(data=request.data)
-        if serializer.is_valid():
-            state = serializer.validated_data.get('status')
-            if str(state).lower() == "approved":
-                Project.objects.get_or_create(
-                    admin=request.user,
-                    quote_request=quote,
-                    is_approved=True
-                )
-            else:
-                project = Project.objects.filter(quote_request=quote, is_approved=True).first()
-                if project:
-                    project.delete()
+#     def update(self, request, *args, **kwargs):
+#         quote = self.get_object()
+#         serializer = self.get_serializer(data=request.data)
+#         if serializer.is_valid():
+#             state = serializer.validated_data.get('status')
+#             if str(state).lower() == "approved":
+#                 Project.objects.get_or_create(
+#                     admin=request.user,
+#                     quote_request=quote,
+#                     is_approved=True
+#                 )
+#             else:
+#                 project = Project.objects.filter(quote_request=quote, is_approved=True).first()
+#                 if project:
+#                     project.delete()
                     
-            quote.status = state
-            quote.save()
-            return Response({'message': 'Quote status updated'}, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+#             quote.status = state
+#             quote.save()
+#             return Response({'message': 'Quote status updated'}, status=status.HTTP_200_OK)
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class UpdateContractorAPIView(RetrieveUpdateAPIView):

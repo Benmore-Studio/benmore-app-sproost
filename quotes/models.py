@@ -44,6 +44,7 @@ class Property(models.Model):
     property_owner = models.ForeignKey("accounts.User", on_delete=models.CASCADE, related_name='property_owner')
     home_owner_agents = models.ManyToManyField("accounts.User", blank=True, related_name='home_owner_agents')
     has_quotes = models.BooleanField(default=False)
+    estimated_budget = models.IntegerField(null=True, blank=True)
     contractors = models.ManyToManyField(
         "accounts.User",
         blank=True,
@@ -80,6 +81,9 @@ class QuoteRequest(models.Model):
     property_type = models.CharField(max_length=50, choices=RENOVATION_CHOICES)
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     title = models.CharField(max_length=255, )
+    sproosts_ARV = models.IntegerField(null=True, blank=True)
+    estimated_timeline = models.IntegerField(null=True, blank=True)
+    ROI = models.IntegerField(null=True, blank=True)
     proposed_returned_budget = models.IntegerField(null=True, blank=True)
     renovation_type = models.CharField(max_length=50, choices=RENOVATION_CHOICES, null=True, blank=True)
     summary = models.TextField(null=False, max_length=257)
