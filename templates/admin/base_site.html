@@ -1,0 +1,100 @@
+{% extends "admin/base.html" %}
+
+{% block extrahead %}
+    {{ block.super }}
+    <!-- Tailwind CSS via CDN (for demo) -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/tailwindcss@3.2.7/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
+{% endblock extrahead %}
+
+{% block userlinks %}
+    {{ block.super }}
+    <!-- Insert our chat icon + dropdown in the user links bar -->
+    <div id="chat-icon" onclick="toggleChatDropdown()" style="width: 16px; height: 16px; 
+    background-color:royalblue; position:relative; border-radius: 100%; padding: 8px; cursor: pointer;
+    ">
+      <!-- Simple chat icon (SVG) -->
+      <div id="message-number" style="color: white; position: absolute; top: -3px; right: -2px;">0</div>
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-3 ">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 8.511c.884.284 1.5 1.128 1.5 2.097v4.286c0 1.136-.847 2.1-1.98 2.193-.34.027-.68.052-1.02.072v3.091l-3-3c-1.354 0-2.694-.055-4.02-.163a2.115 2.115 0 0 1-.825-.242m9.345-8.334a2.126 2.126 0 0 0-.476-.095 48.64 48.64 0 0 0-8.048 0c-1.131.094-1.976 1.057-1.976 2.192v4.286c0 .837.46 1.58 1.155 1.951m9.345-8.334V6.637c0-1.621-1.152-3.026-2.76-3.235A48.455 48.455 0 0 0 11.25 3c-2.115 0-4.198.137-6.24.402-1.608.209-2.76 1.614-2.76 3.235v6.226c0 1.621 1.152 3.026 2.76 3.235.577.075 1.157.14 1.74.194V21l4.155-4.155" />
+      </svg>
+    </div>
+
+
+    <!-- Dropdown panel (initially hidden) -->
+    <div id="chatDropdown" class="hidden" style="position: absolute;  height: 80%; right: 0; margin-top: 8px; width: 380px; background-color: #fff; border: 1px solid #ccc; border-radius: 4px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); z-index: 50;">
+      <div style="display: flex; flex-direction: column; height: 288px;">
+        <!-- header -->
+        <!-- Message area -->
+        <div id="chatMessages" style="flex: 1; overflow-y: auto; padding: 12px;">
+          <!-- Incoming messages will appear here -->
+        </div>
+      </div>
+    </div>
+    
+{% endblock userlinks %}
+
+{% block content %}
+    {{ block.super }}
+    <!-- The main admin content remains as is. -->
+{% endblock content %}
+
+{% block footer %}
+    {{ block.super }}
+    <!-- Basic WebSocket chat logic + dropdown toggle -->
+    <script>
+      
+      let header = document.querySelector("#header")
+      let chatMessages = document.querySelector("#chatMessages")
+      let userTools = document.querySelector("#user-tools")
+      let chatIcon = document.querySelector("#chat-icon")
+      console.log("usertools",header);
+      header.prepend(chatIcon)
+      userTools.append(chatMessages)
+      // userTools.style.cssText = 'lign-items:center; justify-items:center;'
+      function toggleChatDropdown() {
+        const dropdown = document.getElementById('chatDropdown');
+        dropdown.classList.toggle('hidden');
+      }
+
+      // WebSocket setup
+      const wsScheme = window.location.protocol === "https:" ? "wss" : "ws";
+      
+      
+      const roomId = "room_ab"
+      const chatSocket = new WebSocket(
+          wsScheme + '://' + window.location.host + '/ws/chat/' + roomId + '/'
+      );
+
+      chatSocket.onopen = () => {
+        console.log("WebSocket connection established");
+      };
+
+      chatSocket.onmessage = (e) => {
+        const data = JSON.parse(e.data);
+        const chatMessages = document.getElementById('chatMessages');
+        // Create a message div
+        const msgDiv = document.createElement('div');
+        msgDiv.textContent = data.message;
+        msgDiv.className = "bg-gray-100 p-2 rounded mb-2";
+        chatMessages.appendChild(msgDiv);
+        // Auto-scroll to the bottom
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      };
+
+      chatSocket.onclose = () => {
+        console.log("WebSocket connection closed");
+      };
+
+      function sendMessage() {
+        const input = document.getElementById('chatInput');
+        const message = input.value.trim();
+        if (message) {
+          chatSocket.send(JSON.stringify({ message }));
+          input.value = '';
+        }
+      }
+    </script>
+{% endblock footer %}

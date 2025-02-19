@@ -34,6 +34,7 @@ SECRET_KEY = config("SECRET_KEY")
 # Application definition
 
 INSTALLED_APPS = [
+    "daphne",
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -109,7 +110,11 @@ TEMPLATES = [
     },
 ]
 
+
 WSGI_APPLICATION = 'SproostApp.wsgi.application'
+
+ASGI_APPLICATION = 'SproostApp.asgi.application'
+
 
 DATABASES = {
     'default': {
