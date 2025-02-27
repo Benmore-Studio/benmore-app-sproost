@@ -99,7 +99,7 @@ class UserPropertyListView(generics.ListAPIView):
             # For contractors, combine properties they own and those assigned to their contractor profile.
             qs = Property.objects.filter(property_owner=user)
             try:
-                contractor_profile = user.contractorprofile  # Adjust attribute name if needed.
+                contractor_profile = user.contractor_profile  # Adjust attribute name if needed.
                 qs = qs | Property.objects.filter(contractors=contractor_profile)
             except Exception:
                 pass
