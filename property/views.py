@@ -1,20 +1,21 @@
 from quotes.models import Project, QuoteRequest
 from django.contrib.auth import get_user_model
 from .models import AssignedAccount
-
-
-from rest_framework.generics import RetrieveAPIView
+from quotes.models import Property
+from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.exceptions import NotFound, PermissionDenied
 from property.models import AssignedAccount
 from profiles.serializers import HomeOwnerSerializer 
+from .serializers import ( PropertyCreateSerializer,PropertyUpdateSerializer, PropertyRetrieveSerializer)
+from rest_framework.parsers import MultiPartParser, FormParser
 
 
 User = get_user_model()
 
 
-class AgentsHomeOwnerAccountAPIView(RetrieveAPIView):
+class AgentsHomeOwnerAccountAPIView(generics.RetrieveAPIView):
     """
     API View to handle retrieving a home owner's details for agents who were assigned to them.
 
@@ -61,11 +62,57 @@ class AgentsHomeOwnerAccountAPIView(RetrieveAPIView):
             raise NotFound("Home Owner not found.")
 
         
-# class ViewAllPropertyAPIView(ListAPIView):
-#     """
-#     API View to retrieve all properties.
-#     """
-#     queryset = Property.objects.all()
-#     serializer_class = PropertySerializer
-#     permission_classes = [IsAuthenticated ]
+class PropertyCreateView(generics.CreateAPIView):
+    queryset = Property.objects.all()
+    serializer_class = PropertyCreateSerializer
+    permission_classes = [IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser]
+
+
+
+   
     
+class PropertyRetrieveView(generics.RetrieveAPIView):
+    queryset = Property.objects.all()
+    permission_classes = [IsAuthenticated]
+    serializer_class = PropertyRetrieveSerializer
+
+class PropertyUpdateView(generics.UpdateAPIView):
+    queryset = Property.objects.all()
+    permission_classes = [IsAuthenticated]
+    serializer_class = PropertyUpdateSerializer
+
+
+
+
+class ContractorAllPropertiesView(generics.ListAPIView):
+    serializer_class = PropertyRetrieveSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        # Query for properties owned by the user.
+        qs = Property.objects.filter(property_owner=user)
+        # If the user has a contractor profile, include properties assigned to that profile.
+        try:
+            contractor_profile = user.contractor_profile
+            qs = qs | Property.objects.filter(contractors=contractor_profile)
+        except Exception:
+            # No contractor profile; do nothing extra.
+            pass
+
+        return qs.distinct()
+    
+    
+class PropertyDeleteView(generics.DestroyAPIView):
+    queryset = Property.objects.all()
+    serializer_class = PropertyRetrieveSerializer
+    permission_classes = [IsAuthenticated]
+
+    def perform_destroy(self, instance):
+        request = self.request
+        # Only allow deletion if the request.user is the property owner or an admin.
+        if instance.property_owner != request.user and not request.user.is_staff:
+            from rest_framework.exceptions import PermissionDenied
+            raise PermissionDenied("You do not have permission to delete this property.")
+        instance.delete()
