@@ -317,6 +317,18 @@ class PropertyCreateSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'date_created', 'likes', 'status']
 
     def create(self, validated_data):
+        request = self.context.get("request")
+        
+          # Only allow users whose user_type is not "IV"
+        if request and getattr(request.user, 'user_type', None) == 'IV':
+            raise serializers.ValidationError(
+                {"detail": "Investors are not allowed to create properties."}
+            )
+            
+        if not validated_data.get('property_owner'):
+            validated_data['property_owner'] = request.user
+            
+            
         # Extract media data from the request
         before_images = validated_data.pop('before_images', [])
         after_images = validated_data.pop('after_images', [])
@@ -328,9 +340,6 @@ class PropertyCreateSerializer(serializers.ModelSerializer):
         after_images = validated_data.pop('after_images', [])
         
         # Set the property owner automatically if not provided
-        request = self.context.get("request")
-        if not validated_data.get('property_owner'):
-            validated_data['property_owner'] = request.user
 
         # Create the Property instance without M2M fields
         property_obj = Property.objects.create(**validated_data)
@@ -360,7 +369,7 @@ class PropertyCreateSerializer(serializers.ModelSerializer):
     
  
  
- 
+#  for property retrieval purposes, to fixed circular imports issues
 class SimpleUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
