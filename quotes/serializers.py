@@ -5,7 +5,6 @@ from main.models import Media
 from django.contrib.contenttypes.models import ContentType
 from accounts.models import User
 from profiles.models import ContractorProfile
-
  
 
 
@@ -359,11 +358,30 @@ class PropertyCreateSerializer(serializers.ModelSerializer):
 
         return property_obj
     
-    
+ 
+ 
+ 
+class SimpleUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = '__all__'
+        extra_kwargs = {
+                'password': {'write_only': True},
+                'last_login': {'read_only': True},
+                'is_superuser': {'read_only': True},
+            }
+
+
+class SimpleContractorProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ContractorProfile
+        fields = '__all__'     
     
 class PropertyRetrieveSerializer(serializers.ModelSerializer):
     before_images = serializers.SerializerMethodField()
     after_images = serializers.SerializerMethodField()
+    home_owner_agents = SimpleUserSerializer(many=True, read_only=True)
+    contractors = SimpleContractorProfileSerializer(many=True, read_only=True)
 
     class Meta:
         model = Property
