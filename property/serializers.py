@@ -1,8 +1,7 @@
 from rest_framework import serializers
-from .models import AssignedAccount
+from .models import AssignedAccount, Property
 from accounts.models import User
 from profiles.models import ContractorProfile
-from quotes.models import Property
 from django.contrib.contenttypes.models import ContentType
 from main.models import Media
 from quotes.serializers import MediaSerializer, BulkMediaSerializer

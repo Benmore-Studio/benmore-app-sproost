@@ -1,12 +1,11 @@
 from quotes.models import Project, QuoteRequest
 from django.contrib.auth import get_user_model
-from .models import AssignedAccount
-from quotes.models import Property
+from .models import AssignedAccount, Property
+from django.db.models import Q
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.exceptions import NotFound, PermissionDenied
-from property.models import AssignedAccount
 from profiles.serializers import HomeOwnerSerializer 
 from .serializers import ( PropertyCreateSerializer,PropertyUpdateSerializer, PropertyRetrieveSerializer)
 from rest_framework.parsers import MultiPartParser, FormParser
@@ -85,21 +84,37 @@ class PropertyUpdateView(generics.UpdateAPIView):
 
 
 
-class ContractorAllPropertiesView(generics.ListAPIView):
+class UserPropertyListView(generics.ListAPIView):
     serializer_class = PropertyRetrieveSerializer
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         user = self.request.user
-        # Query for properties owned by the user.
-        qs = Property.objects.filter(property_owner=user)
-        # If the user has a contractor profile, include properties assigned to that profile.
-        try:
-            contractor_profile = user.contractor_profile
-            qs = qs | Property.objects.filter(contractors=contractor_profile)
-        except Exception:
-            # No contractor profile; do nothing extra.
-            pass
+        user_type = getattr(user, 'user_type', None)
+        
+        # Start with an empty QuerySet.
+        qs = Property.objects.none()
+
+        if user_type == "CO":
+            # For contractors, combine properties they own and those assigned to their contractor profile.
+            qs = Property.objects.filter(property_owner=user)
+            try:
+                contractor_profile = user.contractorprofile  # Adjust attribute name if needed.
+                qs = qs | Property.objects.filter(contractors=contractor_profile)
+            except Exception:
+                pass
+        elif user_type == "AG":
+            # For agents, include properties they own and those where they are added as a home_owner_agent.
+            qs = Property.objects.filter(Q(property_owner=user) | Q(home_owner_agents=user))
+        elif user_type == "HO":
+            # For home owners, only include properties they own.
+            qs = Property.objects.filter(property_owner=user)
+        elif user_type == "IV":
+            # For investors, you might choose a different rule. Here we return properties they liked.
+            qs = Property.objects.filter(likes=user)
+        else:
+            # For any other user type, you might default to all properties.
+            qs = Property.objects.all()
 
         return qs.distinct()
     

@@ -15,8 +15,8 @@ from django.shortcuts import get_object_or_404
 
 from profiles.models import ContractorProfile, UserProfile, AgentProfile
 from profiles.services.contractor import ContractorService
-
-from quotes.models import QuoteRequest, Project,Review, UserPoints, Bid,ProjectPictures, Property 
+from property.models import Property
+from quotes.models import QuoteRequest, Project,Review, UserPoints, Bid,ProjectPictures 
 from .serializers import (SimpleContractorProfileSerializer, 
                           ProfilePictureSerializer, UserSerializer,
                           SimpleHomeOwnerProfileSerializer, 

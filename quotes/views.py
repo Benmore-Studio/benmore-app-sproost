@@ -11,7 +11,8 @@ from rest_framework.generics import GenericAPIView, ListAPIView, UpdateAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import generics
 from profiles.serializers import PropertySerializer
-from .models import   Property, QuoteRequest
+from property.models import Property
+from .models import QuoteRequest
 from .serializers import   QuoteRequestSerializer,BulkMediaSerializer
 from django.db.models import Prefetch
 from django.contrib.contenttypes.models import ContentType
