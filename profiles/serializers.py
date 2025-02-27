@@ -11,6 +11,11 @@ class SimpleUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = '__all__'
+        extra_kwargs = {
+                'password': {'write_only': True},
+                'last_login': {'read_only': True},
+                'is_superuser': {'read_only': True},
+            }
 
 
 class SimpleContractorProfileSerializer(serializers.ModelSerializer):
@@ -56,6 +61,7 @@ class ContractorSerializer(serializers.ModelSerializer):
             'contractor_profile',
             'property_owner',
         ]
+
 
 
 class HomeOwnerSerializer(serializers.ModelSerializer):

@@ -17,6 +17,11 @@ class MediaTypes(models.TextChoices):
     IMAGE = "Image", _("Image")
     FILE = "File", _("File")
     VIDEO = "Video", _("Video")
+    
+class ImageCategories(models.TextChoices):
+    BEFORE = "before", _("Before")
+    AFTER = "after", _("After")
+
 
 class Media(models.Model):
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, related_name="media")
@@ -25,6 +30,7 @@ class Media(models.Model):
 
     media_type = models.CharField(max_length=10, choices=MediaTypes.choices, default=MediaTypes.IMAGE)
     image = models.ImageField(upload_to=image_upload_location, null=True, blank=True)
+    image_category = models.CharField(max_length=10, choices=ImageCategories.choices, null=True, blank=True)
     file = models.FileField(upload_to=file_upload_location, null=True, blank=True, storage=RawMediaCloudinaryStorage())
     video = models.FileField(upload_to=video_upload_location, null=True, blank=True, storage=RawMediaCloudinaryStorage())  # Add this field
     upload_date = models.DateTimeField(auto_now_add=True, null=False)

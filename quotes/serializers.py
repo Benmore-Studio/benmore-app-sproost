@@ -94,7 +94,7 @@ class QuoteStatusSerializer(serializers.Serializer):
 class MediaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Media
-        fields = ['id', 'content_type', 'object_id', 'media_type', 'image', 'file', 'video', 'upload_date']
+        fields = ['id', 'content_type', 'object_id', 'media_type', 'image', 'image_category', 'file', 'video', 'upload_date']
 
     def validate(self, data):
         """
@@ -184,18 +184,18 @@ class MediaSerializer(serializers.ModelSerializer):
 
 
 class BulkMediaSerializer(serializers.Serializer):
-    """
-    A custom serializer for handling multiple media uploads in one pass.
-    """
     content_type_id = serializers.IntegerField()
     object_id = serializers.IntegerField()
-
-    # We expect lists of uploaded files for each category
     files = serializers.ListField(
         child=serializers.FileField(allow_empty_file=False),
         required=False
     )
-    images = serializers.ListField(
+    # Separate fields for before and after images
+    before_images = serializers.ListField(
+        child=serializers.ImageField(allow_empty_file=False),
+        required=False
+    )
+    after_images = serializers.ListField(
         child=serializers.ImageField(allow_empty_file=False),
         required=False
     )
@@ -205,16 +205,11 @@ class BulkMediaSerializer(serializers.Serializer):
     )
 
     def validate(self, attrs):
-        """
-        Perform extension and size checks for all media in a single pass.
-        """
         max_file_size = 10 * 1024 * 1024
         supported_file_types = ['pdf', 'doc', 'docx', 'txt']
         supported_image_types = ['jpg', 'jpeg', 'png', 'gif']
         supported_video_types = ['mp4', 'avi', 'mov', 'mkv', 'ts']
 
-        # We'll accumulate errors in a dict {field: [list of errors]}
-        # but you could raise ValidationError immediately if you prefer.
         errors = {}
 
         def validate_file(f, kind):
@@ -230,54 +225,59 @@ class BulkMediaSerializer(serializers.Serializer):
                 return f"{kind.capitalize()} size exceeds 10MB. Size: {mb_size:.2f} MB"
             return None
 
-        # Validate files
         for f in attrs.get("files", []):
             err = validate_file(f, "file")
             if err:
                 errors.setdefault("files", []).append(err)
 
-        # Validate images
-        for img in attrs.get("images", []):
+        for img in attrs.get("before_images", []):
             err = validate_file(img, "image")
             if err:
-                errors.setdefault("images", []).append(err)
+                errors.setdefault("before_images", []).append(err)
 
-        # Validate videos
+        for img in attrs.get("after_images", []):
+            err = validate_file(img, "image")
+            if err:
+                errors.setdefault("after_images", []).append(err)
+
         for vid in attrs.get("videos", []):
             err = validate_file(vid, "video")
             if err:
                 errors.setdefault("videos", []).append(err)
 
         if errors:
-            # Raise a ValidationError with all accumulated errors
             raise serializers.ValidationError(errors)
-
         return attrs
 
     def create(self, validated_data):
-        """
-        Bulk-create all Media objects after validation passes.
-        """
+        from django.contrib.contenttypes.models import ContentType
+        from main.models import Media  # Adjust your import as needed
+
         content_type_id = validated_data["content_type_id"]
         object_id = validated_data["object_id"]
-        
-        # Retrieve the ContentType
+
         try:
             ct = ContentType.objects.get(pk=content_type_id)
         except ContentType.DoesNotExist:
             raise serializers.ValidationError({"content_type_id": "Invalid content type ID."})
-        
+
         new_media_objects = []
 
-        # Prepare file-based media
         for f in validated_data.get("files", []):
             new_media_objects.append(
                 Media(content_type=ct, object_id=object_id, media_type="File", file=f)
             )
 
-        for img in validated_data.get("images", []):
+        # Create Media for before images, defaulting their image category to 'before'
+        for img in validated_data.get("before_images", []):
             new_media_objects.append(
-                Media(content_type=ct, object_id=object_id, media_type="Image", image=img)
+                Media(content_type=ct, object_id=object_id, media_type="Image", image=img, image_category="before")
+            )
+
+        # Create Media for after images, setting image_category to 'after'
+        for img in validated_data.get("after_images", []):
+            new_media_objects.append(
+                Media(content_type=ct, object_id=object_id, media_type="Image", image=img, image_category="after")
             )
 
         for vid in validated_data.get("videos", []):
@@ -285,10 +285,82 @@ class BulkMediaSerializer(serializers.Serializer):
                 Media(content_type=ct, object_id=object_id, media_type="Video", video=vid)
             )
 
-        # Now do a single bulk_create
         Media.objects.bulk_create(new_media_objects)
-
-        # Return the list of created objects
         return new_media_objects
 
 
+
+
+       
+        
+class PropertyCreateSerializer(serializers.ModelSerializer):
+    before_images = serializers.ListField(
+        child=serializers.ImageField(),
+        required=False,
+        write_only=True
+    )
+    after_images = serializers.ListField(
+        child=serializers.ImageField(),
+        required=False,
+        write_only=True
+    )
+    
+    class Meta:
+        model = Property
+        fields = [
+            'id', 'title', 'property_type', 'property_owner', 'home_owner_agents', 
+            'contractors', 'price', 'address', 'half_bath', 'full_bath', 'bathrooms', 
+            'bedrooms', 'square_footage', 'total_square_foot', 'lot_size', 'scope_of_work', 
+            'taxes', 'basement_details', 'garage', 'repair_recommendations', 'date_created',
+            'likes', 'status', 'before_images', 'after_images'
+        ]
+        read_only_fields = ['id', 'date_created', 'likes', 'status']
+
+    def create(self, validated_data):
+        # Extract media data from the request
+        before_images = validated_data.pop('before_images', [])
+        after_images = validated_data.pop('after_images', [])
+
+        # Create the Property. You may have additional logic to set the status.
+        property_obj = super().create(validated_data)
+        
+        # Get ContentType for Property
+        ct = ContentType.objects.get_for_model(Property)
+
+        # Combine before and after images into one payload for BulkMediaSerializer.
+        # (The BulkMediaSerializer expects keys: content_type_id, object_id, before_images, after_images.)
+        media_payload = {
+            "content_type_id": ct.id,
+            "object_id": property_obj.id,
+            "before_images": before_images,
+            "after_images": after_images,
+        }
+        # Initialize and validate the bulk serializer.
+        bulk_serializer = BulkMediaSerializer(data=media_payload, context=self.context)
+        bulk_serializer.is_valid(raise_exception=True)
+        # Save creates all Media objects.
+        bulk_serializer.save()
+
+        return property_obj
+    
+    
+    
+class PropertyRetrieveSerializer(serializers.ModelSerializer):
+    before_images = serializers.SerializerMethodField()
+    after_images = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Property
+        fields = [
+            'id', 'title', 'property_type', 'property_owner', 'price', 'address',
+            'scope_of_work', 'status', 'before_images', 'after_images'
+            # Include other fields as needed
+        ]
+
+    def get_before_images(self, obj):
+        before_qs = obj.media_paths.filter(image_category="before")
+        return MediaSerializer(before_qs, many=True, context=self.context).data
+
+    def get_after_images(self, obj):
+        after_qs = obj.media_paths.filter(image_category="after")
+        return MediaSerializer(after_qs, many=True, context=self.context).data

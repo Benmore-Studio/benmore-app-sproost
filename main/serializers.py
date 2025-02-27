@@ -109,9 +109,16 @@ class BulkMediaSerializer(serializers.Serializer):
                 Media(content_type=ct, object_id=object_id, media_type="File", file=f)
             )
 
-        for img in validated_data.get("images", []):
+        # Create Media for before images, defaulting their image category to 'before'
+        for img in validated_data.get("before_images", []):
             new_media_objects.append(
-                Media(content_type=ct, object_id=object_id, media_type="Image", image=img)
+                Media(content_type=ct, object_id=object_id, media_type="Image", image=img, image_category="before")
+            )
+
+        # Create Media for after images, setting image_category to 'after'
+        for img in validated_data.get("after_images", []):
+            new_media_objects.append(
+                Media(content_type=ct, object_id=object_id, media_type="Image", image=img, image_category="after")
             )
 
         for vid in validated_data.get("videos", []):
