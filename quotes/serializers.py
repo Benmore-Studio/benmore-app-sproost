@@ -335,13 +335,7 @@ class PropertyCreateSerializer(serializers.ModelSerializer):
 
         # Create the Property instance without M2M fields
         property_obj = Property.objects.create(**validated_data)
-        
-        # Now assign many-to-many fields using set() or add()
-        if home_owner_agents:
-            property_obj.home_owner_agents.set(home_owner_agents)
-        if contractors:
-            property_obj.contractors.set(contractors)
-     
+            
 
         # Create the Property. You may have additional logic to set the status.
         property_obj = super().create(validated_data)
@@ -424,96 +418,95 @@ class PropertyUpdateSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['property_owner', 'date_created', 'likes']
     
+  
     def update(self, instance, validated_data):
         request = self.context.get("request")
 
-        # Pop many-to-many fields and media fields from validated_data
-         
+        # Pop many-to-many and media fields.
+        home_owner_agent_ids = validated_data.pop('home_owner_agents', None)
+        contractor_ids = validated_data.pop('contractors', None)
         before_images = validated_data.pop('before_images', [])
         after_images = validated_data.pop('after_images', [])
-        
-        # Expect lists of IDs instead of model instances.
-        home_owner_agents = serializers.ListField(
-            child=serializers.IntegerField(), required=False
-        )
-        contractors = serializers.ListField(
-            child=serializers.IntegerField(), required=False
-        )
-        
-        # Update the property fields
+
+        # Update regular fields.
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
         instance.save()
-        
-        
-        # Update home_owner_agents if provided.
-        if home_owner_agents is not None:
-             # Retrieve users with the provided IDs, ensure they have user_type 'AG' and are not the property owner.
+
+        # --- Update home_owner_agents ---
+        if home_owner_agent_ids is not None and len(home_owner_agent_ids) > 0:
+             # Retrieve users with the provided IDs, ensuring they have user_type 'AG'
+            # and are not the property owner.
             valid_agents = User.objects.filter(
-                id__in=home_owner_agents, 
+                id__in=home_owner_agent_ids,
                 user_type='AG'
             ).exclude(id=instance.property_owner.id)
-            if valid_agents.count() != len(home_owner_agents):
+            if valid_agents.count() != len(home_owner_agent_ids):
                 raise serializers.ValidationError({
                     "home_owner_agents": "One or more agent IDs are invalid, not of type AG, or belong to the property owner."
                 })
             instance.home_owner_agents.set(valid_agents)
         else:
-            # If not provided, and if the authenticated user qualifies.
-            if request and getattr(request.user, 'user_type', None) == 'AG' and request.user != instance.property_owner:
+            # If not provided, and if the authenticated user qualifies, add them.
+            request = self.context.get("request")
+            if (request and getattr(request.user, 'user_type', None) == 'AG' and 
+                request.user != instance.property_owner):
                 instance.home_owner_agents.add(request.user)
 
-        # Update contractors if provided.
-        if contractors is not None:
-             # Retrieve contractor profiles by ID, then filter those whose related user has user_type 'CO'
+        # --- Update contractors ---
+        if contractor_ids is not None and len(contractor_ids) > 0:
             valid_contractors = ContractorProfile.objects.filter(
-                id__in=contractors
+                id__in=contractor_ids
             ).select_related('user').exclude(user=instance.property_owner)
             valid_contractors = valid_contractors.filter(user__user_type='CO')
-            if valid_contractors.count() != len(contractors):
+        
+            if valid_contractors.count() != len(contractor_ids):
                 raise serializers.ValidationError({
                     "contractors": "One or more contractor IDs are invalid, not of type CO, or belong to the property owner."
                 })
             instance.contractors.set(valid_contractors)
         else:
-            # If not provided, and if the authenticated user qualifies as a contractor.
-            if request and getattr(request.user, 'user_type', None) == 'CO' and request.user != instance.property_owner:
+            # If no contractor IDs are provided (or an empty list is provided),
+            # and if the authenticated user qualifies as a contractor, add them.
+            if (request and getattr(request.user, 'user_type', None) == 'CO' and 
+                request.user != instance.property_owner):
                 try:
-                    contractor_profile = request.user.contractorprofile
+                    # Use the correct attribute name for the contractor profile.
+                    contractor_profile = request.user.contractor_profile  
                     instance.contractors.add(contractor_profile)
-                except Exception:
-                    pass
-
-        
-        # Retrieve ContentType for Property
+                except Exception as e:
+                    raise serializers.ValidationError({"contractors": str(e)})
+                
+                
+                # --- Process Media Uploads ---
+        # Get the ContentType for the Property model.
         ct = ContentType.objects.get_for_model(Property)
-        
-        # Process new before images
-        for img in before_images:
-            Media.objects.create(
-                content_type=ct,
-                object_id=instance.id,
-                media_type="Image",
-                image=img,
-                image_category="before"
-            )
-        
-        # Process new after images.
-        # Optionally, if after_images are provided, update the status to 'completed'
-        if after_images:
-             # Delete old after images associated with this property
-            instance.media_paths.filter(image_category="after").delete()
 
-            for img in after_images:
+        # Process new before images (just add new ones).
+        if before_images:
+            for image in before_images:
                 Media.objects.create(
                     content_type=ct,
                     object_id=instance.id,
                     media_type="Image",
-                    image=img,
+                    image=image,
+                    image_category="before"
+                )
+
+        # Process new after images: remove old ones and add the new ones.
+        if after_images:
+            instance.media_paths.filter(image_category="after").delete()
+            for image in after_images:
+                Media.objects.create(
+                    content_type=ct,
+                    object_id=instance.id,
+                    media_type="Image",
+                    image=image,
                     image_category="after"
                 )
-            # Update status to "completed" (adjust if your status field uses different values)
+            # Optionally update the status to 'completed'
             instance.status = "completed"
-            instance.save()
-        
+            
+        instance.save()
+
         return instance
