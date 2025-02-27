@@ -1,6 +1,6 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import PropertyAPIView, QuotesAPIView, PropertySearchView, PropertyCreateView,PropertyRetrieveView, PropertyUpdateView
+from .views import PropertyAPIView, QuotesAPIView, PropertySearchView, PropertyCreateView,PropertyRetrieveView, PropertyUpdateView, ContractorAllPropertiesView, PropertyDeleteView
 
 app_name = 'quotes'
 
@@ -16,5 +16,7 @@ urlpatterns = [
     path('properties/create', PropertyCreateView.as_view(), name="properties"),
     path('properties/<int:pk>', PropertyRetrieveView.as_view(), name="properties"),
     path('properties/<int:pk>/update', PropertyUpdateView.as_view(), name="properties"),
+    path('properties/<int:pk>/delete', PropertyDeleteView.as_view(), name="property-delete"),
+    path('contractor/properties', ContractorAllPropertiesView.as_view(), name="contractor-all-properties"),
 
 ]
