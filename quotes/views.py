@@ -12,11 +12,12 @@ from rest_framework import status, filters
 from rest_framework.views import APIView
 from rest_framework.generics import GenericAPIView, ListAPIView, UpdateAPIView
 from rest_framework.permissions import IsAuthenticated
+from rest_framework import generics
 
 from profiles.models import UserProfile, AgentProfile
 from profiles.serializers import PropertySerializer
 from .models import Project, Property, QuoteRequest
-from .serializers import ProjectSerializer, QuoteRequestSerializer,BulkMediaSerializer, MediaSerializer
+from .serializers import ProjectSerializer, QuoteRequestSerializer,BulkMediaSerializer, MediaSerializer, PropertyCreateSerializer, PropertyRetrieveSerializer, PropertyUpdateSerializer
 
 from django.db.models import Prefetch
 from django.contrib.contenttypes.models import ContentType
@@ -339,3 +340,25 @@ class PropertySearchView(ListAPIView):
     filter_backends = [filters.SearchFilter]
     # Adjust these fields to whatever you want to enable searching on
     search_fields = ['address', 'property_owner__username', 'basement_details', 'tittle']
+
+
+
+class PropertyCreateView(generics.CreateAPIView):
+    queryset = Property.objects.all()
+    serializer_class = PropertyCreateSerializer
+    permission_classes = [IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser]
+
+
+
+   
+    
+class PropertyRetrieveView(generics.RetrieveAPIView):
+    queryset = Property.objects.all()
+    permission_classes = [IsAuthenticated]
+    serializer_class = PropertyRetrieveSerializer
+
+class PropertyUpdateView(generics.UpdateAPIView):
+    queryset = Property.objects.all()
+    permission_classes = [IsAuthenticated]
+    serializer_class = PropertyUpdateSerializer

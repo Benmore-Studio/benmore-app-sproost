@@ -4,6 +4,7 @@ from quotes.models import QuoteRequest, QuoteRequestStatus, Property
 from main.models import Media
 from django.contrib.contenttypes.models import ContentType
 from accounts.models import User
+from profiles.models import ContractorProfile
 
  
 
@@ -320,6 +321,27 @@ class PropertyCreateSerializer(serializers.ModelSerializer):
         # Extract media data from the request
         before_images = validated_data.pop('before_images', [])
         after_images = validated_data.pop('after_images', [])
+                   
+        # Extract many-to-many fields first.
+        home_owner_agents = validated_data.pop('home_owner_agents', [])
+        contractors = validated_data.pop('contractors', [])
+        before_images = validated_data.pop('before_images', [])
+        after_images = validated_data.pop('after_images', [])
+        
+        # Set the property owner automatically if not provided
+        request = self.context.get("request")
+        if not validated_data.get('property_owner'):
+            validated_data['property_owner'] = request.user
+
+        # Create the Property instance without M2M fields
+        property_obj = Property.objects.create(**validated_data)
+        
+        # Now assign many-to-many fields using set() or add()
+        if home_owner_agents:
+            property_obj.home_owner_agents.set(home_owner_agents)
+        if contractors:
+            property_obj.contractors.set(contractors)
+     
 
         # Create the Property. You may have additional logic to set the status.
         property_obj = super().create(validated_data)
@@ -352,9 +374,11 @@ class PropertyRetrieveSerializer(serializers.ModelSerializer):
     class Meta:
         model = Property
         fields = [
-            'id', 'title', 'property_type', 'property_owner', 'price', 'address',
-            'scope_of_work', 'status', 'before_images', 'after_images'
-            # Include other fields as needed
+            'id', 'title', 'property_type', 'property_owner', 'home_owner_agents', 
+            'contractors', 'price', 'address', 'half_bath', 'full_bath', 'bathrooms', 
+            'bedrooms', 'square_footage', 'total_square_foot', 'lot_size', 'scope_of_work', 
+          'garage', 'repair_recommendations', 'date_created',
+            'likes', 'status', 'before_images', 'after_images'
         ]
 
     def get_before_images(self, obj):
@@ -364,3 +388,132 @@ class PropertyRetrieveSerializer(serializers.ModelSerializer):
     def get_after_images(self, obj):
         after_qs = obj.media_paths.filter(image_category="after")
         return MediaSerializer(after_qs, many=True, context=self.context).data
+    
+
+
+
+class PropertyUpdateSerializer(serializers.ModelSerializer):
+    # Optional fields for adding new images. These are write-only.
+    before_images = serializers.ListField(
+        child=serializers.ImageField(),
+        required=False,
+        write_only=True
+    )
+    after_images = serializers.ListField(
+        child=serializers.ImageField(),
+        required=False,
+        write_only=True
+    )
+    
+     # Many-to-many fields as primary key related fields
+    home_owner_agents = serializers.PrimaryKeyRelatedField(
+        many=True, queryset=User.objects.all(), required=False
+    )
+    contractors = serializers.PrimaryKeyRelatedField(
+        many=True, queryset=ContractorProfile.objects.all(), required=False
+    )
+    
+    class Meta:
+        model = Property
+        fields = [
+            'id', 'title', 'property_type', 'property_owner', 'home_owner_agents', 
+            'contractors', 'price', 'address', 'half_bath', 'full_bath', 'bathrooms', 
+            'bedrooms', 'square_footage', 'total_square_foot', 'lot_size', 'scope_of_work', 
+          'garage', 'repair_recommendations', 'date_created',
+            'likes', 'status', 'before_images', 'after_images'
+        ]
+        read_only_fields = ['property_owner', 'date_created', 'likes']
+    
+    def update(self, instance, validated_data):
+        request = self.context.get("request")
+
+        # Pop many-to-many fields and media fields from validated_data
+         
+        before_images = validated_data.pop('before_images', [])
+        after_images = validated_data.pop('after_images', [])
+        
+        # Expect lists of IDs instead of model instances.
+        home_owner_agents = serializers.ListField(
+            child=serializers.IntegerField(), required=False
+        )
+        contractors = serializers.ListField(
+            child=serializers.IntegerField(), required=False
+        )
+        
+        # Update the property fields
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+        
+        
+        # Update home_owner_agents if provided.
+        if home_owner_agents is not None:
+             # Retrieve users with the provided IDs, ensure they have user_type 'AG' and are not the property owner.
+            valid_agents = User.objects.filter(
+                id__in=home_owner_agents, 
+                user_type='AG'
+            ).exclude(id=instance.property_owner.id)
+            if valid_agents.count() != len(home_owner_agents):
+                raise serializers.ValidationError({
+                    "home_owner_agents": "One or more agent IDs are invalid, not of type AG, or belong to the property owner."
+                })
+            instance.home_owner_agents.set(valid_agents)
+        else:
+            # If not provided, and if the authenticated user qualifies.
+            if request and getattr(request.user, 'user_type', None) == 'AG' and request.user != instance.property_owner:
+                instance.home_owner_agents.add(request.user)
+
+        # Update contractors if provided.
+        if contractors is not None:
+             # Retrieve contractor profiles by ID, then filter those whose related user has user_type 'CO'
+            valid_contractors = ContractorProfile.objects.filter(
+                id__in=contractors
+            ).select_related('user').exclude(user=instance.property_owner)
+            valid_contractors = valid_contractors.filter(user__user_type='CO')
+            if valid_contractors.count() != len(contractors):
+                raise serializers.ValidationError({
+                    "contractors": "One or more contractor IDs are invalid, not of type CO, or belong to the property owner."
+                })
+            instance.contractors.set(valid_contractors)
+        else:
+            # If not provided, and if the authenticated user qualifies as a contractor.
+            if request and getattr(request.user, 'user_type', None) == 'CO' and request.user != instance.property_owner:
+                try:
+                    contractor_profile = request.user.contractorprofile
+                    instance.contractors.add(contractor_profile)
+                except Exception:
+                    pass
+
+        
+        # Retrieve ContentType for Property
+        ct = ContentType.objects.get_for_model(Property)
+        
+        # Process new before images
+        for img in before_images:
+            Media.objects.create(
+                content_type=ct,
+                object_id=instance.id,
+                media_type="Image",
+                image=img,
+                image_category="before"
+            )
+        
+        # Process new after images.
+        # Optionally, if after_images are provided, update the status to 'completed'
+        if after_images:
+             # Delete old after images associated with this property
+            instance.media_paths.filter(image_category="after").delete()
+
+            for img in after_images:
+                Media.objects.create(
+                    content_type=ct,
+                    object_id=instance.id,
+                    media_type="Image",
+                    image=img,
+                    image_category="after"
+                )
+            # Update status to "completed" (adjust if your status field uses different values)
+            instance.status = "completed"
+            instance.save()
+        
+        return instance

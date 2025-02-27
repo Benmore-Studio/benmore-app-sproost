@@ -60,7 +60,7 @@ class PropertyStatusChoices(models.TextChoices):
 
 
 class Property(models.Model):
-    title = models.CharField(max_length=255)
+    title = models.CharField(max_length=255, blank=True)
     property_type = models.CharField(
         max_length=20,
         choices=PropertyTypeChoices.choices,
@@ -68,6 +68,7 @@ class Property(models.Model):
     )
     property_owner = models.ForeignKey(
         "accounts.User",
+        blank=True,
         on_delete=models.CASCADE,
         related_name='owned_properties'
     )
@@ -83,7 +84,7 @@ class Property(models.Model):
         help_text=_("Contractors assigned to this property.")
     )
     price = models.DecimalField(max_digits=10, decimal_places=2, null=True, default=0.00)
-    address = models.CharField(max_length=255)
+    address = models.CharField(max_length=255, blank=True)
     half_bath = models.PositiveIntegerField(null=True, blank=True)
     full_bath = models.PositiveIntegerField(null=True, blank=True)
     bathrooms = models.PositiveIntegerField(null=True, blank=True)
@@ -91,7 +92,7 @@ class Property(models.Model):
     square_footage = models.PositiveIntegerField(null=True, blank=True)
     total_square_foot = models.PositiveIntegerField(null=True, blank=True)
     lot_size = models.PositiveIntegerField(null=True, blank=True)
-    scope_of_work = models.TextField()
+    scope_of_work = models.TextField(default='explain your scope of work')
     taxes = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     basement_details = models.TextField(null=True, blank=True)
     garage = models.CharField(max_length=50, choices=GARAGE_CHOICES, null=True, blank=True)
