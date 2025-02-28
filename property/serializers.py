@@ -6,6 +6,12 @@ from profiles.models import ContractorProfile
 from django.contrib.contenttypes.models import ContentType
 from main.models import Media
 from quotes.serializers import MediaSerializer, BulkMediaSerializer
+from .models import AssignedAccount, Property
+from accounts.models import User
+from profiles.models import ContractorProfile
+from django.contrib.contenttypes.models import ContentType
+from main.models import Media
+from quotes.serializers import MediaSerializer, BulkMediaSerializer
 
 class AssignedAccountSerializer(serializers.ModelSerializer):
     class Meta:

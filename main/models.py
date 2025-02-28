@@ -23,6 +23,12 @@ class ImageCategories(models.TextChoices):
     AFTER = "after", _("After")
 
 
+    
+class ImageCategories(models.TextChoices):
+    BEFORE = "before", _("Before")
+    AFTER = "after", _("After")
+
+
    
     
 class Media(models.Model):
