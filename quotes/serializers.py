@@ -249,9 +249,9 @@ class BulkMediaSerializer(serializers.Serializer):
         return attrs
 
     def create(self, validated_data):
-        """
-        Bulk-create all Media objects after validation passes.
-        """
+        from django.contrib.contenttypes.models import ContentType
+        from main.models import Media  # Adjust your import as needed
+
         content_type_id = validated_data["content_type_id"]
         object_id = validated_data["object_id"]
 
@@ -262,47 +262,28 @@ class BulkMediaSerializer(serializers.Serializer):
 
         new_media_objects = []
 
-            # Handle "files"
         for f in validated_data.get("files", []):
-            secure_url, public_id = self.upload_to_cloudinary(f, "File")
-            new_media_objects.append(Media(
-                content_type=ct,
-                object_id=object_id,
-                media_type="File",
-                file_url=secure_url,
-                public_id=public_id
-            ))
+            new_media_objects.append(
+                Media(content_type=ct, object_id=object_id, media_type="File", file=f)
+            )
 
-        # Handle "images"
-        for img in validated_data.get("images", []):
-            secure_url, public_id = self.upload_to_cloudinary(img, "Image")
-            new_media_objects.append(Media(
-                content_type=ct,
-                object_id=object_id,
-                media_type="Image",
-                file_url=secure_url,
-                public_id=public_id
-            ))
+        # Create Media for before images, defaulting their image category to 'before'
+        for img in validated_data.get("before_images", []):
+            new_media_objects.append(
+                Media(content_type=ct, object_id=object_id, media_type="Image", image=img, image_category="before")
+            )
 
-        # Handle "videos"
+        # Create Media for after images, setting image_category to 'after'
+        for img in validated_data.get("after_images", []):
+            new_media_objects.append(
+                Media(content_type=ct, object_id=object_id, media_type="Image", image=img, image_category="after")
+            )
+
         for vid in validated_data.get("videos", []):
-            secure_url, public_id = self.upload_to_cloudinary(vid, "Video")
-            new_media_objects.append(Media(
-                content_type=ct,
-                object_id=object_id,
-                media_type="Video",
-                file_url=secure_url,
-                public_id=public_id
-            ))
+            new_media_objects.append(
+                Media(content_type=ct, object_id=object_id, media_type="Video", video=vid)
+            )
 
-            # Now do a single bulk_create
-        if new_media_objects:
-            Media.objects.bulk_create(new_media_objects)
-
-        # Return the list of created objects
-        return new_media_objects
-
-        # Helper to upload to Cloudinary
-    
-
+        Media.objects.bulk_create(new_media_objects)
+        return new_media_objects    
     

@@ -1,3 +1,4 @@
+import json
 from rest_framework import serializers
 from .models import AssignedAccount, Property
 from accounts.models import User
@@ -51,11 +52,7 @@ class PropertyCreateSerializer(serializers.ModelSerializer):
         if not validated_data.get('property_owner'):
             validated_data['property_owner'] = request.user
             
-            
-        # Extract media data from the request
-        before_images = validated_data.pop('before_images', [])
-        after_images = validated_data.pop('after_images', [])
-                   
+                    
         # Extract many-to-many fields first.
         home_owner_agents = validated_data.pop('home_owner_agents', [])
         contractors = validated_data.pop('contractors', [])
@@ -135,7 +132,6 @@ class PropertyRetrieveSerializer(serializers.ModelSerializer):
     
 
 
-
 class PropertyUpdateSerializer(serializers.ModelSerializer):
     # Optional fields for adding new images. These are write-only.
     before_images = serializers.ListField(
@@ -149,32 +145,64 @@ class PropertyUpdateSerializer(serializers.ModelSerializer):
         write_only=True
     )
     
-     # Many-to-many fields as primary key related fields
+    # Write-only field for updating contractor IDs.
+    contractors = serializers.PrimaryKeyRelatedField(
+        many=True, queryset=ContractorProfile.objects.all(), required=False, write_only=True
+    )
+    # Read-only field for nested contractor profile details.
+     
+    # Many-to-many field for home_owner_agents remains unchanged.
     home_owner_agents = serializers.PrimaryKeyRelatedField(
         many=True, queryset=User.objects.all(), required=False
-    )
-    contractors = serializers.PrimaryKeyRelatedField(
-        many=True, queryset=ContractorProfile.objects.all(), required=False
     )
     
     class Meta:
         model = Property
         fields = [
             'id', 'title', 'property_type', 'property_owner', 'home_owner_agents', 
-            'contractors', 'price', 'address', 'half_bath', 'full_bath', 'bathrooms', 
+            'contractors',   # Include both fields
+            'price', 'address', 'half_bath', 'full_bath', 'bathrooms', 
             'bedrooms', 'square_footage', 'total_square_foot', 'lot_size', 'scope_of_work', 
-          'garage', 'repair_recommendations', 'date_created',
+            'garage', 'repair_recommendations', 'date_created',
             'likes', 'status', 'before_images', 'after_images'
         ]
         read_only_fields = ['property_owner', 'date_created', 'likes']
+        
+    def to_internal_value(self, data):
+        """
+        Parse any JSON-like strings into actual Python lists before DRF validates them.
+        """
+        if hasattr(data, 'copy'):
+            data = data.copy()
+
+        # Parse 'contractors' if provided as a JSON string.
+        contractors_str = data.get('contractors')
+        if isinstance(contractors_str, str):
+            try:
+                data['contractors'] = json.loads(contractors_str)
+            except json.JSONDecodeError:
+                raise serializers.ValidationError({
+                    'contractors': 'Expected a JSON array, e.g. [1,2].'
+                })
+
+        # Parse 'home_owner_agents' if provided as a JSON string.
+        agents_str = data.get('home_owner_agents')
+        if isinstance(agents_str, str):
+            try:
+                data['home_owner_agents'] = json.loads(agents_str)
+            except json.JSONDecodeError:
+                raise serializers.ValidationError({
+                    'home_owner_agents': 'Expected a JSON array, e.g. [1,2].'
+                })
+
+        return super().to_internal_value(data)
     
-  
     def update(self, instance, validated_data):
         request = self.context.get("request")
 
         # Pop many-to-many and media fields.
-        home_owner_agent_ids = validated_data.pop('home_owner_agents', None)
-        contractor_ids = validated_data.pop('contractors', None)
+        home_owner_agent_data = validated_data.pop('home_owner_agents', None)
+        contractor_data = validated_data.pop('contractors', None)
         before_images = validated_data.pop('before_images', None)
         after_images = validated_data.pop('after_images', None)
 
@@ -184,27 +212,27 @@ class PropertyUpdateSerializer(serializers.ModelSerializer):
         instance.save()
 
         # --- Update home_owner_agents ---
-        if home_owner_agent_ids is not None and len(home_owner_agent_ids) > 0:
-             # Retrieve users with the provided IDs, ensuring they have user_type 'AG'
-            # and are not the property owner.
+        if home_owner_agent_data is not None and len(home_owner_agent_data) > 0:
+            # Ensure we are working with IDs.
+            agent_ids = [agent.id if hasattr(agent, 'id') else agent for agent in home_owner_agent_data]
             valid_agents = User.objects.filter(
-                id__in=home_owner_agent_ids,
+                id__in=agent_ids,
                 user_type='AG'
             ).exclude(id=instance.property_owner.id)
-            if valid_agents.count() != len(home_owner_agent_ids):
+            if valid_agents.count() != len(agent_ids):
                 raise serializers.ValidationError({
                     "home_owner_agents": "One or more agent IDs are invalid, not of type AG, or belong to the property owner."
                 })
             instance.home_owner_agents.set(valid_agents)
         else:
             # If not provided, and if the authenticated user qualifies, add them.
-            request = self.context.get("request")
             if (request and getattr(request.user, 'user_type', None) == 'AG' and 
                 request.user != instance.property_owner):
                 instance.home_owner_agents.add(request.user)
 
         # --- Update contractors ---
-        if contractor_ids is not None and len(contractor_ids) > 0:
+        if contractor_data is not None and len(contractor_data) > 0:
+            contractor_ids = [contractor.id if hasattr(contractor, 'id') else contractor for contractor in contractor_data]
             valid_contractors = ContractorProfile.objects.filter(
                 id__in=contractor_ids
             ).select_related('user').exclude(user=instance.property_owner)
@@ -227,9 +255,7 @@ class PropertyUpdateSerializer(serializers.ModelSerializer):
                 except Exception as e:
                     raise serializers.ValidationError({"contractors": str(e)})
                 
-                
-                # --- Process Media Uploads ---
-        # Get the ContentType for the Property model.
+        # --- Process Media Uploads ---
         ct = ContentType.objects.get_for_model(Property)
 
         # Process new before images (just add new ones).
