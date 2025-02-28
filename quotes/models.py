@@ -41,7 +41,6 @@ class QuoteRequestStatus(models.TextChoices):
 
 
 
-
 class QuoteRequest(models.Model):
     user = models.ForeignKey("accounts.User", on_delete=models.CASCADE, related_name="quote_requests", help_text='the user who created the quote')
     contractors = models.ForeignKey("profiles.ContractorProfile", null=True, blank=True, on_delete=models.PROTECT, related_name="quote_contractors")
@@ -49,8 +48,10 @@ class QuoteRequest(models.Model):
     property_type = models.CharField(max_length=50, choices=RENOVATION_CHOICES)
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     title = models.CharField(max_length=255, )
-    proprosed_budget = models.IntegerField()
-    returned_budget = models.IntegerField(null=True, blank=True)
+    sproosts_ARV = models.IntegerField(null=True, blank=True)
+    estimated_timeline = models.IntegerField(null=True, blank=True)
+    ROI = models.IntegerField(null=True, blank=True)
+    proposed_returned_budget = models.IntegerField(null=True, blank=True)
     renovation_type = models.CharField(max_length=50, choices=RENOVATION_CHOICES, null=True, blank=True)
     summary = models.TextField(null=False, max_length=257)
     status = models.CharField(max_length=255, choices=QuoteRequestStatus.choices, default=QuoteRequestStatus.pending)

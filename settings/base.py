@@ -34,6 +34,7 @@ SECRET_KEY = config("SECRET_KEY")
 # Application definition
 
 INSTALLED_APPS = [
+    "daphne",
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -109,7 +110,11 @@ TEMPLATES = [
     },
 ]
 
+
 WSGI_APPLICATION = 'SproostApp.wsgi.application'
+
+ASGI_APPLICATION = 'SproostApp.asgi.application'
+
 
 DATABASES = {
     'default': {
@@ -266,14 +271,14 @@ SOCIALACCOUNT_PROVIDERS = {
 
 AUTH_USER_MODEL = 'accounts.User'
 
-GOOGLE_API_KEY = "AIzaSyBIMv62jBi-MjrYXsARUfy8S5xZwKqeGqc"
+GOOGLE_API_KEY = config('GOOGLE_API_KEY')
 
 CSRF_TRUSTED_ORIGINS = ['https://fdb9-105-113-33-126.ngrok-free.app']
 
 CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': 'dnggljofw',
-    'API_KEY': '586111527832668',
-    'API_SECRET': 'WmY1BwTV7RHirzWinywslKg3tXU'
+    'CLOUD_NAME': config("CLOUD_NAME"),
+    'API_KEY': config("API_KEY"),
+    'API_SECRET': config("API_SECRET")
 }
 
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'

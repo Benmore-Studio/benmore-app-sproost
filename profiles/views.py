@@ -1,5 +1,5 @@
 
-from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiTypes
+from drf_spectacular.utils import extend_schema,extend_schema_view, OpenApiParameter, OpenApiTypes
 
 from rest_framework.parsers import MultiPartParser
 from rest_framework.exceptions import PermissionDenied, ValidationError
@@ -22,12 +22,10 @@ from .serializers import (SimpleContractorProfileSerializer,
                           SimpleHomeOwnerProfileSerializer, 
                           SimpleAgentProfileSerializer, AgentSerializer,
                           ContractorSerializer,SimplePropertySerializer,HomeOwnerSerializer,
-                          PolymorphicUserSerializer
+                          PolymorphicUserSerializer, AgentUserSerializer
 
                           
                         )
-
-
 
 
 
@@ -40,20 +38,57 @@ class GetUserListingsOrProperties(ListAPIView):
     serializer_class = SimplePropertySerializer
 
     def get_queryset(self):
-        return Property.objects.filter(property_owner=self.request.user)
+        return Property.objects.filter(property_owner=self.request.user).prefetch_related('media_paths')
+
     
-    
+
 class GetUserClientsOrAgents(ListAPIView):
-    """List of invited agents (if user is HO) or invited homeowners (if user is AG)."""
+    """
+    List of invited agents (if user is HO) or invited homeowners (if user is AG). 
+    The query types are different users-(AG,CO and HO). 
+    if you are trying to see the agents associated to house owners, query type = AG, 
+    if you are trying to see the house owners associated to agents, query type = HO, 
+    if you are trying to see the contractors associated to house owners, query type = CO and vice versa
+      
+    """
 
-    permission_classes = [IsAuthenticated]  
+    permission_classes = [IsAuthenticated] 
 
+    @extend_schema(
+    summary="Get User Clients or Agents",
+    description="""
+        **List of invited agents (if user is HO) or invited homeowners (if user is AG).**
+
+        - **Home Owners (HO):**
+        - `query_type=AG` → Returns invited agents
+        - `query_type=CO` → Returns associated contractors
+
+        - **Agents (AG):**
+        - `query_type=HO` → Returns invited homeowners
+        - `query_type=CO` → Returns associated contractors
+
+        Provide the appropriate `query_type` in the **URL** (or query param). 
+        If an invalid value is supplied for the user type, a validation error is raised.
+        """,
+    parameters=[
+        OpenApiParameter(
+            name="query_type",
+            type=OpenApiTypes.STR,
+            location=OpenApiParameter.PATH,  # or QUERY if you're using ?query_type=...
+            required=True,
+            description="Allowed values: 'AG', 'HO', or 'CO'."
+        )
+    ],
+    responses={
+        200: OpenApiTypes.OBJECT,
+        400: OpenApiTypes.OBJECT,
+    },
+)
     def get_queryset(self):
         user = self.request.user
         query_type = self.kwargs.get('query_type')
         if user.user_type == 'HO':
             if query_type == "AG":
-                print(2)
                 return (
                     user.user_profile
                     .home_owner_invited_agents
@@ -121,19 +156,25 @@ class EditUsersProfileAPIView(APIView):
         - Agents → `AgentProfile`
         - Contractors → `ContractorProfile`
         """,
-        parameters=[
-            OpenApiParameter(name="phone_number", type=OpenApiTypes.STR, required=False, description="User's phone number."),
-            OpenApiParameter(name="email", type=OpenApiTypes.STR, required=False, description="User's email address."),
-            OpenApiParameter(name="first_name", type=OpenApiTypes.STR, required=False, description="User's first name."),
-            OpenApiParameter(name="last_name", type=OpenApiTypes.STR, required=False, description="User's last name."),
-            OpenApiParameter(name="image", type=OpenApiTypes.STR, required=False, description="User's profile picture."),
-        ],
+        request={
+        "application/json": {
+            "type": "object",
+            "properties": {
+                "phone_number": {"type": "string", "description": "User's phone number"},
+                "email": {"type": "string", "description": "User's email address"},
+                "first_name": {"type": "string", "description": "User's first name"},
+                "last_name": {"type": "string", "description": "User's last name"},
+                "image": {"type": "string", "format": "binary", "description": "User's profile picture"},
+            }
+        }
+        },
     
         responses={
             200: OpenApiTypes.OBJECT,
             400: OpenApiTypes.OBJECT,
         },
     )
+
 
     def patch(self, request):
         user = request.user
@@ -270,7 +311,6 @@ class ChangeProfilePictureAPIView(APIView):
         else:
             # Handle errors
             self.stdout.write('ff')
-            print("ff")
             image_errors = form.errors.get('image', [])
             for error in image_errors:
                 if error == 'This field is required':
@@ -361,7 +401,7 @@ class UploadPicturesView(APIView):
 
 class AllAgents(ListAPIView):
     permission_classes = [IsAuthenticated]
-    serializer_class = SimpleAgentProfileSerializer
+    serializer_class = AgentUserSerializer
     queryset = AgentProfile.objects.all()
 
 
