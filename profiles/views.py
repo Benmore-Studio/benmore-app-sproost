@@ -15,8 +15,8 @@ from django.shortcuts import get_object_or_404
 
 from profiles.models import ContractorProfile, UserProfile, AgentProfile
 from profiles.services.contractor import ContractorService
-
-from quotes.models import QuoteRequest, Review, UserPoints, Bid,ProjectPictures, Property 
+from property.models import Property
+from quotes.models import QuoteRequest, Project,Review, UserPoints, Bid,ProjectPictures 
 from .serializers import (SimpleContractorProfileSerializer, 
                           ProfilePictureSerializer, UserSerializer,
                           SimpleHomeOwnerProfileSerializer, 
@@ -318,7 +318,7 @@ class ChangeProfilePictureAPIView(APIView):
                 else:
                     return Response({'error': f'An Error Occurred, {error}'}, status=status.HTTP_400_BAD_REQUEST)
 
-
+# not needed - web-based
 class ContractorUploadApiView(APIView):
     """
     API View to handle contractor media/project uploads.
@@ -412,8 +412,10 @@ class ContractorListAPIView(ListAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = ContractorSerializer
 
+    # def get_queryset(self):
+    #     return User.objects.select_related("contractor_profile").filter(user_type="CO", contractor_profile__isnull=False)
     def get_queryset(self):
-        return User.objects.select_related("contractor_profile").filter(user_type="CO", contractor_profile__isnull=False)
+        return ContractorProfile.objects.all()
     
 
 def award_points(user, points):

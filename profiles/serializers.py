@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import ContractorProfile, UserProfile, AgentProfile
-from main.serializers import MediaSerializer
+from property.models import Property
 from accounts.models import User
 from quotes.serializers import  QuoteRequestAllSerializer
 from quotes.models import Property, QuoteRequest
@@ -11,7 +11,12 @@ from rest_framework.exceptions import APIException
 class SimpleUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'email', 'first_name', 'phone_number','user_type', 'last_name', 'agent_profile', 'date_joined'] 
+        fields = '__all__'
+        extra_kwargs = {
+                'password': {'write_only': True},
+                'last_login': {'read_only': True},
+                'is_superuser': {'read_only': True},
+            }
 
 
 class SimpleContractorProfileSerializer(serializers.ModelSerializer):
@@ -80,6 +85,7 @@ class ContractorSerializer(serializers.ModelSerializer):
             'contractor_profile',
             'property_owner',
         ]
+
 
 
 class HomeOwnerSerializer(serializers.ModelSerializer):
