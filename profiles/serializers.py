@@ -2,9 +2,10 @@ from rest_framework import serializers
 from .models import ContractorProfile, UserProfile, AgentProfile
 from property.models import Property
 from accounts.models import User
-from quotes.serializers import  QuoteRequestAllSerializer
-from quotes.models import Property, QuoteRequest
+from quotes.serializers import  QuoteRequestAllSerializer, MediaSerializer
+from quotes.models import QuoteRequest
 from rest_framework.exceptions import APIException
+
 
 
 
