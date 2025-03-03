@@ -216,7 +216,7 @@ class PropertyUpdateSerializer(serializers.ModelSerializer):
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
         instance.save()
-
+    # TODO: CHECK BACK ON THIS IN THE FUTURE UPDATES
         # --- Update home_owner_agents ---
         if home_owner_agent_data is not None and len(home_owner_agent_data) > 0:
             # Ensure we are working with IDs.
