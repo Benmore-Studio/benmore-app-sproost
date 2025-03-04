@@ -3,7 +3,7 @@ from .models import ContractorProfile, UserProfile, AgentProfile
 from property.models import Property
 from accounts.models import User
 from quotes.serializers import  QuoteRequestAllSerializer, MediaSerializer
-from quotes.models import QuoteRequest
+from quotes.models import QuoteRequest,UserPoints
 from rest_framework.exceptions import APIException
 
 
@@ -166,16 +166,25 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 
+class UserPointsSerializer(serializers.ModelSerializer):
+    user = SimpleUserSerializer
+    class Meta:
+        model = UserPoints
+        fields = ['user', 'total_points']
+
+
 class HomeViewUserSerializer(serializers.ModelSerializer):
     # using a method field for `user_profile`
     user_profile = serializers.SerializerMethodField()
     
     property_owner = SimplePropertySerializer(many=True, read_only=True)
+    
+    points = UserPointsSerializer(many=True, read_only=True)
 
     class Meta:
         model = User
         fields = ['id', 'username', 'phone_number',
-            'user_type', 'email', 'last_name', 'first_name', 'user_type', 'user_profile', 'property_owner']
+            'user_type', 'email', 'last_name', 'first_name', 'user_type', 'user_profile', 'property_owner', 'points']
     
     def get_user_profile(self, user):
         """

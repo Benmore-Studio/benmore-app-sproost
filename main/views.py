@@ -72,11 +72,13 @@ class HomeView(GenericAPIView):
             context = User.objects.select_related('user_profile').prefetch_related("owned_properties").get(id=request.user.id)
             
         elif user_type == "AG":
-            context = User.objects.select_related('agent_profile').prefetch_related("owned_properties").get(id=request.user.id)
+            context = User.objects.select_related('agent_profile').prefetch_related(
+                "owned_properties", "points"
+            ).get(id=request.user.id)
 
         elif user_type == "CO":
             context =  User.objects.select_related('contractor_profile').prefetch_related(
-                 'owned_properties').get(id=request.user.id)
+                 'owned_properties', "points").get(id=request.user.id)
         else:
             raise PermissionDenied("Unauthorized access")
         

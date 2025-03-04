@@ -31,8 +31,8 @@ class UserProfile(models.Model):
 
 class AgentProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name = 'agent_profile')
-    agent_invited_home_owners = models.ForeignKey(User, on_delete=models.CASCADE, related_name = 'invited_home_owners')
-    agent_associated_contarctors = models.ForeignKey(User, on_delete=models.CASCADE, related_name = 'agent_associated_contarctors')
+    agent_invited_home_owners = models.ForeignKey(User, on_delete=models.SET_NULL, related_name = 'invited_home_owners', null=True, blank=True)
+    agent_associated_contarctors = models.ForeignKey(User, on_delete=models.SET_NULL, related_name = 'agent_associated_contarctors', null=True, blank=True)
     agent_address = models.CharField(max_length = 50)
     registration_ID = models.CharField(max_length = 225, unique=True, verbose_name="license number", help_text='Also known as licences_ID')
     image = models.ImageField(upload_to=image_upload_location_agent, null=True)
