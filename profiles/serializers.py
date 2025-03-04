@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import ContractorProfile, UserProfile, AgentProfile
+from .models import ContractorProfile, UserProfile, AgentProfile, Invitation
 from property.models import Property
 from accounts.models import User
 from quotes.serializers import  QuoteRequestAllSerializer, MediaSerializer
@@ -204,6 +204,15 @@ class HomeViewUserSerializer(serializers.ModelSerializer):
         
         # Default case (maybe None or an empty dict)
         return None
+    
+
+
+
+class InvitationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Invitation
+        fields = ['id', 'email', 'referral_code', 'created_at']
+        read_only_fields = ['referral_code', 'created_at']
 
 class QuotePropertySerializer(serializers.ModelSerializer):
     property = SimplePropertySerializer(read_only=True)

@@ -25,8 +25,6 @@ from rest_framework.permissions import IsAuthenticated
 from quotes.serializers import QuoteRequestAllSerializer, ProjectSerializer
 from property.serializers import AssignedAccountSerializer
 
-from profiles.models import Referral
-
 
 
 

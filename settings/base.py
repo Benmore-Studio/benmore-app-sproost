@@ -313,3 +313,5 @@ SIMPLE_JWT = {
     'BLACKLIST_AFTER_ROTATION': True, 
 }
 
+
+DOMAIN_NAME=config('DOMAIN_NAME', default='http://localhost:8000')

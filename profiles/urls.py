@@ -9,6 +9,7 @@ urlpatterns = [
     path('contractor-change-dp-request/', views.ChangeProfilePictureAPIView.as_view(), name="change-dp-request"),
     path('contractor-upload/', views.ContractorUploadApiView.as_view(), name='upload'),
     path('all-agents/', views.AllAgents.as_view(), name="all-agents"),
+    path('invite-agents/', views.InviteAgentView.as_view(), name="invite-agents"),
     path('list-contractors/', views.ContractorListAPIView.as_view(), name="list-contractors"),
     path('get-clients-agents-or-contractors/<str:query_type>/', views.GetUserClientsOrAgents.as_view(), name="get-clients-or-agents"),
     path('user-listing-or-properties/', views.GetUserListingsOrProperties.as_view(), name="user-listing-or-properties"),

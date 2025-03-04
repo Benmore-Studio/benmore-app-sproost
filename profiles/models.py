@@ -1,3 +1,4 @@
+import uuid
 from django.db import models
 from accounts.models import User
 from address.models import AddressField
@@ -76,37 +77,19 @@ class InvestorProfile(models.Model):
         return self.user.email
     
     
+    
+class Invitation(models.Model):
+    inviter = models.ForeignKey(User, on_delete=models.CASCADE, related_name='invitations') # for agents to agents
+    email = models.EmailField()
+    referral_code = models.CharField(max_length=50, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    accepted = models.BooleanField(default=False)
 
-class Referral(models.Model):
-    """Represents a referral made by a user.
-
-    Attributes:
-        referrer (User): The user who made the referral.
-        referred (User): The users who have been referred.
-        code (str): The referral code.
-    """
-    referrer = models.OneToOneField(
-        User,
-        on_delete=models.CASCADE,
-        related_name='referrer',
-        help_text=_('The user who made the referral.')
-    )
-    referred = models.ManyToManyField(
-        User,
-        related_name='referred',
-        help_text=_('The users who have been referred.')
-    )
-    code = models.CharField(
-        max_length=100,
-        help_text=_('The referral code.')
-    )
-
-    class Meta:
-        verbose_name = _('Referral')
-        verbose_name_plural = _('Referrals')
-
-    def __str__(self):
-        return self.referrer.email
+    def save(self, *args, **kwargs):
+        # Generate a referral code if not provided
+        if not self.referral_code:
+            self.referral_code = str(uuid.uuid4()).replace('-', '')[:10]
+        super().save(*args, **kwargs)
 
 
 class Message(models.Model):

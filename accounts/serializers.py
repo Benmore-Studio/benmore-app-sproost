@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
-from profiles.models import UserProfile, AgentProfile, ContractorProfile, Referral, InvestorProfile
+from profiles.models import UserProfile, AgentProfile, ContractorProfile, Invitation, InvestorProfile
 from property.models import AssignedAccount
 from phonenumber_field.formfields import PhoneNumberField
 from phonenumber_field.serializerfields import PhoneNumberField
@@ -18,7 +18,7 @@ class CustomSignupSerializer(serializers.ModelSerializer):
     city = serializers.CharField(max_length=100, required=False)
     state = serializers.CharField(max_length=100, required=False)
     user_type = serializers.ChoiceField(choices=[('HO', 'Home Owner'), ('AG', 'Agent'), ('CO', 'Contractor'), ('IV', 'Investor')], required=True)
-    referral_code = serializers.CharField(max_length=100, required=False)
+    referral_code = serializers.CharField(required=False, allow_blank=True)
 
 
     # Contractor Info
@@ -32,6 +32,7 @@ class CustomSignupSerializer(serializers.ModelSerializer):
     # Agent Info
     registration_ID= serializers.CharField(help_text='registration_ID', max_length=225, required=False)
     agent_address = serializers.CharField(max_length=255, required=False)
+    
 
 
     # investor info
@@ -147,6 +148,20 @@ class CustomSignupSerializer(serializers.ModelSerializer):
     #     if not email:
     #         raise serializers.ValidationError({"email": "This field is required."})
     #     return value
+    
+    def validate_referral_code(self, value):
+            # If referral code is provided, validate it exists and hasn't been used
+        if value:
+            try:
+                invitation = Invitation.objects.get(referral_code=value)
+            except Invitation.DoesNotExist:
+                raise serializers.ValidationError("Invalid referral code.")
+            
+            if invitation.accepted:
+                raise serializers.ValidationError("This referral code has already been used.")
+            
+            # Optionally, you could perform additional checks such as expiration
+        return value
 
 
     def validate_email(self, value):
@@ -178,9 +193,10 @@ class CustomSignupSerializer(serializers.ModelSerializer):
             referral_code = validated_data.get('referral_code')
             if referral_code:
                 try:
-                    referral = Referral.objects.get(code=referral_code)
-                    referral.referred.add(user)
-                    referral.save()
+                     
+                    invitation = Invitation.objects.get(referral_code=referral_code)
+                    invitation.accepted = True
+                    invitation.save()
 
                     # Handle agent assignment if referral code is agent's registration ID
                     agent = AgentProfile.objects.get(registration_ID=referral_code)
@@ -189,7 +205,7 @@ class CustomSignupSerializer(serializers.ModelSerializer):
                         assigned_by=user,
                         is_approved=True
                     )
-                except (Referral.DoesNotExist, AgentProfile.DoesNotExist):
+                except (Invitation.DoesNotExist, AgentProfile.DoesNotExist):
                     pass
 
         elif user.user_type == "AG":
