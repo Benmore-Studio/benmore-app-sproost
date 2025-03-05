@@ -1,12 +1,34 @@
 from django.contrib import admin
 from django.utils.html import format_html
-from .models import QuoteRequest, Project, Property
+from .models import QuoteRequest, Project, Property, QuoteRequestStatus
+
+class StatusFilter(admin.SimpleListFilter):
+    title = "Status"
+    parameter_name = "status"
+
+    def lookups(self, request, model_admin):
+        """Defines the filter options."""
+        return [
+            (QuoteRequestStatus.pending, "Pending"),
+            (QuoteRequestStatus.returned, "Returned"),
+            (QuoteRequestStatus.accepted, "Accepted"),
+            (QuoteRequestStatus.rejected, "Rejected"),
+        ]
+
+    def queryset(self, request, queryset):
+        """Filters the queryset based on the selected option."""
+        if self.value():
+            return queryset.filter(status=self.value())
+        return queryset
 
 class QuoteRequestAdmin(admin.ModelAdmin):
-    list_display = ('title', 'user', 'status', 'is_quote', 'upload_date')
-    list_filter = ('status', 'is_quote', 'upload_date')
-    search_fields = ('title', 'user__username', 'contact_username')
-    readonly_fields = ('upload_date',)
+    list_display = ("title", "user", "status", "is_quote", "upload_date")
+    list_filter = (StatusFilter, "is_quote", "upload_date")  # Custom filter added
+    search_fields = ("title", "user__email")
+    ordering = ("-upload_date",)
+
+
+
 
 class ProjectAdmin(admin.ModelAdmin):
     list_display = ('quote_request_title', 'admin', 'is_approved', 'file_link', 'upload_date')
@@ -31,5 +53,5 @@ class ProjectAdmin(admin.ModelAdmin):
 
 # Register your models here
 admin.site.register(QuoteRequest, QuoteRequestAdmin)
-admin.site.register(Project, ProjectAdmin)
+# admin.site.register(Project, ProjectAdmin)
 admin.site.register(Property)

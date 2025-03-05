@@ -1,0 +1,82 @@
+openapi: 3.0.0
+info:
+  title: WebSocket Chat API
+  description: API documentation for the WebSocket-based chat system.
+  version: 1.0.0
+servers:
+  - url: ws://127.0.0.1:8000/ws/chat/?Bearertoken=Bearertoken code
+    description: Local WebSocket server (development)
+  - url: wss://api.example.com/ws/chat/?Bearertoken=Bearertoken code
+    description: Production WebSocket server
+
+paths:
+  /chat:
+    get:
+      summary: Connect to WebSocket
+      description: Establish a WebSocket connection for real-time chat.
+      parameters:
+        - name: Bearertoken
+          in: query
+          required: true
+          description: JWT token for authentication (sent as a query parameter).
+          schema:
+            type: string
+      responses:
+        "101":
+          description: WebSocket connection established successfully
+        "403":
+          description: Unauthorized - Invalid or missing Bearer token
+        "400":
+          description: Bad Request - Invalid WebSocket request
+
+components:
+  schemas:
+    SendMessage:
+      type: object
+      required:
+        - action
+        - room_id
+        - message
+      properties:
+        action:
+          type: string
+          example: "send"
+          description: The action type (e.g., "send", "join", "leave").
+        room_id:
+          type: integer
+          example: 1
+          description: The ID of the chat room.
+        message:
+          type: string
+          example: "Hello, world!"
+          description: The chat message content.
+
+    ReceiveMessage:
+      type: object
+      properties:
+        action:
+          type: string
+          example: "message"
+          description: The type of message received.
+        room:
+          type: integer
+          example: 1
+          description: The room ID.
+        username:
+          type: string
+          example: "user1"
+          description: The sender's username.
+        message:
+          type: string
+          example: "Hello, world!"
+          description: The actual chat message.
+        timestamp:
+          type: string
+          format: date-time
+          example: "2025-03-04T10:49:26Z"
+          description: Timestamp when the message was sent.
+
+tags:
+  - name: WebSocket
+    description: WebSocket communication for real-time chat
+

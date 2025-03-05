@@ -158,6 +158,7 @@ class Referral(models.Model):
     referral_code = models.CharField(max_length=12, unique=True)
     date_created = models.DateTimeField(auto_now_add=True)
 
+
 class UserPoints(models.Model):
     user = models.OneToOneField("accounts.User", on_delete=models.CASCADE, related_name='points')
     total_points = models.PositiveIntegerField(default=0)

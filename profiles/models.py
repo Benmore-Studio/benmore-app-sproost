@@ -37,6 +37,7 @@ class AgentProfile(models.Model):
     registration_ID = models.CharField(max_length = 225, unique=True, verbose_name="license number", help_text='Also known as licences_ID')
     image = models.ImageField(upload_to=image_upload_location_agent, null=True)
     country= models.CharField(max_length=500)
+
     
     def __str__(self):
         return self.user.email
@@ -75,7 +76,7 @@ class InvestorProfile(models.Model):
     def __str__(self):
         return self.user.email
     
-    
+
 
 class Referral(models.Model):
     """Represents a referral made by a user.
@@ -108,18 +109,4 @@ class Referral(models.Model):
     def __str__(self):
         return self.referrer.email
 
-
-class Message(models.Model):
-    content = models.TextField(max_length=512)
-    sender= models.ForeignKey(User, on_delete=models.CASCADE, related_name="messagesender")
-    receiver= models.ForeignKey(User, on_delete=models.CASCADE, related_name="messagereceiver")
-    timestamp = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        indexes = [
-            models.Index(fields=['sender', 'receiver'])
-        ]
-
-    def __str__(self):
-        return f'{self.content}'
 
