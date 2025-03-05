@@ -1,23 +1,19 @@
-from django.shortcuts import get_object_or_404
-
+ 
 from accounts.models import User
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiTypes
 from quotes.services import QuoteService
-
 from django.contrib.auth import get_user_model
-from rest_framework import viewsets
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.response import Response
 from rest_framework import status, filters
 from rest_framework.views import APIView
 from rest_framework.generics import GenericAPIView, ListAPIView, UpdateAPIView, RetrieveAPIView 
 from rest_framework.permissions import IsAuthenticated
-
-from profiles.models import UserProfile, AgentProfile
-from profiles.serializers import PropertySerializer, QuotePropertySerializer
-from .models import Project, Property, QuoteRequest
-from .serializers import ProjectSerializer, QuoteRequestSerializer,BulkMediaSerializer, MediaSerializer
-
+from rest_framework import generics
+from profiles.serializers import PropertySerializer
+from property.models import Property
+from .models import QuoteRequest
+from .serializers import   QuoteRequestSerializer,BulkMediaSerializer
 from django.db.models import Prefetch
 from django.contrib.contenttypes.models import ContentType
 from django.core.serializers import serialize
@@ -366,3 +362,6 @@ class PropertySearchView(ListAPIView):
     filter_backends = [filters.SearchFilter]
     # Adjust these fields to whatever you want to enable searching on
     search_fields = ['address', 'property_owner__username', 'basement_details', 'tittle']
+
+
+

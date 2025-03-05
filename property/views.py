@@ -1,20 +1,20 @@
 from quotes.models import Project, QuoteRequest
 from django.contrib.auth import get_user_model
-from .models import AssignedAccount
-
-
-from rest_framework.generics import RetrieveAPIView
+from .models import AssignedAccount, Property
+from django.db.models import Q
+from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.exceptions import NotFound, PermissionDenied
-from property.models import AssignedAccount
 from profiles.serializers import HomeOwnerSerializer 
+from .serializers import ( PropertyCreateSerializer,PropertyUpdateSerializer, PropertyRetrieveSerializer)
+from rest_framework.parsers import MultiPartParser, FormParser
 
 
 User = get_user_model()
 
 
-class AgentsHomeOwnerAccountAPIView(RetrieveAPIView):
+class AgentsHomeOwnerAccountAPIView(generics.RetrieveAPIView):
     """
     API View to handle retrieving a home owner's details for agents who were assigned to them.
 
@@ -61,11 +61,73 @@ class AgentsHomeOwnerAccountAPIView(RetrieveAPIView):
             raise NotFound("Home Owner not found.")
 
         
-# class ViewAllPropertyAPIView(ListAPIView):
-#     """
-#     API View to retrieve all properties.
-#     """
-#     queryset = Property.objects.all()
-#     serializer_class = PropertySerializer
-#     permission_classes = [IsAuthenticated ]
+class PropertyCreateView(generics.CreateAPIView):
+    queryset = Property.objects.all()
+    serializer_class = PropertyCreateSerializer
+    permission_classes = [IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser]
+
+
+
+   
     
+class PropertyRetrieveView(generics.RetrieveAPIView):
+    queryset = Property.objects.all()
+    permission_classes = [IsAuthenticated]
+    serializer_class = PropertyRetrieveSerializer
+
+class PropertyUpdateView(generics.UpdateAPIView):
+    queryset = Property.objects.all()
+    permission_classes = [IsAuthenticated]
+    serializer_class = PropertyUpdateSerializer
+
+
+
+
+class UserPropertyListView(generics.ListAPIView):
+    serializer_class = PropertyRetrieveSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        user_type = getattr(user, 'user_type', None)
+        
+        # Start with an empty QuerySet.
+        qs = Property.objects.none()
+
+        if user_type == "CO":
+            # For contractors, combine properties they own and those assigned to their contractor profile.
+            qs = Property.objects.filter(property_owner=user)
+            try:
+                contractor_profile = user.contractor_profile  # Adjust attribute name if needed.
+                qs = qs | Property.objects.filter(contractors=contractor_profile)
+            except Exception:
+                pass
+        elif user_type == "AG":
+            # For agents, include properties they own and those where they are added as a home_owner_agent.
+            qs = Property.objects.filter(Q(property_owner=user) | Q(home_owner_agents=user))
+        elif user_type == "HO":
+            # For home owners, only include properties they own.
+            qs = Property.objects.filter(property_owner=user)
+        elif user_type == "IV":
+            # For investors, you might choose a different rule. Here we return properties they liked.
+            qs = Property.objects.filter(likes=user)
+        else:
+            # For any other user type, you might default to all properties.
+            qs = Property.objects.all()
+
+        return qs.distinct()
+    
+    
+class PropertyDeleteView(generics.DestroyAPIView):
+    queryset = Property.objects.all()
+    serializer_class = PropertyRetrieveSerializer
+    permission_classes = [IsAuthenticated]
+
+    def perform_destroy(self, instance):
+        request = self.request
+        # Only allow deletion if the request.user is the property owner or an admin.
+        if instance.property_owner != request.user and not request.user.is_staff:
+            from rest_framework.exceptions import PermissionDenied
+            raise PermissionDenied("You do not have permission to delete this property.")
+        instance.delete()
