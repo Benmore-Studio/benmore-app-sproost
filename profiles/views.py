@@ -438,20 +438,17 @@ class InviteAgentView(generics.GenericAPIView):
             return Response({"error": "Email is required."}, status=status.HTTP_400_BAD_REQUEST)
 
         # Create the invitation instance; referral_code is auto-generated in save()
-        invitation = Invitation.objects.create(inviter=inviter, email=email)
+        invitation = Invitation.objects.filter(inviter=inviter, email=email).first()
+        
+        if invitation:
+            send_invitation_email(email, invitation.referral_code)
+              
+        else:
 
-        # Build referral link (using a frontend URL from settings)
-        referral_link = f"{settings.DOMAIN_NAME}/accounts/manual_signup?referral_code={invitation.referral_code}"
+            invitation = Invitation.objects.create(inviter=inviter, email=email)
+            send_invitation_email(email, invitation.referral_code)
 
-        send_invitation_email(email, invitation.referral_code)
 
-        # Count total invitations sent by this agent  
-        invitation_count = Invitation.objects.filter(inviter=inviter, accepted=True).count()
-        # When the agent reaches 10 invitations, reward them with 1000 points.
-        if invitation_count >= 10:
-            user_points, _ = UserPoints.objects.get_or_create(user=inviter)
-            user_points.total_points += 1000
-            user_points.save()
 
         serializer = self.get_serializer(invitation)         
         return Response(serializer.data, status=status.HTTP_201_CREATED)

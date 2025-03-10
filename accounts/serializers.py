@@ -4,6 +4,7 @@ from profiles.models import UserProfile, AgentProfile, ContractorProfile, Invita
 from property.models import AssignedAccount
 from phonenumber_field.formfields import PhoneNumberField
 from phonenumber_field.serializerfields import PhoneNumberField
+from quotes.models import UserPoints
 
 
 
@@ -209,6 +210,20 @@ class CustomSignupSerializer(serializers.ModelSerializer):
                     pass
 
         elif user.user_type == "AG":
+            referral_code = validated_data.get('referral_code')
+            if referral_code:                     
+                invitation = Invitation.objects.get(referral_code=referral_code)
+                invitation.accepted = True
+                invitation.save()
+                
+            # Count total invitations sent by this agent  
+            invitation_count = Invitation.objects.filter(referral_code=referral_code, accepted=True).count()
+             # When the agent reaches 10 invitations, reward them with 1000 points.
+            if invitation_count >= 1:
+                user_points, _ = UserPoints.objects.get_or_create(user=invitation.inviter)
+                user_points.total_points += 1000
+                user_points.save()
+                    
             AgentProfile.objects.create(
                 user=user,
                 agent_address=validated_data.get('agent_address'),

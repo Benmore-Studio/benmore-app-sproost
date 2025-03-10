@@ -23,8 +23,7 @@ class SimpleUserSerializer(serializers.ModelSerializer):
 class SimpleContractorProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = ContractorProfile
-        fields = '__all__' 
-
+        fields = '__all__'
 
 class SimpleHomeOwnerProfileSerializer(serializers.ModelSerializer):
     class Meta:
@@ -167,11 +166,11 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class UserPointsSerializer(serializers.ModelSerializer):
-    user = SimpleUserSerializer
     class Meta:
         model = UserPoints
-        fields = ['user', 'total_points']
-
+        fields = ['total_points']
+        
+ 
 
 class HomeViewUserSerializer(serializers.ModelSerializer):
     # using a method field for `user_profile`
@@ -179,12 +178,13 @@ class HomeViewUserSerializer(serializers.ModelSerializer):
     
     property_owner = SimplePropertySerializer(many=True, read_only=True)
     
-    points = UserPointsSerializer(many=True, read_only=True)
+    points = serializers.IntegerField(source="points.total_points", default=0, read_only=True)
 
     class Meta:
         model = User
         fields = ['id', 'username', 'phone_number',
             'user_type', 'email', 'last_name', 'first_name', 'user_type', 'user_profile', 'property_owner', 'points']
+    
     
     def get_user_profile(self, user):
         """
@@ -204,6 +204,8 @@ class HomeViewUserSerializer(serializers.ModelSerializer):
         
         # Default case (maybe None or an empty dict)
         return None
+    
+ # R
     
 
 

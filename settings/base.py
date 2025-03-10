@@ -214,11 +214,15 @@ SESSION_SAVE_EVERY_REQUEST = True  # Save the session to the database on every r
 
 
 
-# ACCOUNT_SIGNUP_REDIRECT_URL = "/jobs/job-onboarding/"
-
-# Email settings for local testing
-EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
-EMAIL_FILE_PATH = '/tmp/app-emails'  
+ 
+ 
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.sendgrid.net"
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = "apikey"  # Use "apikey" as the username
+EMAIL_HOST_PASSWORD = config('SENDGRID_API_KEY')
+DEFAULT_FROM_EMAIL = config('FROM_EMAIL')
 
 
 

@@ -13,9 +13,3 @@ DATABASES = {
     }
 }
 
-
-# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-# EMAIL_HOST_USER = "samuel@gmail.com"
-
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-EMAIL_HOST_USER = "benmore@gmail.com"
