@@ -202,15 +202,18 @@ class QuotesAPIView(GenericAPIView):
         Get initial data for the form based on the user type (HO or AG).
         """
         home_owner_quotes = self.get_user(user)
-        tt = home_owner_quotes.quote_requests.all()
-        print(home_owner_quotes)
-        print("home_owner_quotes")
-        print(tt)
-        # print(tt.property)
-        serializer = QuotePropertySerializer(tt, many = True)
-
-        if user.user_type == 'HO' or user.user_type == 'AG':
-            return serializer.data
+        quotes_data = json.loads(serialize('json', home_owner_quotes.quote_requests.all()))
+        if user.user_type == 'HO':
+            return {
+                'contact_phone': str(user.phone_number),
+                'custom_home_owner_id': user.pk,
+                'created_by_agent': user.pk,
+                "quotes": quotes_data
+            }
+        elif user.user_type == 'AG':
+            return {
+                'contact_phone': user.phone_number,
+            }
         return {}
 
 

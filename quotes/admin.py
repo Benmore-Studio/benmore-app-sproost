@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.utils.html import format_html
-from .models import QuoteRequest, Project
+from .models import QuoteRequest, Project, UserPoints
 
 class QuoteRequestAdmin(admin.ModelAdmin):
     list_display = ('title', 'user', 'status', 'is_quote', 'upload_date')
@@ -32,3 +32,4 @@ class ProjectAdmin(admin.ModelAdmin):
 # Register your models here
 admin.site.register(QuoteRequest, QuoteRequestAdmin)
 admin.site.register(Project, ProjectAdmin)
+admin.site.register(UserPoints)

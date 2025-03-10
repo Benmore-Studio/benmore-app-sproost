@@ -94,6 +94,11 @@ class Property(models.Model):
         default=PropertyStatusChoices.PENDING,
         help_text=_("Status: Pending (new listing), In Progress (contractor assigned), Completed (work finished).")
     )
+    
+    is_first_property = models.BooleanField(
+        default=True,
+        help_text=_("Indicates if this is the property owner's first property.")
+    )
 
     def __str__(self):
         return f"{self.property_owner} - {self.address}"

@@ -6,6 +6,7 @@ from profiles.models import ContractorProfile
 from django.contrib.contenttypes.models import ContentType
 from main.models import Media
 from quotes.serializers import MediaSerializer, BulkMediaSerializer
+from quotes.models import UserPoints
 from .models import AssignedAccount, Property
 from accounts.models import User
 from profiles.models import ContractorProfile
@@ -60,8 +61,8 @@ class PropertyCreateSerializer(serializers.ModelSerializer):
             
                     
         # Extract many-to-many fields first.
-        home_owner_agents = validated_data.pop('home_owner_agents', [])
-        contractors = validated_data.pop('contractors', [])
+        home_owner_agents = validated_data.pop('home_owner_agents', None)
+        contractors = validated_data.pop('contractors', None)
         before_images = validated_data.pop('before_images', [])
         after_images = validated_data.pop('after_images', [])
         
@@ -69,10 +70,7 @@ class PropertyCreateSerializer(serializers.ModelSerializer):
 
         # Create the Property instance without M2M fields
         property_obj = Property.objects.create(**validated_data)
-            
-
-        # Create the Property. You may have additional logic to set the status.
-        property_obj = super().create(validated_data)
+             
         
         # Get ContentType for Property
         ct = ContentType.objects.get_for_model(Property)
@@ -90,6 +88,39 @@ class PropertyCreateSerializer(serializers.ModelSerializer):
         bulk_serializer.is_valid(raise_exception=True)
         # Save creates all Media objects.
         bulk_serializer.save()
+
+        # Check if property status is completed and reward points to agents
+        if property_obj.status == 'completed':
+            # Check if this is the first time the property is marked as completed
+            # Check if the agent already has other completed properties
+            if property_obj.property_owner.user_type == 'AG':
+                owner_completed_properties = Property.objects.filter(
+                    property_owner=property_obj.property_owner,
+                    status='completed'
+                ).exclude(id=property_obj.id).count()
+                
+                # Only award points if this is their first or second completed property
+                if owner_completed_properties <= 0:
+                    user_points, created = UserPoints.objects.get_or_create(user=property_obj.property_owner)
+                    user_points.total_points += 1500
+                    user_points.save()
+
+            # Similarly for home_owner_agents, check their completed property count
+            for agent in property_obj.home_owner_agents.all():
+                if agent.user_type == 'AG' and agent != property_obj.property_owner:
+                    agent_completed_properties = Property.objects.filter(
+                        home_owner_agents=agent,
+                        status='completed'
+                    ).exclude(id=property_obj.id).count()
+                    
+                    # Only award points if this is their first or second completed property
+                    if agent_completed_properties <= 0:
+                        user_points, created = UserPoints.objects.get_or_create(user=agent)
+                        user_points.total_points += 1500
+                        user_points.save()
+                        # Since this is a new property, we know it's the first time
+            
+            
 
         return property_obj
     
@@ -288,7 +319,43 @@ class PropertyUpdateSerializer(serializers.ModelSerializer):
                 )
             # Optionally update the status to 'completed'
             instance.status = "completed"
+        
             
         instance.save()
+        
+        
+        # Check if property status is changed to completed and reward points to agents
+        if instance.status == 'completed' and instance.is_first_property != False:
+            # Check if the agent already has other completed properties
+            if instance.property_owner.user_type == 'AG':
+                owner_completed_properties = Property.objects.filter(
+                    property_owner=instance.property_owner,
+                    status='completed'
+                ).exclude(id=instance.id).count()
+                
+                # Only award points if this is their first completed property
+                if owner_completed_properties <= 0 and instance.is_first_property != False:
+                    user_points, _ = UserPoints.objects.get_or_create(user=instance.property_owner)
+                    user_points.total_points += 1500
+                    user_points.save()
+
+            # Similarly for home_owner_agents, check their completed property count
+            for agent in instance.home_owner_agents.all():
+                if agent.user_type == 'AG' and agent != instance.property_owner:
+                    agent_completed_properties = Property.objects.filter(
+                        home_owner_agents=agent,
+                        status='completed'
+                    ).exclude(id=instance.id).count()
+                    
+                    # Only award points if this is their first completed property
+                    if agent_completed_properties <= 0 and instance.is_first_property != False:
+                        user_points, _ = UserPoints.objects.get_or_create(user=agent)
+                        user_points.total_points += 1500
+                        user_points.save()
+            
+            # Only mark it as not the first property after points are awarded
+            instance.is_first_property = False
+            instance.save()
+            
 
         return instance
