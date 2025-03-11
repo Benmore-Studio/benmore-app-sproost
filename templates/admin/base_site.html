@@ -3,6 +3,12 @@
 {% block extrahead %}
     {{ block.super }}
     <!-- Tailwind CSS via CDN (for demo) -->
+     <!-- Toastify CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+
+    <!-- Toastify JS -->
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.2.7/dist/tailwind.min.css" rel="stylesheet"/>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -92,6 +98,36 @@
     </div>
   </div>
 
+  <!-- leave room yes or no modal-->
+  <div id="leave-room-yes-or-no-modal" class="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50" style="z-index: 100; display: none;">
+    <div class="bg-white rounded-lg shadow-lg w-full max-w-md fixed z-index-50">
+      <!-- Modal Header -->
+      <div class="px-6 py-4 border-b border-gray-200">
+        <h3 class="text-xl font-semibold">Are you sure you want to leave room?</h3>
+      </div>
+      <!-- Modal Body -->
+      <div class="px-6 py-4 border-t border-gray-200 flex justify-end">
+        <button id="leave-room-closeModalBtn"  class="inline-flex items-center w-[70%] md:w-[50%] justify-center p-3 rounded-3xl bg-red-600 text-white border border-neutral-150 shadow-sm font-semibold">Cancel</button>
+        <button id="leave-room-confirm"  class="inline-flex items-center w-[70%] md:w-[50%] justify-center p-3 rounded-3xl bg-[#417690] text-white border border-neutral-150 shadow-sm font-semibold">Leave</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- remove user yes or no modal-->
+  <div id="remove-user-yes-or-no-modal" class="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50" style="z-index: 100; display: none;">
+    <div class="bg-white rounded-lg shadow-lg w-full max-w-md fixed z-index-50">
+      <!-- Modal Header -->
+      <div class="px-6 py-4 border-b border-gray-200">
+        <h3 class="text-xl font-semibold">Are you sure you want to remove this user?</h3>
+      </div>
+      <!-- Modal Body -->
+      <div class="px-6 py-4 border-t border-gray-200 flex justify-end">
+        <button id="remove-user-closeModalBtn"  class="inline-flex items-center w-[70%] md:w-[50%] justify-center p-3 rounded-3xl bg-red-600 text-white border border-neutral-150 shadow-sm font-semibold">Cancel</button>
+        <button id="remove-user-confirm"  class="inline-flex items-center w-[70%] md:w-[50%] justify-center p-3 rounded-3xl bg-[#417690] text-white border border-neutral-150 shadow-sm font-semibold">Leave</button>
+      </div>
+    </div>
+  </div>
+
 
   <div id="icon-container" style="display: flex; justify-content: center; gap: 1rem; margin-top: -7px;">
     <!-- Insert our chat icon + dropdown in the user links bar -->
@@ -165,7 +201,7 @@
                 {% if request.user == 'ADMIN' %}
                   <p id="add-user" class="cursor-pointer text-blue-500">Add</p>     
                 {% endif %}
-                  
+                
               </div>
             </div>
               <div id="roomTitle" class="mt-4 text-center"></div>
@@ -208,7 +244,6 @@
 
 
 <script>
-  
   let header = document.querySelector("#header")
   let userTools = document.querySelector("#user-tools")
   let chatIcon = document.querySelector("#chat-icon")
@@ -219,12 +254,22 @@
   const individualChatListBody = document.getElementById("individual-chatList-body");
   const backArrow = document.getElementById("back-arrow");
   const addUserToGroup = document.getElementById("add-user");
+  const adminleaveRoomButton = document.getElementById("leave-room");
+  const leaveRoomYesOrNoModal = document.getElementById("leave-room-yes-or-no-modal");
+  const removeUserYesOrNoModal = document.getElementById("remove-user-yes-or-no-modal");
+  let createChatModal = document.getElementById('create-chatModal')
   let addUserModal = document.getElementById("only-add-user-modal")
+  let leaveRoomCloseModalBtn = document.getElementById("leave-room-closeModalBtn")
+  let removeUserCloseModalBtn = document.getElementById("remove-user-closeModalBtn")
+  let leaveRoomConfirm = document.getElementById("leave-room-confirm")
+  let removeUserConfirm = document.getElementById("remove-user-confirm")
   backArrow.style.marginTop = '8px'
   const roomDetails = {}
   let globalRoomName
   let adminAddUserRoomTitle
   let sender 
+  let messageCount = 0
+
   console.log("usertools",header);
   // header.prepend(chatIcon)
   header.prepend(iconContainer)
@@ -432,9 +477,13 @@ function previousSearchResult(roomId) {
     console.log("data");
     console.log(data);
     if (data.action === "room_list") {
-        updateChatRooms(data);  // Update the chat room UI
+      updateChatRooms(data);  // Update the chat room UI
+    } 
+    else if (data.action === "new_room") {
+      updateChatRooms(data);  // Update the chat room UI
     } 
     else if (data.action === "message") { 
+      updateChatList(data.room, data.message, data.timestamp )
       const chatMessages = document.getElementById('message-body');   
       const msgDiv = document.createElement('div');
       const messageBody = document.createElement('p');
@@ -501,6 +550,42 @@ function previousSearchResult(roomId) {
     }
 }
 
+// to updae the chat and move the message div to the top and to update message count
+function updateChatList(id, message, timestamp) {
+  console.log("iii");
+  
+    messageCount++
+    let messageId = `chat-room-${id}`; 
+    let roomDiv = `roomDivParent-${id}`; 
+    let messageNumber = `messageNumber-${id}`; 
+    let messageList = document.getElementById("chatList");
+    let individualMessage = document.getElementById(messageId);
+    let roomDivParent = document.getElementById(roomDiv);
+
+    if (individualMessage) {
+        // Updating the second child (message content)
+        let messageText = individualMessage.querySelector(".text-sm");
+        if (messageText) messageText.textContent = message;
+
+        // Update timestamp (if there's an element for it)
+        let timestampElement = individualMessage.querySelector(".xs"); // Add a timestamp div in HTML
+        if (timestampElement) timestampElement.textContent = timestamp;
+
+        if (messageCount > 0){
+          let numberDiv = document.getElementById(messageNumber)
+          console.log(numberDiv);
+          numberDiv.style.opacity = 1
+          numberDiv.textContent = messageCount
+        }
+
+        // Move to top without flickering
+        messageList.prepend(roomDivParent);
+    } else {
+        console.error(`Message with ID "${messageId}" not found.`);
+    }
+}
+
+
 
   document.getElementById("chat-message-submit").addEventListener('click', function(){
     sendMessage(roomTitle)
@@ -551,14 +636,34 @@ function previousSearchResult(roomId) {
   // Function to update chat room UI
   function updateChatRooms(rooms) {
     const chatList = document.getElementById("chatList");
-    chatList.innerHTML = "";
+    if(rooms.action === "room_list"){
+      chatList.innerHTML = "";
+    }
+    console.log("object",rooms);
 
     if (rooms.rooms.length > 0) {
+      if(rooms.action === "new_room"){
         rooms.rooms.forEach(room => {
             const roomDiv = document.createElement("div");
-            roomDiv.setAttribute("id", 'chat-room')
-            roomDiv.setAttribute("id", 'chat-room')
+            roomDiv.setAttribute("id", `chat-room-${room.id}`)
             roomDiv.className = "cursor-pointer hover:bg-gray-100 p-3 border-b border-gray-200";
+            roomDiv.innerHTML = `
+                <div class="font-semibold text-gray-800">${room.name}</div>
+                <div class="text-sm text-gray-500 truncate">You have just been added to this room</div>
+            `;
+            roomDiv.addEventListener("click", function () {openChatRoom(room.id, room.name);});
+            roomDetails[room.name] =  room.id
+
+            chatList.prepend(roomDiv);
+        });
+      }
+      else if(rooms.action === "room_list"){
+        rooms.rooms.forEach(room => {
+            const roomDiv = document.createElement("div");
+            const roomDivParent = document.createElement("div");
+            const newMessageNumber = document.createElement("div");
+            roomDiv.setAttribute("id", `chat-room-${room.id}`)
+            roomDiv.className = "w-[80%]";
             roomDiv.innerHTML = `
                 <div class="font-semibold text-gray-800">${room.name}</div>
                 <div class="text-sm text-gray-500 truncate">${room.last_message}</div>
@@ -567,8 +672,16 @@ function previousSearchResult(roomId) {
             roomDiv.addEventListener("click", function () {openChatRoom(room.id, room.name);});
             roomDetails[room.name] =  room.id
 
-            chatList.appendChild(roomDiv);
+            newMessageNumber.className = 'w-[20px] h-[20px] bg-red-600 text-white opacity-0 rounded-full flex justify-center items-center'
+            // newMessageNumber.style.display = "none"
+            newMessageNumber.setAttribute('id', `messageNumber-${room.id}`)
+            roomDivParent.className = 'w-full hover:bg-gray-100 p-3 flex items-center justify-around cursor-pointer border-b border-gray-200'
+            roomDivParent.setAttribute('id', `roomDivParent-${room.id}`)
+            roomDivParent.appendChild(newMessageNumber);
+            roomDivParent.appendChild(roomDiv);
+            chatList.appendChild(roomDivParent);
         });
+      }
     } else {
         chatList.innerHTML = `<div class="text-gray-500 p-3">No chat rooms available.</div>`;
     }
@@ -577,10 +690,10 @@ function previousSearchResult(roomId) {
 
   // Modal open and close logic
   document.getElementById('openModalBtn').addEventListener('click', () => {
-    document.getElementById('create-chatModal').classList.remove('hidden');
+    createChatModal.classList.remove('hidden');
   });
   document.getElementById('closeModalBtn').addEventListener('click', () => {
-    document.getElementById('create-chatModal').classList.add('hidden');
+    createChatModal.classList.add('hidden');
   });
 
   // Live search for users
@@ -628,10 +741,11 @@ function previousSearchResult(roomId) {
 
   // Add user to selected list
   function addUserToRoom(userId, username) {
+  console.log("oghene");
     if (addedUserIds.includes(userId)) return;
     addedUserIds.push(userId);
     
-    const selectedUsersDiv = document.getElementById('admin-selectedUsers');
+    const selectedUsersDiv = document.getElementById('selectedUsers');
     const userEntry = document.createElement('div');
     userEntry.className = 'flex items-center justify-between p-2 bg-gray-100 rounded mt-2 text-[#417690]';
     userEntry.innerHTML = `
@@ -641,8 +755,8 @@ function previousSearchResult(roomId) {
     selectedUsersDiv.appendChild(userEntry);
     
     // Optionally, clear search results and input
-    document.getElementById('admin-searchResults').innerHTML = '';
-    document.getElementById('admin-userSearch').value = '';
+    document.getElementById('searchResults').innerHTML = '';
+    document.getElementById('userSearch').value = '';
   }
 
   
@@ -688,7 +802,7 @@ function previousSearchResult(roomId) {
       document.getElementById('roomName').value = '';
       addedUserIds = [];
       document.getElementById('selectedUsers').innerHTML = '';
-      chatModal.classList.add('hidden');
+      createChatModal.classList.add('hidden');
       // Optionally redirect to the chat room page
       // window.location.href = `/chat/room/${data.roomName}/`;
     } else {
@@ -700,6 +814,8 @@ function previousSearchResult(roomId) {
   });
   });
 
+  
+
   //#endregion
 
   
@@ -708,27 +824,6 @@ function previousSearchResult(roomId) {
   const adminCloseModalBtn = document.getElementById('admin-closeModalBtn');
   const adminAddUsers = document.getElementById('admin-add-users');
 
-  let adminAaddedUserIds = [];
-
-  function adminAddUserToRoom(userId, username) {
-    if (addedUserIds.includes(userId)) return;
-    adminAaddedUserIds.push(userId);
-    
-    const selectedUsersDiv = document.getElementById('admin-selectedUsers');
-    const userEntry = document.createElement('div');
-    userEntry.className = 'flex items-center justify-between p-2 bg-gray-100 rounded mt-2 text-[#417690]';
-    userEntry.innerHTML = `
-      <span>${username}</span>
-      <button onclick="adminRemoveUserFromRoom('${userId}', this)" class="text-red-500 hover:text-red-700">Remove</button>
-    `;
-    selectedUsersDiv.appendChild(userEntry);
-    
-    // Optionally, clear search results and input
-    document.getElementById('admin-searchResults').innerHTML = '';
-    document.getElementById('admin-userSearch').value = '';
-  }
-
-  
 
   function adminLiveSearchUsers() {
     const adminQuery = document.getElementById('admin-userSearch').value;
@@ -767,6 +862,26 @@ function previousSearchResult(roomId) {
       });
   }
 
+  let adminAddedUserIds = [];
+  
+
+  function adminAddUserToRoom(userId, username) {
+    if (adminAddedUserIds.includes(userId)) return;
+    adminAddedUserIds.push(userId);
+    
+    const selectedUsersDiv = document.getElementById('admin-selectedUsers');
+    const userEntry = document.createElement('div');
+    userEntry.className = 'flex items-center justify-between p-2 bg-gray-100 rounded mt-2 text-[#417690]';
+    userEntry.innerHTML = `
+      <span>${username}</span>
+      <button onclick="adminRemoveUserFromRoom('${userId}', this)" class="text-red-500 hover:text-red-700">Remove</button>
+    `;
+    selectedUsersDiv.appendChild(userEntry);
+    
+    // Optionally, clear search results and input
+    document.getElementById('admin-searchResults').innerHTML = '';
+    document.getElementById('admin-userSearch').value = '';
+  }
 
 
   addUserToGroup.addEventListener("click",()=>{
@@ -777,12 +892,12 @@ function previousSearchResult(roomId) {
   adminAddUsers.addEventListener('click', () => {
     // Build the POST data
     const payload = {
-      members: addedUserIds
+      members: adminAddedUserIds
     };
   // If you're using Django's CSRF protection in templates, grab the token:
   const csrfToken = getCookie('csrftoken'); // defining a getCookie below
 
-  fetch(`/rooms/${roomDetails[adminAddUserRoomTitle]}/add-members/`, {
+  fetch(`/profiles/rooms/${roomDetails[adminAddUserRoomTitle]}/add-members/`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -794,9 +909,26 @@ function previousSearchResult(roomId) {
   .then(response => response.json())
   .then(data => {
     if (data.success) {
-      addedUserIds
+      adminAddedUserIds = []
+      document.getElementById('admin-selectedUsers').innerHTML = '';
+      addUserModal.classList.add('hidden');
+      Toastify({
+        text: "Users added successfully",
+        duration: 3000, // Time in milliseconds (3 seconds)
+        close: true, // Show close button
+        gravity: "top", // `top` or `bottom`
+        position: "right", // `left`, `center`, or `right`
+        backgroundColor: "linear-gradient(to right, #00b09b, #417690)",
+    }).showToast();
     } else {
-      alert(`Error: ${data.error}`);
+      Toastify({
+        text: "Sorry! an error occured",
+        duration: 3000, // Time in milliseconds (3 seconds)
+        close: true, // Show close button
+        gravity: "top", // `top` or `bottom`
+        position: "right", // `left`, `center`, or `right`
+        backgroundColor: "linear-gradient(to right, #ff4d4d, #ff0000)",
+    }).showToast();
     }
   })
   .catch(error => {
@@ -804,10 +936,63 @@ function previousSearchResult(roomId) {
   });
   });
 
+
   adminCloseModalBtn.addEventListener("click", ()=>{
     addUserModal.style.display = "none"
   })
 
+  adminleaveRoomButton.addEventListener("click", ()=>{
+    adminAddUserRoomTitle = document.getElementById("roomTitle").innerHTML;
+    leaveRoomYesOrNoModal.style.display = "flex"
+  })
+
+  leaveRoomCloseModalBtn.addEventListener("click", ()=>{
+    leaveRoomYesOrNoModal.style.display = "none"
+  })
+
+
+  leaveRoomConfirm.addEventListener('click', () => {
+    
+  // If you're using Django's CSRF protection in templates, grab the token:
+  const csrfToken = getCookie('csrftoken'); // defining a getCookie below
+
+  fetch(`/profiles/rooms/${roomDetails[adminAddUserRoomTitle]}/leave/`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRFToken': csrfToken
+    },
+    credentials: 'include',  // ensures cookies are sent
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      leaveRoomYesOrNoModal.classList.add('hidden');
+      Toastify({
+        text: "Users added successfully",
+        duration: 3000, // Time in milliseconds (3 seconds)
+        close: true, // Show close button
+        gravity: "top", // `top` or `bottom`
+        position: "right", // `left`, `center`, or `right`
+        backgroundColor: "linear-gradient(to right, #00b09b, #417690)",
+    }).showToast();
+    } else {
+      Toastify({
+        text: "Sorry! an error occured",
+        duration: 3000, // Time in milliseconds (3 seconds)
+        close: true, // Show close button
+        gravity: "top", // `top` or `bottom`
+        position: "right", // `left`, `center`, or `right`
+        backgroundColor: "linear-gradient(to right, #ff4d4d, #ff0000)",
+    }).showToast();
+    }
+  })
+  .catch(error => {
+    console.error('Error adding user to room:', error);
+  });
+  });
+
+  
   //#endregion
 
 

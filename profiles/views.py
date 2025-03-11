@@ -29,7 +29,8 @@ from .serializers import (SimpleContractorProfileSerializer,
 
 
 
-
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
 from chat.models import ChatRoom, Message
 
 
@@ -464,6 +465,21 @@ class CreateRoomAPIView(APIView):
             except User.DoesNotExist:
                 # Optionally handle this case if user doesn't exist
                 pass
+        
+        print("ogo")
+        # **Send WebSocket Notification to Connected Users**
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)(
+            "global_notifications",  # Broadcast to all connected users
+            {
+                "type": "notify_new_room",
+                "room": {
+                    "id": chat_room.id,
+                    "name": chat_room.name
+                }
+            }
+        )
+        print(chat_room.id, "✅ WebSocket event successfully sent!", chat_room.name)
         
         return Response({
             'success': True,
