@@ -218,8 +218,8 @@ class CustomSignupSerializer(serializers.ModelSerializer):
                 
             # Count total invitations sent by this agent  
             invitation_count = Invitation.objects.filter(referral_code=referral_code, accepted=True).count()
-             # When the agent reaches 10 invitations, reward them with 1000 points.
-            if invitation_count >= 1:
+             # When the agent reaches 10 invitations milestone, reward them with 1000 points.
+            if invitation_count >= 10 and invitation_count % 10 == 0:
                 user_points, _ = UserPoints.objects.get_or_create(user=invitation.inviter)
                 user_points.total_points += 1000
                 user_points.save()
