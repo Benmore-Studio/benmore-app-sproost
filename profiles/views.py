@@ -6,14 +6,13 @@ from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from rest_framework import status
+from rest_framework import status, generics
 from rest_framework.generics import  ListAPIView
-
+from django.conf import settings
 from django.db.models import Q
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
-
-from profiles.models import ContractorProfile, UserProfile, AgentProfile
+from profiles.models import ContractorProfile, UserProfile, AgentProfile, Invitation
 from profiles.services.contractor import ContractorService
 from property.models import Property
 from quotes.models import QuoteRequest, Project,Review, UserPoints, Bid,ProjectPictures 
@@ -22,11 +21,11 @@ from .serializers import (SimpleContractorProfileSerializer,
                           SimpleHomeOwnerProfileSerializer, 
                           SimpleAgentProfileSerializer, AgentSerializer,
                           ContractorSerializer,SimplePropertySerializer,HomeOwnerSerializer,
-                          PolymorphicUserSerializer, AgentUserSerializer
+                          PolymorphicUserSerializer, AgentUserSerializer, InvitationSerializer
 
                           
                         )
-
+from .utils import send_invitation_email
 
 
 from channels.layers import get_channel_layer
@@ -416,10 +415,9 @@ class ContractorListAPIView(ListAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = ContractorSerializer
 
-    # def get_queryset(self):
-    #     return User.objects.select_related("contractor_profile").filter(user_type="CO", contractor_profile__isnull=False)
     def get_queryset(self):
-        return ContractorProfile.objects.all()
+        return User.objects.select_related("contractor_profile").filter(user_type="CO", contractor_profile__isnull=False)
+   
     
 
 
@@ -587,6 +585,33 @@ def award_points(user, points):
 
 
 
+class InviteAgentView(generics.GenericAPIView):
+    serializer_class = InvitationSerializer
+
+    def post(self, request, *args, **kwargs):
+        
+        if request.user.user_type != 'AG':
+            return Response({'errror': "you don't have permission to invite agents"}, status=status.HTTP_400_BAD_REQUEST)
+        inviter = request.user
+        email = request.data.get('email')
+        if not email:
+            return Response({"error": "Email is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Create the invitation instance; referral_code is auto-generated in save()
+        invitation = Invitation.objects.filter(inviter=inviter, email=email).first()
+        
+        if invitation:
+            send_invitation_email(email, invitation.referral_code)
+              
+        else:
+
+            invitation = Invitation.objects.create(inviter=inviter, email=email)
+            send_invitation_email(email, invitation.referral_code)
+
+
+
+        serializer = self.get_serializer(invitation)         
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 class WinBidView(APIView):
     permission_classes = [IsAuthenticated]
