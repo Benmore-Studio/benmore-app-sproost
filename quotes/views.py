@@ -12,7 +12,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework import generics
 from profiles.serializers import PropertySerializer
 from property.models import Property
-from .models import QuoteRequest
+from .models import QuoteRequest, QuoteRequestStatus, UserPoints
 from .serializers import   QuoteRequestSerializer,BulkMediaSerializer
 from django.db.models import Prefetch
 from django.contrib.contenttypes.models import ContentType
@@ -191,6 +191,7 @@ class QuotesAPIView(GenericAPIView):
     - GET: Returns initial data for the quote request.
     - POST: Returns success or error messages upon submission.
     """
+    serializer_class = QuoteRequestSerializer
     parser_classes = [MultiPartParser, FormParser]
     permission_classes = [IsAuthenticated] 
 
@@ -202,15 +203,18 @@ class QuotesAPIView(GenericAPIView):
         Get initial data for the form based on the user type (HO or AG).
         """
         home_owner_quotes = self.get_user(user)
-        tt = home_owner_quotes.quote_requests.all()
-        print(home_owner_quotes)
-        print("home_owner_quotes")
-        print(tt)
-        # print(tt.property)
-        serializer = QuotePropertySerializer(tt, many = True)
-
-        if user.user_type == 'HO' or user.user_type == 'AG':
-            return serializer.data
+        quotes_data = json.loads(serialize('json', home_owner_quotes.quote_requests.all()))
+        if user.user_type == 'HO':
+            return {
+                'contact_phone': str(user.phone_number),
+                'custom_home_owner_id': user.pk,
+                'created_by_agent': user.pk,
+                "quotes": quotes_data
+            }
+        elif user.user_type == 'AG':
+            return {
+                'contact_phone': str(user.phone_number),
+            }
         return {}
 
 
@@ -220,8 +224,7 @@ class QuotesAPIView(GenericAPIView):
         """
         return Response({'error': 'You are not authenticated. Please log in and try again.'}, status=status.HTTP_401_UNAUTHORIZED)
 
-
-    def get(self, request, *args, **kwargs):
+    def get(self, request, **_):
         """
         Handle GET request to return initial form data.
         """
@@ -233,7 +236,7 @@ class QuotesAPIView(GenericAPIView):
             return Response(initial_data, status=status.HTTP_200_OK)
         else:
             return Response({"errors":"User type has no quotes"}, status=status.HTTP_400_BAD_REQUEST)
-
+ 
 
     @extend_schema(
         summary="Submit a Quote Request",
@@ -264,8 +267,7 @@ class QuotesAPIView(GenericAPIView):
         responses={201: OpenApiTypes.OBJECT, 400: OpenApiTypes.OBJECT},
     )
 
-
-    def post(self, request, *args, **kwargs):
+    def post(self, request, **_):
         """
         Handle POST request to submit quote request data, including media files.
         """
@@ -273,44 +275,65 @@ class QuotesAPIView(GenericAPIView):
         if not user.is_authenticated:
             return self.handle_no_permission()
 
-        # Initialize the serializer with data from the request
-        if request.user.user_type == 'AG' or request.user.user_type == 'HO':
-            data_copy = request.data.copy()
-            data_copy['user'] = user.id
-            serializer = self.get_serializer(data=data_copy) 
-            if serializer.is_valid():
-                form_data = serializer.validated_data
-                form_data['user'] = user
+        # Check if user is allowed to create quotes
+        if request.user.user_type not in ['AG', 'HO']:
+            return Response({"error": "User type not allowed to create quotes"}, status=status.HTTP_400_BAD_REQUEST)
 
-                # Handle media file uploads
-                form_data['media'] = None
-                if 'media' in request.FILES:
-                    uploaded_files = request.FILES.getlist("media")
-                    form_data["media"] = uploaded_files
-
-                # Process the quote request using the QuoteService
-                print(request.data, "lord")
-                # request_data = request.data.copy()
-                user_profile = self.get_user(user)
-                quote_service = QuoteService(request, user_profile)
-                # print(quote_service)
-                result, error = quote_service.create(form_data, user_profile, model_passed=QuoteRequest)
-
-                if result:
-                    user_property = Property.objects.get(id = data_copy['property'])
-                    user_property.has_quotes = True
-                    user_property.save()
-                    return Response({'message': 'Quote request created successfully',
-                                    #  "result":json.loads(result),
-                                    }, status=status.HTTP_201_CREATED)
-                else:
-                    return Response({'error': 'Failed to create quote request'}, status=status.HTTP_400_BAD_REQUEST)
-            else:
-                print(serializer.errors)
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        # Prepare data for validation
+        data_copy = request.data.copy()
+        data_copy['user'] = user.id
+        
+        # Validate the data using serializer
+        serializer = self.get_serializer(data=data_copy)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Prepare form data for the service
+        form_data = serializer.validated_data
+        form_data['user'] = user
+        
+        # Handle media file uploads
+        form_data['media'] = None
+        if 'media' in request.FILES:
+            form_data['media'] = request.FILES.getlist('media')
+        
+        # Get user profile and use QuoteService to create the quote
+        user_profile = self.get_user(user)
+        quote_service = QuoteService(request, user_profile)
+        
+        # Create the quote using the service
+        result, created_quote = quote_service.create(form_data, user_profile, model_passed=QuoteRequest)
+        
+        if result:
+            # Update the property to indicate it has quotes
+            try:
+                user_property = Property.objects.get(id=data_copy['property'])
+                user_property.has_quotes = True
+                user_property.save()
+                
+                if (
+                        result.status == QuoteRequestStatus.accepted
+                        and result.user
+                        and result.user.user_type == 'AG'
+                    ):
+                    print(f'Quote request {result.id} passed validation for points award')
+                    # Award points regardless of whether it's admin or API request
+                    accepted_count = QuoteRequest.objects.filter(
+                        user=result.user,
+                        status=QuoteRequestStatus.accepted
+                    ).count()
+                    if accepted_count >= 5 and accepted_count % 5 == 0:
+                        user_points, _ = UserPoints.objects.get_or_create(user=result.user)
+                        user_points.total_points += 500
+                        user_points.save()
+                        
+                return Response({
+                    'message': 'Quote request created successfully',
+                 }, status=status.HTTP_201_CREATED)
+            except Property.DoesNotExist:
+                return Response({'error': 'Property not found'}, status=status.HTTP_400_BAD_REQUEST)
         else:
-            return Response({"errors":"User type not allowed to create quotes"}, status=status.HTTP_400_BAD_REQUEST)
-
+            return Response({'error': 'Failed to create quote request'}, status=status.HTTP_400_BAD_REQUEST)
 
 class ListQuotesForPropertyView(ListAPIView):
     """

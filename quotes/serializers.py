@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import Project
-from quotes.models import QuoteRequest, QuoteRequestStatus
+from quotes.models import QuoteRequest, QuoteRequestStatus, UserPoints
 from main.models import Media
 from django.contrib.contenttypes.models import ContentType
 from accounts.models import User
@@ -50,22 +50,6 @@ class QuoteRequestAllSerializer(serializers.ModelSerializer):
 
 
 class QuoteRequestSerializer(serializers.ModelSerializer):
-    """
-    Serializer for Quote Requests, handling media file uploads as well.
-    
-    ----------------------------
-    INPUT PARAMETERS:
-    - title: Title of the quote request.
-    - summary: A summary of the quote request.
-    - contact_phone: Contact phone of the user.
-    - created_by_agent: The agent creating the quote request (optional).
-    - media: List of media files (image, file, etc.).
-    
-    -----------------------------
-    OUTPUT PARAMETERS:
-    - Serialized data for quote request including file uploads.
-    """
-    
     media = serializers.ListField(
         child=serializers.FileField(), required=False, allow_empty=True
     )
@@ -75,20 +59,16 @@ class QuoteRequestSerializer(serializers.ModelSerializer):
         fields = "__all__"
     
     def create(self, validated_data):
-        """
-        Handles the creation of a new quote request, including file uploads.
-        """
         media_files = validated_data.pop('media', None)
         quote_request = QuoteRequest.objects.create(**validated_data)
-        
-        # Call the utility function to handle media files
         handle_media_files(quote_request, media_files)
 
+       
         return quote_request
 
 
 
-
+    
 
 class MediaSerializer(serializers.ModelSerializer):
     class Meta:
