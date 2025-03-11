@@ -328,4 +328,10 @@ SIMPLE_JWT = {
 #     },
 # }
 
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer",
+    },
+}
+
 DOMAIN_NAME=config('DOMAIN_NAME', default='http://localhost:8000')
