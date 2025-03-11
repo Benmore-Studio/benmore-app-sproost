@@ -35,6 +35,16 @@ class PropertyCreateSerializer(serializers.ModelSerializer):
         required=False,
         write_only=True
     )
+    home_owner_agents = serializers.ListField(
+        child=serializers.IntegerField(),
+        required=False,
+        write_only=True
+    )
+    contractors = serializers.ListField(
+        child=serializers.IntegerField(),
+        required=False,
+        write_only=True
+    )
     
     class Meta:
         model = Property
@@ -47,10 +57,57 @@ class PropertyCreateSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['id', 'date_created', 'likes', 'status']
 
+    def to_internal_value(self, data):
+        """
+        Parse any JSON-like strings into actual Python lists before DRF validates them.
+        """
+        if hasattr(data, 'copy'):
+            data = data.copy()
+
+        # Handle contractors - can be either comma-separated string or JSON string
+        contractors_str = data.get('contractors')
+        if contractors_str and isinstance(contractors_str, str):
+            try:
+                # Try parsing as JSON first
+                data['contractors'] = json.loads(contractors_str)
+            except json.JSONDecodeError:
+                # If not valid JSON, try comma-separated format
+                if ',' in contractors_str:
+                    data['contractors'] = [int(id.strip()) for id in contractors_str.split(',') if id.strip()]
+                else:
+                    # Might be a single value
+                    try:
+                        data['contractors'] = [int(contractors_str)]
+                    except ValueError:
+                        raise serializers.ValidationError({
+                            'contractors': 'Expected a valid integer ID, comma-separated IDs, or JSON array.'
+                        })
+
+        # Handle home_owner_agents - similar approach
+        agents_str = data.get('home_owner_agents')
+        if agents_str and isinstance(agents_str, str):
+            try:
+                # Try parsing as JSON first
+                data['home_owner_agents'] = json.loads(agents_str)
+            except json.JSONDecodeError:
+                # If not valid JSON, try comma-separated format
+                if ',' in agents_str:
+                    data['home_owner_agents'] = [int(id.strip()) for id in agents_str.split(',') if id.strip()]
+                else:
+                    # Might be a single value
+                    try:
+                        data['home_owner_agents'] = [int(agents_str)]
+                    except ValueError:
+                        raise serializers.ValidationError({
+                            'home_owner_agents': 'Expected a valid integer ID, comma-separated IDs, or JSON array.'
+                        })
+
+        return super().to_internal_value(data)
+
     def create(self, validated_data):
         request = self.context.get("request")
         
-          # Only allow users whose user_type is not "IV"
+        # Only allow users whose user_type is not "IV"
         if request and getattr(request.user, 'user_type', None) == 'IV':
             raise serializers.ValidationError(
                 {"detail": "Investors are not allowed to create properties."}
@@ -59,24 +116,29 @@ class PropertyCreateSerializer(serializers.ModelSerializer):
         if not validated_data.get('property_owner'):
             validated_data['property_owner'] = request.user
             
-                    
         # Extract many-to-many fields first.
-        home_owner_agents = validated_data.pop('home_owner_agents', None)
-        contractors = validated_data.pop('contractors', None)
+        home_owner_agent_ids = validated_data.pop('home_owner_agents', [])
+        contractor_ids = validated_data.pop('contractors', [])
         before_images = validated_data.pop('before_images', [])
         after_images = validated_data.pop('after_images', [])
-        
-        # Set the property owner automatically if not provided
-
+         
         # Create the Property instance without M2M fields
         property_obj = Property.objects.create(**validated_data)
-             
         
+        # Add home_owner_agents if provided
+        if home_owner_agent_ids:
+            home_owner_agents = User.objects.filter(id__in=home_owner_agent_ids, user_type='AG')
+            property_obj.home_owner_agents.set(home_owner_agents)
+            
+        # Add contractors if provided
+        if contractor_ids:
+            contractors = ContractorProfile.objects.filter(id__in=contractor_ids)
+            property_obj.contractors.set(contractors)
+             
         # Get ContentType for Property
         ct = ContentType.objects.get_for_model(Property)
 
         # Combine before and after images into one payload for BulkMediaSerializer.
-        # (The BulkMediaSerializer expects keys: content_type_id, object_id, before_images, after_images.)
         media_payload = {
             "content_type_id": ct.id,
             "object_id": property_obj.id,
@@ -91,7 +153,6 @@ class PropertyCreateSerializer(serializers.ModelSerializer):
 
         # Check if property status is completed and reward points to agents
         if property_obj.status == 'completed':
-            # Check if this is the first time the property is marked as completed
             # Check if the agent already has other completed properties
             if property_obj.property_owner.user_type == 'AG':
                 owner_completed_properties = Property.objects.filter(
@@ -99,7 +160,7 @@ class PropertyCreateSerializer(serializers.ModelSerializer):
                     status='completed'
                 ).exclude(id=property_obj.id).count()
                 
-                # Only award points if this is their first or second completed property
+                # Only award points if this is their first completed property
                 if owner_completed_properties <= 0:
                     user_points, created = UserPoints.objects.get_or_create(user=property_obj.property_owner)
                     user_points.total_points += 1500
@@ -113,14 +174,11 @@ class PropertyCreateSerializer(serializers.ModelSerializer):
                         status='completed'
                     ).exclude(id=property_obj.id).count()
                     
-                    # Only award points if this is their first or second completed property
+                    # Only award points if this is their first completed property
                     if agent_completed_properties <= 0:
                         user_points, created = UserPoints.objects.get_or_create(user=agent)
                         user_points.total_points += 1500
                         user_points.save()
-                        # Since this is a new property, we know it's the first time
-            
-            
 
         return property_obj
     
