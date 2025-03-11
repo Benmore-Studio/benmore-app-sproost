@@ -99,6 +99,12 @@ class Property(models.Model):
         default=True,
         help_text=_("Indicates if this is the property owner's first property.")
     )
+    
+    has_quotes = models.BooleanField(
+        default=False,
+        help_text=_("Indicates if the property has a quotes on it.")
+    )
+    
 
     def __str__(self):
         return f"{self.property_owner} - {self.address}"

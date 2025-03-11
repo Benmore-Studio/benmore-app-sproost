@@ -63,19 +63,6 @@ class QuoteRequestSerializer(serializers.ModelSerializer):
         quote_request = QuoteRequest.objects.create(**validated_data)
         handle_media_files(quote_request, media_files)
 
-        if (
-            quote_request.status == QuoteRequestStatus.accepted
-            and quote_request.user
-            and quote_request.user.user_type == 'AG'
-        ):
-            accepted_count = QuoteRequest.objects.filter(
-                user=quote_request.user,
-                status=QuoteRequestStatus.accepted
-            ).count()
-            if accepted_count >= 5 and accepted_count % 5 == 0:
-                user_points, created = UserPoints.objects.get_or_create(user=quote_request.user)
-                user_points.total_points += 500
-                user_points.save()
         return quote_request
 
 

@@ -53,9 +53,9 @@ class PropertyCreateSerializer(serializers.ModelSerializer):
             'contractors', 'price', 'address', 'half_bath', 'full_bath', 'bathrooms', 
             'bedrooms', 'square_footage', 'total_square_foot', 'lot_size', 'scope_of_work', 
             'taxes', 'basement_details', 'garage', 'repair_recommendations', 'date_created',
-            'likes', 'status', 'before_images', 'after_images'
+            'likes', 'status', 'has_quotes', 'before_images', 'after_images'
         ]
-        read_only_fields = ['id', 'date_created', 'likes', 'status']
+        read_only_fields = ['id', 'date_created', 'likes', 'status', 'has_quotes']
 
     def to_internal_value(self, data):
         """
@@ -214,7 +214,7 @@ class PropertyRetrieveSerializer(serializers.ModelSerializer):
             'contractors', 'price', 'address', 'half_bath', 'full_bath', 'bathrooms', 
             'bedrooms', 'square_footage', 'total_square_foot', 'lot_size', 'scope_of_work', 
           'garage', 'repair_recommendations', 'date_created',
-            'likes', 'status', 'before_images', 'after_images'
+            'likes', 'status','has_quotes', 'before_images', 'after_images'
         ]
 
     def get_before_images(self, obj):
@@ -259,7 +259,7 @@ class PropertyUpdateSerializer(serializers.ModelSerializer):
             'price', 'address', 'half_bath', 'full_bath', 'bathrooms', 
             'bedrooms', 'square_footage', 'total_square_foot', 'lot_size', 'scope_of_work', 
             'garage', 'repair_recommendations', 'date_created',
-            'likes', 'status', 'before_images', 'after_images'
+            'likes', 'status','has_quotes', 'before_images', 'after_images'
         ]
         read_only_fields = ['property_owner', 'date_created', 'likes']
         

@@ -411,10 +411,9 @@ class ContractorListAPIView(ListAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = ContractorSerializer
 
-    # def get_queryset(self):
-    #     return User.objects.select_related("contractor_profile").filter(user_type="CO", contractor_profile__isnull=False)
     def get_queryset(self):
-        return ContractorProfile.objects.all()
+        return User.objects.select_related("contractor_profile").filter(user_type="CO", contractor_profile__isnull=False)
+   
     
 
 def award_points(user, points):
