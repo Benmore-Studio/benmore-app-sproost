@@ -31,6 +31,8 @@ class Message(models.Model):
     sender= models.ForeignKey(User, on_delete=models.CASCADE, related_name="messagesender")
     receiver= models.ManyToManyField(User, blank=True, related_name="messagereceiver")
     timestamp = models.DateTimeField(auto_now_add=True)
+    read_by = models.ManyToManyField(User, blank=True, related_name="messages_read", help_text=" Track who has read it")  # Track who has read it
+
 
     def __str__(self):
         return f'{self.content}: {self.content[:20]}..."  # Show a preview of the message'

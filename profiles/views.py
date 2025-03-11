@@ -15,8 +15,8 @@ from django.shortcuts import get_object_or_404
 
 from profiles.models import ContractorProfile, UserProfile, AgentProfile
 from profiles.services.contractor import ContractorService
-
-from quotes.models import QuoteRequest, Review, UserPoints, Bid,ProjectPictures, Property 
+from property.models import Property
+from quotes.models import QuoteRequest, Project,Review, UserPoints, Bid,ProjectPictures 
 from .serializers import (SimpleContractorProfileSerializer, 
                           ProfilePictureSerializer, UserSerializer,
                           SimpleHomeOwnerProfileSerializer, 
@@ -29,7 +29,8 @@ from .serializers import (SimpleContractorProfileSerializer,
 
 
 
-
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
 from chat.models import ChatRoom, Message
 
 
@@ -321,7 +322,7 @@ class ChangeProfilePictureAPIView(APIView):
                 else:
                     return Response({'error': f'An Error Occurred, {error}'}, status=status.HTTP_400_BAD_REQUEST)
 
-
+# not needed - web-based
 class ContractorUploadApiView(APIView):
     """
     API View to handle contractor media/project uploads.
@@ -415,8 +416,10 @@ class ContractorListAPIView(ListAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = ContractorSerializer
 
+    # def get_queryset(self):
+    #     return User.objects.select_related("contractor_profile").filter(user_type="CO", contractor_profile__isnull=False)
     def get_queryset(self):
-        return User.objects.select_related("contractor_profile").filter(user_type="CO", contractor_profile__isnull=False)
+        return ContractorProfile.objects.all()
     
 
 
@@ -462,6 +465,21 @@ class CreateRoomAPIView(APIView):
             except User.DoesNotExist:
                 # Optionally handle this case if user doesn't exist
                 pass
+        
+        print("ogo")
+        # **Send WebSocket Notification to Connected Users**
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)(
+            "global_notifications",  # Broadcast to all connected users
+            {
+                "type": "notify_new_room",
+                "room": {
+                    "id": chat_room.id,
+                    "name": chat_room.name
+                }
+            }
+        )
+        print(chat_room.id, "✅ WebSocket event successfully sent!", chat_room.name)
         
         return Response({
             'success': True,
