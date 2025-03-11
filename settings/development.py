@@ -4,7 +4,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['localhost',
     '127.0.0.1',
-    '44a8b72b893325a51bc6403f5837d712.serveo.net',]
+    '44a8b72b893325a51bc6403f5837d712.serveo.net', "*"]
 
 DATABASES = {
     'default': {
@@ -13,3 +13,15 @@ DATABASES = {
     }
 }
 
+
+# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+# EMAIL_HOST_USER = "samuel@gmail.com"
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_HOST_USER = "benmore@gmail.com"
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer",
+    },
+}

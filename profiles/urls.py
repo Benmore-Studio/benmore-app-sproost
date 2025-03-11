@@ -13,6 +13,11 @@ urlpatterns = [
     path('list-contractors/', views.ContractorListAPIView.as_view(), name="list-contractors"),
     path('get-clients-agents-or-contractors/<str:query_type>/', views.GetUserClientsOrAgents.as_view(), name="get-clients-or-agents"),
     path('user-listing-or-properties/', views.GetUserListingsOrProperties.as_view(), name="user-listing-or-properties"),
+    path('live_admin_user_search/', views.UserSearchAPIView.as_view(), name="live_admin_user_search"),
+    path('chat/create_room/', views.CreateRoomAPIView.as_view(), name='create_room'),
+    path("search_messages/", views.SearchMessagesView.as_view(), name="search_messages"),
+    path('rooms/<int:room_id>/add-members/', views.AddMembersAPIView.as_view(), name='add-members'),
+    path('rooms/<int:room_id>/leave/', views.LeaveRoomAPIView.as_view(), name='leave-room'),
 
     # path('agent/update/', views.EditAgentProfileAPIView.as_view(), name="edit-agent-profile"),
     # path('contractor/update/', views.ContractorProfileEditAPIView.as_view(), name="edit-contractor-profile"),

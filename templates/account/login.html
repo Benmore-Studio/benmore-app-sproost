@@ -6,6 +6,9 @@
   Login 
 {% endblock %}  
 {% block authContent %}
+<link
+      href="https://cdn.jsdelivr.net/npm/tailwindcss@3.2.7/dist/tailwind.min.css" rel="stylesheet"
+    />
 <div class="w-full p-4 pt-8">
   <div class="flex flex-col gap-8 items-center justify-center">
     <img src="{% static 'svgs/sproost.svg' %}" alt="" class="" />
@@ -81,6 +84,11 @@
       </div>
     </form>
   </div>
+</div>
+
+<div id="chatMessages" style="flex: 1; overflow-y: auto; padding: 12px;">
+  <!-- Incoming messages will appear here -->
+   
 </div>
 {% endblock authContent %}
 {% block extraScripts %}
