@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'profiles',
     'admins',
     'property',
+    'chat',
     
     'address',
     'mail_templated',
@@ -232,6 +233,7 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 10,
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
     ),
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 
@@ -313,3 +315,11 @@ SIMPLE_JWT = {
     'BLACKLIST_AFTER_ROTATION': True, 
 }
 
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("127.0.0.1", 6379)],  # Local Redis
+        },
+    },
+}

@@ -3,33 +3,231 @@
 {% block extrahead %}
     {{ block.super }}
     <!-- Tailwind CSS via CDN (for demo) -->
-    <link
-      href="https://cdn.jsdelivr.net/npm/tailwindcss@3.2.7/dist/tailwind.min.css"
-      rel="stylesheet"
-    />
+     <!-- Toastify CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+
+    <!-- Toastify JS -->
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.2.7/dist/tailwind.min.css" rel="stylesheet"/>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet">
 {% endblock extrahead %}
 
 {% block userlinks %}
     {{ block.super }}
+
+    <!-- Modal (hidden by default) -->
+  <div id="create-chatModal" class="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 hidden" style="z-index: 100;">
+    <div class="bg-white rounded-lg shadow-lg w-full max-w-md fixed z-index-50">
+      <!-- Modal Header -->
+      <div class="px-6 py-4 border-b border-gray-200">
+        <h3 class="text-xl font-semibold">Create Group Chat</h3>
+      </div>
+      <!-- Modal Body -->
+      <div class="px-6 py-4">
+        <!-- Room Name Input -->
+        <div class="mb-4">
+          <label for="roomName" class="block text-gray-700 text-sm font-bold mb-2">Room Name</label>
+          <input id="roomName" type="text" placeholder="Enter room name"  class="w-full rounded-3xl h-full focus:outline-none bg-transparent border-none focus:border-gray-500">
+        </div>
+        <!-- User Search Input -->
+        <div class="mb-4">
+          <label for="userSearch" class="block text-gray-700 text-sm font-bold mb-2">Add Users</label>
+          <input id="userSearch" type="text" placeholder="Search for users..." class="w-full rounded-3xl h-full focus:outline-none bg-transparent border-none focus:border-gray-500" onkeyup="liveSearchUsers()">
+        </div>
+        <!-- Search Results -->
+        <div id="searchResults" class="mb-4 max-h-40 overflow-y-scroll">
+          <!-- Live search results will appear here -->
+        </div>
+        <!-- No user found message -->
+        <div id="noUserFound" class="hidden text-red-500 text-sm">
+          Oops, user not found.
+          <button id="sendInviteBtn" class="underline text-blue-500 ml-2">Send Invite</button>
+        </div>
+        <!-- Selected Users -->
+        <div id="selectedUsers" class="mb-4 max-h-32 overflow-y-scroll">
+          <h4 class="text-gray-700 font-bold mb-2">Selected Users:</h4>
+          <!-- Selected users will be appended here -->
+        </div>
+      </div>
+      <!-- Modal Footer -->
+      <div class="px-6 py-4 border-t border-gray-200 flex justify-end">
+        <button id="closeModalBtn"  class="inline-flex items-center w-[70%] md:w-[50%] justify-center p-3 rounded-3xl bg-red-600 text-white border border-neutral-150 shadow-sm font-semibold">Cancel</button>
+        <button id="createRoomBtn"  class="inline-flex items-center w-[70%] md:w-[50%] justify-center p-3 rounded-3xl bg-[#417690] text-white border border-neutral-150 shadow-sm font-semibold">Create Room</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- only add user modal -->
+  <div id="only-add-user-modal" class="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50" style="z-index: 100; display: none;">
+    <div class="bg-white rounded-lg shadow-lg w-full max-w-md fixed z-index-50">
+      <!-- Modal Header -->
+      <div class="px-6 py-4 border-b border-gray-200">
+        <h3 class="text-xl font-semibold">Add users to Chat</h3>
+      </div>
+      <!-- Modal Body -->
+      <div class="px-6 py-4">
+        <!-- User Search Input -->
+        <div class="mb-4">
+          <label for="admin-userSearch" class="block text-gray-700 text-sm font-bold mb-2">Add Users</label>
+          <input id="admin-userSearch" type="text" placeholder="Search for users..." class="w-full rounded-3xl h-full focus:outline-none bg-transparent border-none focus:border-gray-500" onkeyup="adminLiveSearchUsers()">
+        </div>
+        <!-- Search Results -->
+        <div id="admin-searchResults" class="mb-4 max-h-40 overflow-y-scroll">
+          <!-- Live search results will appear here -->
+        </div>
+        <!-- No user found message -->
+        <div id="admin-noUserFound" class="hidden text-red-500 text-sm">
+          Oops, user not found.
+          <button id="admin-sendInviteBtn" class="underline text-blue-500 ml-2">Send Invite</button>
+        </div>
+        <!-- Selected Users -->
+        <div id="admin-selectedUsers" class="mb-4 max-h-32 overflow-y-scroll">
+          <h4 class="text-gray-700 font-bold mb-2">Selected Users:</h4>
+          <!-- Selected users will be appended here -->
+        </div>
+      </div>
+      <!-- Modal Footer -->
+      <div class="px-6 py-4 border-t border-gray-200 flex justify-end">
+        <button id="admin-closeModalBtn"  class="inline-flex items-center w-[70%] md:w-[50%] justify-center p-3 rounded-3xl bg-red-600 text-white border border-neutral-150 shadow-sm font-semibold">Cancel</button>
+        <button id="admin-add-users"  class="inline-flex items-center w-[70%] md:w-[50%] justify-center p-3 rounded-3xl bg-[#417690] text-white border border-neutral-150 shadow-sm font-semibold">Add Users</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- leave room yes or no modal-->
+  <div id="leave-room-yes-or-no-modal" class="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50" style="z-index: 100; display: none;">
+    <div class="bg-white rounded-lg shadow-lg w-full max-w-md fixed z-index-50">
+      <!-- Modal Header -->
+      <div class="px-6 py-4 border-b border-gray-200">
+        <h3 class="text-xl font-semibold">Are you sure you want to leave room?</h3>
+      </div>
+      <!-- Modal Body -->
+      <div class="px-6 py-4 border-t border-gray-200 flex justify-end">
+        <button id="leave-room-closeModalBtn"  class="inline-flex items-center w-[70%] md:w-[50%] justify-center p-3 rounded-3xl bg-red-600 text-white border border-neutral-150 shadow-sm font-semibold">Cancel</button>
+        <button id="leave-room-confirm"  class="inline-flex items-center w-[70%] md:w-[50%] justify-center p-3 rounded-3xl bg-[#417690] text-white border border-neutral-150 shadow-sm font-semibold">Leave</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- remove user yes or no modal-->
+  <div id="remove-user-yes-or-no-modal" class="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50" style="z-index: 100; display: none;">
+    <div class="bg-white rounded-lg shadow-lg w-full max-w-md fixed z-index-50">
+      <!-- Modal Header -->
+      <div class="px-6 py-4 border-b border-gray-200">
+        <h3 class="text-xl font-semibold">Are you sure you want to remove this user?</h3>
+      </div>
+      <!-- Modal Body -->
+      <div class="px-6 py-4 border-t border-gray-200 flex justify-end">
+        <button id="remove-user-closeModalBtn"  class="inline-flex items-center w-[70%] md:w-[50%] justify-center p-3 rounded-3xl bg-red-600 text-white border border-neutral-150 shadow-sm font-semibold">Cancel</button>
+        <button id="remove-user-confirm"  class="inline-flex items-center w-[70%] md:w-[50%] justify-center p-3 rounded-3xl bg-[#417690] text-white border border-neutral-150 shadow-sm font-semibold">Leave</button>
+      </div>
+    </div>
+  </div>
+
+
+  <div id="icon-container" style="display: flex; justify-content: center; gap: 1rem; margin-top: -7px;">
     <!-- Insert our chat icon + dropdown in the user links bar -->
-    <div id="chat-icon" onclick="toggleChatDropdown()" style="width: 16px; height: 16px; 
-    background-color:royalblue; position:relative; border-radius: 100%; padding: 8px; cursor: pointer;
-    ">
+    <div id="chat-icon" onclick="toggleChatDropdown()" class="w-[28px] h-[28px] bg-[royalblue] relative rounded-full items-center flex justify-center">
       <!-- Simple chat icon (SVG) -->
-      <div id="message-number" style="color: white; position: absolute; top: -3px; right: -2px;">0</div>
-      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-3 ">
+      <div id="message-number" class="text-white absolute top-[-3px] right-[-2px]">0</div>
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
         <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 8.511c.884.284 1.5 1.128 1.5 2.097v4.286c0 1.136-.847 2.1-1.98 2.193-.34.027-.68.052-1.02.072v3.091l-3-3c-1.354 0-2.694-.055-4.02-.163a2.115 2.115 0 0 1-.825-.242m9.345-8.334a2.126 2.126 0 0 0-.476-.095 48.64 48.64 0 0 0-8.048 0c-1.131.094-1.976 1.057-1.976 2.192v4.286c0 .837.46 1.58 1.155 1.951m9.345-8.334V6.637c0-1.621-1.152-3.026-2.76-3.235A48.455 48.455 0 0 0 11.25 3c-2.115 0-4.198.137-6.24.402-1.608.209-2.76 1.614-2.76 3.235v6.226c0 1.621 1.152 3.026 2.76 3.235.577.075 1.157.14 1.74.194V21l4.155-4.155" />
       </svg>
     </div>
 
+      <!-- Button to open the modal -->  
+    <div id="openModalBtn"  title="create chat rooms" class="cursor-pointer">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-7">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+      </svg>
+    </div>
+    
+  </div>
+
 
     <!-- Dropdown panel (initially hidden) -->
     <div id="chatDropdown" class="hidden" style="position: absolute;  height: 80%; right: 0; margin-top: 8px; width: 380px; background-color: #fff; border: 1px solid #ccc; border-radius: 4px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); z-index: 50;">
-      <div style="display: flex; flex-direction: column; height: 288px;">
+      <div class="h-full">
         <!-- header -->
-        <!-- Message area -->
-        <div id="chatMessages" style="flex: 1; overflow-y: auto; padding: 12px;">
-          <!-- Incoming messages will appear here -->
+        <!-- Message area -->        
+        <div class="h-full">
+          <!-- Left Sidebar (Chats List) -->
+          <div class="w-full h-full bg-white border-r border-gray-300">
+            <!-- Search Bar -->
+            <div class="p-4 border-b border-gray-300 relative">
+              <input 
+                type="text" 
+                placeholder="Search..." 
+                id="messageSearchInput"
+                class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500" 
+              />
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4 absolute text-black cursor-pointer right-[23px] top-[23px]">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+              </svg>
+            </div>
+
+            <button onclick="previousSearchResult(currentRoomId)">⬅️ Previous</button>
+            <button onclick="nextSearchResult(currentRoomId)">Next ➡️</button>
+        
+            <div id="message-search-results" style="display: none;" class="p-4 border rounded-md bg-white max-h-64 overflow-y-auto">
+                <!-- Live search results will be displayed here -->
+            </div>
+
+            <!-- Chats List (Scroll) -->
+            <div id="chatList" class="h-[86%] flex-1 overflow-y-auto">
+              <!-- Single chat item -->
+              <div class="cursor-pointer hover:bg-gray-100 p-3 border-b border-gray-200">
+                <div class="font-semibold text-gray-800">Room A</div>
+                <div class="text-sm text-gray-500 truncate">Last message snippet here...</div>
+              </div>             
+            </div>
+
+            <!-- individual chats -->
+            <div id="individual-chatList" class="h-[93%] flex flex-col" style="display: none;">             
+              <div class="flex justify-between">
+              <!-- Back Arrow -->
+              <div id="back-arrow" class="cursor-pointer ml-4">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-3 text-black">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
+                </svg>                
+              </div>
+              <div class="flex items-center gap-4">
+                <p id="leave-room" class="cursor-pointer text-red-500">Leave</p>                
+                <p id="add-user" class="cursor-pointer text-blue-500">Add</p>     
+                {% if request.user == 'ADMIN' %}
+                  <p id="add-user" class="cursor-pointer text-blue-500">Add</p>     
+                {% endif %}
+                
+              </div>
+            </div>
+              <div id="roomTitle" class="mt-4 text-center"></div>
+              <!-- Chat List & Input (Inside a container to maintain order) -->
+              <div class="flex flex-col flex-1 overflow-y-auto h-full mt-4">               
+                <!-- Chat Messages -->
+                <div id="individual-chatList-body" class="flex-1 overflow-y-auto h-[94%]" style="position: relative;">
+                  
+                  <div id="message-body" class="h-[70%] overflow-y-auto"></div>
+                  
+                  <!-- Chat Input -->
+                  <div class="w-full flex justify-center" style="position: absolute; bottom: 0;">
+                  <div id="input" class="mt-4 w-full flex gap-2 px-2">
+                      <input id="message" type="text" placeholder="type..." 
+                            class="bg-transparent outline-none border pl-3 h-[50px] rounded-xl dark:text-white flex-1">
+                      
+                      <div id="chat-message-submit" class="text-[#0d2438] dark:text-white cursor-pointer flex flex-col justify-center">
+                          <i class="fa fa-paper-plane" aria-hidden="true"></i>
+                          <input class="cursor-pointer" type="button" value="Send">
+                      </div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -42,59 +240,786 @@
 {% endblock content %}
 
 {% block footer %}
-    {{ block.super }}
-    <!-- Basic WebSocket chat logic + dropdown toggle -->
-    <script>
-      
-      let header = document.querySelector("#header")
-      let chatMessages = document.querySelector("#chatMessages")
-      let userTools = document.querySelector("#user-tools")
-      let chatIcon = document.querySelector("#chat-icon")
-      console.log("usertools",header);
-      header.prepend(chatIcon)
-      userTools.append(chatMessages)
-      // userTools.style.cssText = 'lign-items:center; justify-items:center;'
-      function toggleChatDropdown() {
-        const dropdown = document.getElementById('chatDropdown');
-        dropdown.classList.toggle('hidden');
-      }
+{{ block.super }}
 
-      // WebSocket setup
-      const wsScheme = window.location.protocol === "https:" ? "wss" : "ws";
-      
-      
-      const roomId = "room_ab"
-      const chatSocket = new WebSocket(
-          wsScheme + '://' + window.location.host + '/ws/chat/' + roomId + '/'
-      );
 
-      chatSocket.onopen = () => {
-        console.log("WebSocket connection established");
-      };
+<script>
+  let header = document.querySelector("#header")
+  let userTools = document.querySelector("#user-tools")
+  let chatIcon = document.querySelector("#chat-icon")
+  let iconContainer = document.querySelector("#icon-container")
+  let openModalBtn = document.querySelector("#openModalBtn")
+  const chatContainer = document.getElementById("chatList");
+  const individualChatList = document.getElementById("individual-chatList");
+  const individualChatListBody = document.getElementById("individual-chatList-body");
+  const backArrow = document.getElementById("back-arrow");
+  const addUserToGroup = document.getElementById("add-user");
+  const adminleaveRoomButton = document.getElementById("leave-room");
+  const leaveRoomYesOrNoModal = document.getElementById("leave-room-yes-or-no-modal");
+  const removeUserYesOrNoModal = document.getElementById("remove-user-yes-or-no-modal");
+  let createChatModal = document.getElementById('create-chatModal')
+  let addUserModal = document.getElementById("only-add-user-modal")
+  let leaveRoomCloseModalBtn = document.getElementById("leave-room-closeModalBtn")
+  let removeUserCloseModalBtn = document.getElementById("remove-user-closeModalBtn")
+  let leaveRoomConfirm = document.getElementById("leave-room-confirm")
+  let removeUserConfirm = document.getElementById("remove-user-confirm")
+  backArrow.style.marginTop = '8px'
+  const roomDetails = {}
+  let globalRoomName
+  let adminAddUserRoomTitle
+  let sender 
+  let messageCount = 0
 
-      chatSocket.onmessage = (e) => {
-        const data = JSON.parse(e.data);
-        const chatMessages = document.getElementById('chatMessages');
-        // Create a message div
-        const msgDiv = document.createElement('div');
-        msgDiv.textContent = data.message;
-        msgDiv.className = "bg-gray-100 p-2 rounded mb-2";
-        chatMessages.appendChild(msgDiv);
-        // Auto-scroll to the bottom
+  console.log("usertools",header);
+  // header.prepend(chatIcon)
+  header.prepend(iconContainer)
+  // userTools.style.cssText = 'lign-items:center; justify-items:center;'
+  function toggleChatDropdown() {
+    const dropdown = document.getElementById('chatDropdown');
+    dropdown.classList.toggle('hidden');
+  }
+
+  // WebSocket setup
+  const wsScheme = window.location.protocol === "https:" ? "wss" : "ws";
+  
+  
+  const chatSocket = new WebSocket(wsScheme + "://" + window.location.host + "/ws/chat/");
+  let currentRoomId = null;
+  let currentPage = 1;
+  let isLoading = false;
+
+  backArrow.addEventListener("click", function(){
+    chatContainer.style.display = 'block'
+    individualChatList.style.display = 'none'
+  })
+
+  function openChatRoom(roomId, roomName) {
+    currentRoomId = roomId;
+    currentPage = 1;
+    document.getElementById('message-body').innerHTML = ''
+    chatContainer.style.display = 'none'
+    const roomTitle = document.getElementById("roomTitle")
+    roomTitle.innerHTML = roomName
+    globalRoomName = roomName
+    roomTitle.style.textAlign = 'center'
+    individualChatList.style.display = 'block'
+    individualChatList.style.color = 'black'
+
+    // Request first batch of messages
+    chatSocket.send(JSON.stringify({
+        action: "load_messages",
+        room_id: roomId,
+        page: currentPage
+    }));
+    
+}
+
+
+let searchResults = [];  // Store found messages
+let currentSearchIndex = -1;  // Track highlighted message index
+
+//#region   message search
+async function searchMessages() {
+    const query = document.getElementById("messageSearchInput").value.trim();
+    if (!query) {
+      document.getElementById("searchResults").innerHTML = "";  // Clear results if empty
+      searchResults = [];
+      currentSearchIndex = -1;
+      return;
+    }
+
+    const csrfToken = getCookie('csrftoken');  // Get CSRF token from cookies
+
+    const response = await fetch(`/profiles/search_messages/?q=${query}`, {
+      method: "GET",
+      headers: {
+        "X-CSRFToken": csrfToken,  // CSRF token
+        "Content-Type": "application/json"
+      },
+      credentials: "include"  // Send cookies with request
+    });
+
+    const data = await response.json();
+    
+    if (data.error) {
+      console.error(data.error);
+      return;
+    }
+
+    const resultsDiv = document.getElementById("message-search-results");
+    resultsDiv.innerHTML = "";
+
+    searchResults = data.results;  // Store results for navigation
+    currentSearchIndex = -1;  // Reset index
+
+    console.log("girl", data);
+    if(data){
+      document.getElementById("chatList").style.display = "none"
+      resultsDiv.style.display = "block"
+      data.results.forEach((msg, index) => {
+          const msgElement = document.createElement("div");
+          msgElement.classList.add("p-2", "border-b", "cursor-pointer", "hover:bg-gray-200", "text-black");
+          msgElement.innerHTML = `<strong>${msg.sender}</strong>: ${msg.content}`;
+          msgElement.onclick = () => openMessageChatRoom(msg.room_id, msg.id, index); // Open specific result
+          resultsDiv.appendChild(msgElement);
+      });
+    }
+    
+  }
+
+document.getElementById("messageSearchInput").addEventListener("input", searchMessages);
+
+
+function loadChatRoom(roomId) {
+    console.log(`Loading chat room: ${roomId}`);
+
+    // Show the chat panel
+    document.getElementById("individual-chatList").style.display = "block";
+
+    // Set the room title
+    document.getElementById("roomTitle").innerText = `Chat Room ${roomId}`;
+
+    // Clear previous messages
+    const chatMessages = document.getElementById("message-body");
+    chatMessages.innerHTML = "Loading messages...";
+
+    // Fetch and display messages
+    fetch(`/get-messages/?room_id=${roomId}`)
+        .then(response => response.json())
+        .then(data => {
+            chatMessages.innerHTML = "";  // Clear loading text
+
+            data.messages.forEach(msg => {
+                const msgDiv = document.createElement("div");
+                msgDiv.id = `message-${msg.id}`;  // Set unique ID for highlighting
+                msgDiv.classList.add("p-2", "border-b");
+
+                // Message structure
+                msgDiv.innerHTML = `
+                    <div class="flex gap-4">
+                        <p class="text-[#417690] font-bold">${msg.sender}</p>
+                        <p class="text-gray-300 text-sm">${msg.timestamp}</p>
+                    </div>
+                    <p>${msg.content}</p>
+                `;
+
+                chatMessages.appendChild(msgDiv);
+            });
+
+            console.log("Messages loaded successfully.");
+        })
+        .catch(error => {
+            console.error("Error loading chat messages:", error);
+            chatMessages.innerHTML = "Failed to load messages.";
+        });
+}
+
+
+function openMessageChatRoom(roomId, messageId, resultIndex = 0) {
+    console.log(`Opening chat room ${roomId} and highlighting message ${messageId}`);
+
+    loadChatRoom(roomId);  // Ensure chat is loaded
+
+    setTimeout(() => {
+        highlightSearchResult(roomId, resultIndex);
+    }, 1000); 
+}
+
+
+function highlightSearchResult(roomId, index) {
+    if (searchResults.length === 0) return;
+
+    // Ensure we're in the correct room
+    const currentRoomMessages = searchResults.filter(msg => msg.room_id == roomId);
+
+    if (currentRoomMessages.length === 0) return;
+
+    // Cycle through results
+    currentSearchIndex = index < 0 ? 0 : index % currentRoomMessages.length;
+    const messageId = currentRoomMessages[currentSearchIndex].id;
+
+    console.log(`Highlighting message ${messageId} (${currentSearchIndex + 1}/${currentRoomMessages.length})`);
+
+    // Remove previous highlight
+    document.querySelectorAll(".highlighted").forEach(el => {
+      el.classList.remove("bg-yellow-200", "p-2", "rounded-md", "highlighted");
+    });
+
+    // Highlight new message
+    const messageElement = document.getElementById(`message-${messageId}`);
+    if (messageElement) {
+        messageElement.classList.add("bg-yellow-200", "p-2", "rounded-md", "highlighted");
+        messageElement.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+}
+
+// Navigate between search results
+function nextSearchResult(roomId) {
+    if (searchResults.length > 0) {
+        highlightSearchResult(roomId, currentSearchIndex + 1);
+    }
+}
+
+function previousSearchResult(roomId) {
+    if (searchResults.length > 0) {
+        highlightSearchResult(roomId, currentSearchIndex - 1);
+    }
+}
+//#endregion
+
+  chatSocket.onopen = () => {
+    console.log("WebSocket connection established");
+  };
+
+
+  chatSocket.onmessage = function (event) {
+    const data = JSON.parse(event.data);
+    console.log("data");
+    console.log(data);
+    if (data.action === "room_list") {
+      updateChatRooms(data);  // Update the chat room UI
+    } 
+    else if (data.action === "new_room") {
+      updateChatRooms(data);  // Update the chat room UI
+    } 
+    else if (data.action === "message") { 
+      updateChatList(data.room, data.message, data.timestamp )
+      const chatMessages = document.getElementById('message-body');   
+      const msgDiv = document.createElement('div');
+      const messageBody = document.createElement('p');
+      messageBody.style.textTransform = "none"; 
+      messageBody.style.fontFamily = "'Rubik', sans-serif";
+      messageBody.style.fontSize = "13px";
+      const usernameAndDate = document.createElement('div');
+      const msgDivDate = document.createElement('p');
+      const msgDivUsername = document.createElement('p');
+      msgDivDate.textContent = data.timestamp;
+      msgDivUsername.textContent = data.username;
+      messageBody.textContent = data.message;
+      msgDiv.className = "bg-gray-100 p-2 rounded mb-2";
+      msgDivUsername.className = "text-[#417690] text-bold";
+      msgDivDate.className = "text-gray-300 text-small";
+      messageBody.className = "justify-self-start";
+      usernameAndDate.className = "flex gap-4";
+      usernameAndDate.appendChild(msgDivUsername)
+      usernameAndDate.appendChild(msgDivDate)
+      msgDiv.prepend(usernameAndDate)
+      msgDiv.append(messageBody)
+      chatMessages.appendChild(msgDiv);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+    
+    else if (data.action === "message_list") {
+      const chatMessages = document.getElementById('message-body');
+       // Clear old messages
+      chatMessages.innerHTML = "";
+      // Reverse messages (oldest first) and add to chat
+      data.messages.reverse().forEach(msg => addMessage(msg.username, msg.message, msg.timestamp));
+      isLoading = false;
+      // scroll to the bottom
+      setTimeout(() => {
         chatMessages.scrollTop = chatMessages.scrollHeight;
-      };
+    }, 100);
+    } 
+};
 
-      chatSocket.onclose = () => {
-        console.log("WebSocket connection closed");
-      };
 
-      function sendMessage() {
-        const input = document.getElementById('chatInput');
-        const message = input.value.trim();
-        if (message) {
-          chatSocket.send(JSON.stringify({ message }));
-          input.value = '';
+  chatSocket.onclose = () => {
+    console.log("WebSocket connection closed");
+  };
+
+
+  function sendMessage(roomTitle) {
+    const input = document.getElementById('message');
+    const message = input.value.trim();
+
+    if (!message) return; // Prevent empty messages
+
+    console.log("globalRoomName",roomDetails[globalRoomName]);
+    // Ensure WebSocket is open before sending a message
+    if (chatSocket.readyState === WebSocket.OPEN) {
+        chatSocket.send(JSON.stringify({
+            action: "send",      
+            room_id: roomDetails[globalRoomName],  
+            message: message     
+        }));
+
+        input.value = ''; // Clear input after sending
+    } else {
+        console.error("WebSocket is not open. Cannot send message.");
+    }
+}
+
+// to updae the chat and move the message div to the top and to update message count
+function updateChatList(id, message, timestamp) {
+  console.log("iii");
+  
+    messageCount++
+    let messageId = `chat-room-${id}`; 
+    let roomDiv = `roomDivParent-${id}`; 
+    let messageNumber = `messageNumber-${id}`; 
+    let messageList = document.getElementById("chatList");
+    let individualMessage = document.getElementById(messageId);
+    let roomDivParent = document.getElementById(roomDiv);
+
+    if (individualMessage) {
+        // Updating the second child (message content)
+        let messageText = individualMessage.querySelector(".text-sm");
+        if (messageText) messageText.textContent = message;
+
+        // Update timestamp (if there's an element for it)
+        let timestampElement = individualMessage.querySelector(".xs"); // Add a timestamp div in HTML
+        if (timestampElement) timestampElement.textContent = timestamp;
+
+        if (messageCount > 0){
+          let numberDiv = document.getElementById(messageNumber)
+          console.log(numberDiv);
+          numberDiv.style.opacity = 1
+          numberDiv.textContent = messageCount
+        }
+
+        // Move to top without flickering
+        messageList.prepend(roomDivParent);
+    } else {
+        console.error(`Message with ID "${messageId}" not found.`);
+    }
+}
+
+
+
+  document.getElementById("chat-message-submit").addEventListener('click', function(){
+    sendMessage(roomTitle)
+  })
+
+  // Function to get all individual message to the UI
+  function addMessage(username, message, timestamp) {
+      const chatMessages = document.getElementById('message-body');
+      const msgDiv = document.createElement('div');
+      const usernameAndDate = document.createElement('div');
+      const messageBody = document.createElement('p');
+      messageBody.style.textTransform = "none"; 
+      messageBody.style.fontFamily = "'Rubik', sans-serif";
+      messageBody.style.fontSize = "13px";
+      const msgDivDate = document.createElement('p');
+      const msgDivUsername = document.createElement('p');
+      messageBody.innerHTML = message;
+      msgDivDate.textContent = timestamp;
+      msgDivUsername.textContent = username;
+      msgDiv.className = "p-2 border-b";
+      msgDivUsername.className = "text-[#417690] text-bold";
+      msgDivDate.className = "text-gray-300 text-small";
+      messageBody.className = "justify-self-start";
+      usernameAndDate.className = "flex gap-4";
+      usernameAndDate.appendChild(msgDivUsername)
+      usernameAndDate.appendChild(msgDivDate)
+      msgDiv.prepend(usernameAndDate)
+      msgDiv.append(messageBody)
+      chatMessages.append(msgDiv);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+  }
+
+
+  // Handle Scroll for Pagination
+  chatContainer.addEventListener("scroll", () => {
+      if (chatContainer.scrollTop === 0 && !isLoading) {
+          isLoading = true;
+          currentPage += 1;
+
+          chatSocket.send(JSON.stringify({
+              action: "load_messages",
+              room_id: currentRoomId,
+              page: currentPage
+          }));
+      }
+  });
+
+  // Function to update chat room UI
+  function updateChatRooms(rooms) {
+    const chatList = document.getElementById("chatList");
+    if(rooms.action === "room_list"){
+      chatList.innerHTML = "";
+    }
+    console.log("object",rooms);
+
+    if (rooms.rooms.length > 0) {
+      if(rooms.action === "new_room"){
+        rooms.rooms.forEach(room => {
+            const roomDiv = document.createElement("div");
+            roomDiv.setAttribute("id", `chat-room-${room.id}`)
+            roomDiv.className = "cursor-pointer hover:bg-gray-100 p-3 border-b border-gray-200";
+            roomDiv.innerHTML = `
+                <div class="font-semibold text-gray-800">${room.name}</div>
+                <div class="text-sm text-gray-500 truncate">You have just been added to this room</div>
+            `;
+            roomDiv.addEventListener("click", function () {openChatRoom(room.id, room.name);});
+            roomDetails[room.name] =  room.id
+
+            chatList.prepend(roomDiv);
+        });
+      }
+      else if(rooms.action === "room_list"){
+        rooms.rooms.forEach(room => {
+            const roomDiv = document.createElement("div");
+            const roomDivParent = document.createElement("div");
+            const newMessageNumber = document.createElement("div");
+            roomDiv.setAttribute("id", `chat-room-${room.id}`)
+            roomDiv.className = "w-[80%]";
+            roomDiv.innerHTML = `
+                <div class="font-semibold text-gray-800">${room.name}</div>
+                <div class="text-sm text-gray-500 truncate">${room.last_message}</div>
+                <div class="text-xs text-gray-400">${room.last_message_time}</div>
+            `;
+            roomDiv.addEventListener("click", function () {openChatRoom(room.id, room.name);});
+            roomDetails[room.name] =  room.id
+
+            newMessageNumber.className = 'w-[20px] h-[20px] bg-red-600 text-white opacity-0 rounded-full flex justify-center items-center'
+            // newMessageNumber.style.display = "none"
+            newMessageNumber.setAttribute('id', `messageNumber-${room.id}`)
+            roomDivParent.className = 'w-full hover:bg-gray-100 p-3 flex items-center justify-around cursor-pointer border-b border-gray-200'
+            roomDivParent.setAttribute('id', `roomDivParent-${room.id}`)
+            roomDivParent.appendChild(newMessageNumber);
+            roomDivParent.appendChild(roomDiv);
+            chatList.appendChild(roomDivParent);
+        });
+      }
+    } else {
+        chatList.innerHTML = `<div class="text-gray-500 p-3">No chat rooms available.</div>`;
+    }
+  }
+
+
+  // Modal open and close logic
+  document.getElementById('openModalBtn').addEventListener('click', () => {
+    createChatModal.classList.remove('hidden');
+  });
+  document.getElementById('closeModalBtn').addEventListener('click', () => {
+    createChatModal.classList.add('hidden');
+  });
+
+  // Live search for users
+  function liveSearchUsers() {
+    const query = document.getElementById('userSearch').value;
+    const resultsDiv = document.getElementById('searchResults');
+    const noUserDiv = document.getElementById('noUserFound');
+    
+    if (query.length < 2 ) {
+      resultsDiv.innerHTML = '';
+      noUserDiv.classList.add('hidden');
+      return;
+    }
+    
+    fetch(`/profiles/live_admin_user_search/?q=${encodeURIComponent(query)}`)
+      .then(response => response.json())
+      .then(data => {
+        resultsDiv.innerHTML = '';
+        if (data.users && data.users.length > 0) {
+          noUserDiv.classList.add('hidden');
+          data.users.forEach(user => {
+            console.log(user);
+            const userDiv = document.createElement('div');
+            userDiv.className = 'flex items-center justify-between border-b border-gray-200 py-2 text-[#417690]';
+            userDiv.innerHTML = `
+              <span>${user.email}</span>
+              <button onclick="addUserToRoom('${user.id}', '${user.username}')" class="text-blue-500 hover:text-blue-700">Add</button>
+            `;
+            resultsDiv.appendChild(userDiv);
+          });
+        } else {
+          resultsDiv.innerHTML = '';
+          noUserDiv.classList.remove('hidden');
+        }
+      })
+      .catch(error => {
+        console.error('Error searching users:', error);
+      });
+  }
+
+
+  // Keep track of selected user IDs
+  let addedUserIds = [];
+ 
+
+  // Add user to selected list
+  function addUserToRoom(userId, username) {
+  console.log("oghene");
+    if (addedUserIds.includes(userId)) return;
+    addedUserIds.push(userId);
+    
+    const selectedUsersDiv = document.getElementById('selectedUsers');
+    const userEntry = document.createElement('div');
+    userEntry.className = 'flex items-center justify-between p-2 bg-gray-100 rounded mt-2 text-[#417690]';
+    userEntry.innerHTML = `
+      <span>${username}</span>
+      <button onclick="removeUserFromRoom('${userId}', this)" class="text-red-500 hover:text-red-700">Remove</button>
+    `;
+    selectedUsersDiv.appendChild(userEntry);
+    
+    // Optionally, clear search results and input
+    document.getElementById('searchResults').innerHTML = '';
+    document.getElementById('userSearch').value = '';
+  }
+
+  
+
+  // Remove a user from selected list
+  function removeUserFromRoom(userId, btn) {
+    addedUserIds = addedUserIds.filter(id => id !== userId);
+    btn.parentElement.remove();
+  }
+
+  //#region Create Room (POST Request)
+  const createRoomBtn = document.getElementById('createRoomBtn');
+  
+  createRoomBtn.addEventListener('click', () => {
+    const roomName = document.getElementById('roomName').value.trim();
+    if (!roomName) {
+      alert("Please enter a room name.");
+      return;
+    }
+
+    // Build the POST data
+    const payload = {
+      roomName: roomName,
+      members: addedUserIds
+    };
+  // If you're using Django's CSRF protection in templates, grab the token:
+  const csrfToken = getCookie('csrftoken'); // defining a getCookie below
+
+  fetch('/profiles/chat/create_room/', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRFToken': csrfToken
+    },
+    credentials: 'include',  // ensures cookies are sent
+    body: JSON.stringify(payload)
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      alert(`Room '${data.roomName}' created successfully!`);
+      // Clear fields and close modal
+      document.getElementById('roomName').value = '';
+      addedUserIds = [];
+      document.getElementById('selectedUsers').innerHTML = '';
+      createChatModal.classList.add('hidden');
+      // Optionally redirect to the chat room page
+      // window.location.href = `/chat/room/${data.roomName}/`;
+    } else {
+      alert(`Error: ${data.error}`);
+    }
+  })
+  .catch(error => {
+    console.error('Error creating room:', error);
+  });
+  });
+
+  
+
+  //#endregion
+
+  
+
+  //#region admin add users
+  const adminCloseModalBtn = document.getElementById('admin-closeModalBtn');
+  const adminAddUsers = document.getElementById('admin-add-users');
+
+
+  function adminLiveSearchUsers() {
+    const adminQuery = document.getElementById('admin-userSearch').value;
+    const adminResultsDiv = document.getElementById('admin-searchResults');
+    const adminNoUserDiv = document.getElementById('admin-noUserFound');
+    
+   
+    if (adminQuery.length < 2 ) {
+      adminResultsDiv.innerHTML = '';
+      adminNoUserDiv.classList.add('hidden');
+      return;
+    }
+    
+    fetch(`/profiles/live_admin_user_search/?q=${encodeURIComponent(adminQuery)}`)
+      .then(response => response.json())
+      .then(data => {
+        adminResultsDiv.innerHTML = '';
+        if (data.users && data.users.length > 0) {
+          adminNoUserDiv.classList.add('hidden');
+          data.users.forEach(user => {
+            const userDiv = document.createElement('div');
+            userDiv.className = 'flex items-center justify-between border-b border-gray-200 py-2 text-[#417690]';
+            userDiv.innerHTML = `
+              <span>${user.email}</span>
+              <button onclick="adminAddUserToRoom('${user.id}', '${user.username}')" class="text-blue-500 hover:text-blue-700">Add</button>
+            `;
+            adminResultsDiv.appendChild(userDiv);
+          });
+        } else {
+          adminResultsDiv.innerHTML = '';
+          adminNoUserDiv.classList.remove('hidden');
+        }
+      })
+      .catch(error => {
+        console.error('Error searching users:', error);
+      });
+  }
+
+  let adminAddedUserIds = [];
+  
+
+  function adminAddUserToRoom(userId, username) {
+    if (adminAddedUserIds.includes(userId)) return;
+    adminAddedUserIds.push(userId);
+    
+    const selectedUsersDiv = document.getElementById('admin-selectedUsers');
+    const userEntry = document.createElement('div');
+    userEntry.className = 'flex items-center justify-between p-2 bg-gray-100 rounded mt-2 text-[#417690]';
+    userEntry.innerHTML = `
+      <span>${username}</span>
+      <button onclick="adminRemoveUserFromRoom('${userId}', this)" class="text-red-500 hover:text-red-700">Remove</button>
+    `;
+    selectedUsersDiv.appendChild(userEntry);
+    
+    // Optionally, clear search results and input
+    document.getElementById('admin-searchResults').innerHTML = '';
+    document.getElementById('admin-userSearch').value = '';
+  }
+
+
+  addUserToGroup.addEventListener("click",()=>{
+    adminAddUserRoomTitle = document.getElementById("roomTitle").innerHTML;
+    addUserModal.style.display= "flex"
+  })
+
+  adminAddUsers.addEventListener('click', () => {
+    // Build the POST data
+    const payload = {
+      members: adminAddedUserIds
+    };
+  // If you're using Django's CSRF protection in templates, grab the token:
+  const csrfToken = getCookie('csrftoken'); // defining a getCookie below
+
+  fetch(`/profiles/rooms/${roomDetails[adminAddUserRoomTitle]}/add-members/`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRFToken': csrfToken
+    },
+    credentials: 'include',  // ensures cookies are sent
+    body: JSON.stringify(payload)
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      adminAddedUserIds = []
+      document.getElementById('admin-selectedUsers').innerHTML = '';
+      addUserModal.classList.add('hidden');
+      Toastify({
+        text: "Users added successfully",
+        duration: 3000, // Time in milliseconds (3 seconds)
+        close: true, // Show close button
+        gravity: "top", // `top` or `bottom`
+        position: "right", // `left`, `center`, or `right`
+        backgroundColor: "linear-gradient(to right, #00b09b, #417690)",
+    }).showToast();
+    } else {
+      Toastify({
+        text: "Sorry! an error occured",
+        duration: 3000, // Time in milliseconds (3 seconds)
+        close: true, // Show close button
+        gravity: "top", // `top` or `bottom`
+        position: "right", // `left`, `center`, or `right`
+        backgroundColor: "linear-gradient(to right, #ff4d4d, #ff0000)",
+    }).showToast();
+    }
+  })
+  .catch(error => {
+    console.error('Error adding user to room:', error);
+  });
+  });
+
+
+  adminCloseModalBtn.addEventListener("click", ()=>{
+    addUserModal.style.display = "none"
+  })
+
+  adminleaveRoomButton.addEventListener("click", ()=>{
+    adminAddUserRoomTitle = document.getElementById("roomTitle").innerHTML;
+    leaveRoomYesOrNoModal.style.display = "flex"
+  })
+
+  leaveRoomCloseModalBtn.addEventListener("click", ()=>{
+    leaveRoomYesOrNoModal.style.display = "none"
+  })
+
+
+  leaveRoomConfirm.addEventListener('click', () => {
+    
+  // If you're using Django's CSRF protection in templates, grab the token:
+  const csrfToken = getCookie('csrftoken'); // defining a getCookie below
+
+  fetch(`/profiles/rooms/${roomDetails[adminAddUserRoomTitle]}/leave/`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRFToken': csrfToken
+    },
+    credentials: 'include',  // ensures cookies are sent
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      leaveRoomYesOrNoModal.classList.add('hidden');
+      Toastify({
+        text: "Users added successfully",
+        duration: 3000, // Time in milliseconds (3 seconds)
+        close: true, // Show close button
+        gravity: "top", // `top` or `bottom`
+        position: "right", // `left`, `center`, or `right`
+        backgroundColor: "linear-gradient(to right, #00b09b, #417690)",
+    }).showToast();
+    } else {
+      Toastify({
+        text: "Sorry! an error occured",
+        duration: 3000, // Time in milliseconds (3 seconds)
+        close: true, // Show close button
+        gravity: "top", // `top` or `bottom`
+        position: "right", // `left`, `center`, or `right`
+        backgroundColor: "linear-gradient(to right, #ff4d4d, #ff0000)",
+    }).showToast();
+    }
+  })
+  .catch(error => {
+    console.error('Error adding user to room:', error);
+  });
+  });
+
+  
+  //#endregion
+
+
+  
+
+  // Helper function to get CSRF token from cookies
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
         }
       }
-    </script>
+    }
+    return cookieValue;
+  }
+
+
+</script>
 {% endblock footer %}
+
+
+
+
+
+
