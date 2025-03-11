@@ -12,7 +12,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework import generics
 from profiles.serializers import PropertySerializer
 from property.models import Property
-from .models import QuoteRequest
+from .models import QuoteRequest, QuoteRequestStatus, UserPoints
 from .serializers import   QuoteRequestSerializer,BulkMediaSerializer
 from django.db.models import Prefetch
 from django.contrib.contenttypes.models import ContentType
@@ -311,6 +311,22 @@ class QuotesAPIView(GenericAPIView):
                 user_property.has_quotes = True
                 user_property.save()
                 
+                if (
+                        result.status == QuoteRequestStatus.accepted
+                        and result.user
+                        and result.user.user_type == 'AG'
+                    ):
+                    print(f'Quote request {result.id} passed validation for points award')
+                    # Award points regardless of whether it's admin or API request
+                    accepted_count = QuoteRequest.objects.filter(
+                        user=result.user,
+                        status=QuoteRequestStatus.accepted
+                    ).count()
+                    if accepted_count >= 5 and accepted_count % 5 == 0:
+                        user_points, _ = UserPoints.objects.get_or_create(user=result.user)
+                        user_points.total_points += 500
+                        user_points.save()
+                        
                 return Response({
                     'message': 'Quote request created successfully',
                  }, status=status.HTTP_201_CREATED)

@@ -150,36 +150,7 @@ class PropertyCreateSerializer(serializers.ModelSerializer):
         bulk_serializer.is_valid(raise_exception=True)
         # Save creates all Media objects.
         bulk_serializer.save()
-
-        # Check if property status is completed and reward points to agents
-        if property_obj.status == 'completed':
-            # Check if the agent already has other completed properties
-            if property_obj.property_owner.user_type == 'AG':
-                owner_completed_properties = Property.objects.filter(
-                    property_owner=property_obj.property_owner,
-                    status='completed'
-                ).exclude(id=property_obj.id).count()
-                
-                # Only award points if this is their first completed property
-                if owner_completed_properties <= 0:
-                    user_points, created = UserPoints.objects.get_or_create(user=property_obj.property_owner)
-                    user_points.total_points += 1500
-                    user_points.save()
-
-            # Similarly for home_owner_agents, check their completed property count
-            for agent in property_obj.home_owner_agents.all():
-                if agent.user_type == 'AG' and agent != property_obj.property_owner:
-                    agent_completed_properties = Property.objects.filter(
-                        home_owner_agents=agent,
-                        status='completed'
-                    ).exclude(id=property_obj.id).count()
-                    
-                    # Only award points if this is their first completed property
-                    if agent_completed_properties <= 0:
-                        user_points, created = UserPoints.objects.get_or_create(user=agent)
-                        user_points.total_points += 1500
-                        user_points.save()
-
+ 
         return property_obj
     
  

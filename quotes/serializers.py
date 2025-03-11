@@ -63,6 +63,7 @@ class QuoteRequestSerializer(serializers.ModelSerializer):
         quote_request = QuoteRequest.objects.create(**validated_data)
         handle_media_files(quote_request, media_files)
 
+       
         return quote_request
 
 
