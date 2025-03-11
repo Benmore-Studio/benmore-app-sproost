@@ -313,8 +313,7 @@ class QuotesAPIView(GenericAPIView):
                 
                 return Response({
                     'message': 'Quote request created successfully',
-                    'quote_id': getattr(created_quote, 'id', None)
-                }, status=status.HTTP_201_CREATED)
+                 }, status=status.HTTP_201_CREATED)
             except Property.DoesNotExist:
                 return Response({'error': 'Property not found'}, status=status.HTTP_400_BAD_REQUEST)
         else:
