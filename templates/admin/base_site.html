@@ -525,6 +525,10 @@ function previousSearchResult(roomId) {
 };
 
 
+  chatSocket.onerror = function(e) {
+    console.error("WebSocket encountered an error:", e);
+  };
+
   chatSocket.onclose = () => {
     console.log("WebSocket connection closed");
   };
