@@ -1,7 +1,7 @@
 from  .utils import CustomRequestUtil
 from profiles.models import UserProfile
 from accounts.models import User
-from quotes.models import Property
+from property.models import Property
 
 
 class ModelAction(CustomRequestUtil):

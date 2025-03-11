@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import Project
-from quotes.models import QuoteRequest, QuoteRequestStatus, Property
+from quotes.models import QuoteRequest, QuoteRequestStatus, UserPoints
 from main.models import Media
 from django.contrib.contenttypes.models import ContentType
 from accounts.models import User
@@ -50,22 +50,6 @@ class QuoteRequestAllSerializer(serializers.ModelSerializer):
 
 
 class QuoteRequestSerializer(serializers.ModelSerializer):
-    """
-    Serializer for Quote Requests, handling media file uploads as well.
-    
-    ----------------------------
-    INPUT PARAMETERS:
-    - title: Title of the quote request.
-    - summary: A summary of the quote request.
-    - contact_phone: Contact phone of the user.
-    - created_by_agent: The agent creating the quote request (optional).
-    - media: List of media files (image, file, etc.).
-    
-    -----------------------------
-    OUTPUT PARAMETERS:
-    - Serialized data for quote request including file uploads.
-    """
-    
     media = serializers.ListField(
         child=serializers.FileField(), required=False, allow_empty=True
     )
@@ -75,25 +59,20 @@ class QuoteRequestSerializer(serializers.ModelSerializer):
         fields = "__all__"
     
     def create(self, validated_data):
-        """
-        Handles the creation of a new quote request, including file uploads.
-        """
         media_files = validated_data.pop('media', None)
         quote_request = QuoteRequest.objects.create(**validated_data)
-        
-        # Call the utility function to handle media files
         handle_media_files(quote_request, media_files)
 
         return quote_request
 
 
 
-
+    
 
 class MediaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Media
-        fields = ['id', 'content_type', 'object_id', 'media_type', 'image', 'file', 'video', 'upload_date']
+        fields = ['id', 'content_type', 'object_id', 'media_type', 'image', 'image_category', 'file', 'video', 'upload_date']
 
     def validate(self, data):
         """
@@ -183,18 +162,18 @@ class MediaSerializer(serializers.ModelSerializer):
 
 
 class BulkMediaSerializer(serializers.Serializer):
-    """
-    A custom serializer for handling multiple media uploads in one pass.
-    """
     content_type_id = serializers.IntegerField()
     object_id = serializers.IntegerField()
-
-    # We expect lists of uploaded files for each category
     files = serializers.ListField(
         child=serializers.FileField(allow_empty_file=False),
         required=False
     )
-    images = serializers.ListField(
+    # Separate fields for before and after images
+    before_images = serializers.ListField(
+        child=serializers.ImageField(allow_empty_file=False),
+        required=False
+    )
+    after_images = serializers.ListField(
         child=serializers.ImageField(allow_empty_file=False),
         required=False
     )
@@ -204,16 +183,11 @@ class BulkMediaSerializer(serializers.Serializer):
     )
 
     def validate(self, attrs):
-        """
-        Perform extension and size checks for all media in a single pass.
-        """
         max_file_size = 10 * 1024 * 1024
         supported_file_types = ['pdf', 'doc', 'docx', 'txt']
         supported_image_types = ['jpg', 'jpeg', 'png', 'gif']
         supported_video_types = ['mp4', 'avi', 'mov', 'mkv', 'ts']
 
-        # We'll accumulate errors in a dict {field: [list of errors]}
-        # but you could raise ValidationError immediately if you prefer.
         errors = {}
 
         def validate_file(f, kind):
@@ -229,100 +203,66 @@ class BulkMediaSerializer(serializers.Serializer):
                 return f"{kind.capitalize()} size exceeds 10MB. Size: {mb_size:.2f} MB"
             return None
 
-        # Validate files
         for f in attrs.get("files", []):
             err = validate_file(f, "file")
             if err:
                 errors.setdefault("files", []).append(err)
-                
 
-        # Validate images
-        for img in attrs.get("images", []):
+        for img in attrs.get("before_images", []):
             err = validate_file(img, "image")
             if err:
-                errors.setdefault("images", []).append(err)
+                errors.setdefault("before_images", []).append(err)
 
-        # Validate videos
+        for img in attrs.get("after_images", []):
+            err = validate_file(img, "image")
+            if err:
+                errors.setdefault("after_images", []).append(err)
+
         for vid in attrs.get("videos", []):
             err = validate_file(vid, "video")
             if err:
                 errors.setdefault("videos", []).append(err)
 
         if errors:
-            # Raise a ValidationError with all accumulated errors
             raise serializers.ValidationError(errors)
-
         return attrs
 
-    def upload_to_cloudinary(self, file_obj, media_type):
-        """
-        Upload file_obj to Cloudinary and return (secure_url, public_id).
-        Use resource_type='auto' so Cloudinary auto-detects (image/video/etc.).
-        """
-        result = cloudinary.uploader.upload(
-            file_obj,
-            resource_type="auto",  # or 'image'/'video' if you want to be strict
-            folder="your_folder_name"  # optional folder structure
-        )
-        return result["secure_url"], result["public_id"]
-
-  
     def create(self, validated_data):
-        """
-        Bulk-create all Media objects after validation passes.
-        """
+        from django.contrib.contenttypes.models import ContentType
+        from main.models import Media  # Adjust your import as needed
+
         content_type_id = validated_data["content_type_id"]
         object_id = validated_data["object_id"]
-        
-        # Retrieve the ContentType
+
         try:
             ct = ContentType.objects.get(pk=content_type_id)
         except ContentType.DoesNotExist:
             raise serializers.ValidationError({"content_type_id": "Invalid content type ID."})
-        
+
         new_media_objects = []
 
-            # Handle "files"
         for f in validated_data.get("files", []):
-            secure_url, public_id = self.upload_to_cloudinary(f, "File")
-            new_media_objects.append(Media(
-                content_type=ct,
-                object_id=object_id,
-                media_type="File",
-                file_url=secure_url,
-                public_id=public_id
-            ))
+            new_media_objects.append(
+                Media(content_type=ct, object_id=object_id, media_type="File", file=f)
+            )
 
-        # Handle "images"
-        for img in validated_data.get("images", []):
-            secure_url, public_id = self.upload_to_cloudinary(img, "Image")
-            new_media_objects.append(Media(
-                content_type=ct,
-                object_id=object_id,
-                media_type="Image",
-                file_url=secure_url,
-                public_id=public_id
-            ))
+        # Create Media for before images, defaulting their image category to 'before'
+        for img in validated_data.get("before_images", []):
+            new_media_objects.append(
+                Media(content_type=ct, object_id=object_id, media_type="Image", image=img, image_category="before")
+            )
 
-        # Handle "videos"
+        # Create Media for after images, setting image_category to 'after'
+        for img in validated_data.get("after_images", []):
+            new_media_objects.append(
+                Media(content_type=ct, object_id=object_id, media_type="Image", image=img, image_category="after")
+            )
+
         for vid in validated_data.get("videos", []):
-            secure_url, public_id = self.upload_to_cloudinary(vid, "Video")
-            new_media_objects.append(Media(
-                content_type=ct,
-                object_id=object_id,
-                media_type="Video",
-                file_url=secure_url,
-                public_id=public_id
-            ))
+            new_media_objects.append(
+                Media(content_type=ct, object_id=object_id, media_type="Video", video=vid)
+            )
 
-            # Now do a single bulk_create
-        if new_media_objects:
-            Media.objects.bulk_create(new_media_objects)
-
-        # Return the list of created objects
-        return new_media_objects
-
-        # Helper to upload to Cloudinary
-    
-
+        Media.objects.bulk_create(new_media_objects)
+        return new_media_objects    
     

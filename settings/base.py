@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'profiles',
     'admins',
     'property',
+    'chat',
     
     'address',
     'mail_templated',
@@ -214,11 +215,15 @@ SESSION_SAVE_EVERY_REQUEST = True  # Save the session to the database on every r
 
 
 
-# ACCOUNT_SIGNUP_REDIRECT_URL = "/jobs/job-onboarding/"
-
-# Email settings for local testing
-EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
-EMAIL_FILE_PATH = '/tmp/app-emails'  
+ 
+ 
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.sendgrid.net"
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = "apikey"  # Use "apikey" as the username
+EMAIL_HOST_PASSWORD = config('SENDGRID_API_KEY')
+DEFAULT_FROM_EMAIL = config('FROM_EMAIL')
 
 
 
@@ -232,6 +237,7 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 10,
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
     ),
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 
@@ -313,3 +319,13 @@ SIMPLE_JWT = {
     'BLACKLIST_AFTER_ROTATION': True, 
 }
 
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("127.0.0.1", 6379)],  # Local Redis
+        },
+    },
+}
+
+DOMAIN_NAME=config('DOMAIN_NAME', default='http://localhost:8000')

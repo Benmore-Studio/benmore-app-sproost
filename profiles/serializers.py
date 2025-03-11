@@ -1,24 +1,29 @@
 from rest_framework import serializers
-from .models import ContractorProfile, UserProfile, AgentProfile
-from main.serializers import MediaSerializer
+from .models import ContractorProfile, UserProfile, AgentProfile, Invitation
+from property.models import Property
 from accounts.models import User
-from quotes.serializers import  QuoteRequestAllSerializer
-from quotes.models import Property, QuoteRequest
+from quotes.serializers import  QuoteRequestAllSerializer, MediaSerializer
+from quotes.models import QuoteRequest,UserPoints
 from rest_framework.exceptions import APIException
+
 
 
 
 class SimpleUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'email', 'first_name', 'phone_number','user_type', 'last_name', 'agent_profile', 'date_joined'] 
+        fields = '__all__'
+        extra_kwargs = {
+                'password': {'write_only': True},
+                'last_login': {'read_only': True},
+                'is_superuser': {'read_only': True},
+            }
 
 
 class SimpleContractorProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = ContractorProfile
-        fields = '__all__' 
-
+        fields = '__all__'
 
 class SimpleHomeOwnerProfileSerializer(serializers.ModelSerializer):
     class Meta:
@@ -80,6 +85,7 @@ class ContractorSerializer(serializers.ModelSerializer):
             'contractor_profile',
             'property_owner',
         ]
+
 
 
 class HomeOwnerSerializer(serializers.ModelSerializer):
@@ -159,16 +165,26 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 
+class UserPointsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserPoints
+        fields = ['total_points']
+        
+ 
+
 class HomeViewUserSerializer(serializers.ModelSerializer):
     # using a method field for `user_profile`
     user_profile = serializers.SerializerMethodField()
     
     property_owner = SimplePropertySerializer(many=True, read_only=True)
+    
+    points = serializers.IntegerField(source="points.total_points", default=0, read_only=True)
 
     class Meta:
         model = User
         fields = ['id', 'username', 'phone_number',
-            'user_type', 'email', 'last_name', 'first_name', 'user_type', 'user_profile', 'property_owner']
+            'user_type', 'email', 'last_name', 'first_name', 'user_type', 'user_profile', 'property_owner', 'points']
+    
     
     def get_user_profile(self, user):
         """
@@ -188,6 +204,17 @@ class HomeViewUserSerializer(serializers.ModelSerializer):
         
         # Default case (maybe None or an empty dict)
         return None
+    
+ # R
+    
+
+
+
+class InvitationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Invitation
+        fields = ['id', 'email', 'referral_code', 'created_at']
+        read_only_fields = ['referral_code', 'created_at']
 
 class QuotePropertySerializer(serializers.ModelSerializer):
     property = SimplePropertySerializer(read_only=True)

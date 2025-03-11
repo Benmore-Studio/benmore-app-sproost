@@ -14,4 +14,6 @@ urlpatterns = [
     path('view_individual_quote/<int:property_id>/', ListQuotesForPropertyView.as_view(), name="view_individual_quote"),
     # path('request-quotes/<str:name>', Quotes.as_view(), name="request-quotes"),
     # path('api/', include(router.urls)),
+
+
 ]

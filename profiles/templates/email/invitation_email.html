@@ -1,0 +1,169 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Join SPROOST as an Agent</title>
+    <style type="text/css">
+      /* Client-specific styles */
+      body,
+      table,
+      td,
+      a {
+        -webkit-text-size-adjust: 100%;
+        -ms-text-size-adjust: 100%;
+      }
+      table,
+      td {
+        mso-table-lspace: 0pt;
+        mso-table-rspace: 0pt;
+      }
+      img {
+        -ms-interpolation-mode: bicubic;
+      }
+
+      /* Reset styles */
+      img {
+        border: 0;
+        height: auto;
+        line-height: 100%;
+        outline: none;
+        text-decoration: none;
+      }
+      table {
+        border-collapse: collapse !important;
+      }
+      body {
+        height: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+      }
+
+      /* Main styles */
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f5f5f5;
+        color: #333;
+        line-height: 1.6;
+      }
+      .container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #ffffff;
+        border-radius: 8px;
+      }
+      .header {
+        text-align: center;
+        padding: 20px 0;
+        background-color: #4caf50;
+        border-radius: 8px 8px 0 0;
+      }
+      .header h1 {
+        color: white;
+        margin: 0;
+        font-weight: 600;
+      }
+      .content {
+        padding: 30px 20px;
+      }
+      .code-box {
+        background-color: #f7f9fa;
+        border: 1px dashed #ccc;
+        padding: 15px;
+        margin: 20px 0;
+        text-align: center;
+        border-radius: 5px;
+      }
+      .code {
+        font-size: 24px;
+        font-weight: 700;
+        color: #4caf50;
+        letter-spacing: 2px;
+      }
+      .button {
+        display: inline-block;
+        padding: 12px 24px;
+        background-color: #4caf50;
+        color: white;
+        text-decoration: none;
+        border-radius: 4px;
+        font-weight: 600;
+        margin-top: 15px;
+      }
+      .footer {
+        margin-top: 30px;
+        text-align: center;
+        color: #888;
+        font-size: 14px;
+      }
+    </style>
+  </head>
+  <body>
+    <center>
+      <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px; margin: 0 auto">
+        <tr>
+          <td>
+            <div class="container">
+              <div class="header">
+                <h1>You're Invited to SPROOST!</h1>
+              </div>
+              <div class="content">
+                <h2>Join Our Growing Network of Professional Agents</h2>
+
+                <p>Hello,</p>
+
+                <p>
+                  You've been invited to join SPROOST as an agent! Our platform connects professionals like you with clients and projects that match your
+                  expertise.
+                </p>
+
+                <p>Use your personal invitation code to register:</p>
+
+                <div class="code-box">
+                  <div class="code">{{ invitation_code }}</div>
+                </div>
+
+                <p>As a SPROOST agent, you'll enjoy:</p>
+                <ul>
+                  <li>Access to qualified leads and projects</li>
+                  <li>Tools to showcase your portfolio and expertise</li>
+                  <li>Opportunity to earn reward points and incentives</li>
+                  <li>Networking with other industry professionals</li>
+                </ul>
+
+                <div style="text-align: center">
+                  <a
+                    href="{{ domain_name }}/accounts/manual_signup?referral_code={{ invitation_code }}"
+                    class="button"
+                    style="
+                      background-color: #4caf50;
+                      color: white;
+                      text-decoration: none;
+                      padding: 12px 24px;
+                      border-radius: 4px;
+                      font-weight: 600;
+                      display: inline-block;
+                    "
+                    >Sign Up Now</a
+                  >
+                </div>
+
+                <p style="margin-top: 30px">If you have any questions, feel free to contact our support team.</p>
+
+                <p>Best regards,<br />The SPROOST Team</p>
+              </div>
+
+              <div class="footer">
+                <p>© {% now "Y" %} SPROOST. All rights reserved.</p>
+                <p>This invitation was sent to you because a member of our platform thought you would be a great addition to our community.</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+      </table>
+    </center>
+  </body>
+</html>

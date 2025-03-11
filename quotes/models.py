@@ -39,45 +39,12 @@ class QuoteRequestStatus(models.TextChoices):
 
 
 
-class Property(models.Model):
-    tittle = models.CharField(max_length=255)
-    property_owner = models.ForeignKey("accounts.User", on_delete=models.CASCADE, related_name='property_owner')
-    home_owner_agents = models.ManyToManyField("accounts.User", blank=True, related_name='home_owner_agents')
-    has_quotes = models.BooleanField(default=False)
-    estimated_budget = models.IntegerField(null=True, blank=True)
-    contractors = models.ManyToManyField(
-        "accounts.User",
-        blank=True,
-        related_name="assigned_contractors",
-        help_text=_("Contractors assigned to this property.")
-    )
-    address = models.CharField(max_length=255)
-    half_bath = models.PositiveIntegerField(null=True, blank=True)
-    full_bath = models.PositiveIntegerField(null=True, blank=True)
-    bedrooms = models.PositiveIntegerField(null=True, blank=True)
-    square_footage = models.PositiveIntegerField(null=True, blank=True)
-    total_square_footage = models.PositiveIntegerField(null=True, blank=True)
-    lot_size = models.PositiveIntegerField(null=True, blank=True)
-    taxes = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-    basement_details = models.TextField(null=True, blank=True)
-    garage = models.CharField(max_length=50, choices=GARAGE_CHOICES, null=True, blank=True)
-    media_paths = GenericRelation("main.Media")
-    date_created = models.DateField(auto_now_add=True)
-    likes = models.ManyToManyField(
-        "accounts.User",
-        related_name="liked_properties",
-        blank=True,
-        help_text=_("investors who have liked this properties.")
-    )
-
-    def __str__(self):
-        return f"{self.property_owner} - {self.address}"
 
 
 class QuoteRequest(models.Model):
     user = models.ForeignKey("accounts.User", on_delete=models.CASCADE, related_name="quote_requests", help_text='the user who created the quote')
     contractors = models.ForeignKey("profiles.ContractorProfile", null=True, blank=True, on_delete=models.PROTECT, related_name="quote_contractors")
-    property = models.ForeignKey(Property, on_delete=models.CASCADE, related_name="quote_properties")
+    property = models.ForeignKey('property.Property', on_delete=models.CASCADE, related_name="quote_properties")
     property_type = models.CharField(max_length=50, choices=RENOVATION_CHOICES)
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     title = models.CharField(max_length=255, )
@@ -157,6 +124,7 @@ class Referral(models.Model):
     referred_user = models.OneToOneField("accounts.User", related_name='referred_by', on_delete=models.CASCADE, null=True, blank=True)
     referral_code = models.CharField(max_length=12, unique=True)
     date_created = models.DateTimeField(auto_now_add=True)
+
 
 class UserPoints(models.Model):
     user = models.OneToOneField("accounts.User", on_delete=models.CASCADE, related_name='points')

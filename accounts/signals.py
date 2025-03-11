@@ -1,6 +1,6 @@
 from django.db.models.signals import post_save, post_delete, m2m_changed
 from main.models import Media
-from quotes.models import Property
+from property.models import Property
 from profiles.models import ContractorProfile
 from django.dispatch import receiver
 from allauth.socialaccount.signals import social_account_added

@@ -6,28 +6,31 @@ from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from rest_framework import status
+from rest_framework import status, generics
 from rest_framework.generics import  ListAPIView
-
+from django.conf import settings
 from django.db.models import Q
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
-
-from profiles.models import ContractorProfile, UserProfile, AgentProfile
+from profiles.models import ContractorProfile, UserProfile, AgentProfile, Invitation
 from profiles.services.contractor import ContractorService
-
-from quotes.models import QuoteRequest, Review, UserPoints, Bid,ProjectPictures, Property 
+from property.models import Property
+from quotes.models import QuoteRequest, Project,Review, UserPoints, Bid,ProjectPictures 
 from .serializers import (SimpleContractorProfileSerializer, 
                           ProfilePictureSerializer, UserSerializer,
                           SimpleHomeOwnerProfileSerializer, 
                           SimpleAgentProfileSerializer, AgentSerializer,
                           ContractorSerializer,SimplePropertySerializer,HomeOwnerSerializer,
-                          PolymorphicUserSerializer, AgentUserSerializer
+                          PolymorphicUserSerializer, AgentUserSerializer, InvitationSerializer
 
                           
                         )
+from .utils import send_invitation_email
 
 
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
+from chat.models import ChatRoom, Message
 
 
 User = get_user_model()
@@ -318,7 +321,7 @@ class ChangeProfilePictureAPIView(APIView):
                 else:
                     return Response({'error': f'An Error Occurred, {error}'}, status=status.HTTP_400_BAD_REQUEST)
 
-
+# not needed - web-based
 class ContractorUploadApiView(APIView):
     """
     API View to handle contractor media/project uploads.
@@ -414,7 +417,165 @@ class ContractorListAPIView(ListAPIView):
 
     def get_queryset(self):
         return User.objects.select_related("contractor_profile").filter(user_type="CO", contractor_profile__isnull=False)
+   
     
+
+
+class UserSearchAPIView(APIView):
+    def get(self, request, *args, **kwargs):
+        query = request.GET.get('q', '')
+        if query:
+            users = User.objects.filter(
+                Q(username__icontains=query) | Q(email__icontains=query)
+            )
+            results = [
+                {'id': user.id, 'username': user.username, 'email': user.email}
+                for user in users
+            ]
+            return Response({'users': results})
+        return Response({'users': []})
+
+
+class CreateRoomAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+    def post(self, request):
+        room_name = request.data.get('roomName')
+        member_ids = request.data.get('members', [])
+
+        if not room_name:
+            return Response({'error': 'Room name is required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Optional: ensure uniqueness of room name
+        if ChatRoom.objects.filter(name=room_name).exists():
+            return Response({'error': 'A room with this name already exists.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Create the room with the requesting user as creator
+        chat_room = ChatRoom.objects.create(name=room_name, creator=request.user)
+        
+        # Add the creator to the room by default)
+        chat_room.members.add(request.user)
+
+        # Add each selected user
+        for user_id in member_ids:
+            try:
+                user = User.objects.get(id=user_id)
+                chat_room.members.add(user)
+            except User.DoesNotExist:
+                # Optionally handle this case if user doesn't exist
+                pass
+        
+        print("ogo")
+        # **Send WebSocket Notification to Connected Users**
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)(
+            "global_notifications",  # Broadcast to all connected users
+            {
+                "type": "notify_new_room",
+                "room": {
+                    "id": chat_room.id,
+                    "name": chat_room.name
+                }
+            }
+        )
+        print(chat_room.id, "✅ WebSocket event successfully sent!", chat_room.name)
+        
+        return Response({
+            'success': True,
+            'roomId': chat_room.id,
+            'roomName': chat_room.name
+        }, status=status.HTTP_201_CREATED)
+
+
+
+class AddMembersAPIView(APIView):
+    """ Allow only the room creator to add members to an existing chat room """
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, room_id):
+        # Get the chat room
+        chat_room = get_object_or_404(ChatRoom, id=room_id)
+
+        # Ensure that only the room creator (admin) can add new members
+        if chat_room.creator != request.user:
+            return Response({'error': 'Only the room creator can add members.'}, status=status.HTTP_403_FORBIDDEN)
+
+        # Get user IDs from request
+        member_ids = request.data.get('members', [])
+
+        if not member_ids:
+            return Response({'error': 'No members provided to add.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        added_users = []
+        for user_id in member_ids:
+            try:
+                user = User.objects.get(id=user_id)
+                if user not in chat_room.members.all():  # Prevent duplicates
+                    chat_room.members.add(user)
+                    added_users.append(user.username)
+            except User.DoesNotExist:
+                continue  # Ignore invalid user IDs
+
+        return Response({
+            'success': True,
+            'message': 'Users added successfully.',
+            'added_users': added_users
+        }, status=status.HTTP_200_OK)
+
+class LeaveRoomAPIView(APIView):
+    """ Allow a user to leave a chat room """
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, room_id):
+        # Get the chat room
+        chat_room = get_object_or_404(ChatRoom, id=room_id)
+
+        # Ensure the user is in the chat room
+        if request.user not in chat_room.members.all():
+            return Response({'error': 'You are not a member of this chat room.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Remove the user from the room
+        chat_room.members.remove(request.user)
+
+        return Response({
+            'success': True,
+            'message': 'You have left the chat room.'
+        }, status=status.HTTP_200_OK)
+
+
+class SearchMessagesView(APIView):
+    """
+    API endpoint to search messages in chat rooms.
+    Users can search globally or within a specific chat room.
+    """
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        query = request.GET.get('q', '').strip()
+        room_id = request.GET.get('room_id')  # Optional: filter messages by room
+
+        if not query:
+            return Response({"error": "Query is required"}, status=400)
+
+        messages = Message.objects.filter(Q(content__icontains=query))
+
+        if room_id:
+            messages = messages.filter(room_id=room_id)
+
+        results = [
+            {
+                "id": msg.id,
+                "room_id": msg.room.id,
+                "room_name": msg.room.name,
+                "content": msg.content,
+                "sender": msg.sender.username,
+                "timestamp": msg.timestamp.strftime("%Y-%m-%d %H:%M:%S")
+            }
+            for msg in messages
+        ]
+
+        return Response({"results": results})
+
+
 
 def award_points(user, points):
     if hasattr(user, 'points'):
@@ -424,6 +585,33 @@ def award_points(user, points):
 
 
 
+class InviteAgentView(generics.GenericAPIView):
+    serializer_class = InvitationSerializer
+
+    def post(self, request, *args, **kwargs):
+        
+        if request.user.user_type != 'AG':
+            return Response({'errror': "you don't have permission to invite agents"}, status=status.HTTP_400_BAD_REQUEST)
+        inviter = request.user
+        email = request.data.get('email')
+        if not email:
+            return Response({"error": "Email is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Create the invitation instance; referral_code is auto-generated in save()
+        invitation = Invitation.objects.filter(inviter=inviter, email=email).first()
+        
+        if invitation:
+            send_invitation_email(email, invitation.referral_code)
+              
+        else:
+
+            invitation = Invitation.objects.create(inviter=inviter, email=email)
+            send_invitation_email(email, invitation.referral_code)
+
+
+
+        serializer = self.get_serializer(invitation)         
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 class WinBidView(APIView):
     permission_classes = [IsAuthenticated]
