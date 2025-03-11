@@ -284,6 +284,7 @@
   
   
   const chatSocket = new WebSocket(wsScheme + "://" + window.location.host + "/ws/chat/");
+  console.log("chatsocket", chatSocket);
   let currentRoomId = null;
   let currentPage = 1;
   let isLoading = false;
