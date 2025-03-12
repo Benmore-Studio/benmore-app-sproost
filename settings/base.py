@@ -279,7 +279,7 @@ AUTH_USER_MODEL = 'accounts.User'
 
 GOOGLE_API_KEY = config('GOOGLE_API_KEY')
 
-CSRF_TRUSTED_ORIGINS = ['https://fdb9-105-113-33-126.ngrok-free.app']
+CSRF_TRUSTED_ORIGINS = ['https://fdb9-105-113-33-126.ngrok-free.app', 'https://sproost-1d5809b5aa5b.herokuapp.com']
 
 CLOUDINARY_STORAGE = {
     'CLOUD_NAME': config("CLOUD_NAME"),
