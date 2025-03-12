@@ -18,10 +18,76 @@ from django.contrib.auth import get_user_model
 from rest_framework_simplejwt.tokens import AccessToken
 from asgiref.sync import sync_to_async
 import re
+import os
 
+import redis
+from asgiref.sync import sync_to_async
 
+# ADDED: Initialize a global Redis client
+REDIS_URL = os.environ.get("REDIS_URL", "redis://localhost:6379")
+redis_client = redis.Redis.from_url(REDIS_URL)
 
 User = get_user_model()
+
+
+@sync_to_async
+def set_user_online(user_id: int):
+    """Mark user as 'online' in Redis."""
+    redis_client.set(f"user_status:{user_id}", "online", ex=3600)
+    # The 'ex=3600' means it'll expire in 1 hour if not updated.
+    # You can omit ex=... or choose a different time.
+
+@sync_to_async
+def set_user_offline(user_id: int):
+    """Mark user as 'offline' in Redis."""
+    redis_client.set(f"user_status:{user_id}", "offline")
+
+
+@sync_to_async
+def is_user_offline(user_id: int) -> bool:
+    """Check if user is offline in Redis."""
+    status = redis_client.get(f"user_status:{user_id}")
+    if not status:
+        # Key doesn't exist or expired; treat as offline
+        return True
+    return (status.decode() == "offline")
+
+
+@sync_to_async
+def store_offline_in_redis(recipient_id: int, message_data: dict):
+    """
+    Stores a message for an offline user in a Redis list.
+    We'll use LPUSH or RPUSH. 
+    Let's pick LPUSH => So we can RPOP later in get_offline_messages if we want.
+    """
+    key = f"offline_messages:{recipient_id}"
+    redis_client.lpush(key, json.dumps(message_data))
+    # Optionally set an expire, e.g. redis_client.expire(key, 604800)  # 7 days
+
+
+@sync_to_async
+def get_offline_messages(user_id: int):
+    """
+    Pop all offline messages from Redis list offline_messages:{user_id}.
+    Return them as a list of dicts.
+    """
+    key = f"offline_messages:{user_id}"
+    messages = []
+
+    # We'll do RPOP in a while loop, since we did LPUSH earlier
+    # Or you can do LRANGE + LTRIM if you prefer.
+    while True:
+        raw = redis_client.rpop(key)
+        if not raw:
+            break
+        messages.append(json.loads(raw))
+
+    # The messages are now in reverse order (if we use RPOP after LPUSH).
+    # So we might want to reverse them to keep chronological sequence:
+    messages.reverse()
+    return messages
+
+
 
 class MultiplexChatConsumer(AsyncWebsocketConsumer):
 
@@ -49,17 +115,29 @@ class MultiplexChatConsumer(AsyncWebsocketConsumer):
 
         print(f"✅ User authenticated: {user.username}")
 
+        # Mark user as online in Redis
+        await set_user_online(self.user.id)
+
+
         # Accept WebSocket connection
         await self.accept()
 
-        # ✅ **Join ALL chat rooms, including new ones**
+
+        offline_msgs = await get_offline_messages(self.user.id)
+        if offline_msgs:
+            await self.send(json.dumps({
+                "action": "offline_messages",
+                "messages": offline_msgs
+            }))
+
+        # Join ALL chat rooms, including new ones**
         user_rooms = await self.get_user_rooms_with_last_message(user)
         for room in user_rooms:
             group_name = f"chat_{room['id']}"
             await self.channel_layer.group_add(group_name, self.channel_name)
             self.rooms.add(group_name)
 
-        # ✅ **Also subscribe to a global notification group**
+        # Also subscribe to a global notification group**
         await self.channel_layer.group_add("global_notifications", self.channel_name)
 
         # Send the list of rooms to the connected user
@@ -68,11 +146,9 @@ class MultiplexChatConsumer(AsyncWebsocketConsumer):
             "rooms": user_rooms
         }))
 
-         # **Send missed messages count**
+         # Send missed messages count
         missed_messages = await self.get_missed_messages_count(user)
         print(f"📌 Missed Messages Count: {missed_messages}")
-
-        # Notify user of missed messages count
         await self.send(json.dumps({
             "action": "missed_messages",
             "missed_messages": missed_messages
@@ -81,6 +157,9 @@ class MultiplexChatConsumer(AsyncWebsocketConsumer):
     async def disconnect(self, close_code):
         """Handle WebSocket disconnection and remove user from groups"""
         print(f"🔴 WebSocket Disconnected for {self.user.username}")
+
+        # Mark user as offline in Redis
+        await set_user_offline(self.user.id)
 
         for group in list(self.rooms):
             await self.channel_layer.group_discard(group, self.channel_name)
@@ -162,6 +241,24 @@ class MultiplexChatConsumer(AsyncWebsocketConsumer):
             "messages": messages
         }))
 
+    async def store_offline_for_room_members(self, room_id, sender, msg_data):
+            members = await self.get_room_members(room_id)
+            for member_id in members:
+                if member_id != sender.id:
+                    offline = await is_user_offline(member_id)  # is_user_offline is @sync_to_async
+                    if offline:
+                        message_payload = {
+                            "room_id": room_id,
+                            "sender_id": sender.id,
+                            "sender_username": sender.username,
+                            "content": msg_data["message"],
+                            "timestamp": msg_data["timestamp"]
+                        }
+                        await store_offline_in_redis(member_id, message_payload)  
+                        # store_offline_in_redis is also @sync_to_async
+
+
+    
     async def send_message(self, data, user):
         """Securely send a message to a chat room"""
         
@@ -214,7 +311,10 @@ class MultiplexChatConsumer(AsyncWebsocketConsumer):
             }
         )
 
-        # Notify all users in the chat room about missed messages
+        # Store the message in Redis for all offline members, fetch all members except the sender, then check if they're offline
+        await self.store_offline_for_room_members(room_id, user, message)
+
+        # Notify about missed messages, if you still want that logic
         await self.notify_missed_messages(room_id)
 
     async def chat_message(self, event):
@@ -331,6 +431,13 @@ class MultiplexChatConsumer(AsyncWebsocketConsumer):
         
         for message in unread_messages:
             message.read_by.add(user)  # Mark as read
+
+
+    @database_sync_to_async
+    def get_room_members(self, room_id):
+        """Return a list of user IDs for all members of a room."""
+        room = ChatRoom.objects.get(id=room_id)
+        return list(room.members.values_list("id", flat=True))
 
 
 
