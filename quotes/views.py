@@ -52,19 +52,12 @@ class QuotesAPIView(GenericAPIView):
         """
         home_owner_quotes = self.get_user(user)
         quotes_data = QuoteRequestSerializer(home_owner_quotes.quote_requests.all(), many=True).data
-        if user.user_type == 'HO':
-            return {
+        return {
                 'contact_phone': str(user.phone_number),
                 'custom_home_owner_id': user.pk,
                 'created_by_agent': user.pk,
                 "quotes": quotes_data
-            }
-        elif user.user_type == 'AG':
-            return {
-                'contact_phone': str(user.phone_number),
-            }
-        return {}
-
+        }
 
     def handle_no_permission(self):
         """
