@@ -465,7 +465,7 @@ class CreateRoomAPIView(APIView):
                 pass
         
         print("ogo")
-        # **Send WebSocket Notification to Connected Users**
+        # Send WebSocket Notification to Connected Users**
         channel_layer = get_channel_layer()
         async_to_sync(channel_layer.group_send)(
             "global_notifications",  # Broadcast to all connected users
