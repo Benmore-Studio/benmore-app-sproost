@@ -10,7 +10,6 @@ from profiles.serializers import HomeOwnerSerializer
 from .serializers import ( PropertyCreateSerializer,PropertyUpdateSerializer, PropertyRetrieveSerializer)
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework import generics, filters
-from django_filters.rest_framework import DjangoFilterBackend
 from django.shortcuts import get_object_or_404
 
 
