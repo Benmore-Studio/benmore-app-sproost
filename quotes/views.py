@@ -124,14 +124,25 @@ class QuotesAPIView(GenericAPIView):
         data_copy = request.data.copy()
         data_copy['user'] = user.id
         
+
+         
         # Validate the data using serializer
         serializer = self.get_serializer(data=data_copy)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
+        property_id = request.data.get('property')
+
+        if not property_id:
+            return Response({"error":"Property ID is required"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        
+        property = Property.objects.get(id=int(property_id))
+        
         # Prepare form data for the service
         form_data = serializer.validated_data
         form_data['user'] = user
+        form_data['property'] = property
         
         # Handle media file uploads
         form_data['media'] = None
@@ -144,11 +155,12 @@ class QuotesAPIView(GenericAPIView):
         
         # Create the quote using the service
         result, created_quote = quote_service.create(form_data, user_profile, model_passed=QuoteRequest)
+     
         
         if result:
             # Update the property to indicate it has quotes
             try:
-                user_property = Property.objects.get(id=data_copy['property'])
+                user_property = Property.objects.get(id=int(data_copy['property']))
                 user_property.has_quotes = True
                 user_property.save()
                 
