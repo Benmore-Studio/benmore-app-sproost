@@ -5,7 +5,7 @@ from decouple import config
 
 DEBUG = True
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = ["*", 'sproost-1d5809b5aa5b.herokuapp.com']
 
 
 # DATABASES = {

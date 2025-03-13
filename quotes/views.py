@@ -6,14 +6,14 @@ from django.contrib.auth import get_user_model
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.response import Response
 from rest_framework import status, filters
-from rest_framework.views import APIView
 from rest_framework.generics import GenericAPIView, ListAPIView, UpdateAPIView, RetrieveAPIView 
 from rest_framework.permissions import IsAuthenticated
-from rest_framework import generics
 from profiles.serializers import PropertySerializer
 from property.models import Property
+from property.serializers import PropertyRetrieveSerializer
 from .models import QuoteRequest, QuoteRequestStatus, UserPoints
-from .serializers import   QuoteRequestSerializer,BulkMediaSerializer
+from .serializers import   QuoteRequestSerializer
+from main.serializers import BulkMediaSerializer
 from django.db.models import Prefetch
 from django.contrib.contenttypes.models import ContentType
 from django.core.serializers import serialize
@@ -23,158 +23,6 @@ from django.core.exceptions import ValidationError
 
 
 User = get_user_model()
-
-class PropertyAPIView(GenericAPIView):
-    """
-    API View to handle quote requests and file uploads.
-
-    ----------------------------
-    INPUT PARAMETERS:
-    - GET: Fetch initial form data for quote requests based on user type.
-    - POST: Submit quote request data, including media files (if any).
-
-    -----------------------------
-    OUTPUT PARAMETERS:
-    - GET: Returns initial data for the quote request.
-    - POST: Returns success or error messages upon submission.
-
-    send your request in this format-properties:{"tittle": "Sample Property",
-    "address": "123 Sample St",
-    "status": "pending",
-    "home_owner_agents": [1, 2, 4]
-    },
-    images:image files, 
-    videos:video inputs, 
-    files(pdf):file_input
-    """
-    serializer_class = PropertySerializer
-    parser_classes = [MultiPartParser, FormParser]
-    permission_classes = [IsAuthenticated] 
-    # user_profile = UserProfile.objects.get(user= payload["user"])
-
-    def get_user(self, user):
-        return User.objects.prefetch_related(Prefetch('property_owner', queryset=Property.objects.all())).get(id=user.id)
-  
-    
-    def get_initial_data(self, user):
-        """
-        Get initial data for the form based on the user type (HO or AG).
-        """
-        home_owner_properties = self.get_user(user)
-        property_data = json.loads(serialize('json', home_owner_properties.property_owner.all()))
-        if user.user_type == 'HO':
-            return {
-                'contact_phone': str(user.phone_number),
-                'custom_home_owner_id': user.pk,
-                'created_by_agent': user.pk,
-                "property": property_data
-            }
-        elif user.user_type == 'AG':
-            print("agent")
-            return {
-                'contact_phone': str(user.phone_number),
-                'property':property_data
-            }
-        else:
-            return {}
-
-
-
-    def handle_no_permission(self):
-        """
-        Custom response for unauthenticated requests.
-        """
-        return Response({'error': 'You are not authenticated. Please log in and try again.'}, status=status.HTTP_401_UNAUTHORIZED)
-
-    def get(self, request, *args, **kwargs):
-        """
-        Handle GET request to return initial form data.
-        """
-        user = request.user
-        if not user.is_authenticated:  # Check if the user is authenticated
-            return self.handle_no_permission()
-        
-
-
-        initial_data = self.get_initial_data(user)
-        return Response(initial_data, status=status.HTTP_200_OK)
-
-
-    @extend_schema(
-        summary="Upload Property with Media Files",
-        description="""
-        Allows users to submit property data along with associated media files.
-
-        **Required Fields:**
-        - `properties` (JSON String): Property details including title, address, etc.
-        - `images` (File): One or multiple image files.
-        - `videos` (File): One or multiple video files.
-        - `files` (File): PDFs or other document files.
-        """,
-        parameters=[
-            OpenApiParameter(name="properties", type=OpenApiTypes.STR, required=True, description="Property details in JSON string."),
-            OpenApiParameter(name="images", type=OpenApiTypes.STR, required=False, description="Multiple image files."),
-            OpenApiParameter(name="videos", type=OpenApiTypes.STR, required=False, description="Multiple video files."),
-            OpenApiParameter(name="files", type=OpenApiTypes.STR, required=False, description="Multiple document files (PDFs, etc.)."),
-        ],
-        
-        responses={201: OpenApiTypes.OBJECT},
-    )
-    def post(self, request, *args, **kwargs):
-        """
-        Handle POST request to submit quote request data, including media files.
-        """
-        user = request.user
-        if not user.is_authenticated: 
-            return self.handle_no_permission()
-
-        # Initialize the serializer with data from the request
-        if request.user.user_type == "HO" or request.user.user_type == "AG":
-            user_profile = self.get_user(user)
-        else:
-            return Response({"error": "user not allowed to upload"}, status=status.HTTP_400_BAD_REQUEST)
-        try:
-            user_property = json.loads(request.data.get('properties'))
-        except (TypeError, json.JSONDecodeError):
-            return Response({"error": "Invalid JSON data"}, status=status.HTTP_400_BAD_REQUEST)
-        
-        user_property['property_owner'] = user_profile.id
-        print("data_copy",user_property)
-        serializer = self.get_serializer(data=user_property) 
-        if serializer.is_valid():
-            property_created = serializer.save()
-            media_serializer={}
-            if request.FILES:
-                print("request.FILES", request.FILES)
-                content_type = ContentType.objects.get_for_model(property_created)
-                bulk_media_data = {
-                    "content_type_id": content_type.id,
-                    "object_id": property_created.id,
-                    "files": request.FILES.getlist('files', []),
-                    "images": request.FILES.getlist('images', []),
-                    "videos": request.FILES.getlist('videos', []),
-                }
-                media_serializer = BulkMediaSerializer(data=bulk_media_data)
-                media_serializer.is_valid(raise_exception=True)
-
-                # Instead of `media_serializer.save()`:
-                created_media_objs = media_serializer.create(
-                    media_serializer.validated_data
-                )
-
-            return Response({'message': 'request successfull', "property":serializer.data, "media": [
-                        {
-                            "id": m.id,
-                            "media_type": m.media_type,
-                            "file_url": m.file_url,
-                        }
-                        for m in created_media_objs
-                    ],}, status=status.HTTP_201_CREATED)
-            
-        else:
-            print(serializer.errors)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 
 
 class QuotesAPIView(GenericAPIView):
@@ -203,20 +51,13 @@ class QuotesAPIView(GenericAPIView):
         Get initial data for the form based on the user type (HO or AG).
         """
         home_owner_quotes = self.get_user(user)
-        quotes_data = json.loads(serialize('json', home_owner_quotes.quote_requests.all()))
-        if user.user_type == 'HO':
-            return {
+        quotes_data = QuoteRequestSerializer(home_owner_quotes.quote_requests.all(), many=True).data
+        return {
                 'contact_phone': str(user.phone_number),
                 'custom_home_owner_id': user.pk,
                 'created_by_agent': user.pk,
                 "quotes": quotes_data
-            }
-        elif user.user_type == 'AG':
-            return {
-                'contact_phone': str(user.phone_number),
-            }
-        return {}
-
+        }
 
     def handle_no_permission(self):
         """
@@ -283,14 +124,25 @@ class QuotesAPIView(GenericAPIView):
         data_copy = request.data.copy()
         data_copy['user'] = user.id
         
+
+         
         # Validate the data using serializer
         serializer = self.get_serializer(data=data_copy)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
+        property_id = request.data.get('property')
+
+        if not property_id:
+            return Response({"error":"Property ID is required"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        
+        property = Property.objects.get(id=int(property_id))
+        
         # Prepare form data for the service
         form_data = serializer.validated_data
         form_data['user'] = user
+        form_data['property'] = property
         
         # Handle media file uploads
         form_data['media'] = None
@@ -303,11 +155,12 @@ class QuotesAPIView(GenericAPIView):
         
         # Create the quote using the service
         result, created_quote = quote_service.create(form_data, user_profile, model_passed=QuoteRequest)
+     
         
         if result:
             # Update the property to indicate it has quotes
             try:
-                user_property = Property.objects.get(id=data_copy['property'])
+                user_property = Property.objects.get(id=int(data_copy['property']))
                 user_property.has_quotes = True
                 user_property.save()
                 
@@ -375,16 +228,7 @@ class AcceptOrRejectQuotes(UpdateAPIView):
             quote.save()
 
 
-class PropertySearchView(ListAPIView):
-    """
-    GET /api/properties/?search=<query>, 
-    search_fields = ['address', 'property_owner__username', 'basement_details', 'tittle']
-    """
-    queryset = Property.objects.all().order_by("id")
-    serializer_class = PropertySerializer
-    filter_backends = [filters.SearchFilter]
-    # Adjust these fields to whatever you want to enable searching on
-    search_fields = ['address', 'property_owner__username', 'basement_details', 'tittle']
+ 
 
 
 

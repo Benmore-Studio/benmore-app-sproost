@@ -17,19 +17,115 @@ class AgentAssignmentSerializer(serializers.Serializer):
     registration_ID = serializers.CharField(max_length=100)
 
 
+
+
+class MediaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Media
+        fields = ['id', 'content_type', 'object_id', 'media_type', 'image', 'image_category', 'file', 'video', 'upload_date']
+
+    def validate(self, data):
+        """
+        Validate uploaded media types (files, images, videos).
+        """
+        supported_file_types = ['pdf', 'doc', 'docx', 'txt']
+        supported_image_types = ['jpg', 'jpeg', 'png', 'gif']
+        supported_video_types = ['mp4', 'avi', 'mov', 'mkv']
+
+        file = data.get('file')
+        image = data.get('image')
+        video = data.get('video')
+
+        if file:
+            extension = file.name.split('.')[-1].lower()
+            if extension not in supported_file_types:
+                raise serializers.ValidationError({"file": f"Unsupported file type: {extension}"})
+
+        if image:
+            extension = image.name.split('.')[-1].lower()
+            if extension not in supported_image_types:
+                raise serializers.ValidationError({"image": f"Unsupported image type: {extension}"})
+
+        if video:
+            extension = video.name.split('.')[-1].lower()
+            if extension not in supported_video_types:
+                raise serializers.ValidationError({"video": f"Unsupported video type: {extension}"})
+
+        return data
+
+    def create(self, validated_data):
+        """
+        Create a single Media instance.
+        """
+        return Media.objects.create(**validated_data)
+
+    def create_many(self, content_type, object_id, files, images, videos):
+        """
+        Handle multiple media uploads.
+        """
+        created_media = []
+        errors = []
+
+        # Process files
+        for file in files:
+            media_data = {
+                'content_type': content_type.id,
+                'object_id': object_id,
+                'media_type': 'File',
+                'file': file
+            }
+            serializer = MediaSerializer(data=media_data)
+            if serializer.is_valid():
+                created_media.append(serializer.save())
+            else:
+                errors.append(serializer.errors)
+
+        # Process images
+        for image in images:
+            media_data = {
+                'content_type': content_type.id,
+                'object_id': object_id,
+                'media_type': 'Image',
+                'image': image
+            }
+            serializer = MediaSerializer(data=media_data)
+            if serializer.is_valid():
+                created_media.append(serializer.save())
+            else:
+                errors.append(serializer.errors)
+
+        # Process videos
+        for video in videos:
+            media_data = {
+                'content_type': content_type.id,
+                'object_id': object_id,
+                'media_type': 'Video',
+                'video': video
+            }
+            serializer = MediaSerializer(data=media_data)
+            if serializer.is_valid():
+                created_media.append(serializer.save())
+            else:
+                errors.append(serializer.errors)
+
+        return created_media, errors
+
+
+
+
 class BulkMediaSerializer(serializers.Serializer):
-    """
-    A custom serializer for handling multiple media uploads in one pass.
-    """
     content_type_id = serializers.IntegerField()
     object_id = serializers.IntegerField()
-
-    # We expect lists of uploaded files for each category
     files = serializers.ListField(
         child=serializers.FileField(allow_empty_file=False),
         required=False
     )
-    images = serializers.ListField(
+    # Separate fields for before and after images
+    before_images = serializers.ListField(
+        child=serializers.ImageField(allow_empty_file=False),
+        required=False
+    )
+    after_images = serializers.ListField(
         child=serializers.ImageField(allow_empty_file=False),
         required=False
     )
@@ -39,16 +135,11 @@ class BulkMediaSerializer(serializers.Serializer):
     )
 
     def validate(self, attrs):
-        """
-        Perform extension and size checks for all media in a single pass.
-        """
         max_file_size = 10 * 1024 * 1024
         supported_file_types = ['pdf', 'doc', 'docx', 'txt']
         supported_image_types = ['jpg', 'jpeg', 'png', 'gif']
         supported_video_types = ['mp4', 'avi', 'mov', 'mkv', 'ts']
 
-        # We'll accumulate errors in a dict {field: [list of errors]}
-        # but you could raise ValidationError immediately if you prefer.
         errors = {}
 
         def validate_file(f, kind):
@@ -64,46 +155,44 @@ class BulkMediaSerializer(serializers.Serializer):
                 return f"{kind.capitalize()} size exceeds 10MB. Size: {mb_size:.2f} MB"
             return None
 
-        # Validate files
         for f in attrs.get("files", []):
             err = validate_file(f, "file")
             if err:
                 errors.setdefault("files", []).append(err)
 
-        # Validate images
-        for img in attrs.get("images", []):
+        for img in attrs.get("before_images", []):
             err = validate_file(img, "image")
             if err:
-                errors.setdefault("images", []).append(err)
+                errors.setdefault("before_images", []).append(err)
 
-        # Validate videos
+        for img in attrs.get("after_images", []):
+            err = validate_file(img, "image")
+            if err:
+                errors.setdefault("after_images", []).append(err)
+
         for vid in attrs.get("videos", []):
             err = validate_file(vid, "video")
             if err:
                 errors.setdefault("videos", []).append(err)
 
         if errors:
-            # Raise a ValidationError with all accumulated errors
             raise serializers.ValidationError(errors)
-
         return attrs
 
     def create(self, validated_data):
-        """
-        Bulk-create all Media objects after validation passes.
-        """
+        from django.contrib.contenttypes.models import ContentType
+        from main.models import Media  # Adjust your import as needed
+
         content_type_id = validated_data["content_type_id"]
         object_id = validated_data["object_id"]
-        
-        # Retrieve the ContentType
+
         try:
             ct = ContentType.objects.get(pk=content_type_id)
         except ContentType.DoesNotExist:
             raise serializers.ValidationError({"content_type_id": "Invalid content type ID."})
-        
+
         new_media_objects = []
 
-        # Prepare file-based media
         for f in validated_data.get("files", []):
             new_media_objects.append(
                 Media(content_type=ct, object_id=object_id, media_type="File", file=f)
@@ -126,8 +215,5 @@ class BulkMediaSerializer(serializers.Serializer):
                 Media(content_type=ct, object_id=object_id, media_type="Video", video=vid)
             )
 
-        # Now do a single bulk_create
         Media.objects.bulk_create(new_media_objects)
-
-        # Return the list of created objects
-        return new_media_objects
+        return new_media_objects   

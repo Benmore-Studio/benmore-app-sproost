@@ -9,6 +9,9 @@ from rest_framework.exceptions import NotFound, PermissionDenied
 from profiles.serializers import HomeOwnerSerializer 
 from .serializers import ( PropertyCreateSerializer,PropertyUpdateSerializer, PropertyRetrieveSerializer)
 from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework import generics, filters
+from django.shortcuts import get_object_or_404
+
 
 
 User = get_user_model()
@@ -68,9 +71,7 @@ class PropertyCreateView(generics.CreateAPIView):
     parser_classes = [MultiPartParser, FormParser]
 
 
-
    
-    
 class PropertyRetrieveView(generics.RetrieveAPIView):
     queryset = Property.objects.all()
     permission_classes = [IsAuthenticated]
@@ -81,6 +82,32 @@ class PropertyUpdateView(generics.UpdateAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = PropertyUpdateSerializer
 
+
+
+class PropertyListAPIView(generics.ListAPIView):
+    """
+    API View to retrieve all properties with search and filter options.
+    """
+    queryset = Property.objects.all()
+    serializer_class = PropertyRetrieveSerializer
+    filter_backends = [filters.SearchFilter]  # Only search, no filtering
+    search_fields = ['title', 'address', 'property_type', 'status']    
+    # Fields that can be searched using ?search=
+    
+    def get_queryset(self):
+        """
+        Get properties for a specific user if `user_id` is provided in query params.
+        Otherwise, return all properties.
+        """
+        queryset = Property.objects.all()
+        user_id = self.request.query_params.get('user_id')
+
+        if user_id:
+            user = get_object_or_404(User, id=user_id)
+            queryset = queryset.filter(property_owner=user)
+
+        return queryset
+ 
 
 
 
