@@ -113,6 +113,21 @@
     </div>
   </div>
 
+  <!-- Delete room yes or no modal-->
+  <div id="delete-room-yes-or-no-modal" class="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50" style="z-index: 100; display: none;">
+    <div class="bg-white rounded-lg shadow-lg w-full max-w-md fixed z-index-50">
+      <!-- Modal Header -->
+      <div class="px-6 py-4 border-b border-gray-200">
+        <h3 class="text-xl font-semibold">Are you sure you want to delete room?</h3>
+      </div>
+      <!-- Modal Body -->
+      <div class="px-6 py-4 border-t border-gray-200 flex justify-end">
+        <button id="delete-room-closeModalBtn"  class="inline-flex items-center w-[70%] md:w-[50%] justify-center p-3 rounded-3xl bg-red-600 text-white border border-neutral-150 shadow-sm font-semibold">Cancel</button>
+        <button id="delete-room-confirm"  class="inline-flex items-center w-[70%] md:w-[50%] justify-center p-3 rounded-3xl bg-[#417690] text-white border border-neutral-150 shadow-sm font-semibold">Delete</button>
+      </div>
+    </div>
+  </div>
+
   <!-- remove user yes or no modal-->
   <div id="remove-user-yes-or-no-modal" class="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50" style="z-index: 100; display: none;">
     <div class="bg-white rounded-lg shadow-lg w-full max-w-md fixed z-index-50">
@@ -150,85 +165,87 @@
 
 
     <!-- Dropdown panel (initially hidden) -->
-    <div id="chatDropdown" class="hidden" style="position: absolute;  height: 80%; right: 0; margin-top: 8px; width: 380px; background-color: #fff; border: 1px solid #ccc; border-radius: 4px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); z-index: 50;">
+    <div id="chatDropdown" class="hidden" style="position: absolute;  height: 92%; overflow-y: hidden; right: 0; margin-top: 8px; width: 480px; background-color: #fff; border: 1px solid #ccc; border-radius: 4px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); z-index: 50;">
       <div class="h-full">
         <!-- header -->
         <!-- Message area -->        
         <div class="h-full">
           <!-- Left Sidebar (Chats List) -->
           <div class="w-full h-full bg-white border-r border-gray-300">
-            <!-- Search Bar -->
-            <div class="p-4 border-b border-gray-300 relative">
-              <input 
-                type="text" 
-                placeholder="Search..." 
-                id="messageSearchInput"
-                class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500" 
-              />
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4 absolute text-black cursor-pointer right-[23px] top-[23px]">
-                <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
-              </svg>
-            </div>
-
-            <button onclick="previousSearchResult(currentRoomId)">⬅️ Previous</button>
-            <button onclick="nextSearchResult(currentRoomId)">Next ➡️</button>
-        
-            <div id="message-search-results" style="display: none;" class="p-4 border rounded-md bg-white max-h-64 overflow-y-auto">
-                <!-- Live search results will be displayed here -->
-            </div>
-
-            <!-- Chats List (Scroll) -->
-            <div id="chatList" class="h-[86%] flex-1 overflow-y-auto">
-              <!-- Single chat item -->
-              <div class="cursor-pointer hover:bg-gray-100 p-3 border-b border-gray-200">
-                <div class="font-semibold text-gray-800">Room A</div>
-                <div class="text-sm text-gray-500 truncate">Last message snippet here...</div>
-              </div>             
-            </div>
-
-            <!-- individual chats -->
-            <div id="individual-chatList" class="h-[93%] flex flex-col" style="display: none;">             
-              <div class="flex justify-between">
-              <!-- Back Arrow -->
-              <div id="back-arrow" class="cursor-pointer ml-4">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-3 text-black">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
-                </svg>                
+            <div class="h-full">
+              <!-- Search Bar -->
+              <div class="p-4 border-b border-gray-300 relative">
+                <input 
+                  type="text" 
+                  placeholder="Search..." 
+                  id="messageSearchInput"
+                  class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500" 
+                />
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4 absolute text-black cursor-pointer right-[23px] top-[23px]">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+                </svg>
               </div>
-              <div class="flex items-center gap-4">
-                <p id="leave-room" class="cursor-pointer text-red-500">Leave</p>                
-                <p id="add-user" class="cursor-pointer text-blue-500">Add</p>     
-                {% if request.user == 'ADMIN' %}
-                  <p id="add-user" class="cursor-pointer text-blue-500">Add</p>     
-                {% endif %}
-                
+
+              <button onclick="previousSearchResult(currentRoomId)">⬅️ Previous</button>
+              <button onclick="nextSearchResult(currentRoomId)">Next ➡️</button>
+          
+              <div id="message-search-results" style="display: none;" class="p-4 border rounded-md bg-white max-h-64 overflow-y-auto">
+                  <!-- Live search results will be displayed here -->
               </div>
-            </div>
-              <div id="roomTitle" class="mt-4 text-center"></div>
-              <!-- Chat List & Input (Inside a container to maintain order) -->
-              <div class="flex flex-col flex-1 overflow-y-auto h-full mt-4">               
-                <!-- Chat Messages -->
-                <div id="individual-chatList-body" class="flex-1 overflow-y-auto h-[94%]" style="position: relative;">
-                  
-                  <div id="message-body" class="h-[70%] overflow-y-auto"></div>
-                  
-                  <!-- Chat Input -->
-                  <div class="w-full flex justify-center" style="position: absolute; bottom: 0;">
-                  <div id="input" class="mt-4 w-full flex gap-2 px-2">
-                      <input id="message" type="text" placeholder="type..." 
-                            class="bg-transparent outline-none border pl-3 h-[50px] rounded-xl dark:text-white flex-1">
-                      
-                      <div id="chat-message-submit" class="text-[#0d2438] dark:text-white cursor-pointer flex flex-col justify-center">
-                          <i class="fa fa-paper-plane" aria-hidden="true"></i>
-                          <input class="cursor-pointer" type="button" value="Send">
-                      </div>
-                  </div>
+
+              <!-- Chats List (Scroll) -->
+              <div id="chatList" class="h-[86%] flex-1 overflow-y-auto">
+                <!-- Single chat item -->
+                <div class="cursor-pointer hover:bg-gray-100 p-3 border-b border-gray-200">
+                  <div class="font-semibold text-gray-800">Room A</div>
+                  <div class="text-sm text-gray-500 truncate">Last message snippet here...</div>
+                </div>             
+              </div>
+
+              <!-- individual chats -->
+              <div id="individual-chatList" class="flex flex-col h-full" style="display: none;">             
+                <div class="flex justify-between mr-2">
+                <!-- Back Arrow -->
+                <div id="back-arrow" class="cursor-pointer ml-4">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-3 text-black">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
+                  </svg>                
                 </div>
-
+                <div class="flex items-center gap-4">
+                  <p id="delete-room" class="cursor-pointer text-red-500">Delete Room</p>                
+                  <p id="leave-room" class="cursor-pointer text-red-500">Leave</p>                
+                  <p id="add-user" class="cursor-pointer text-blue-500">Add</p>     
+                  {% if request.user == 'ADMIN' %}
+                    <p id="add-user" class="cursor-pointer text-blue-500">Add</p>     
+                  {% endif %}
+                  
+                </div>
+              </div>
+                <div id="roomTitle" class="mt-4 text-center"></div>
+                <!-- Chat List & Input (Inside a container to maintain order) -->
+                <div class="flex flex-col flex-1 h-full mt-4">               
+                  <!-- Chat Messages -->
+                  <div id="individual-chatList-body" class="flex-1 overflow-y-auto h-full" style="position: relative;">
+                    
+                    <div id="message-body" class="overflow-y-auto"></div>
+                </div>
+              </div>
               </div>
             </div>
-          </div>
-        </div>
+
+            <!-- Chat Input -->
+            <div id="chat-message-parent-div" class="w-full flex justify-center items-center py-2" style="position: absolute; bottom: 0; display: none;">
+              <div id="input" class="mt-4 w-full flex gap-2 px-2">
+                  <input id="message" type="text" placeholder="type..." 
+                        class="bg-transparent outline-none border pl-3 h-[50px] rounded-xl dark:text-white flex-1" oninput="onInputChange()">
+                  
+                  <div id="chat-message-submit" class="text-[#0d2438] dark:text-white cursor-pointer flex flex-col justify-center">
+                      <i class="fa fa-paper-plane" aria-hidden="true"></i>
+                      <input class="cursor-pointer" type="button" value="Send">
+                  </div>
+              </div>
+            </div>
+        </div>  
       </div>
     </div>
     
@@ -255,7 +272,9 @@
   const backArrow = document.getElementById("back-arrow");
   const addUserToGroup = document.getElementById("add-user");
   const adminleaveRoomButton = document.getElementById("leave-room");
+  const adminDeleteRoomButton = document.getElementById("delete-room");
   const leaveRoomYesOrNoModal = document.getElementById("leave-room-yes-or-no-modal");
+  const deleteRoomYesOrNoModal = document.getElementById("delete-room-yes-or-no-modal");
   const removeUserYesOrNoModal = document.getElementById("remove-user-yes-or-no-modal");
   let createChatModal = document.getElementById('create-chatModal')
   let addUserModal = document.getElementById("only-add-user-modal")
@@ -263,6 +282,9 @@
   let removeUserCloseModalBtn = document.getElementById("remove-user-closeModalBtn")
   let leaveRoomConfirm = document.getElementById("leave-room-confirm")
   let removeUserConfirm = document.getElementById("remove-user-confirm")
+  let deleteRoomConfirm = document.getElementById("delete-room-confirm")
+  let deleteRoomCloseModalBtn = document.getElementById("delete-room-closeModalBtn")
+  let deleteUserConfirm = document.getElementById("delete-user-confirm")
   backArrow.style.marginTop = '8px'
   const roomDetails = {}
   let globalRoomName
@@ -292,12 +314,16 @@
   backArrow.addEventListener("click", function(){
     chatContainer.style.display = 'block'
     individualChatList.style.display = 'none'
+    document.getElementById('chat-message-parent-div').style.display = 'none'
+
   })
 
   function openChatRoom(roomId, roomName) {
+    console.log("opened");
     currentRoomId = roomId;
     currentPage = 1;
     document.getElementById('message-body').innerHTML = ''
+    document.getElementById('chat-message-parent-div').style.display = 'block'
     chatContainer.style.display = 'none'
     const roomTitle = document.getElementById("roomTitle")
     roomTitle.innerHTML = roomName
@@ -483,7 +509,29 @@ function previousSearchResult(roomId) {
     else if (data.action === "new_room") {
       updateChatRooms(data);  // Update the chat room UI
     } 
+    else if (data.action === 'typing') {
+      let roomId = `chat-room-${data.room}`
+      let room = document.getElementById(roomId)
+      console.log(room);
+      console.log(room.children[3]);
+      console.log(room.children[1]);
+      if(data.typing === true){
+        room.children[3].innerHTML = `${data.username} is typing`
+        room.children[3].className = "text-green-500 text-sm"
+       
+        room.children[1].style.display = "none"
+        room.children[2].style.display = "none"
+        room.children[3].style.cssText = "text-transform: none; font-family: Rubik, sans-serif; font-size: 13px;"
+      
+      }else{
+        room.children[1].style.display = "block"
+        room.children[2].style.display = "block"
+        room.children[3].style.display = "none"
+      
+      }
+    }
     else if (data.action === "message") { 
+      console.log("uphreme");
       updateChatList(data.room, data.message, data.timestamp )
       const chatMessages = document.getElementById('message-body');   
       const msgDiv = document.createElement('div');
@@ -511,9 +559,11 @@ function previousSearchResult(roomId) {
     }
     
     else if (data.action === "message_list") {
+      console.log(("wooo"));
       const chatMessages = document.getElementById('message-body');
        // Clear old messages
       chatMessages.innerHTML = "";
+      chatMessages.style.height = "60%"
       // Reverse messages (oldest first) and add to chat
       data.messages.reverse().forEach(msg => addMessage(msg.username, msg.message, msg.timestamp));
       isLoading = false;
@@ -534,6 +584,7 @@ function previousSearchResult(roomId) {
   };
 
 
+  // function to send message
   function sendMessage(roomTitle) {
     const input = document.getElementById('message');
     const message = input.value.trim();
@@ -554,6 +605,31 @@ function previousSearchResult(roomId) {
         console.error("WebSocket is not open. Cannot send message.");
     }
 }
+
+
+  // Start typing
+function onInputChange() {
+  console.log(roomDetails,"pop", globalRoomName);
+  chatSocket.send(JSON.stringify({
+    action: 'typing',
+    room_id: currentRoomId,
+    typing: true
+  }));
+
+  // Clear any existing timer
+  if (window.typingTimer) clearTimeout(window.typingTimer);
+
+  // After 2 seconds of no input, send "typing: false"
+  window.typingTimer = setTimeout(() => {
+    chatSocket.send(JSON.stringify({
+      action: 'typing',
+      room_id: currentRoomId,
+      typing: false
+    }));
+  }, 2000);
+}
+
+
 
 // to updae the chat and move the message div to the top and to update message count
 function updateChatList(id, message, timestamp) {
@@ -598,7 +674,7 @@ function updateChatList(id, message, timestamp) {
 
   // Function to get all individual message to the UI
   function addMessage(username, message, timestamp) {
-      const chatMessages = document.getElementById('message-body');
+      const chatMessages = document.getElementById('message-body')
       const msgDiv = document.createElement('div');
       const usernameAndDate = document.createElement('div');
       const messageBody = document.createElement('p');
@@ -673,6 +749,7 @@ function updateChatList(id, message, timestamp) {
                 <div class="font-semibold text-gray-800">${room.name}</div>
                 <div class="text-sm text-gray-500 truncate">${room.last_message}</div>
                 <div class="text-xs text-gray-400">${room.last_message_time}</div>
+                <div></div>
             `;
             roomDiv.addEventListener("click", function () {openChatRoom(room.id, room.name);});
             roomDetails[room.name] =  room.id
@@ -681,7 +758,7 @@ function updateChatList(id, message, timestamp) {
             // newMessageNumber.style.display = "none"
             newMessageNumber.setAttribute('id', `messageNumber-${room.id}`)
             roomDivParent.className = 'w-full hover:bg-gray-100 p-3 flex items-center justify-around cursor-pointer border-b border-gray-200'
-            roomDivParent.setAttribute('id', `roomDivParent-${room.id}`)
+            // roomDivParent.setAttribute('id', `roomDivParent-${room.id}`)
             roomDivParent.appendChild(newMessageNumber);
             roomDivParent.appendChild(roomDiv);
             chatList.appendChild(roomDivParent);
@@ -802,7 +879,14 @@ function updateChatList(id, message, timestamp) {
   .then(response => response.json())
   .then(data => {
     if (data.success) {
-      alert(`Room '${data.roomName}' created successfully!`);
+      Toastify({
+        text: `Room '${data.roomName}' created successfully!`,
+        duration: 3000, // Time in milliseconds (3 seconds)
+        close: true, // Show close button
+        gravity: "top", // `top` or `bottom`
+        position: "right", // `left`, `center`, or `right`
+        backgroundColor: "linear-gradient(to right, #00b09b, #417690)",
+      }).showToast();
       // Clear fields and close modal
       document.getElementById('roomName').value = '';
       addedUserIds = [];
@@ -811,7 +895,15 @@ function updateChatList(id, message, timestamp) {
       // Optionally redirect to the chat room page
       // window.location.href = `/chat/room/${data.roomName}/`;
     } else {
-      alert(`Error: ${data.error}`);
+      Toastify({
+          text: `Sorry! an error occured-Error: ${data.error}`,
+          duration: 3000, // Time in milliseconds (3 seconds)
+          close: true, // Show close button
+          gravity: "top", // `top` or `bottom`
+          position: "right", // `left`, `center`, or `right`
+          backgroundColor: "linear-gradient(to right, #ff4d4d, #ff0000)",
+      }).showToast();
+      alert();
     }
   })
   .catch(error => {
@@ -951,6 +1043,11 @@ function updateChatList(id, message, timestamp) {
     leaveRoomYesOrNoModal.style.display = "flex"
   })
 
+  adminDeleteRoomButton.addEventListener("click", ()=>{
+    adminAddUserRoomTitle = document.getElementById("roomTitle").innerHTML;
+    deleteRoomYesOrNoModal.style.display = "flex"
+  })
+
   leaveRoomCloseModalBtn.addEventListener("click", ()=>{
     leaveRoomYesOrNoModal.style.display = "none"
   })
@@ -981,7 +1078,8 @@ function updateChatList(id, message, timestamp) {
         position: "right", // `left`, `center`, or `right`
         backgroundColor: "linear-gradient(to right, #00b09b, #417690)",
     }).showToast();
-    } else {
+        
+  } else {
       Toastify({
         text: "Sorry! an error occured",
         duration: 3000, // Time in milliseconds (3 seconds)
@@ -995,6 +1093,59 @@ function updateChatList(id, message, timestamp) {
   .catch(error => {
     console.error('Error adding user to room:', error);
   });
+  });
+
+  
+  deleteRoomCloseModalBtn.addEventListener("click", ()=>{
+    deleteRoomYesOrNoModal.style.display = "none"
+  })
+
+
+  deleteRoomConfirm.addEventListener('click', () => {
+      
+    // If you're using Django's CSRF protection in templates, grab the token:
+    const csrfToken = getCookie('csrftoken'); // defining a getCookie below
+
+    fetch(`/profiles/rooms/${roomDetails[adminAddUserRoomTitle]}/delete/`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': csrfToken
+      },
+      credentials: 'include',  // ensures cookies are sent
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        deleteRoomYesOrNoModal.classList.add('hidden');
+        let roomId = `chat-room-${roomDetails[adminAddUserRoomTitle]}`
+        let room = document.getElementById(roomId)
+        individualChatList.style.display = "none"  
+        chatContainer.style.display = "block"  
+        console.log(roomId, roomId);
+        room.style.display = "none"
+        Toastify({
+          text: "Room deleted successfully",
+          duration: 3000, // Time in milliseconds (3 seconds)
+          close: true, // Show close button
+          gravity: "top", // `top` or `bottom`
+          position: "right", // `left`, `center`, or `right`
+          backgroundColor: "linear-gradient(to right, #00b09b, #417690)",
+      }).showToast();
+      } else {
+        Toastify({
+          text: "Sorry! an error occured",
+          duration: 3000, // Time in milliseconds (3 seconds)
+          close: true, // Show close button
+          gravity: "top", // `top` or `bottom`
+          position: "right", // `left`, `center`, or `right`
+          backgroundColor: "linear-gradient(to right, #ff4d4d, #ff0000)",
+      }).showToast();
+      }
+    })
+    .catch(error => {
+      console.error('Error adding user to room:', error);
+    });
   });
 
   

@@ -18,6 +18,7 @@ urlpatterns = [
     path("search_messages/", views.SearchMessagesView.as_view(), name="search_messages"),
     path('rooms/<int:room_id>/add-members/', views.AddMembersAPIView.as_view(), name='add-members'),
     path('rooms/<int:room_id>/leave/', views.LeaveRoomAPIView.as_view(), name='leave-room'),
+    path('rooms/<int:room_id>/delete/', views.DeleteRoomAPIView.as_view(), name='delete-room'),
 
     # path('agent/update/', views.EditAgentProfileAPIView.as_view(), name="edit-agent-profile"),
     # path('contractor/update/', views.ContractorProfileEditAPIView.as_view(), name="edit-contractor-profile"),
