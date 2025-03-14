@@ -7,6 +7,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.exceptions import NotFound, PermissionDenied
 from profiles.serializers import HomeOwnerSerializer , SimpleUserSerializer
+from profiles.serializers import HomeOwnerSerializer , SimpleUserSerializer
 from .serializers import ( PropertyCreateSerializer,PropertyUpdateSerializer, PropertyRetrieveSerializer)
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework import generics, filters
