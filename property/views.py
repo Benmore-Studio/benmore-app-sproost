@@ -2,15 +2,18 @@ from quotes.models import Project, QuoteRequest
 from django.contrib.auth import get_user_model
 from .models import AssignedAccount, Property
 from django.db.models import Q
-from rest_framework import generics
+from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.exceptions import NotFound, PermissionDenied
+from profiles.serializers import HomeOwnerSerializer , SimpleUserSerializer
 from profiles.serializers import HomeOwnerSerializer , SimpleUserSerializer
 from .serializers import ( PropertyCreateSerializer,PropertyUpdateSerializer, PropertyRetrieveSerializer)
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework import generics, filters
 from django.shortcuts import get_object_or_404
+from django.core.exceptions import ObjectDoesNotExist
+
 
 
 User = get_user_model()
@@ -185,12 +188,31 @@ class PropertyListForClientView(generics.ListAPIView):
         client_id = self.kwargs.get("client_id")
 
         return Property.objects.filter(
-            property_owner_id=client_id,
+            property_owner__id=client_id,
             home_owner_agents=agent
-        )
+        ).distinct()
     
     def list(self, request, *args, **kwargs):
-        if self.request.user.user_type != 'AG':
-            return Response({"error": "You don't have permission to access this information"}, status=403)
+        client_id = self.kwargs.get("client_id")
 
-        return super().list(request, *args, **kwargs)  
+        if not client_id:
+            return Response(
+                {"error": "Client ID is required"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            User.objects.get(id=client_id)
+        except ObjectDoesNotExist:
+            return Response(
+                {"error": "Client not found or invalid request"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        if self.request.user.user_type != 'AG':
+            return Response(
+                {"error": "You don't have permission to access this information"},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        return super().list(request, *args, **kwargs)
