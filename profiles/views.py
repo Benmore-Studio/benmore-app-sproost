@@ -542,6 +542,38 @@ class LeaveRoomAPIView(APIView):
         }, status=status.HTTP_200_OK)
 
 
+
+class DeleteRoomAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request, room_id):
+        # Fetch the chat room or return 404 if it does not exist
+        room = get_object_or_404(ChatRoom, id=room_id)
+
+        if not (request.user.is_superuser or request.user == room.creator):
+            return Response({"detail": "You do not have permission to delete this room."},
+                            status=status.HTTP_403_FORBIDDEN)
+
+        room.delete()
+
+         # Send WebSocket Notification to Connected Users**
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)(
+            "global_notifications",  # Broadcast to all connected users
+            {
+                "type": "notify_delete_room",
+                "room": {
+                    "message": "room deleted",
+                }
+            }
+        )
+        return Response(
+            {"detail": "Chat room deleted successfully.", "success": True},
+            status=status.HTTP_200_OK
+        )
+
+
+
 class SearchMessagesView(APIView):
     """
     API endpoint to search messages in chat rooms.

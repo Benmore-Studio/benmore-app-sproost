@@ -297,9 +297,7 @@ CACHES = {
 }
 
 CORS_ALLOW_CREDENTIALS = True
-CSRF_TRUSTED_ORIGINS = [
-    'https://44a8b72b893325a51bc6403f5837d712.serveo.net',
-]
+
 
 CORS_ALLOW_METHODS = [
     'GET',

@@ -1,33 +1,40 @@
 openapi: 3.0.0
 info:
   title: WebSocket Chat API
-  description: API documentation for the WebSocket-based chat system.
-  version: 1.0.0
+  description: >
+    API documentation for the WebSocket-based chat system. Clients connect to the WebSocket
+    endpoint by providing a valid JWT token in the `Bearertoken` query parameter. Once connected,
+    the server authenticates the user, subscribes them to their chat rooms, and sends initial data
+    (e.g. room list and missed messages count). The client then communicates with the server by
+    sending JSON messages with an `action` key (e.g., "send", "join", "leave", "load_messages").
+  version: 1.1.0
 servers:
-  - url: ws://127.0.0.1:8000/ws/chat/?Bearertoken=Bearertoken code
+  - url: ws://127.0.0.1:8000/ws/chat/?Bearertoken={token}
     description: Local WebSocket server (development)
-  - url: wss://api.example.com/ws/chat/?Bearertoken=Bearertoken code
+  - url: wss://https://sproost-1d5809b5aa5b.herokuapp.com/ws/chat/?Bearertoken={token}
     description: Production WebSocket server
 
 paths:
-  /chat:
+  /ws/chat/:
     get:
-      summary: Connect to WebSocket
-      description: Establish a WebSocket connection for real-time chat.
+      summary: Connect to WebSocket for Chat
+      description: >
+        Establish a WebSocket connection for real-time chat. A valid JWT token must be provided
+        as a query parameter named `Bearertoken`.
       parameters:
         - name: Bearertoken
           in: query
           required: true
-          description: JWT token for authentication (sent as a query parameter).
+          description: JWT token for authentication.
           schema:
             type: string
       responses:
         "101":
-          description: WebSocket connection established successfully
+          description: WebSocket connection established successfully (Switching Protocols).
         "403":
-          description: Unauthorized - Invalid or missing Bearer token
+          description: Unauthorized – Invalid or missing Bearer token.
         "400":
-          description: Bad Request - Invalid WebSocket request
+          description: Bad Request – Invalid WebSocket request.
 
 components:
   schemas:
@@ -37,11 +44,19 @@ components:
         - action
         - room_id
         - message
-      properties:
+      properties: 
+        jsExample: chatSocket.send(JSON.stringify({
+            action: "send",      
+            room_id: roomDetails[globalRoomName],  
+            message: message     
+        }));
         action:
           type: string
           example: "send"
-          description: The action type (e.g., "send", "join", "leave").
+          description: >
+            The action type. Valid values include "send" (to send a message),
+            "join" (to join a room), "leave" (to leave a room),
+            or "load_messages" (to request paginated messages).
         room_id:
           type: integer
           example: 1
@@ -50,7 +65,6 @@ components:
           type: string
           example: "Hello, world!"
           description: The chat message content.
-
     ReceiveMessage:
       type: object
       properties:
@@ -66,17 +80,94 @@ components:
           type: string
           example: "user1"
           description: The sender's username.
+        sender:
+          type: string
+          example: "user1"
+          description: The sender’s identifier.
         message:
           type: string
           example: "Hello, world!"
-          description: The actual chat message.
+          description: The actual chat message content.
         timestamp:
           type: string
           format: date-time
           example: "2025-03-04T10:49:26Z"
           description: Timestamp when the message was sent.
+    RoomList:
+      type: object
+      properties:
+        action:
+          type: string
+          example: "room_list"
+          description: Indicates that the payload contains a list of chat rooms.
+        rooms:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+                example: 1
+              name:
+                type: string
+                example: "General Chat"
+              last_message:
+                type: string
+                example: "Hello there!"
+              last_message_time:
+                type: string
+                format: date-time
+                example: "2025-03-04T10:49:26Z"
+    MissedMessages:
+      type: object
+      properties:
+        action:
+          type: string
+          example: "missed_messages"
+          description: Indicates that the payload contains missed message counts.
+        missed_messages:
+          type: object
+          additionalProperties:
+            type: integer
+          example: { "1": 2, "3": 5 }
+    JoinResponse:
+      type: object
+      properties:
+        action:
+          type: string
+          example: "joined"
+        room:
+          type: integer
+          example: 1
+        message:
+          type: string
+          example: "Joined room 1"
+    LeaveResponse:
+      type: object
+      properties:
+        action:
+          type: string
+          example: "left"
+        room:
+          type: integer
+          example: 1
+        message:
+          type: string
+          example: "Left room 1"
+    MessageList:
+      type: object
+      properties:
+        action:
+          type: string
+          example: "message_list"
+        room_id:
+          type: integer
+          example: 1
+        messages:
+          type: array
+          items:
+            $ref: "#/components/schemas/ReceiveMessage"
 
 tags:
   - name: WebSocket
     description: WebSocket communication for real-time chat
-
