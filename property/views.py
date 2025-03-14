@@ -6,12 +6,11 @@ from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.exceptions import NotFound, PermissionDenied
-from profiles.serializers import HomeOwnerSerializer 
+from profiles.serializers import HomeOwnerSerializer , SimpleUserSerializer
 from .serializers import ( PropertyCreateSerializer,PropertyUpdateSerializer, PropertyRetrieveSerializer)
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework import generics, filters
 from django.shortcuts import get_object_or_404
-
 
 
 User = get_user_model()
@@ -158,3 +157,40 @@ class PropertyDeleteView(generics.DestroyAPIView):
             from rest_framework.exceptions import PermissionDenied
             raise PermissionDenied("You do not have permission to delete this property.")
         instance.delete()
+        
+ 
+
+class ClientListView(generics.ListAPIView):
+    serializer_class = SimpleUserSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return User.objects.filter(
+            owned_properties__home_owner_agents=self.request.user
+        ).distinct()
+
+    def list(self, request, *args, **kwargs):
+        if self.request.user.user_type != 'AG':
+            return Response({"error": "You don't have permission to access this information"}, status=403)
+
+        return super().list(request, *args, **kwargs)
+        
+        
+class PropertyListForClientView(generics.ListAPIView):
+    serializer_class = PropertyRetrieveSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        agent = self.request.user
+        client_id = self.kwargs.get("client_id")
+
+        return Property.objects.filter(
+            property_owner_id=client_id,
+            home_owner_agents=agent
+        )
+    
+    def list(self, request, *args, **kwargs):
+        if self.request.user.user_type != 'AG':
+            return Response({"error": "You don't have permission to access this information"}, status=403)
+
+        return super().list(request, *args, **kwargs)  
