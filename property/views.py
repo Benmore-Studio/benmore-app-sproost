@@ -185,7 +185,7 @@ class PropertyListForClientView(generics.ListAPIView):
         client_id = self.kwargs.get("client_id")
 
         return Property.objects.filter(
-            property_owner_id=client_id,
+            property_owner__id=client_id,
             home_owner_agents=agent
         )
     
