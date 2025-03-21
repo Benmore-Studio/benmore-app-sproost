@@ -77,13 +77,17 @@ class HomeView(GenericAPIView):
         elif user_type == "CO":
             context =  User.objects.select_related('contractor_profile').prefetch_related(
                  'owned_properties', "points").get(id=request.user.id)
+            
+        elif user_type == "IV":
+            context = User.objects.select_related("investor_profile").get(id=request.user.id)
+            
         else:
             raise PermissionDenied("Unauthorized access")
         
         serializer = HomeViewUserSerializer(context)
         return Response(serializer.data, status=status.HTTP_200_OK)
         
-            
+        
 
 
 class HomeViewByPkAPIView(RetrieveAPIView):

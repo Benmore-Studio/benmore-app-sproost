@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import ContractorProfile, UserProfile, AgentProfile, Invitation
+from .models import ContractorProfile, UserProfile, AgentProfile, Invitation, InvestorProfile
 from property.models import Property
 from accounts.models import User
 from quotes.serializers import  QuoteRequestAllSerializer
@@ -24,6 +24,11 @@ class SimpleUserSerializer(serializers.ModelSerializer):
 class SimpleContractorProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = ContractorProfile
+        fields = '__all__'
+        
+class SimpleInvestorProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = InvestorProfile
         fields = '__all__'
 
 class SimpleHomeOwnerProfileSerializer(serializers.ModelSerializer):
@@ -207,10 +212,11 @@ class HomeViewUserSerializer(serializers.ModelSerializer):
             # For contractors
             return SimpleContractorProfileSerializer(user.contractor_profile).data
         
+        elif user.user_type == "IV":
+            return SimpleInvestorProfileSerializer(user.investor_profile).data
+            
         # Default case (maybe None or an empty dict)
         return None
-    
- # R
     
 
 
