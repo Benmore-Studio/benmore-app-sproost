@@ -1181,6 +1181,9 @@ document.getElementById("message").addEventListener("keydown", function(event) {
 
   function openOptions(e){
     let messageOptions = e.target.nextElementSibling
+    console.log("sokoh");
+    console.log(e.target);
+    console.log(e.target.nextElementSibling);
 
     if(messageOptions.style.display === "flex"){
       messageOptions.style.display = "none"
