@@ -828,7 +828,7 @@ class MultiplexChatConsumer(AsyncWebsocketConsumer):
         # getting the reply message sender
         sender_username = None
         if reply_to_msg:
-            sender_username = await sync_to_async(lambda: reply_to_msg.sender)()
+            sender_username = await sync_to_async(lambda: reply_to_msg.sender.username)()
         # Save media files
         if media_list:
             await self.save_media(message, media_list)
