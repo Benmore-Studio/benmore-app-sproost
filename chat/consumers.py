@@ -765,7 +765,6 @@ class MultiplexChatConsumer(AsyncWebsocketConsumer):
             "room_id": room_id,
             "messages": messages,
             "members": members,
-            "offline_message_count":offline_message_count
         }))
 
     async def send_message(self, data, user):
