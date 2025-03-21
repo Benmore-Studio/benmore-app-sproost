@@ -10,7 +10,6 @@ import cloudinary.api
 from decouple import config
 from datetime import timedelta
 
-import ssl
 
 
 SECRET = config('SECRET')
@@ -320,8 +319,6 @@ SIMPLE_JWT = {
 
 
 REDIS_URL = config("REDIS_URL")
-
-unverified_context = ssl._create_unverified_context()
 
 
 CHANNEL_LAYERS = {
