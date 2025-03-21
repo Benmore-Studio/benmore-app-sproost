@@ -15,7 +15,7 @@ from datetime import timedelta
 SECRET = config('SECRET')
 CLIENT_ID = config('CLIENT_ID')
 
-# print(SECRET)
+# print()
 from django.core.management.utils import get_random_secret_key
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -317,19 +317,36 @@ SIMPLE_JWT = {
     'BLACKLIST_AFTER_ROTATION': True, 
 }
 
-# CHANNEL_LAYERS = {
-#     "default": {
-#         "BACKEND": "channels_redis.core.RedisChannelLayer",
-#         "CONFIG": {
-#             "hosts": [("127.0.0.1", 6379)],  # Local Redis
-#         },
-#     },
-# }
+ENVIRONMENT = config("ENVIRONMENT", "remote").lower()
+REDIS_URL = config("REDIS_URL")
+
 
 CHANNEL_LAYERS = {
     "default": {
-        "BACKEND": "channels.layers.InMemoryChannelLayer",
-    },
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [
+                {
+                  "address": REDIS_URL,
+                  "ssl_cert_reqs": None,
+                  "retry_on_timeout": True,
+                  "socket_keepalive": True,
+                } if ENVIRONMENT == "remote" else REDIS_URL
+            ],
+        }
+    }
 }
+
+
+
+
+
+
+
+# CHANNEL_LAYERS = {
+#     "default": {
+#         "BACKEND": "channels.layers.InMemoryChannelLayer",
+#     },
+# }
 
 DOMAIN_NAME=config('DOMAIN_NAME', default='http://localhost:8000')

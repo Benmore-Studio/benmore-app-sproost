@@ -32,6 +32,7 @@ class ImageCategories(models.TextChoices):
    
     
 class Media(models.Model):
+    message = models.ForeignKey("chat.Message", related_name="media", on_delete=models.CASCADE)
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, related_name="media")
     object_id = models.PositiveIntegerField()
     content_object = GenericForeignKey()

@@ -185,13 +185,11 @@
                   <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
                 </svg>
               </div>
-
-              <button onclick="previousSearchResult(currentRoomId)">⬅️ Previous</button>
-              <button onclick="nextSearchResult(currentRoomId)">Next ➡️</button>
           
               <div id="message-search-results" style="display: none;" class="p-4 border rounded-md bg-white max-h-64 overflow-y-auto">
                   <!-- Live search results will be displayed here -->
               </div>
+
 
               <!-- Chats List (Scroll) -->
               <div id="chatList" class="h-[86%] flex-1 overflow-y-auto">
@@ -206,22 +204,23 @@
               <div id="individual-chatList" class="flex flex-col h-full" style="display: none;">             
                 <div class="flex justify-between mr-2">
                 <!-- Back Arrow -->
-                <div id="back-arrow" class="cursor-pointer ml-4">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-3 text-black">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
-                  </svg>                
-                </div>
-                <div class="flex items-center gap-4">
+                  <div id="back-arrow" class="cursor-pointer ml-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-3 text-black">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
+                    </svg>                
+                  </div>
+                  <div class="flex items-center gap-4">
                   <p id="delete-room" class="cursor-pointer text-red-500">Delete Room</p>                
                   <p id="leave-room" class="cursor-pointer text-red-500">Leave</p>                
-                  <p id="add-user" class="cursor-pointer text-blue-500">Add</p>     
-                  {% if request.user == 'ADMIN' %}
+                  {% if request.user.username == 'admin' %}
                     <p id="add-user" class="cursor-pointer text-blue-500">Add</p>     
                   {% endif %}
                   
                 </div>
               </div>
                 <div id="roomTitle" class="mt-4 text-center"></div>
+
+                <div id="search-navigation"></div>
                 <!-- Chat List & Input (Inside a container to maintain order) -->
                 <div class="flex flex-col flex-1 h-full mt-4">               
                   <!-- Chat Messages -->
@@ -233,12 +232,37 @@
               </div>
             </div>
 
-            <!-- Chat Input -->
+            <div id="suggestion-div" class="bottom-[4rem] absolute h-fit w-[407px] bg-white pl-[8px]" style="display: none;">
+              <div id="mentionSuggestions" class="flex flex-col gap-4 bg-white w-[300px] h-fit pt-4" style="text-align: start;"></div>
+              <!-- Media Preview -->
+              <div id="mediaPreview" class="mb-3"></div>
+              <div id="reply-message-div" style="text-align: start; display: none;">
+                <div class="w-full flex flex-col gap-4 bg-gray-200 text-gray-600 text-transform-none border-l-2 border-green-200 p-4 rounded-t-md mb-1">
+                  <div id="reply-message-cancel" style="align-self: end;">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-3 text-red-500 cursor-pointer">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                    </svg>
+                    
+                  </div>
+                </div>
+              </div>
+              <div id="typing-div"></div>
+            </div>
+
+            <!-- File Upload -->
+            <input type="file" id="mediaInput" style="display: none;" accept="image/*">
+              
+
+              <!-- Chat Input -->
             <div id="chat-message-parent-div" class="w-full flex justify-center items-center py-2" style="position: absolute; bottom: 0; display: none;">
-              <div id="input" class="mt-4 w-full flex gap-2 px-2">
+              <div id="input" class="mt-4 w-full flex gap-2 px-2 relative">
                   <input id="message" type="text" placeholder="type..." 
-                        class="bg-transparent outline-none border pl-3 h-[50px] rounded-xl dark:text-white flex-1" oninput="onInputChange()">
-                  
+                        class="bg-transparent outline-none border pl-3 h-[50px] rounded-xl dark:text-white flex-1 text-md font-md" oninput="onInputChange()">
+                        <label for="mediaInput" id="mediaInputLabel" class="cursor-pointer absolute bottom-4 right-[6rem]" id="messageMedia">
+                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5 text-gray-500 cursor-pointer">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 0 0-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 0 1-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H9.75" />
+                          </svg>
+                        </label>
                   <div id="chat-message-submit" class="text-[#0d2438] dark:text-white cursor-pointer flex flex-col justify-center">
                       <i class="fa fa-paper-plane" aria-hidden="true"></i>
                       <input class="cursor-pointer" type="button" value="Send">
@@ -258,9 +282,14 @@
 
 {% block footer %}
 {{ block.super }}
-
+<script>
+  const csrfToken = "{{ csrf_token }}";  
+  const userId = "{{ request.user.username}}";
+</script>
 
 <script>
+  console.log(csrfToken, userId, "try");
+
   let header = document.querySelector("#header")
   let userTools = document.querySelector("#user-tools")
   let chatIcon = document.querySelector("#chat-icon")
@@ -285,17 +314,19 @@
   let deleteRoomConfirm = document.getElementById("delete-room-confirm")
   let deleteRoomCloseModalBtn = document.getElementById("delete-room-closeModalBtn")
   let deleteUserConfirm = document.getElementById("delete-user-confirm")
+  let replyMessageCancel = document.getElementById("reply-message-cancel")
   backArrow.style.marginTop = '8px'
   const roomDetails = {}
-  let globalRoomName
-  let adminAddUserRoomTitle
+  let replyMessageId;
+  let globalSearchId;
+  let globalRoomName;
+  let adminAddUserRoomTitle;
+  let roomMembers;
   let sender 
   let messageCount = 0
 
-  console.log("usertools",header);
   // header.prepend(chatIcon)
   header.prepend(iconContainer)
-  // userTools.style.cssText = 'lign-items:center; justify-items:center;'
   function toggleChatDropdown() {
     const dropdown = document.getElementById('chatDropdown');
     dropdown.classList.toggle('hidden');
@@ -318,8 +349,36 @@
 
   })
 
-  function openChatRoom(roomId, roomName) {
-    console.log("opened");
+
+
+
+  function openChatRoom(roomId, messages, type, roomName, searchId) {
+    if(type == "search"){
+      document.getElementById("message-search-results").style.display = "none"
+
+      let nextSearchResult = document.createElement("div")
+      let previousSearchResult = document.createElement("div")
+      nextSearchResult.innerHTML = `<button onclick="highlightSearchResult(currentSearchIndex + 1)">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4 text-black">
+                                      <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 15.75 7.5-7.5 7.5 7.5" />
+                                    </svg>
+                                  </button>`
+      previousSearchResult.innerHTML = `<button onclick="highlightSearchResult(currentSearchIndex - 1)">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4 text-black">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                </svg>             
+              </button> ` 
+    const searchNavigation = document.getElementById("search-navigation") 
+    searchNavigation.innerHTML = ""   
+    searchNavigation.appendChild(nextSearchResult)
+    searchNavigation.appendChild(previousSearchResult)                 
+    }     
+    console.log("opened", "chat");
+    const messageNumberElement  = document.querySelector(`#messageNumber-${roomId}`);
+    messageNumberElement.innerHTML = ''
+    messageNumberElement.style.opacity = 0
+
+      console.log("messageNumberElement",messageNumberElement);
     currentRoomId = roomId;
     currentPage = 1;
     document.getElementById('message-body').innerHTML = ''
@@ -338,32 +397,50 @@
         room_id: roomId,
         page: currentPage
     }));
-    
+
+    if(type === "search"){
+      // Store search matches for navigation
+      currentSearchIndex = 0;
+
+      // Highlight first match
+      setTimeout(() => highlightSearchResult(0, searchId), 1000);
+    }
 }
 
+
+//#region   message search
 
 let searchResults = [];  // Store found messages
 let currentSearchIndex = -1;  // Track highlighted message index
 
-//#region   message search
+
+// let searchArrowButton = document.getElementById("searchBackArrow")
+// console.log("cry", searchArrowButton);
+// if(searchArrowButton){
+  
+// }
+
+// chatroom async chat
 async function searchMessages() {
     const query = document.getElementById("messageSearchInput").value.trim();
+    const individualChatList= document.getElementById("individual-chatList")
+    individualChatList.style.display = "none"
     if (!query) {
-      document.getElementById("searchResults").innerHTML = "";  // Clear results if empty
+      document.getElementById("searchResults").innerHTML = "";  
       searchResults = [];
       currentSearchIndex = -1;
       return;
     }
 
-    const csrfToken = getCookie('csrftoken');  // Get CSRF token from cookies
+    const csrfToken = getCookie('csrftoken');  
 
     const response = await fetch(`/profiles/search_messages/?q=${query}`, {
       method: "GET",
       headers: {
-        "X-CSRFToken": csrfToken,  // CSRF token
+        "X-CSRFToken": csrfToken,  
         "Content-Type": "application/json"
       },
-      credentials: "include"  // Send cookies with request
+      credentials: "include"
     });
 
     const data = await response.json();
@@ -373,28 +450,120 @@ async function searchMessages() {
       return;
     }
 
+
+    console.log("dd", data);
+
     const resultsDiv = document.getElementById("message-search-results");
+    const chatList = document.getElementById("chatList")
+    let searchBackArrow = document.createElement("div")
+    searchBackArrow.setAttribute("id", 'searchBackArrow')
+    searchBackArrow.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4 cursor-pointer text-black">
+                                  <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
+                                </svg>
+                                `
+    searchBackArrow.addEventListener("click", function(){
+      console.log("must", searchBackArrow);
+      resultsDiv.style.display = "none"
+      chatList.style.display = "block";
+
+    })
+    // resultsDiv.className = ""
     resultsDiv.innerHTML = "";
+    resultsDiv.appendChild(searchBackArrow)
 
-    searchResults = data.results;  // Store results for navigation
-    currentSearchIndex = -1;  // Reset index
+    searchResults = data.results;  
+    currentSearchIndex = -1;
 
-    console.log("girl", data);
-    if(data){
-      document.getElementById("chatList").style.display = "none"
-      resultsDiv.style.display = "block"
-      data.results.forEach((msg, index) => {
-          const msgElement = document.createElement("div");
-          msgElement.classList.add("p-2", "border-b", "cursor-pointer", "hover:bg-gray-200", "text-black");
-          msgElement.innerHTML = `<strong>${msg.sender}</strong>: ${msg.content}`;
-          msgElement.onclick = () => openMessageChatRoom(msg.room_id, msg.id, index); // Open specific result
-          resultsDiv.appendChild(msgElement);
-      });
+    if (data.results.length > 0) {
+      chatList.style.display = "none";
+        resultsDiv.style.display = "block";
+        
+
+        data.results.forEach((room, index) => {
+          console.log("search", data.results, index);
+          const roomElement = document.createElement("div");
+          roomElement.setAttribute('data-search-id', index)
+          roomElement.classList.add("p-2", "border-b", "cursor-pointer", "hover:bg-gray-200", "text-black");
+          roomElement.innerHTML = `<strong>${room.room_name}</strong> (${room.messages.length} matches)`;
+          
+          // Click to open the room and highlight the first matching message
+          roomElement.addEventListener("click", (event) => {
+              const searchId = event.currentTarget.getAttribute("data-search-id");
+              console.log("Clicked element's search ID:", searchId);
+              globalSearchId = searchId
+
+              const openChatType = "search";
+              // Call the openChatRoom function with correct arguments
+              openChatRoom(room.room_id, room.content, openChatType, room.room_name, searchId);
+          });
+          resultsDiv.appendChild(roomElement);
+        });
+    }else{
+      chatList.style.display = "none";
+        resultsDiv.style.display = "block";
+      let noResult = document.createElement("p")
+      noResult.innerHTML = "No result found"
+      noResult.style.color = "black"
+      resultsDiv.appendChild(noResult)
     }
-    
+
   }
 
+
+function highlightSearchResult(index, searchId) {
+  console.log("much", searchId);
+  
+  if (!searchResults || searchResults.length === 0) {
+    console.warn("No search results available.");
+    return;
+    }
+
+  console.log("Valid index:", index);
+  console.log("Search Results:", searchResults);
+  console.log("Current Room:", searchResults[globalSearchId]);
+  let room = searchResults[globalSearchId];  // Get the chat room object
+  if (!room || !room.messages || room.messages.length === 0 || index >= room.messages.length || index < 0) {
+    console.warn("No messages found for this room.");
+    return;
+  }
+
+  console.log(index, searchResults.length,searchResults[index]);
+ 
+  console.log("trouble", searchResults[globalSearchId].messages);
+  currentSearchIndex = index;
+  let messageId = searchResults[globalSearchId].messages[index].id;
+  
+    // Find the message in chat and highlight it
+    const messageElement = document.querySelector(`[data-message-id="${messageId}"]`);
+    console.log("ache",searchResults);
+    if (messageElement) {
+      console.log("scroll", messageElement);
+      messageElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+      messageElement.style.transition = "background-color 2s ease";
+      messageElement.style.backgroundColor = "yellow";
+
+      setTimeout(() => {
+          messageElement.style.backgroundColor = "";
+      }, 3000);
+    }
+}
+
+
+document.addEventListener("keydown", (event) => {
+    if (event.key === "ArrowUp") {
+        ;
+    } else if (event.key === "ArrowDown") {
+        highlightSearchResult(currentSearchIndex + 1);
+    }
+});
+
+
+
 document.getElementById("messageSearchInput").addEventListener("input", searchMessages);
+
+//#endregion
+
 
 
 function loadChatRoom(roomId) {
@@ -442,43 +611,7 @@ function loadChatRoom(roomId) {
 }
 
 
-function openMessageChatRoom(roomId, messageId, resultIndex = 0) {
-    console.log(`Opening chat room ${roomId} and highlighting message ${messageId}`);
 
-    loadChatRoom(roomId);  // Ensure chat is loaded
-
-    setTimeout(() => {
-        highlightSearchResult(roomId, resultIndex);
-    }, 1000); 
-}
-
-
-function highlightSearchResult(roomId, index) {
-    if (searchResults.length === 0) return;
-
-    // Ensure we're in the correct room
-    const currentRoomMessages = searchResults.filter(msg => msg.room_id == roomId);
-
-    if (currentRoomMessages.length === 0) return;
-
-    // Cycle through results
-    currentSearchIndex = index < 0 ? 0 : index % currentRoomMessages.length;
-    const messageId = currentRoomMessages[currentSearchIndex].id;
-
-    console.log(`Highlighting message ${messageId} (${currentSearchIndex + 1}/${currentRoomMessages.length})`);
-
-    // Remove previous highlight
-    document.querySelectorAll(".highlighted").forEach(el => {
-      el.classList.remove("bg-yellow-200", "p-2", "rounded-md", "highlighted");
-    });
-
-    // Highlight new message
-    const messageElement = document.getElementById(`message-${messageId}`);
-    if (messageElement) {
-        messageElement.classList.add("bg-yellow-200", "p-2", "rounded-md", "highlighted");
-        messageElement.scrollIntoView({ behavior: "smooth", block: "center" });
-    }
-}
 
 // Navigate between search results
 function nextSearchResult(roomId) {
@@ -492,7 +625,6 @@ function previousSearchResult(roomId) {
         highlightSearchResult(roomId, currentSearchIndex - 1);
     }
 }
-//#endregion
 
   chatSocket.onopen = () => {
     console.log("WebSocket connection established");
@@ -501,8 +633,7 @@ function previousSearchResult(roomId) {
 
   chatSocket.onmessage = function (event) {
     const data = JSON.parse(event.data);
-    console.log("data");
-    console.log(data);
+    console.log("call",data);
     if (data.action === "room_list") {
       updateChatRooms(data);  // Update the chat room UI
     } 
@@ -510,12 +641,17 @@ function previousSearchResult(roomId) {
       updateChatRooms(data);  // Update the chat room UI
     } 
     else if (data.action === 'typing') {
+      console.log(data);
       let roomId = `chat-room-${data.room}`
       let room = document.getElementById(roomId)
-      console.log(room);
-      console.log(room.children[3]);
-      console.log(room.children[1]);
+      let typingDiv = document.getElementById('typing-div')
       if(data.typing === true){
+        if(data.username !== userId){
+          document.getElementById("suggestion-div").style.display = "block"
+          typingDiv.innerHTML = `${data.username} is typing` 
+          typingDiv.className = "text-green-500 text-sm mb-3 float-left"
+          typingDiv.style.cssText = "text-transform: none; font-family: Rubik, sans-serif; font-size: 13px;"      
+        }
         room.children[3].innerHTML = `${data.username} is typing`
         room.children[3].className = "text-green-500 text-sm"
        
@@ -527,52 +663,208 @@ function previousSearchResult(roomId) {
         room.children[1].style.display = "block"
         room.children[2].style.display = "block"
         room.children[3].style.display = "none"
-      
+        // document.getElementById("suggestion-div").style.display = "none"
+        typingDiv.style.display = "none"
+    
       }
     }
     else if (data.action === "message") { 
-      console.log("uphreme");
-      updateChatList(data.room, data.message, data.timestamp )
+      console.log("uphreme", data);
+      let iconString = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-3 text-gray-500 cursor-pointer">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" /> onClick="openOptions()"
+                       </svg>`
+      updateChatList(data.room, data.message, data.timestamp, data.sender )
+      const formattedText = formatMessage(data.message);
+      console.log("wwww", data.message);
       const chatMessages = document.getElementById('message-body');   
       const msgDiv = document.createElement('div');
+      const icon = document.createElement('div');
+      const messageOptions = document.createElement('div');
+      const iconUsernameAndDate = document.createElement('div');
+      const replyMessage = document.createElement('p');
+      const deleteMessage = document.createElement('p');
+      const highlightMessage = document.createElement('p');
+
+      replyMessage.innerHTML = "reply";
+      deleteMessage.innerHTML = "delete";
+      highlightMessage.innerHTML = "highlight";
+
+
+       //  Setting their ids and event listeners
+      replyMessage.setAttribute("data-id", data.message_id);
+      replyMessage.addEventListener("click", (e) => {
+        replyMessageId = e.currentTarget.getAttribute("data-id");
+        const messageElement = document.querySelector(`[data-message-id="${data.message_id}"]`);
+        console.log(data.message_id, "data-id", messageElement);
+        const replyMessageDiv = document.getElementById("reply-message-div")
+        const messageInput = document.getElementById("message")
+        messageInput.focus()
+        const gottenReplyMessageUsername= e.target.parentElement.parentElement;
+        const replyMessageUsername= document.createElement('p');
+        replyMessageUsername.className = "text-green-800"
+        const replyMessageContent = document.createElement('p');
+        if (messageElement) {
+          replyMessageContent.textContent = messageElement.textContent;
+          replyMessageContent.className = "text-black"
+          console.log("Message text:", messageElement.textContent);
+        } else {
+          replyMessageContent.textContent = "--";
+        }
+        
+        replyMessageUsername.textContent = gottenReplyMessageUsername.previousSibling.children[0].textContent
+        replyMessageDiv.style.display = "block"
+        replyMessageDiv.children[0].append(replyMessageUsername)
+        replyMessageDiv.children[0].append(replyMessageContent)
+        document.getElementById("suggestion-div").style.display = "block";
+
+        
+        e.target.parentElement.style.display = "none"
+      });
+      
+      deleteMessage.setAttribute("data-delete-id", data.message_id);
+      deleteMessage.addEventListener("click", (e)=>{
+        e.target.parentElement.style.display = "none"
+        console.log("checkinggg", e.target.parentElement);
+        chatSocket.send(JSON.stringify({
+            action: "delete",
+            message_id: data.message_id
+        }));
+
+      })
+
+
+
+
+      messageOptions.className = "message-options flex-col gap-4 bg-white w-fit absolute w-fit p-3 bottom-[-1rem] right-4";
+      messageOptions.style.display = "none"
+      replyMessage.className = "cursor-pointer text-black hover:bg-gray-100 p-2";
+      deleteMessage.className = "cursor-pointer text-black hover:bg-gray-100 p-2";
+      highlightMessage.className = "cursor-pointer text-black hover:bg-gray-100 p-2";
+      
+      
       const messageBody = document.createElement('p');
+      messageBody.setAttribute("data-message-id", data.message_id)
+      icon.innerHTML = iconString;
+      const usernameAndDate = document.createElement('div');
       messageBody.style.textTransform = "none"; 
       messageBody.style.fontFamily = "'Rubik', sans-serif";
       messageBody.style.fontSize = "13px";
-      const usernameAndDate = document.createElement('div');
       const msgDivDate = document.createElement('p');
       const msgDivUsername = document.createElement('p');
       msgDivDate.textContent = data.timestamp;
       msgDivUsername.textContent = data.username;
-      messageBody.textContent = data.message;
-      msgDiv.className = "bg-gray-100 p-2 rounded mb-2";
+
+      // if a user is replying a message
+      if(data.reply_to_content !== "None" && data.reply_to_id !== null){
+        const mainMessageContent = document.createElement('p');
+        const replyMsgDiv = document.createElement('div');
+        mainMessageContent.textContent = formattedText;
+        mainMessageContent.style.textAlign = "start"
+        replyMsgDiv.innerHTML= `
+        <div style="text-align: start;">
+          <div class="w-full flex flex-col gap-4 bg-gray-200 text-gray-600 text-transform-none border-l-2 border-green-200 p-4 rounded-t-md mb-1" onClick="findRepliedMessage(${data.reply_to_id})">
+          <p class="text-black">${data.sender}</p>
+          <p>${data.reply_to_content}</p>
+          </div>
+        </div> `
+        messageBody.appendChild(replyMsgDiv)
+        messageBody.appendChild(mainMessageContent)
+      }else{
+        messageBody.innerHTML = formattedText;
+      }
+      
+
+      msgDiv.className = "bg-gray-100 p-2 rounded mb-2 relative";
       msgDivUsername.className = "text-[#417690] text-bold";
       msgDivDate.className = "text-gray-300 text-small";
       messageBody.className = "justify-self-start";
+      iconUsernameAndDate.className = "flex justify-between";
       usernameAndDate.className = "flex gap-4";
+
+      // appending the messageoptions
+      messageOptions.appendChild(replyMessage)
+      messageOptions.appendChild(deleteMessage)
+      messageOptions.appendChild(highlightMessage)
+      icon.appendChild(messageOptions)
+      icon.addEventListener("click", (e)=>openOptions(e))
       usernameAndDate.appendChild(msgDivUsername)
       usernameAndDate.appendChild(msgDivDate)
-      msgDiv.prepend(usernameAndDate)
+      iconUsernameAndDate.prepend(usernameAndDate)
+      iconUsernameAndDate.appendChild(icon)
+      msgDiv.prepend(iconUsernameAndDate)
       msgDiv.append(messageBody)
       chatMessages.appendChild(msgDiv);
       chatMessages.scrollTop = chatMessages.scrollHeight;
     }
     
     else if (data.action === "message_list") {
-      console.log(("wooo"));
+      console.log("wooo", data);
       const chatMessages = document.getElementById('message-body');
        // Clear old messages
       chatMessages.innerHTML = "";
       chatMessages.style.height = "60%"
       // Reverse messages (oldest first) and add to chat
-      data.messages.reverse().forEach(msg => addMessage(msg.username, msg.message, msg.timestamp));
+      data.messages.reverse().forEach(msg => addMessage(msg.username, msg.deleted, msg.message, msg.timestamp, msg.id, msg.username, msg.reply_to, msg.reply_to_num));
       isLoading = false;
+      roomMembers = data.members
       // scroll to the bottom
       setTimeout(() => {
         chatMessages.scrollTop = chatMessages.scrollHeight;
     }, 100);
     } 
+    else if(data.action === "missed_messages"){
+      console.log("data.missed_messages", data.missed_messages);
+      data.missed_messages.forEach(keyStr => {
+        const keys = Object.keys(keyStr);
+        console.log("keyStr", keys, keyStr, keyStr[keys[0]])
+        const messageNumberElement  = document.querySelector(`#messageNumber-${keys[0]}`);
+        console.log(messageNumberElement);
+        let messageNumber = messageNumberElement.textContent
+        console.log(messageNumber !== "", messageNumber);
+        if(messageNumber !== ""){
+          messageNumberElement.textContent = Number(messageNumber) + Number(keyStr[keys[0]])
+          if(Number(messageNumberElement.textContent)>0){
+            messageNumberElement.style.opacity = 1
+          }
+        }else{
+          messageNumberElement.textContent = Number(keyStr[keys[0]])
+          if(Number(messageNumberElement.textContent)>0){
+            messageNumberElement.style.opacity = 1
+            console.log("mmmm");
+          }
+        }
+        
+      });
+    }
+    else if(data.action === "message_deleted"){
+      const messageElement = document.querySelector(`p[data-delete-id="${data.message_id}"]`);
+      // messageElement.parentElement.style.display = "none"
+      console.log(messageElement.parentElement.parentElement.parentElement.parentElement);
+      messageElement.parentElement.parentElement.parentElement.parentElement.children[1].innerHTML = "This message has been deleted"
+      console.log("juuju",messageElement.parentElement.parentElement.parentElement.parentElement);
+      messageElement.parentElement.parentElement.parentElement.parentElement.children[1].className ="text-red-500 justify-self-start"
+    }
 };
+
+
+
+function findRepliedMessage(messageId) {
+  const messageElement = document.querySelector(`[data-message-id="${messageId}"]`);
+  if (messageElement) {
+    const container = messageElement.parentElement;
+    // Apply a transition so the background color change is smooth.
+    container.style.transition = "background-color 2s ease";
+    // Set the background to yellow.
+    container.style.backgroundColor = "lemon";
+    // Scroll the element into view.
+    messageElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    // After 3 seconds, remove the yellow background.
+    setTimeout(() => {
+      container.style.backgroundColor = "";
+    }, 3000);
+  }
+}
+
 
 
   chatSocket.onerror = function(e) {
@@ -584,32 +876,161 @@ function previousSearchResult(roomId) {
   };
 
 
-  // function to send message
-  function sendMessage(roomTitle) {
-    const input = document.getElementById('message');
-    const message = input.value.trim();
+  let uploadedMedia = [];  // Stores uploaded media references
 
-    if (!message) return; // Prevent empty messages
+  async function uploadMedia(file) {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("upload_preset", "your_cloudinary_preset");  // Cloudinary unsigned preset
 
-    console.log("globalRoomName",roomDetails[globalRoomName]);
-    // Ensure WebSocket is open before sending a message
-    if (chatSocket.readyState === WebSocket.OPEN) {
-        chatSocket.send(JSON.stringify({
-            action: "send",      
-            room_id: roomDetails[globalRoomName],  
-            message: message     
-        }));
+      try {
+          const response = await fetch("https://api.cloudinary.com/v1_1/YOUR_CLOUDINARY_NAME/upload", {
+              method: "POST",
+              body: formData
+          });
 
-        input.value = ''; // Clear input after sending
-    } else {
-        console.error("WebSocket is not open. Cannot send message.");
+          const data = await response.json();
+          if (data.secure_url) {
+              uploadedMedia.push({ url: data.secure_url, public_id: data.public_id, type: file.type.startsWith('image') ? 'image' : 'video' });
+              // displayMediaPreview(data.secure_url, data.public_id);
+          }
+      } catch (error) {
+          console.error("Media upload failed:", error);
+      }
+  }
+
+  function handleFileSelect(event) {
+      const file = event.target.files[0];
+      if (file) {
+          uploadMedia(file);
+      }
+  }
+
+
+//   function displayMediaPreview(url, publicId) {
+//     document.getElementById("suggestion-div").style.display = "block";
+//     const previewContainer = document.getElementById("mediaPreview");
+//     const mediaElement = document.createElement("div");
+//     mediaElement.setAttribute("data-media-id", publicId);
+
+//     if(url.endsWith(".mp4") || url.endsWith(".avi") || url.endsWith(".mov")) {
+//         mediaElement.innerHTML = `<video src="${url}" width="150" controls></video> <button onclick="removeMedia('${publicId}')">❌</button>`;
+//     } else {
+//         mediaElement.innerHTML = `<img src="${url}" width="150"> <button onclick="removeMedia('${publicId}')">❌</button>`;
+//     }
+
+//     previewContainer.appendChild(mediaElement);
+// }
+
+
+  async function removeMedia(publicId) {
+    document.getElementById("mediaPreview").innerHTML = ''
+      uploadedMedia = uploadedMedia.filter(media => media.public_id !== publicId);
+      document.querySelector(`[data-id="${publicId}"]`).remove();
+
+      // Send delete request to Cloudinary
+      await fetch(`/delete_media/${publicId}/`, { method: "DELETE" });
+  }
+
+  document.getElementById("mediaInput").addEventListener("change", function(event) {
+    const files = event.target.files; // Get selected files
+    const previewContainer = document.getElementById("mediaPreview");
+    previewContainer.innerHTML = ""; // Clear previous previews
+
+    Array.from(files).forEach((file, index) => {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            displayMediaPreview(e.target.result, `preview-${index}`);
+        };
+        reader.readAsDataURL(file);
+    });
+});
+
+function displayMediaPreview(url, publicId) {
+    document.getElementById("suggestion-div").style.display = "block";
+    const previewContainer = document.getElementById("mediaPreview");
+    const mediaElement = document.createElement("div");
+    mediaElement.setAttribute("data-media-id", publicId);
+    mediaElement.className = "w-fit"
+    if (url.startsWith("data:video")) { // Detect video files
+        mediaElement.innerHTML = `<button class="cursor-pointer text-red-500 text-md font-lg" onclick="removeMedia('${publicId}')">X</button> <video src="${url}" width="180" controls></video>`;
+    } else { // Assume it's an image
+        mediaElement.innerHTML = `<button class="cursor-pointer text-red-500 text-md font-lg" onclick="removeMedia('${publicId}')">X</button> <img src="${url}" width="180">`;
     }
+
+    previewContainer.appendChild(mediaElement);
 }
 
 
+// Attach event listener to file input
+document.getElementById("mediaInput").addEventListener("change", handleFileSelect);
+
+
+
+  // function to send message
+  function sendMessage(roomTitle) {
+  const input = document.getElementById('message');
+  const message = input.value.trim();
+
+  // Assume uploadedMedia is a global variable holding media objects
+  // e.g., uploadedMedia = [{ id: 10, url: "https://cdn.example.com/media/10.jpg" }, ...];
+  // Prevent sending if there's no text and no media
+  if (!message && (!uploadedMedia || uploadedMedia.length === 0)) return;
+
+  // Ensure WebSocket is open before sending a message
+  if (chatSocket.readyState === WebSocket.OPEN) {
+    // Build the payload
+    const payload = {
+      action: "send",
+      room_id: roomDetails[globalRoomName],
+      message: message,
+      receiver: roomMembers // assume this is defined (e.g., from room info)
+    };
+
+    // If replying, attach the reply message ID
+    if (replyMessageId) {
+      payload.reply_to_id = replyMessageId;
+    }
+
+    // If there are any attached media, include them in the payload
+    if (uploadedMedia && uploadedMedia.length > 0) {
+      payload.media = uploadedMedia;
+    }
+
+    console.log("payload", payload);
+    chatSocket.send(JSON.stringify(payload));
+
+    // Hide the suggestion div for mentions (if present)
+    const suggestionDiv = document.getElementById("suggestion-div");
+    if (suggestionDiv) {
+      suggestionDiv.style.display = "none";
+    }
+
+    // If there's a reply UI active, remove its extra elements
+    const cancelButton = document.getElementById("reply-message-cancel");
+    if (cancelButton) {
+      // Example logic: remove two sibling elements after the cancel button
+      let firstSibling = cancelButton.nextSibling ? cancelButton.nextSibling.nextSibling : null;
+      let secondSibling = firstSibling && firstSibling.nextSibling ? firstSibling.nextSibling : null;
+      if (firstSibling) firstSibling.remove();
+      if (secondSibling) secondSibling.remove();
+    }
+
+    // Clear the text input and reset the attached media (if applicable)
+    input.value = '';
+    document.getElementById("mediaPreview").innerHTML = ""; // Clear media preview
+    uploadedMedia = []; // Clear media attachments after sending
+    // Optionally, also clear replyMessageId if needed:
+    replyMessageId = null;
+  } else {
+    console.error("WebSocket is not open. Cannot send message.");
+  }
+}
+
   // Start typing
 function onInputChange() {
-  console.log(roomDetails,"pop", globalRoomName);
+  const inputEl = document.getElementById('message');
+  const inputValue = inputEl.value;
   chatSocket.send(JSON.stringify({
     action: 'typing',
     room_id: currentRoomId,
@@ -627,14 +1048,94 @@ function onInputChange() {
       typing: false
     }));
   }, 2000);
+
+  // Check for '@' to trigger mention suggestions:
+  // Find the last occurrence of '@' in the input value.
+  const atIndex = inputValue.lastIndexOf('@');
+  if (atIndex !== -1) {
+    // Extract the text following the '@'
+    const query = inputValue.substring(atIndex + 1);
+    
+    // Only trigger suggestions if there is some query text (e.g., at least 1 character)
+    if (query.length > 0) {
+      console.log("query.length");
+      // Filter roomMembers array to match the query (case-insensitive)
+      const suggestions = roomMembers.filter(member => 
+        member.username.toLowerCase().startsWith(query.toLowerCase())
+      );
+
+      console.log("problem", suggestions);
+      // Show suggestions in the UI
+      showMentionSuggestions(suggestions, atIndex);
+    } else {
+      // Optionally hide suggestions if no query text
+      hideMentionSuggestions();
+    }
+  } else {
+    // Hide suggestions if '@' is not found
+    hideMentionSuggestions();
+  }
+
+
+
+}
+
+
+// Example functions to update your UI with suggestions
+function showMentionSuggestions(suggestions, atIndex) {
+  const suggestionBox = document.getElementById('mentionSuggestions');
+  suggestionBox.style.marginBottom = "10px"
+  const suggestionDiv = document.getElementById('suggestion-div');
+  suggestionBox.innerHTML = ''; // Clear previous suggestions
+  suggestions.forEach(username => {
+    console.log("username",username);
+    const item = document.createElement('div');
+    item.classList.add('suggestion-item', 'text-red-500', 'cursor-pointer');
+    item.textContent = username.username;
+    console.log("for", item);
+    item.addEventListener('click', () => {
+      insertMention(username.username, atIndex);
+      hideMentionSuggestions();
+    });
+    suggestionBox.appendChild(item);
+  });
+  suggestionDiv.style.display = 'flex';
+  suggestionBox.style.display = 'flex';
+}
+
+function hideMentionSuggestions() {
+  const suggestionBox = document.getElementById('mentionSuggestions');
+  const suggestionDiv = document.getElementById('suggestion-div');
+
+  suggestionBox.style.display = 'none';
+  suggestionDiv.style.display = 'none';
+}
+
+function insertMention(username, atIndex) {
+  const inputEl = document.getElementById('message');
+  const value = inputEl.value;
+  // Replace the text after the '@' with the full username
+  const beforeAt = value.substring(0, atIndex);
+  // You might want to add a trailing space after the mention.
+  inputEl.value = `${beforeAt}@${username} `;
+  // Optionally, set the caret at the end of the input.
+  inputEl.focus();
+}
+
+
+// formatting message to highlight when a user is tagged. using regex to find when a user is tagged
+function formatMessage(messageText) {
+  const mentionRegex = /@[A-Za-z0-9._-]+(?:@[A-Za-z0-9.-]+\.[A-Za-z]{2,})?/g;
+  return messageText.replace(
+    mentionRegex,
+    `<span class="mention" style="color: purple;">$&</span>`
+  );
 }
 
 
 
 // to updae the chat and move the message div to the top and to update message count
-function updateChatList(id, message, timestamp) {
-  console.log("iii");
-  
+function updateChatList(id, message, timestamp, sender) {  
     messageCount++
     let messageId = `chat-room-${id}`; 
     let roomDiv = `roomDivParent-${id}`; 
@@ -652,7 +1153,7 @@ function updateChatList(id, message, timestamp) {
         let timestampElement = individualMessage.querySelector(".xs"); // Add a timestamp div in HTML
         if (timestampElement) timestampElement.textContent = timestamp;
 
-        if (messageCount > 0){
+        if (messageCount > 0 && sender !== userId){
           let numberDiv = document.getElementById(messageNumber)
           console.log(numberDiv);
           numberDiv.style.opacity = 1
@@ -667,37 +1168,167 @@ function updateChatList(id, message, timestamp) {
 }
 
 
+document.getElementById("message").addEventListener("keydown", function(event) {
+  if (event.key === "Enter") {
+    event.preventDefault(); 
+    sendMessage(roomTitle); 
+  }
+});
 
   document.getElementById("chat-message-submit").addEventListener('click', function(){
     sendMessage(roomTitle)
   })
 
+  function openOptions(e){
+    let messageOptions = e.target.nextElementSibling
+    console.log("sokoh");
+    console.log(e.target);
+    console.log(e.target.nextElementSibling);
+
+    if(messageOptions.style.display === "flex"){
+      messageOptions.style.display = "none"
+    }else if(messageOptions.style.display === "none"){
+      messageOptions.style.display = "flex"
+    }
+  }
+
   // Function to get all individual message to the UI
-  function addMessage(username, message, timestamp) {
-      const chatMessages = document.getElementById('message-body')
-      const msgDiv = document.createElement('div');
-      const usernameAndDate = document.createElement('div');
-      const messageBody = document.createElement('p');
+  function addMessage(username,deleted, message, timestamp, id, sender, replymsg, replyMsgId) {
+    console.log("omo","why");
+    let iconString = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-3 text-gray-500 cursor-pointer">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" /> onClick="openOptions()"
+                      </svg>`
+                      const formattedText = formatMessage(message);
+    const chatMessages = document.getElementById('message-body')
+    const msgDiv = document.createElement('div');
+    const icon = document.createElement('div');
+    const messageOptions = document.createElement('div');
+    const iconUsernameAndDate = document.createElement('div');
+    const usernameAndDate = document.createElement('div');
+    const messageBody = document.createElement('p');
+    const replyMessage = document.createElement('p');
+    const deleteMessage = document.createElement('p');
+    const highlightMessage = document.createElement('p');
+
+    if(replymsg !== "None" && replyMsgId !== null){
+      console.log("replymsg",replymsg);
+      const mainMessageContent = document.createElement('p');
+      const replyMsgDiv = document.createElement('div');
+      mainMessageContent.textContent = message;
+      mainMessageContent.style.textAlign = "start"
+      replyMsgDiv.innerHTML= `
+      <div style="text-align: start;">
+        <div class="w-full flex flex-col gap-4 bg-gray-200 text-gray-600 text-transform-none border-l-2 border-green-200 p-4 rounded-t-md mb-1" onClick="findRepliedMessage(${replyMsgId})">
+        <p class="text-black">${sender}</p>
+        <p>${replymsg}</p>
+        </div>
+      </div> `
+      messageBody.appendChild(replyMsgDiv)
+      messageBody.appendChild(mainMessageContent)
+      }else{
+        if(deleted){
+          messageBody.className = "text-red-500 justify-self-start"
+        }else{
+          messageBody.className = "justify-self-start";
+        }
+        messageBody.textContent = formattedText;
+      }
+      
+
+      //  Setting their ids and event listeners
+      replyMessage.setAttribute("data-id", id);
+      replyMessage.addEventListener("click", (e) => {
+        replyMessageId = e.currentTarget.getAttribute("data-id");
+        const messageElement = document.querySelector(`[data-message-id="${id}"]`);
+        const replyMessageDiv = document.getElementById("reply-message-div")
+        const messageInput = document.getElementById("message")
+        messageInput.focus()
+        const gottenReplyMessageUsername= e.target.parentElement.parentElement;
+        const replyMessageUsername= document.createElement('p');
+        replyMessageUsername.className = "text-green-800"
+        const replyMessageContent = document.createElement('p');
+        if (messageElement) {
+          replyMessageContent.textContent = messageElement.textContent;
+          replyMessageContent.className = "text-black"
+          console.log("Message text:", messageElement.textContent);
+        } else {
+          replyMessageContent.textContent = "--";
+        }
+        
+        replyMessageUsername.textContent = gottenReplyMessageUsername.previousSibling.children[0].textContent
+        replyMessageDiv.style.display = "block"
+        replyMessageDiv.children[0].append(replyMessageUsername)
+        replyMessageDiv.children[0].append(replyMessageContent)
+        document.getElementById("suggestion-div").style.display = "block";
+
+        
+        e.target.parentElement.style.display = "none"
+      });
+      
+      deleteMessage.setAttribute("data-delete-id", id);
+      deleteMessage.addEventListener("click", (e)=>{
+        e.target.parentElement.style.display = "none"
+        chatSocket.send(JSON.stringify({
+            action: "delete",
+            message_id: id
+        }));
+
+      })
+
+
       messageBody.style.textTransform = "none"; 
       messageBody.style.fontFamily = "'Rubik', sans-serif";
       messageBody.style.fontSize = "13px";
       const msgDivDate = document.createElement('p');
       const msgDivUsername = document.createElement('p');
-      messageBody.innerHTML = message;
+      replyMessage.innerHTML = "reply";
+      deleteMessage.innerHTML = "delete";
+      highlightMessage.innerHTML = "highlight";
+      messageBody.setAttribute("data-message-id", id)
+      icon.innerHTML = iconString;
       msgDivDate.textContent = timestamp;
       msgDivUsername.textContent = username;
-      msgDiv.className = "p-2 border-b";
+      
+      messageOptions.className = "message-options flex-col gap-4 bg-white w-fit absolute w-fit p-3 bottom-[-1rem] right-4";
+      messageOptions.style.display = "none"
+      replyMessage.className = "cursor-pointer text-black hover:bg-gray-100 p-2";
+      deleteMessage.className = "cursor-pointer text-black hover:bg-gray-100 p-2";
+      highlightMessage.className = "cursor-pointer text-black hover:bg-gray-100 p-2";
+      
+      msgDiv.className = "p-2 border-b relative";
       msgDivUsername.className = "text-[#417690] text-bold";
       msgDivDate.className = "text-gray-300 text-small";
-      messageBody.className = "justify-self-start";
+      
+      iconUsernameAndDate.className = "flex justify-between";
       usernameAndDate.className = "flex gap-4";
+      messageOptions.appendChild(replyMessage)
+      messageOptions.appendChild(deleteMessage)
+      messageOptions.appendChild(highlightMessage)
+      icon.appendChild(messageOptions)
+      icon.addEventListener("click", (e)=>openOptions(e))
       usernameAndDate.appendChild(msgDivUsername)
       usernameAndDate.appendChild(msgDivDate)
-      msgDiv.prepend(usernameAndDate)
+      iconUsernameAndDate.prepend(usernameAndDate)
+      iconUsernameAndDate.appendChild(icon)
+      msgDiv.prepend(iconUsernameAndDate)
       msgDiv.append(messageBody)
       chatMessages.append(msgDiv);
       chatMessages.scrollTop = chatMessages.scrollHeight;
   }
+
+
+  replyMessageCancel.addEventListener("click", (e)=>{
+    document.getElementById("suggestion-div").style.display= "none"
+    const container = e.currentTarget.parentElement;
+    console.log("cont", container);
+  
+    const adminEl = container.querySelector("p.text-green-800");
+    const outletEl = container.querySelector("p.text-black");
+    adminEl.remove()
+    outletEl.remove()
+    console.log("adddd", adminEl);
+  })
+
 
 
   // Handle Scroll for Pagination
@@ -724,7 +1355,10 @@ function updateChatList(id, message, timestamp) {
 
     if (rooms.rooms.length > 0) {
       if(rooms.action === "new_room"){
+        console.log("rooms.rooms",rooms.rooms);
         rooms.rooms.forEach(room => {
+        console.log(room);
+        console.log(room.id);
             const roomDiv = document.createElement("div");
             roomDiv.setAttribute("id", `chat-room-${room.id}`)
             roomDiv.className = "cursor-pointer hover:bg-gray-100 p-3 border-b border-gray-200";
@@ -732,7 +1366,11 @@ function updateChatList(id, message, timestamp) {
                 <div class="font-semibold text-gray-800">${room.name}</div>
                 <div class="text-sm text-gray-500 truncate">You have just been added to this room</div>
             `;
-            roomDiv.addEventListener("click", function () {openChatRoom(room.id, room.name);});
+            const searchId = 0
+            const messages="empty"
+            const openChatType = "message";
+
+            roomDiv.addEventListener("click", function () {openChatRoom(room.id, messages,  openChatType, room.name, searchId);});
             roomDetails[room.name] =  room.id
 
             chatList.prepend(roomDiv);
@@ -751,7 +1389,10 @@ function updateChatList(id, message, timestamp) {
                 <div class="text-xs text-gray-400">${room.last_message_time}</div>
                 <div></div>
             `;
-            roomDiv.addEventListener("click", function () {openChatRoom(room.id, room.name);});
+            const searchId = 0
+            const messages="empty";
+            const openChatType = "message";
+            roomDiv.addEventListener("click", function () {openChatRoom(room.id,messages,  openChatType, room.name, searchId);});
             roomDetails[room.name] =  room.id
 
             newMessageNumber.className = 'w-[20px] h-[20px] bg-red-600 text-white opacity-0 rounded-full flex justify-center items-center'
