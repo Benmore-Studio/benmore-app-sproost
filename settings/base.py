@@ -10,6 +10,7 @@ import cloudinary.api
 from decouple import config
 from datetime import timedelta
 
+import ssl
 
 
 SECRET = config('SECRET')
@@ -325,8 +326,11 @@ CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            # "hosts": [("127.0.0.1", 6379)],  # Local Redis
-            "hosts": [REDIS_URL],
+            "hosts": [{
+                "address": REDIS_URL,
+                "ssl": True,  
+                "ssl_cert_reqs": ssl.CERT_NONE,
+            }],
         },
     },
 }
