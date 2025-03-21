@@ -598,6 +598,7 @@ class MultiplexChatConsumer(AsyncWebsocketConsumer):
             "missed_messages": missed_messages
         }))
 
+
     async def disconnect(self, close_code):
         """Handle WebSocket disconnection and remove user from groups"""
         print(f"🔴 WebSocket Disconnected. Close Code: {close_code}")
@@ -605,11 +606,13 @@ class MultiplexChatConsumer(AsyncWebsocketConsumer):
             for group in list(self.rooms):
                 await self.channel_layer.group_discard(group, self.channel_name)
 
-        # Mark user as offline in Redis
-        await set_user_offline(self.user.id)
+        # Only mark the user offline if self.user exists.
+        if hasattr(self, "user") and getattr(self.user, "id", None):
+            await set_user_offline(self.user.id)
 
         for group in list(self.rooms):
             await self.channel_layer.group_discard(group, self.channel_name)
+
 
     async def receive(self, text_data):
         """Handle incoming WebSocket messages"""
