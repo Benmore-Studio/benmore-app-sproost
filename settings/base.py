@@ -321,6 +321,8 @@ SIMPLE_JWT = {
 
 REDIS_URL = config("REDIS_URL")
 
+unverified_context = ssl._create_unverified_context()
+
 
 CHANNEL_LAYERS = {
     "default": {
@@ -328,7 +330,7 @@ CHANNEL_LAYERS = {
         "CONFIG": {
             "hosts": [{
                 "address": REDIS_URL,
-                "ssl_cert_reqs": None,
+                "ssl": unverified_context,
             }],
         },
     },

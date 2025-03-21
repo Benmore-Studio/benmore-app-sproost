@@ -543,7 +543,6 @@ class MultiplexChatConsumer(AsyncWebsocketConsumer):
 
         if not user.is_authenticated:
             token = self.get_token_from_query(self.scope["query_string"].decode())
-            print(f"🔑 Extracted Token: {token}")
 
             if token:
                 user = await self.jwt_get_user(token)  # Authenticate via JWT
