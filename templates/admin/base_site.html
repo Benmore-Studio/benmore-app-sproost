@@ -1354,6 +1354,8 @@ document.getElementById("message").addEventListener("keydown", function(event) {
       if(rooms.action === "new_room"){
         console.log("rooms.rooms",rooms.rooms);
         rooms.rooms.forEach(room => {
+        console.log(room);
+        console.log(room.id);
             const roomDiv = document.createElement("div");
             roomDiv.setAttribute("id", `chat-room-${room.id}`)
             roomDiv.className = "cursor-pointer hover:bg-gray-100 p-3 border-b border-gray-200";

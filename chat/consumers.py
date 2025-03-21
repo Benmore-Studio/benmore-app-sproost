@@ -502,6 +502,7 @@ def set_user_online(user_id: int):
     """Mark user as online with optional TTL to auto-expire."""
     redis_client.set(f"user_status:{user_id}", "online", ex=3600)
 
+
 @sync_to_async
 def set_user_offline(user_id: int):
     redis_client.set(f"user_status:{user_id}", "offline")
