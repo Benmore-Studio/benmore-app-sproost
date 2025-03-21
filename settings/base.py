@@ -318,7 +318,19 @@ SIMPLE_JWT = {
 }
 
 ENVIRONMENT = config("ENVIRONMENT", "remote").lower()
-REDIS_URL = config("REDIS_URL")
+# print(ENVIRONMENT)
+REDIS_URL = config("REDIS_TLS_URL")
+
+print(REDIS_URL)
+
+# CHANNEL_LAYERS = {
+#     "default": {
+#         "BACKEND": "channels_redis.core.RedisChannelLayer",
+#         "CONFIG": {
+#             "hosts": [REDIS_URL],
+#         }
+#     }
+# }
 
 
 CHANNEL_LAYERS = {

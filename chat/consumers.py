@@ -483,12 +483,13 @@ import ssl
 from .models import RoomMembership
 
 # Initialize a global Redis client
-REDIS_URL = config("REDIS_URL")
+REDIS_URL = config("REDIS_TLS_URL")
 
 redis_client = redis.Redis.from_url(
     REDIS_URL,
     decode_responses=True,
-    ssl_cert_reqs=ssl.CERT_NONE
+    # ssl_cert_reqs=ssl.CERT_NONE
+    ssl_cert_reqs=None
 )
 
 
@@ -818,6 +819,7 @@ class MultiplexChatConsumer(AsyncWebsocketConsumer):
         if reply_to_id:
             try:
                 reply_to_msg = await database_sync_to_async(Message.objects.get)(id=reply_to_id)
+                print("async", reply_to_msg)
             except Message.DoesNotExist:
                 reply_to_msg = None
 
@@ -1082,16 +1084,16 @@ class MultiplexChatConsumer(AsyncWebsocketConsumer):
 
     @database_sync_to_async
     def get_user_rooms_with_last_message(self, user):
-        """Fetch user's chat rooms along with the last message from Redis or DB"""
-        cache_key = f"user_rooms:{user.id}"
+        # """Fetch user's chat rooms along with the last message from Redis or DB"""
+        # cache_key = f"user_rooms:{user.id}"
         
-        # Check Redis for cached rooms
-        cached_rooms = redis_client.get(cache_key)
-        if cached_rooms:
-            print("✅ Fetching rooms from Redis cache...")
-            return json.loads(cached_rooms)  # Return cached data as Python list
+        # # Check Redis for cached rooms
+        # cached_rooms = redis_client.get(cache_key)
+        # if cached_rooms:
+        #     print("✅ Fetching rooms from Redis cache...")
+        #     return json.loads(cached_rooms)  # Return cached data as Python list
         
-        print("🔄 Fetching rooms from DB...")
+        # print("🔄 Fetching rooms from DB...")
 
         """Fetch user's chat rooms along with the last message"""
         rooms = ChatRoom.objects.filter(members=user).prefetch_related("messages")
@@ -1106,7 +1108,7 @@ class MultiplexChatConsumer(AsyncWebsocketConsumer):
             })
 
         # Cache the result in Redis with a 10-minute expiry
-        redis_client.setex(cache_key, 600, json.dumps(result))  
+        # redis_client.setex(cache_key, 600, json.dumps(result))  
         return result
 
     @database_sync_to_async

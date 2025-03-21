@@ -233,9 +233,9 @@
             </div>
 
             <div id="suggestion-div" class="bottom-[4rem] absolute h-fit w-[407px] bg-white pl-[8px]" style="display: none;">
-              <div id="mentionSuggestions" class="flex flex-col gap-4 bg-white w-[300px] h-fit pt-4" style="text-align: start;"></div>
+              <div id="mentionSuggestions" class="flex-col gap-4 bg-white w-[300px] h-fit pt-4" style="text-align: start; display: none;"></div>
               <!-- Media Preview -->
-              <div id="mediaPreview" class="mb-3"></div>
+              <div id="mediaPreview" class="mb-3" style="display: none;"></div>
               <div id="reply-message-div" style="text-align: start; display: none;">
                 <div class="w-full flex flex-col gap-4 bg-gray-200 text-gray-600 text-transform-none border-l-2 border-green-200 p-4 rounded-t-md mb-1">
                   <div id="reply-message-cancel" style="align-self: end;">
@@ -656,10 +656,12 @@ function previousSearchResult(roomId) {
         room.children[3].className = "text-green-500 text-sm"
        
         room.children[1].style.display = "none"
+        console.log(room.children[1], room.children[2], "room.children[1]");
         room.children[2].style.display = "none"
         room.children[3].style.cssText = "text-transform: none; font-family: Rubik, sans-serif; font-size: 13px;"
       
       }else{
+        
         room.children[1].style.display = "block"
         room.children[2].style.display = "block"
         room.children[3].style.display = "none"
@@ -719,6 +721,7 @@ function previousSearchResult(roomId) {
 
         
         e.target.parentElement.style.display = "none"
+        console.log("e.target.parentElement", e.target.parentElement);
       });
       
       deleteMessage.setAttribute("data-delete-id", data.message_id);
@@ -949,6 +952,7 @@ function findRepliedMessage(messageId) {
 function displayMediaPreview(url, publicId) {
     document.getElementById("suggestion-div").style.display = "block";
     const previewContainer = document.getElementById("mediaPreview");
+    previewContainer.style.display = 'block'
     const mediaElement = document.createElement("div");
     mediaElement.setAttribute("data-media-id", publicId);
     mediaElement.className = "w-fit"
@@ -1003,6 +1007,7 @@ document.getElementById("mediaInput").addEventListener("change", handleFileSelec
     // Hide the suggestion div for mentions (if present)
     const suggestionDiv = document.getElementById("suggestion-div");
     if (suggestionDiv) {
+      console.log("suggestionDiv");
       suggestionDiv.style.display = "none";
     }
 
@@ -1014,6 +1019,7 @@ document.getElementById("mediaInput").addEventListener("change", handleFileSelec
       let secondSibling = firstSibling && firstSibling.nextSibling ? firstSibling.nextSibling : null;
       if (firstSibling) firstSibling.remove();
       if (secondSibling) secondSibling.remove();
+      
     }
 
     // Clear the text input and reset the attached media (if applicable)
@@ -1085,6 +1091,7 @@ function onInputChange() {
 function showMentionSuggestions(suggestions, atIndex) {
   const suggestionBox = document.getElementById('mentionSuggestions');
   suggestionBox.style.marginBottom = "10px"
+  suggestionBox.style.display = "flex"
   const suggestionDiv = document.getElementById('suggestion-div');
   suggestionBox.innerHTML = ''; // Clear previous suggestions
   suggestions.forEach(username => {
@@ -1099,16 +1106,17 @@ function showMentionSuggestions(suggestions, atIndex) {
     });
     suggestionBox.appendChild(item);
   });
-  suggestionDiv.style.display = 'flex';
+  suggestionDiv.style.display = 'block';
   suggestionBox.style.display = 'flex';
 }
 
 function hideMentionSuggestions() {
+  console.log("hide");
   const suggestionBox = document.getElementById('mentionSuggestions');
-  const suggestionDiv = document.getElementById('suggestion-div');
+  // const suggestionDiv = document.getElementById('suggestion-div');
+  // suggestionDiv.style.display = 'none';
 
   suggestionBox.style.display = 'none';
-  suggestionDiv.style.display = 'none';
 }
 
 function insertMention(username, atIndex) {
@@ -1231,7 +1239,7 @@ document.getElementById("message").addEventListener("keydown", function(event) {
         }else{
           messageBody.className = "justify-self-start";
         }
-        messageBody.textContent = formattedText;
+        messageBody.innerHTML = formattedText;
       }
       
 
@@ -1319,6 +1327,8 @@ document.getElementById("message").addEventListener("keydown", function(event) {
 
   replyMessageCancel.addEventListener("click", (e)=>{
     document.getElementById("suggestion-div").style.display= "none"
+    document.getElementById("reply-message-div").style.display = 'none'
+    console.log( "doc",document.getElementById("reply-message-div"));
     const container = e.currentTarget.parentElement;
     console.log("cont", container);
   
