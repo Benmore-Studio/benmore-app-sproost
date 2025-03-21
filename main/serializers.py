@@ -217,3 +217,5 @@ class BulkMediaSerializer(serializers.Serializer):
 
         Media.objects.bulk_create(new_media_objects)
         return new_media_objects   
+    
+    

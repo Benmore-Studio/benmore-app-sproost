@@ -27,6 +27,8 @@ from .serializers import (SimpleContractorProfileSerializer,
                         )
 from .utils import send_invitation_email
 
+from collections import defaultdict
+
 
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
@@ -573,7 +575,7 @@ class DeleteRoomAPIView(APIView):
         )
 
 
-
+# chatroom search message view
 class SearchMessagesView(APIView):
     """
     API endpoint to search messages in chat rooms.
@@ -593,20 +595,24 @@ class SearchMessagesView(APIView):
         if room_id:
             messages = messages.filter(room_id=room_id)
 
-        results = [
-            {
+        # Group messages by room
+        grouped_results = defaultdict(list)
+
+        for msg in messages:
+            grouped_results[msg.room.id].append({
                 "id": msg.id,
                 "room_id": msg.room.id,
                 "room_name": msg.room.name,
                 "content": msg.content,
                 "sender": msg.sender.username,
                 "timestamp": msg.timestamp.strftime("%Y-%m-%d %H:%M:%S")
-            }
-            for msg in messages
-        ]
+            })
+
+        # Convert defaultdict to a normal dict before returning
+        results = [{"room_id": room_id, "room_name": messages[0]["room_name"], "messages": messages} 
+                   for room_id, messages in grouped_results.items()]
 
         return Response({"results": results})
-
 
 
 def award_points(user, points):
