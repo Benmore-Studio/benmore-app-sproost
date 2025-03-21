@@ -148,7 +148,7 @@
     <!-- Insert our chat icon + dropdown in the user links bar -->
     <div id="chat-icon" onclick="toggleChatDropdown()" class="w-[28px] h-[28px] bg-[royalblue] relative rounded-full items-center flex justify-center">
       <!-- Simple chat icon (SVG) -->
-      <div id="message-number" class="text-white absolute top-[-3px] right-[-2px]">0</div>
+      <div id="message-number" class="text-white absolute top-[-3px] right-[-2px] opacity-0">0</div>
       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
         <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 8.511c.884.284 1.5 1.128 1.5 2.097v4.286c0 1.136-.847 2.1-1.98 2.193-.34.027-.68.052-1.02.072v3.091l-3-3c-1.354 0-2.694-.055-4.02-.163a2.115 2.115 0 0 1-.825-.242m9.345-8.334a2.126 2.126 0 0 0-.476-.095 48.64 48.64 0 0 0-8.048 0c-1.131.094-1.976 1.057-1.976 2.192v4.286c0 .837.46 1.58 1.155 1.951m9.345-8.334V6.637c0-1.621-1.152-3.026-2.76-3.235A48.455 48.455 0 0 0 11.25 3c-2.115 0-4.198.137-6.24.402-1.608.209-2.76 1.614-2.76 3.235v6.226c0 1.621 1.152 3.026 2.76 3.235.577.075 1.157.14 1.74.194V21l4.155-4.155" />
       </svg>
@@ -323,6 +323,7 @@
   let adminAddUserRoomTitle;
   let roomMembers;
   let sender 
+  let dontUpdateMessageNumber = false;
   let messageCount = 0
 
   // header.prepend(chatIcon)
@@ -345,6 +346,7 @@
   backArrow.addEventListener("click", function(){
     chatContainer.style.display = 'block'
     individualChatList.style.display = 'none'
+    dontUpdateMessageNumber = false
     document.getElementById('chat-message-parent-div').style.display = 'none'
 
   })
@@ -373,6 +375,7 @@
     searchNavigation.appendChild(nextSearchResult)
     searchNavigation.appendChild(previousSearchResult)                 
     }     
+    dontUpdateMessageNumber = true
     console.log("opened", "chat");
     const messageNumberElement  = document.querySelector(`#messageNumber-${roomId}`);
     messageNumberElement.innerHTML = ''
@@ -773,7 +776,11 @@ function previousSearchResult(roomId) {
         messageBody.appendChild(replyMsgDiv)
         messageBody.appendChild(mainMessageContent)
       }else{
-        messageBody.innerHTML = formattedText;
+        const mainMessageContent = document.createElement('p');
+        mainMessageContent.textContent = formattedText;
+        mainMessageContent.style.textAlign = "start"
+
+        messageBody.appendChild(mainMessageContent);
       }
       
 
@@ -1005,10 +1012,14 @@ document.getElementById("mediaInput").addEventListener("change", handleFileSelec
     chatSocket.send(JSON.stringify(payload));
 
     // Hide the suggestion div for mentions (if present)
-    const suggestionDiv = document.getElementById("suggestion-div");
-    if (suggestionDiv) {
+    const replyMessageDiv = document.getElementById("reply-message-div");
+    const mentionDiv = document.getElementById("reply-message-div");
+    if (replyMessageId && replyMessageDiv) {
       console.log("suggestionDiv");
-      suggestionDiv.style.display = "none";
+      replyMessageDiv.style.display = "none";
+    }
+    if (mentionDiv) {
+      mentionDiv.style.display = "none";
     }
 
     // If there's a reply UI active, remove its extra elements
@@ -1119,12 +1130,13 @@ function hideMentionSuggestions() {
   suggestionBox.style.display = 'none';
 }
 
+// insert suggested user
 function insertMention(username, atIndex) {
   const inputEl = document.getElementById('message');
   const value = inputEl.value;
   // Replace the text after the '@' with the full username
   const beforeAt = value.substring(0, atIndex);
-  // You might want to add a trailing space after the mention.
+  // add a trailing space after the mention.
   inputEl.value = `${beforeAt}@${username} `;
   // Optionally, set the caret at the end of the input.
   inputEl.focus();
@@ -1142,15 +1154,20 @@ function formatMessage(messageText) {
 
 
 
+
 // to updae the chat and move the message div to the top and to update message count
 function updateChatList(id, message, timestamp, sender) {  
+  if(sender !== userId && dontUpdateMessageNumber === false){
     messageCount++
+  }
     let messageId = `chat-room-${id}`; 
     let roomDiv = `roomDivParent-${id}`; 
     let messageNumber = `messageNumber-${id}`; 
     let messageList = document.getElementById("chatList");
     let individualMessage = document.getElementById(messageId);
     let roomDivParent = document.getElementById(roomDiv);
+
+    console.log("roomDivParent",roomDivParent, id, roomDiv);
 
     if (individualMessage) {
         // Updating the second child (message content)
@@ -1161,11 +1178,14 @@ function updateChatList(id, message, timestamp, sender) {
         let timestampElement = individualMessage.querySelector(".xs"); // Add a timestamp div in HTML
         if (timestampElement) timestampElement.textContent = timestamp;
 
-        if (messageCount > 0 && sender !== userId){
+        if (messageCount > 0 && dontUpdateMessageNumber === false){
           let numberDiv = document.getElementById(messageNumber)
+          let numberDiv2 = document.getElementById("message-number")
           console.log(numberDiv);
           numberDiv.style.opacity = 1
+          numberDiv2.style.opacity = 1
           numberDiv.textContent = messageCount
+          numberDiv2.textContent = messageCount
         }
 
         // Move to top without flickering
@@ -1193,7 +1213,7 @@ document.getElementById("message").addEventListener("keydown", function(event) {
     console.log(e.target);
     console.log(e.target.nextElementSibling);
 
-    if(messageOptions.style.display === "flex"){
+    if(messageOptions && messageOptions.style.display === "flex"){
       messageOptions.style.display = "none"
     }else if(messageOptions.style.display === "none"){
       messageOptions.style.display = "flex"
@@ -1408,6 +1428,7 @@ document.getElementById("message").addEventListener("keydown", function(event) {
             newMessageNumber.className = 'w-[20px] h-[20px] bg-red-600 text-white opacity-0 rounded-full flex justify-center items-center'
             // newMessageNumber.style.display = "none"
             newMessageNumber.setAttribute('id', `messageNumber-${room.id}`)
+            roomDivParent.setAttribute('id', `roomDivParent-${room.id}`)
             roomDivParent.className = 'w-full hover:bg-gray-100 p-3 flex items-center justify-around cursor-pointer border-b border-gray-200'
             // roomDivParent.setAttribute('id', `roomDivParent-${room.id}`)
             roomDivParent.appendChild(newMessageNumber);
