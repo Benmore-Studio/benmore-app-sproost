@@ -328,7 +328,6 @@ CHANNEL_LAYERS = {
         "CONFIG": {
             "hosts": [{
                 "address": REDIS_URL,
-                "ssl": True,  
                 "ssl_cert_reqs": ssl.CERT_NONE,
             }],
         },
