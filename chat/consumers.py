@@ -483,7 +483,7 @@ import ssl
 from .models import RoomMembership
 
 # Initialize a global Redis client
-REDIS_URL = config("REDIS_TLS_URL")
+REDIS_URL = config("REDIS_URL")
 
 redis_client = redis.Redis.from_url(
     REDIS_URL,

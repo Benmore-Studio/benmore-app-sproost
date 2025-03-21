@@ -318,7 +318,7 @@ SIMPLE_JWT = {
 }
 
 
-REDIS_URL = config("REDIS_TLS_URL")
+REDIS_URL = config("REDIS_URL")
 
 
 CHANNEL_LAYERS = {
