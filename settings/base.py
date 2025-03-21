@@ -15,7 +15,7 @@ from datetime import timedelta
 SECRET = config('SECRET')
 CLIENT_ID = config('CLIENT_ID')
 
-# print(SECRET)
+# print()
 from django.core.management.utils import get_random_secret_key
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
