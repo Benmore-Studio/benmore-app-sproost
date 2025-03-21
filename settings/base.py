@@ -317,7 +317,7 @@ SIMPLE_JWT = {
     'BLACKLIST_AFTER_ROTATION': True, 
 }
 
-
+ENVIRONMENT = config("ENVIRONMENT", "remote").lower()
 REDIS_URL = config("REDIS_URL")
 
 
@@ -325,10 +325,22 @@ CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [REDIS_URL],
-        },
-    },
+            "hosts": [
+                {
+                  "address": REDIS_URL,
+                  "ssl_cert_reqs": None,
+                  "retry_on_timeout": True,
+                  "socket_keepalive": True,
+                } if ENVIRONMENT == "remote" else REDIS_URL
+            ],
+        }
+    }
 }
+
+
+
+
+
 
 
 # CHANNEL_LAYERS = {
