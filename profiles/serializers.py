@@ -38,6 +38,10 @@ class SimplePropertySerializer(serializers.ModelSerializer):
         fields = '__all__' 
 
 
+
+
+
+
 class SimpleAgentProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = AgentProfile
