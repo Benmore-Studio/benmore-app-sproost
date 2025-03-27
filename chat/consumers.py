@@ -475,12 +475,16 @@ from django.contrib.auth import get_user_model
 from rest_framework_simplejwt.tokens import AccessToken
 from asgiref.sync import sync_to_async
 import re
-from main.models import Media
+from main.models import Media, MessageMedia
+from main.serializers import MessageMediaSerializer
 
 import redis
 from decouple import config
 import ssl
 from .models import RoomMembership
+from django.contrib.contenttypes.models import ContentType
+import cloudinary.uploader
+
 
 # Initialize a global Redis client
 REDIS_URL = config("REDIS_TLS_URL")
@@ -492,7 +496,12 @@ redis_client = redis.Redis.from_url(
     # ssl_cert_reqs=None
 )
 
-
+USER_TYPE_GROUP_MAP = {
+    "HO": "home_owners",
+    "CO": "contractors",
+    "AG": "agents",
+    "IV": "investors",
+}
 
 
 
@@ -501,7 +510,7 @@ User = get_user_model()
 @sync_to_async
 def set_user_online(user_id: int):
     """Mark user as online with optional TTL to auto-expire."""
-    redis_client.set(f"user_status:{user_id}", "online", ex=3600)
+    redis_client.set(f"user_status:{user_id}", "online", ex=60)
 
 
 @sync_to_async
@@ -515,6 +524,7 @@ def is_user_offline(user_id: int) -> bool:
         # If key is missing or expired, treat as offline
         return True
     return (status.decode() == "offline")
+
 
 @sync_to_async
 def increment_unread_count(user_id: int, room_id: int):
@@ -531,6 +541,17 @@ def get_unread_count(user_id: int, room_id: int) -> int:
     """Get the current unread count for a user-room pair."""
     val = redis_client.hget(f"unread_counts:{user_id}", str(room_id))
     return int(val) if val else 0
+
+@database_sync_to_async
+def delete_message_media_and_sync_cloudinary(message):
+    media_items = list(message.messagemedia.all())
+    for media in media_items:
+        try:
+            cloudinary.uploader.destroy(media.public_id)
+        except Exception as e:
+            print(f"❌ Cloudinary deletion failed for {media.public_id} — {e}")
+    deleted_count, _ = message.messagemedia.all().delete()
+    return deleted_count
 
 
 class MultiplexChatConsumer(AsyncWebsocketConsumer):
@@ -586,6 +607,10 @@ class MultiplexChatConsumer(AsyncWebsocketConsumer):
         # Also subscribe to a global notification group**
         await self.channel_layer.group_add("global_notifications", self.channel_name)
 
+        # subscribe only the admin to a group
+        if self.user.is_superuser:
+             await self.channel_layer.group_add("admin_presence", self.channel_name)
+
         # Send the list of rooms to the connected user
         await self.send(json.dumps({
             "action": "room_list",
@@ -601,6 +626,29 @@ class MultiplexChatConsumer(AsyncWebsocketConsumer):
         }))
 
 
+        await self.channel_layer.group_send(
+        "admin_presence",
+        {
+            "type": "user_status",
+            "user_id": self.user.email,
+            "username": self.user.username,
+            "status": "online"
+        }
+    )
+
+        # Only admins should receive and see online/offline notifications
+    
+    async def user_status(self, event):
+        print("jump", event["username"])
+        if self.user.is_superuser:
+            await self.send(json.dumps({
+                "action": "user_status",
+                "user_id": event["user_id"],
+                "username": event["username"],
+                "status": event["status"]
+            }))
+
+
     async def disconnect(self, close_code):
         """Handle WebSocket disconnection and remove user from groups"""
         print(f"🔴 WebSocket Disconnected. Close Code: {close_code}")
@@ -611,6 +659,22 @@ class MultiplexChatConsumer(AsyncWebsocketConsumer):
         # Only mark the user offline if self.user exists.
         if hasattr(self, "user") and getattr(self.user, "id", None):
             await set_user_offline(self.user.id)
+
+        # disconnects the admin from the group
+        if self.user.is_superuser:
+            await self.channel_layer.group_discard("admin_presence", self.channel_name)
+
+        # Only notify admins when non-admin users disconnect
+        if not self.user.is_superuser:
+            await self.channel_layer.group_send(
+                "admin_presence",
+                {
+                    "type": "user_status",
+                    "user_id": self.user.email,
+                    "status": "offline"
+                }
+            )
+
 
         for group in list(self.rooms):
             await self.channel_layer.group_discard(group, self.channel_name)
@@ -651,6 +715,7 @@ class MultiplexChatConsumer(AsyncWebsocketConsumer):
             print(f"❌ Invalid JSON message received: {text_data}. Error: {e}")
             await self.send(json.dumps({"error": "Invalid message format"}))
 
+
     async def join_room(self, data, user):
         """Join a chat room"""
         room_id = data.get("room")
@@ -670,6 +735,7 @@ class MultiplexChatConsumer(AsyncWebsocketConsumer):
                 "message": f"You are not a member of room {room_id}."
             }))
 
+
     async def leave_room(self, data):
         """Leave a chat room"""
         room_id = data.get("room")
@@ -682,6 +748,7 @@ class MultiplexChatConsumer(AsyncWebsocketConsumer):
                 "room": room_id,
                 "message": f"Left room {room_id}"
             }))
+
 
     async def handle_typing(self, data, user):
         """Broadcast typing status to others in the same room."""
@@ -768,6 +835,8 @@ class MultiplexChatConsumer(AsyncWebsocketConsumer):
             "members": members,
         }))
 
+
+
     async def send_message(self, data, user):
         """Securely send a message to a chat room"""
         
@@ -783,6 +852,15 @@ class MultiplexChatConsumer(AsyncWebsocketConsumer):
         room_id = data.get("room_id")
         message_text = data.get("message", "").strip()  # Ensures no empty messages
         media_list = data.get("media", [])
+        broadcast_to = data.get("broadcast_to")  # List of user type codes ['HO', 'CO']
+
+
+        if not (room_id or broadcast_to):
+            await self.send(json.dumps({"action": "error", "message": "Missing room ID or broadcast target."}))
+            return
+        
+        # Sanitize message content (Prevent XSS or Injection)
+        message_text = re.sub(r'[<>]', '', message_text)  # Remove HTML tags
 
         if not room_id or (not message_text and not media_list):
             await self.send(json.dumps({"action": "error", "message": "Invalid message"}))
@@ -805,15 +883,13 @@ class MultiplexChatConsumer(AsyncWebsocketConsumer):
             }))
             return
 
-        # Sanitize message content (Prevent XSS or Injection)
-        message_text = re.sub(r'[<>]', '', message_text)  # Remove HTML tags
 
         print("")
         print("dtaa", data)
 
         # Attemptong to find the original message if reply_to_id is provided
         reply_to_id = data.get("reply_to_id")
-        
+            
 
         reply_to_msg = None
         if reply_to_id:
@@ -824,20 +900,28 @@ class MultiplexChatConsumer(AsyncWebsocketConsumer):
                 reply_to_msg = None
 
         # Save the message securely in the database
-        message = await self.save_message(room_id, user, message_text, reply_to_id, reply_to_msg)
+        message, message_dict = await self.save_message(
+            room_id, user, message_text, reply_to_id, reply_to_msg
+        )
+        # message = await self.save_message(room_id, user, message_text, reply_to_id, reply_to_msg)
         # getting the reply message sender
         sender_username = None
         if reply_to_msg:
             sender_username = await sync_to_async(lambda: reply_to_msg.sender.username)()
-        # Save media files
-        if media_list:
-            await self.save_media(message, media_list)
-
-
         print("")
-        print(message)
-        print("babe")
+        print(message, "", message.id )
+        print("babe", message_dict)
         print(reply_to_id, reply_to_msg)
+            
+        # Save media files
+        saved_media = []
+        if isinstance(media_list, dict):
+            media_list = [media_list]
+
+        for media_data in media_list:
+            saved = await self.save_media(message, media_data)
+            saved_media.append(saved)
+
 
         # Broadcast message to the chat room
         group_name = f"chat_{room_id}"
@@ -850,11 +934,11 @@ class MultiplexChatConsumer(AsyncWebsocketConsumer):
                 "sender": user.username,
                 "message": message_text,
                 "media": media_list,
-                "timestamp": message["timestamp"],
+                "timestamp": message_dict ["timestamp"],
                 "reply_to_id": reply_to_id,
                 "reply_to_content": str(reply_to_msg),
                 "reply_message_sender":sender_username,
-                "message_id" : message['id'],
+                "message_id" : message_dict ['id'],
                 
             }
         )
@@ -864,8 +948,8 @@ class MultiplexChatConsumer(AsyncWebsocketConsumer):
 
         # increment unread messages in redis
         await increment_unread_count(self.user.id, room_id)
-
-
+        
+        
 
     # async def notify_missed_messages(self, room_id):
     #     """
@@ -917,6 +1001,7 @@ class MultiplexChatConsumer(AsyncWebsocketConsumer):
             "username": event.get("username"),
             "sender": event.get("sender"),
             "message": event.get("message"),
+            'media': event.get("media"),
             "timestamp": event.get("timestamp"),
             "reply_to_id": event.get("reply_to_id"),
             "reply_to_content": event.get("reply_to_content"),
@@ -964,53 +1049,54 @@ class MultiplexChatConsumer(AsyncWebsocketConsumer):
         )
 
 
-    async def delete_message(self, data, user):
-        """Mark a message as deleted by replacing its content."""
-        message_id = data.get("message_id")
+    # async def delete_message(self, data, user):
+    #     """Mark a message as deleted by replacing its content."""
+    #     message_id = data.get("message_id")
 
-        if not message_id:
-            await self.send(json.dumps({
-                "action": "error",
-                "message": "Message ID is required to delete."
-            }))
-            return
+    #     if not message_id:
+    #         await self.send(json.dumps({
+    #             "action": "error",
+    #             "message": "Message ID is required to delete."
+    #         }))
+    #         return
 
-        # Fetch message and related room in a sync context
-        message = await database_sync_to_async(
-            lambda: Message.objects.select_related("room").filter(id=message_id, sender=user).first()
-        )()
+    #     # Fetch message and related room in a sync context
+    #     message = await database_sync_to_async(
+    #         lambda: Message.objects.select_related("room").filter(id=message_id, sender=user).first()
+    #     )()
 
-        if not message:
-            await self.send(json.dumps({
-                "action": "error",
-                "message": "Message not found or not authorized to delete."
-            }))
-            return
+    #     if not message:
+    #         await self.send(json.dumps({
+    #             "action": "error",
+    #             "message": "Message not found or not authorized to delete."
+    #         }))
+    #         return
 
-        # Update message content to indicate deletion
-        message.content = "This message has been deleted."
-        message.deleted = True
-        await database_sync_to_async(message.save)()  
+    #     # Update message content to indicate deletion
+    #     message.content = "This message has been deleted."
+    #     message.deleted = True
+    #     await database_sync_to_async(message.save)()  
 
-        # Notify the chat room
-        await self.channel_layer.group_send(
-            f"chat_{message.room.id}",  # ✅ Now this won't error out
-            {
-                "type": "message_deleted",
-                "message_id": message.id,
-                "room_id": message.room.id,
-                "username": user.username,
-            }
-        )
+    #     # Notify the chat room
+    #     await self.channel_layer.group_send(
+    #         f"chat_{message.room.id}",  # ✅ Now this won't error out
+    #         {
+    #             "type": "message_deleted",
+    #             "message_id": message.id,
+    #             "room_id": message.room.id,
+    #             "username": user.username,
+    #         }
+    #     )
 
-    async def message_deleted(self, event):
-        """Send message deleted event to clients."""
-        await self.send(json.dumps({
-            "action": "message_deleted",
-            "message_id": event["message_id"],
-            "room_id": event["room_id"],
-            "username": event["username"],
-        }))
+
+    # async def message_deleted(self, event):
+    #     """Send message deleted event to clients."""
+    #     await self.send(json.dumps({
+    #         "action": "message_deleted",
+    #         "message_id": event["message_id"],
+    #         "room_id": event["room_id"],
+    #         "username": event["username"],
+    #     }))
 
 
     def get_token_from_query(self, query_string):
@@ -1022,13 +1108,78 @@ class MultiplexChatConsumer(AsyncWebsocketConsumer):
         return token or None
 
 
+    # @database_sync_to_async
+    # def get_room_members(self, room_id):
+    #     try:
+    #         room = ChatRoom.objects.get(id=room_id)
+    #         return [{"id": member.id, "username": member.username} for member in room.members.all()]
+    #     except ChatRoom.DoesNotExist:
+    #         return []
+
+
+    async def delete_message(self, data, user):
+        message_id = data.get("message_id")
+        if not message_id:
+            await self.send(json.dumps({"action": "error", "message": "Message ID is required."}))
+            return
+
+        message = await database_sync_to_async(
+            lambda: Message.objects.select_related("room").filter(id=message_id, sender=user).first()
+        )()
+
+        if not message:
+            await self.send(json.dumps({"action": "error", "message": "Message not found or unauthorized."}))
+            return
+
+        room_id = message.room.id
+
+        # Delete media (if any)
+        deleted_media_count = await delete_message_media_and_sync_cloudinary(message)
+
+        # If no message content or already marked, and media was deleted, fully delete
+        if deleted_media_count > 0 and (not message.content.strip() or message.content == "This message has been deleted."):
+            await database_sync_to_async(message.delete)()
+        else:
+            message.content = "This message has been deleted."
+            message.deleted = True
+            await database_sync_to_async(message.save)()
+
+        # Notify the room
+        await self.channel_layer.group_send(
+            f"chat_{room_id}",
+            {
+                "type": "message_deleted",
+                "message_id": message_id,
+                "room_id": room_id,
+                "username": user.username,
+            }
+        )
+
+    async def message_deleted(self, event):
+        await self.send(json.dumps({
+            "action": "message_deleted",
+            "message_id": event["message_id"],
+            "room_id": event["room_id"],
+            "username": event["username"],
+        }))
+
+
     @database_sync_to_async
     def get_room_members(self, room_id):
+        key = f"room_members:{room_id}"
+        cached = redis_client.get(key)
+        if cached:
+            return json.loads(cached)
+
         try:
             room = ChatRoom.objects.get(id=room_id)
-            return [{"id": member.id, "username": member.username} for member in room.members.all()]
+            members = [{"id": m.id, "username": m.username} for m in room.members.all()]
+            redis_client.setex(key, 3600, json.dumps(members))  # Cache for 1 hour
+            return members
         except ChatRoom.DoesNotExist:
             return []
+
+
 
 
     @database_sync_to_async
@@ -1082,92 +1233,230 @@ class MultiplexChatConsumer(AsyncWebsocketConsumer):
         except ChatRoom.DoesNotExist:
             return False
 
-    @database_sync_to_async
-    def get_user_rooms_with_last_message(self, user):
-        # """Fetch user's chat rooms along with the last message from Redis or DB"""
-        # cache_key = f"user_rooms:{user.id}"
+    # @database_sync_to_async
+    # def get_user_rooms_with_last_message(self, user):
+    #     # """Fetch user's chat rooms along with the last message from Redis or DB"""
+    #     # cache_key = f"user_rooms:{user.id}"
         
-        # # Check Redis for cached rooms
-        # cached_rooms = redis_client.get(cache_key)
-        # if cached_rooms:
-        #     print("✅ Fetching rooms from Redis cache...")
-        #     return json.loads(cached_rooms)  # Return cached data as Python list
+    #     # # Check Redis for cached rooms
+    #     # cached_rooms = redis_client.get(cache_key)
+    #     # if cached_rooms:
+    #     #     print("✅ Fetching rooms from Redis cache...")
+    #     #     return json.loads(cached_rooms)  # Return cached data as Python list
         
-        # print("🔄 Fetching rooms from DB...")
+    #     # print("🔄 Fetching rooms from DB...")
 
-        """Fetch user's chat rooms along with the last message"""
-        rooms = ChatRoom.objects.filter(members=user).prefetch_related("messages")
+    #     """Fetch user's chat rooms along with the last message"""
+    #     rooms = ChatRoom.objects.filter(members=user).prefetch_related("messages")prefetch_related("messages", "members").order_by("-created_at")[offset:offset + page_size]
+    #     result = []
+    #     for room in rooms:
+    #         last_message = room.messages.order_by("-timestamp").first()
+    #         result.append({
+    #             "id": room.id,
+    #             "name": room.name,
+    #             "last_message": last_message.content if last_message else "No messages yet",
+    #             "last_message_time": last_message.timestamp.strftime("%Y-%m-%d %H:%M:%S") if last_message else "",
+    #         })
+
+    #     # Cache the result in Redis with a 10-minute expiry
+    #     # redis_client.setex(cache_key, 600, json.dumps(result))  
+    #     return result
+
+
+
+    @database_sync_to_async
+    def get_user_rooms_with_last_message(self, user, page=1, page_size=10):
+        """
+        Fetch paginated chat rooms (group, private, broadcast) the user is in,
+        along with the most recent message for each room.
+        """
+        offset = (page - 1) * page_size
+
+        rooms = ChatRoom.objects.filter(members=user).prefetch_related("messages").prefetch_related("messages", "members").order_by("-created_at")[offset:offset + page_size]
+
         result = []
         for room in rooms:
             last_message = room.messages.order_by("-timestamp").first()
+
             result.append({
                 "id": room.id,
                 "name": room.name,
+                "room_type":room.room_type,
+                "room_type": getattr(room, "room_type", "group"),
                 "last_message": last_message.content if last_message else "No messages yet",
                 "last_message_time": last_message.timestamp.strftime("%Y-%m-%d %H:%M:%S") if last_message else "",
             })
 
-        # Cache the result in Redis with a 10-minute expiry
-        # redis_client.setex(cache_key, 600, json.dumps(result))  
         return result
+
+
+
 
     @database_sync_to_async
     def get_chat_messages(self, room_id, page):
         """Retrieve paginated chat messages"""
         PAGE_SIZE = 20
         offset = (page - 1) * PAGE_SIZE
-        messages = Message.objects.filter(room_id=room_id).order_by("-timestamp")[offset:offset + PAGE_SIZE]
-        return [{"username": msg.sender.username, "id":msg.id, "deleted":msg.deleted, "message": msg.content, "reply_to":str(msg.reply_to),"reply_to_num":msg.reply_to_num, "timestamp": msg.timestamp.strftime("%Y-%m-%d %H:%M:%S")} for msg in messages]
+        messages = Message.objects.filter(room_id=room_id).select_related("sender", "reply_to").prefetch_related("messagemedia").order_by("-timestamp")[offset:offset + PAGE_SIZE]
 
+        print("optimised",messages)
+
+        result = []
+        for msg in messages:
+            media_list = [{
+                "url": m.file_url,
+                "type": m.media_type,
+                "public_id":m.public_id
+            } for m in msg.messagemedia.all()]
+        
+            result.append({
+                "id": msg.id,
+                "username": msg.sender.username,
+                "message": msg.content,
+                "timestamp": msg.timestamp.strftime("%Y-%m-%d %H:%M:%S"),
+                "deleted": msg.deleted,
+                "reply_to": str(msg.reply_to),
+                "reply_to_num": msg.reply_to_num,
+                "media": media_list,
+            })
+        # return [{"username": msg.sender.username, "id":msg.id, "deleted":msg.deleted, "message": msg.content,  "media": media_list, "reply_to":str(msg.reply_to),"reply_to_num":msg.reply_to_num, "timestamp": msg.timestamp.strftime("%Y-%m-%d %H:%M:%S")} for msg in messages]
+        return result
 
     @database_sync_to_async
     def save_message(self, room_id, user, text, reply_to_num=None, reply_to_msg=None):
         """Save chat messages to the database"""
         print("oversabi", user)
         room = ChatRoom.objects.get(id=room_id)
-        message = Message.objects.create(room=room, sender=user, content=text, reply_to_num= reply_to_num, reply_to=reply_to_msg)
-          # Exclude the sender from room members for message receivers.
+        message = Message.objects.create(
+            room=room,
+            sender=user,
+            content=text,
+            reply_to_num=reply_to_num,
+            reply_to=reply_to_msg
+        )
+        # message = Message.objects.create(room=room, sender=user, content=text, reply_to_num= reply_to_num, reply_to=reply_to_msg)
+        # Exclude the sender from room members for message receivers.
         filtered_receivers  = room.members.exclude(id=user.id)
         message.receiver.add(*filtered_receivers )
 
-         # 🧹 Invalidate Redis Cache (force refetch)
+        # 🧹 Invalidate Redis Cache (force refetch)
         redis_client.delete(f"user_rooms:{user.id}")
 
-        return {"id": message.id, "message": message.content, "timestamp": message.timestamp.strftime("%Y-%m-%d %H:%M:%S"), "reply_to_id": reply_to_msg.id if reply_to_msg else None,}
+        return message, {"id": message.id, "message": message.content, "timestamp": message.timestamp.strftime("%Y-%m-%d %H:%M:%S"), "reply_to_id": reply_to_msg.id if reply_to_msg else None,}
 
 
     @sync_to_async
-    def save_media(self, message, media_list):
-        """Save media records to DB"""
-        Media.objects.bulk_create([
-            Media(message=message, url=media["url"], public_id=media["public_id"], media_type=media["type"])
-            for media in media_list
-        ])
+    def save_media(self, message_instance, media_data):
+        print("incoming media:", media_data)
+
+        # Map keys correctly
+        mapped_data = {
+            "file_url": media_data.get("url"),
+            "public_id": media_data.get("public_id"),
+            "media_type": media_data.get("type"),
+        }
+
+        serializer = MessageMediaSerializer(data=mapped_data, context={"message": message_instance})
+        if serializer.is_valid(raise_exception=True):
+            media = serializer.save()
+            print("✅ Media saved:", media)
+            return {
+                "id": media.id,
+                "url": media.file_url,
+                "public_id": media.public_id,
+                "type": media.media_type,
+            }
 
 
-    # @database_sync_to_async
-    # def get_missed_messages_count(self, user):
-    #     """Get the number of unread messages per chat room for a user"""
-    #     rooms = ChatRoom.objects.filter(members=user)
-    #     missed_messages = {}
 
-    #     for room in rooms:
-    #         unread_count = room.messages.exclude(read_by=user).count()
-    #         if unread_count > 0:
-    #             missed_messages[room.id] = unread_count  # Store count per room
+        # @sync_to_async
+        # def save_media(self,message_instance, message_id, media_dict):
+        #     print("sure",message_instance, message_id)
+        #     content_type = ContentType.objects.get_for_model(message_instance)
+        #     media_obj = Media.objects.create(
+        #         content_type=content_type,
+        #         object_id=message_id,
+        #         file_url=media_dict["url"],
+        #         public_id=media_dict["public_id"],
+        #         media_type=media_dict["type"]
+        #     )
+        #     print("✅ Media saved successfully:", media_obj.id)
+        #     return media_obj.id
 
-    #     return missed_messages
-    
+
+        # @database_sync_to_async
+        # def get_missed_messages_count(self, user):
+        #     """Get the number of unread messages per chat room for a user"""
+        #     rooms = ChatRoom.objects.filter(members=user)
+        #     missed_messages = {}
+
+        #     for room in rooms:
+        #         unread_count = room.messages.exclude(read_by=user).count()
+        #         if unread_count > 0:
+        #             missed_messages[room.id] = unread_count  # Store count per room
+
+        #     return missed_messages
+        
+
+
+        # @database_sync_to_async
+        # def mark_messages_as_read(self, room_id, user):
+        #     """Mark all unread messages in a room as read by the user"""
+        #     room = ChatRoom.objects.get(id=room_id)
+        #     unread_messages = room.messages.exclude(read_by=user)
+            
+        #     for message in unread_messages:
+        #         message.read_by.add(user)  # Mark as read
+
+
+        @database_sync_to_async
+        def mark_messages_as_read(self, room_id, user):
+            room = ChatRoom.objects.get(id=room_id)
+            unread_messages = room.messages.exclude(read_by=user).only('id')
+
+            through_model = Message.read_by.through
+            new_links = [
+                through_model(message_id=msg.id, user_id=user.id)
+                for msg in unread_messages
+            ]
+
+            # Bulk create, ignore if already exists (you may need to handle DB constraints)
+            through_model.objects.bulk_create(new_links, ignore_conflicts=True)
 
 
     @database_sync_to_async
-    def mark_messages_as_read(self, room_id, user):
-        """Mark all unread messages in a room as read by the user"""
-        room = ChatRoom.objects.get(id=room_id)
-        unread_messages = room.messages.exclude(read_by=user)
-        
-        for message in unread_messages:
-            message.read_by.add(user)  # Mark as read
+    def get_each_room_type_with_last_message(self, user, room_type=None):
+        """
+        Fetch rooms for a user with optional room_type filtering.
+        """
+        query = ChatRoom.objects.filter(members=user)
+        if room_type:
+            query = query.filter(room_type=room_type)
+
+        rooms = query.prefetch_related("messages", "members")
+
+        result = []
+        for room in rooms:
+            last_message = room.messages.order_by("-timestamp").first()
+
+            # Determine room display name
+            if room.room_type == "private":
+                other_member = room.members.exclude(id=user.id).first()
+                room_name = f"Chat with {other_member.username}" if other_member else "Private Chat"
+            elif room.room_type == "broadcast":
+                room_name = f"Broadcast to {room.name.split('_')[-1]}"
+            else:
+                room_name = room.name
+
+            result.append({
+                "id": room.id,
+                "name": room_name,
+                "room_type": room.room_type,
+                "last_message": last_message.content if last_message else "No messages yet",
+                "last_message_time": last_message.timestamp.strftime("%Y-%m-%d %H:%M:%S") if last_message else "",
+            })
+
+        return result
 
 
 

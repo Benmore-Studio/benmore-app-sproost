@@ -2,11 +2,11 @@ openapi: 3.0.0
 info:
   title: WebSocket Chat API
   description: >
-    API documentation for the WebSocket-based chat system. Clients connect to the WebSocket
-    endpoint by providing a valid JWT token in the `Bearertoken` query parameter. Once connected,
-    the server authenticates the user, subscribes them to their chat rooms, and sends initial data
-    (e.g. room list and missed messages count). The client then communicates with the server by
-    sending JSON messages with an `action` key.
+    API documentation for the WebSocket-based chat system. Clients first establish the connection
+    via an HTTP GET request to the `/ws/chat/` endpoint by providing a valid JWT token in the
+    `Bearertoken` query parameter. Once connected, the server authenticates the user, subscribes
+    them to their chat rooms, and sends initial data (e.g. room list and missed messages count). 
+    The client then communicates with the server by sending JSON messages with an `action` key.
     
     **Client-to-Server Actions:**
     - **send:** Send a chat message.
@@ -31,12 +31,14 @@ servers:
     description: Production WebSocket server
 
 paths:
+  # HTTP GET endpoint to establish the WebSocket connection.
   /ws/chat/:
     get:
       summary: Connect to WebSocket for Chat
       description: >
-        Establish a WebSocket connection for real-time chat. A valid JWT token must be provided
-        as a query parameter named `Bearertoken`.
+        Establish a WebSocket connection for real-time chat using an HTTP GET request. A valid JWT token 
+        must be provided as a query parameter named `Bearertoken`. This request will upgrade to a 
+        WebSocket connection.
       parameters:
         - name: Bearertoken
           in: query
@@ -48,9 +50,173 @@ paths:
         "101":
           description: WebSocket connection established successfully (Switching Protocols).
         "403":
-          description: Unauthorized – Invalid or missing Bearer token.
+          description: Unauthorized – Invalid or missing Bearertoken.
         "400":
           description: Bad Request – Invalid WebSocket request.
+
+  # Additional REST endpoints
+
+  /chat/search_messages/:
+    get:
+      summary: Search Messages
+      description: >
+        Search for messages matching a given query string. The query parameter `q` is used to filter
+        messages based on their content.
+      parameters:
+        - name: q
+          in: query
+          required: true
+          description: The search query string.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: A JSON object containing search results.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        room_id:
+                          type: integer
+                          example: 1
+                        room_name:
+                          type: string
+                          example: "General Chat"
+                        messages:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              id:
+                                type: integer
+                                example: 101
+                              content:
+                                type: string
+                                example: "Hello there!"
+
+
+/profiles/rooms/{room_id}/leave/:
+  post:
+    summary: Leave a Chat Room
+    description: >
+      Allow an authenticated user to leave a chat room. The user must be a member of the chat room.
+      If the user is not a member, an error is returned.
+    parameters:
+      - name: room_id
+        in: path
+        required: true
+        description: The ID of the chat room the user wants to leave.
+        schema:
+          type: integer
+    security:
+      - bearerAuth: []
+    responses:
+      "200":
+        description: Successfully left the chat room.
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: true
+                message:
+                  type: string
+                  example: "You have left the chat room."
+      "400":
+        description: The user is not a member of the chat room.
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                error:
+                  type: string
+                  example: "You are not a member of this chat room."
+      "401":
+        description: Unauthorized – Authentication credentials were not provided or are invalid.
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                detail:
+                  type: string
+                  example: "Authentication credentials were not provided."
+
+# you can do this or store api keys securely in flutter, its much easier with api keys direct calls
+  /chat/cloudinary-signature/:
+    post:
+      summary: Get Cloudinary Signature
+      description: >
+        Retrieve a signature for uploading media to Cloudinary. The request must include the file name,
+        and the response provides the necessary signature, timestamp, API key, and cloud name.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                fileName:
+                  type: string
+                  example: "image.png"
+      responses:
+        "200":
+          description: Cloudinary signature generated successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  signature:
+                    type: string
+                    example: "abcdef1234567890"
+                  timestamp:
+                    type: string
+                    example: "1616161616"
+                  api_key:
+                    type: string
+                    example: "123456789012345"
+                  cloud_name:
+                    type: string
+                    example: "demo"
+
+  /chat/delete_media/{media_id}/:
+    delete:
+      summary: Delete Media from Cloudinary
+      description: >
+        Delete a media asset from Cloudinary. The media asset's public ID is provided as a path parameter.
+      parameters:
+        - name: media_id
+          in: path
+          required: true
+          description: The public ID of the media asset to delete.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Media deleted successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Media deleted successfully."
+        "404":
+          description: Media not found.
 
 components:
   schemas:
@@ -338,8 +504,9 @@ components:
 x-client-implementation:
   javascript:
     description: >
-      Example JavaScript code to connect to the WebSocket server and listen for messages.
-      This snippet demonstrates how to handle various action types received from the server.
+      Example JavaScript code to connect to the WebSocket server, listen for messages,
+      and handle various action types. Note that the HTTP GET request (with Bearertoken query parameter)
+      is used to establish the connection.
     code: |
       // Replace 'your_jwt_token' with your actual JWT token
       const token = "your_jwt_token";
@@ -403,9 +570,8 @@ x-client-implementation:
 
   flutter:
     description: >
-      Example Flutter code to connect to the WebSocket server and listen for messages using the
-      `web_socket_channel` package. This snippet demonstrates how to decode incoming JSON messages
-      and act upon different action types.
+      Example Flutter code to connect to the WebSocket server using the `web_socket_channel` package,
+      listen for incoming messages, decode JSON, and handle various action types.
     code: |
       import 'dart:convert';
       import 'package:flutter/material.dart';

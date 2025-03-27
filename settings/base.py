@@ -15,7 +15,6 @@ from datetime import timedelta
 SECRET = config('SECRET')
 CLIENT_ID = config('CLIENT_ID')
 
-# print()
 from django.core.management.utils import get_random_secret_key
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -245,8 +244,7 @@ REST_FRAMEWORK = {
 
 }
 
-print("BASE_DR")
-print(BASE_DIR)
+
 
 SPECTACULAR_SETTINGS = {
     'TITLE': 'My API',
@@ -287,6 +285,7 @@ CLOUDINARY_STORAGE = {
     'API_SECRET': config("API_SECRET")
 }
 
+
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
 CACHES = {
@@ -318,10 +317,8 @@ SIMPLE_JWT = {
 }
 
 ENVIRONMENT = config("ENVIRONMENT", "remote").lower()
-# print(ENVIRONMENT)
 REDIS_URL = config("REDIS_TLS_URL")
 
-print(REDIS_URL)
 
 # CHANNEL_LAYERS = {
 #     "default": {

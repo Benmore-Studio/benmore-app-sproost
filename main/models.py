@@ -17,6 +17,13 @@ class MediaTypes(models.TextChoices):
     IMAGE = "Image", _("Image")
     FILE = "File", _("File")
     VIDEO = "Video", _("Video")
+
+
+class MessageMediaTypes(models.TextChoices):
+    IMAGE = "image", _("Image")
+    FILE = "file", _("File")
+    VIDEO = "video", _("Video")
+
     
 class ImageCategories(models.TextChoices):
     BEFORE = "before", _("Before")
@@ -32,7 +39,6 @@ class ImageCategories(models.TextChoices):
    
     
 class Media(models.Model):
-    message = models.ForeignKey("chat.Message", related_name="media", on_delete=models.CASCADE)
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, related_name="media")
     object_id = models.PositiveIntegerField()
     content_object = GenericForeignKey()
@@ -48,4 +54,14 @@ class Media(models.Model):
     def __str__(self):
         return f"{self.content_object} - Media"
 
+
+class MessageMedia(models.Model):
+    message = models.ForeignKey("chat.Message", on_delete=models.CASCADE, related_name="messagemedia", db_index=True)
+    file_url = models.URLField(max_length=1024)
+    public_id = models.CharField(max_length=255)
+    media_type = models.CharField(max_length=20, choices=MessageMediaTypes.choices, default=MessageMediaTypes.IMAGE)
+    file_name = models.CharField(max_length=255, blank=True, null=True)
+    file_size = models.PositiveIntegerField(null=True, blank=True)
+    thumbnail_url = models.URLField(max_length=1024, blank=True, null=True)
+    upload_date = models.DateTimeField(auto_now_add=True, null=False)
 

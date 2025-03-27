@@ -5,6 +5,7 @@ from property.models import AssignedAccount
 from phonenumber_field.formfields import PhoneNumberField
 from phonenumber_field.serializerfields import PhoneNumberField
 from quotes.models import UserPoints
+from chat.models import ChatRoom
 
 
 
@@ -185,6 +186,11 @@ class CustomSignupSerializer(serializers.ModelSerializer):
         user.user_type = validated_data.get('user_type')
         user.phone_number = validated_data.get('phone_number')
         user.save()
+
+        admin = User.objects.get(is_superuser=True)
+        room = ChatRoom.objects.create(name=f"Chat with {admin.username} and {user.username}", creator=admin)
+        room.members.add(admin, user)
+        room.save()
 
         if user.user_type == "HO":
             UserProfile.objects.create(

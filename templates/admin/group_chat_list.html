@@ -1,0 +1,46 @@
+  <!-- Chats List (Scroll) -->
+  <div id="chatList" class="flex flex-col h-full" style="display: none;">             
+    <!-- Back Arrow -->
+    <div id="individual-group-parents" class="mb-3">
+      <div id="group-message-back-arrow" class="cursor-pointer ml-4 mb-4">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-3 text-black">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
+        </svg>                
+    </div>
+    
+    <div id="all-individual-groups" class="flex flex-col h-full"></div>
+  </div>
+  
+  <div id="message-body-parent" style="display: none;">
+    <div class="flex justify-between mr-2">
+        <!-- Back Arrow -->
+        <div id="back-arrow" class="cursor-pointer ml-4">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-3 text-black">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
+          </svg> 
+        </div>               
+        <div class="flex items-center gap-4">
+        <p id="delete-room" class="cursor-pointer text-red-500">Delete Room</p>                
+        <p id="leave-room" class="cursor-pointer text-red-500">Leave</p>                
+        {% if request.user.username == 'admin' %}
+          <p id="add-user" class="cursor-pointer text-blue-500">Add</p>     
+        {% endif %}
+        
+      </div>
+    </div>
+    <div id="roomTitle" class="mt-4 text-center"></div>
+
+    <div id="search-navigation"></div>
+    <!-- Chat List & Input (Inside a container to maintain order) -->
+    <div class="flex flex-col flex-1 h-full mt-4">               
+      <!-- loader modal -->
+      <div id="individual-chatroom-modal" class="flex justify-center items-center w-full h-full bg-transparent bg-opacity-50">        
+        <span class="loader block"></span>
+      </div>
+      <!-- Chat Messages -->
+      <div id="individual-chatList-body" class="flex-1 overflow-y-auto h-full" style="position: relative; display: none;">     
+        <div id="message-body" class="overflow-y-auto h-full"></div>
+      </div>
+    </div>
+  </div>
+  </div>

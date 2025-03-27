@@ -3,6 +3,9 @@ from profiles.models import AgentProfile
 from .models import Media
 from django.contrib.contenttypes.models import ContentType
 
+import cloudinary.uploader
+from .models import MessageMedia
+
 
 class AgentAssignmentSerializer(serializers.Serializer):
     """
@@ -181,8 +184,7 @@ class BulkMediaSerializer(serializers.Serializer):
 
     def create(self, validated_data):
         from django.contrib.contenttypes.models import ContentType
-        from main.models import Media  # Adjust your import as needed
-
+        from main.models import Media 
         content_type_id = validated_data["content_type_id"]
         object_id = validated_data["object_id"]
 
@@ -219,3 +221,39 @@ class BulkMediaSerializer(serializers.Serializer):
         return new_media_objects   
     
     
+
+def upload_to_cloudinary(file):
+    result = cloudinary.uploader.upload(file)
+    return {
+        "url": result["secure_url"],
+        "public_id": result["public_id"],
+        "media_type": result["resource_type"]
+    }
+
+
+
+
+
+
+
+class MessageMediaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MessageMedia
+        fields = ["file_url", "public_id", "media_type"]
+
+    def validate(self, attrs):
+        if not attrs.get("media_type") or not attrs.get("file_url"):
+            raise serializers.ValidationError("Both `media_type` and `file_url` are required.")
+
+        if "cloudinary.com" not in attrs["file_url"]:
+            raise serializers.ValidationError("Only Cloudinary URLs are supported.")
+
+        return attrs
+
+    def create(self, validated_data):
+        message = self.context.get("message")
+        if not message:
+            raise serializers.ValidationError("Message instance is required.")
+        return MessageMedia.objects.create(message=message, **validated_data)
+
+
