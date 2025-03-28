@@ -395,16 +395,9 @@
       <!-- Message area -->        
       <div class="h-full">
 
-
-        
-    <div class="border-box-elegant">
-      <h2>Elegant Border</h2>
-      <p>A clean, professional design with a subtle hover effect and shadow.</p>
-  </div>
-
   <!-- Left Sidebar (Chats List) -->
   <div class="w-full h-full bg-white border-r border-gray-300">
-  <div class="h-full">
+  <div class="">
     <!-- Search Bar -->
     <div class="p-4 border-b border-gray-300 relative">
       <input 
@@ -424,7 +417,13 @@
 
 
     <!-- main body -->
-  <div id="main-body" class="flex flex-col">   
+  <div id="main-body" class="flex flex-col"> 
+    <div id="chat-online-back-arrow" class="my-3 cursor-pointer ml-3" style="display: none;">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-3 text-black">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
+      </svg>
+      
+    </div>  
     <div id="menu-switch-tab" class="flex justify-between mx-3 mb-4 mt-2">
       <p id="online-tab" class="cursor-pointer text-black">Online</p>
       <p id="chat-tab" class="cursor-pointer text-black" style="text-decoration: underline;">Chats</p>
@@ -436,14 +435,14 @@
         <div id="broadcast-all-agent" class="w-full text-black hover:bg-gray-100 p-3 cursor-pointer border-b border-gray-200">Broadcast message to Agents</div>
         <div id="broadcast-all-ho" class="w-full text-black hover:bg-gray-100 p-3 cursor-pointer border-b border-gray-200">Broadcast message to Home Owners</div>
       </div>
-      <div id="onlineStatusList" class="online-status-container w-full" style="display: none;"></div>
+      <div id="onlineStatusList" class="online-status-container w-full gap-4" style="display: none;"></div>
     </div>
   </div>
 
   <div id="personal-message-page" class="" style="display: none;">
   {% include './personal_message_page.html' %}  
   </div>
-  <div id="group-message-page" class="h-full" style="display: none;">
+  <div id="group-message-page" class="" style="display: none;">
   {% include './group_chat_list.html' %}  
   </div>
   <div id="broadcast-all-agent-page" class="" style="display: none;">

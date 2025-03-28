@@ -9,6 +9,7 @@
   const ChatList = document.getElementById("chatList");
   const individualChatListBody = document.getElementById("individual-chatList-body");
   const backArrow = document.getElementById("back-arrow");
+  const personalMessageBackArrow  = document.getElementById("personal-back-arrow")
   const addUserToGroup = document.getElementById("add-user");
   const adminleaveRoomButton = document.getElementById("leave-room");
   const adminDeleteRoomButton = document.getElementById("delete-room");
@@ -30,15 +31,24 @@
   let groupChat = document.getElementById("group-chat")
   let grouindividualGroupParentsChat = document.getElementById("individual-group-parents")
   let messageBodyParent = document.getElementById("message-body-parent")
-  backArrow.style.marginTop = '8px'
+  let personalMessageBodyParent = document.getElementById("personal-message-body-parent")
+  let groupMessageBackArrow = document.getElementById("group-message-back-arrow")
+
+  if(backArrow){
+    backArrow.style.marginTop = '8px'
+
+  }
+  // to store room roomDetails, especially id
   const roomDetails = {}
   let replyMessageId;
+  let user_room_types;
   let globalSearchId;
   let globalRoomName;
   let adminAddUserRoomTitle;
   let roomMembers;
   let sender ;
   let dontUpdateMessageNumber = false;
+  let dontUpdatePrivateMessageNumber = false;
   let messageCount = 0
   let globalMessageheight = false
   let prependMode = false;
@@ -50,8 +60,11 @@
 
 
   groupChat.addEventListener("click", ()=>{
+    console.log("all-individual-groups");
     document.getElementById("group-message-page").style.display = "block"
     mainBody.style.display = "none"
+    grouindividualGroupParentsChat.style.display = "block"
+    personalMessageBodyParent.style.display = "block"
   })
 
 
@@ -76,7 +89,7 @@
   let currentPage = 1;
   let isLoading = false;
 
-  document.getElementById("group-message-back-arrow").addEventListener("click", function(){
+  groupMessageBackArrow.addEventListener("click", function(){
     grouindividualGroupParentsChat.style.display = 'none'
     mainBody.style.display = 'block'
 
@@ -97,9 +110,7 @@
 
 
   function openChatRoom(roomId, messages, type, roomName, searchId) {
-    
-    messageBodyParent.style.display = "block"
-    document.getElementById("individual-group-parents").style.display = "none"
+    console.log("typppqwe", type, roomName);
     if(type == "search"){
       document.getElementById("message-search-results").style.display = "none"
 
@@ -120,13 +131,23 @@
     searchNavigation.appendChild(nextSearchResult)
     searchNavigation.appendChild(previousSearchResult)                 
     }     
-    dontUpdateMessageNumber = true
-    console.log("opened", "chat");
-    const messageNumberElement  = document.querySelector(`#messageNumber-${roomId}`);
-    messageNumberElement.innerHTML = ''
-    messageNumberElement.style.opacity = 0
 
+    if(type === "private"){
+      dontUpdatePrivateMessageNumber = true
+      mainBody.style.display = "none"
+      personalMessageBodyParent.style.cssText = "display:flex; flex-direction:column;"
+    }
+    console.log("opened", "chat");
+    if(type == "message"){
+      dontUpdateMessageNumber = true
+      messageBodyParent.style.display = "block"
+      grouindividualGroupParentsChat.style.display = "none"
+      const messageNumberElement  = document.querySelector(`#messageNumber-${roomId}`);
+      messageNumberElement.innerHTML = ''
+      messageNumberElement.style.opacity = 0
       console.log("messageNumberElement",messageNumberElement);
+
+    }
     currentRoomId = roomId;
     currentPage = 1;
     document.getElementById('message-body').innerHTML = ''
@@ -572,10 +593,10 @@ function previousSearchResult(roomId) {
           <p>${data.reply_to_content}</p>
           </div>
         </div> `
-        messageBody.appendChild(replyMsgDiv)
-        messageBody.appendChild(mainMessageContent)
+          messageBody.appendChild(replyMsgDiv)
+          messageBody.appendChild(mainMessageContent)      
       }else{
-        messageBody.appendChild(mainMessageContent);
+          messageBody.appendChild(mainMessageContent);
       }
       
 
@@ -598,8 +619,14 @@ function previousSearchResult(roomId) {
       iconUsernameAndDate.appendChild(icon)
       msgDiv.prepend(iconUsernameAndDate)
       msgDiv.append(messageBody)
-      chatMessages.appendChild(msgDiv);
-      chatMessages.scrollTop = chatMessages.scrollHeight;
+      if(data.room_type === "group_chat"){
+        chatMessages.appendChild(msgDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      }
+      else if(data.room_type === "private"){
+        personalMessageBodyParent.appendChild(msgDiv);
+        personalMessageBodyParent.scrollTop = chatMessages.scrollHeight;
+      }
     }
     
     // else if (data.action === "message_list") {
@@ -678,6 +705,7 @@ function previousSearchResult(roomId) {
             chatMessages.scrollTop = chatMessages.scrollHeight;
         }, 100);
           document.getElementById("individual-chatroom-modal").style.display ="none"
+          document.getElementById("personal-chatroom-modal").style.display ="none"
           document.getElementById("message-body").style.width ="100%"
           individualChatListBody.style.display ="flex"
         } 
@@ -723,7 +751,7 @@ function previousSearchResult(roomId) {
       // messageElement.parentElement.parentElement.parentElement.parentElement.children[1].className ="text-red-500 justify-self-start"
     }
     else if(data.action === "user_status"){
-      renderOnlineStatus(data.user_id,  data.status, data.username)
+      renderOnlineStatus(data.user_id,  data.status, data.username, data.room_id, data.room_name)
     }
 };
 
@@ -752,8 +780,8 @@ function findRepliedMessage(messageId) {
     console.error("WebSocket encountered an error:", e);
   };
 
-  chatSocket.onclose = () => {
-    console.log("WebSocket connection closed");
+  chatSocket.onclose = (error) => {
+    console.log("WebSocket connection closed", error);
   };
 
 
@@ -978,7 +1006,7 @@ async function uploadMedia(file, formData, numKey, data) {
 
 
 
-function sendMessage(roomTitle) {
+function sendMessage() {
   const input = document.getElementById('message');
   const message = input.value.trim();
 
@@ -992,7 +1020,8 @@ function sendMessage(roomTitle) {
       action: "send",
       room_id: roomDetails[globalRoomName],
       message: message,
-      receiver: roomMembers 
+      receiver: roomMembers,
+      room_type:user_room_types 
     };
 
     // If replying, attach the reply message ID
@@ -1005,7 +1034,7 @@ function sendMessage(roomTitle) {
       payload.media = uploadedMedia;
     }
 
-    console.log("payload", payload);
+    console.log("payload", payload, user_room_types);
     chatSocket.send(JSON.stringify(payload));
 
     // Hide the suggestion div for mentions (if present)
@@ -1198,12 +1227,12 @@ function updateChatList(id, message, timestamp, sender) {
 document.getElementById("message").addEventListener("keydown", function(event) {
   if (event.key === "Enter") {
     event.preventDefault(); 
-    sendMessage(roomTitle); 
+    sendMessage(); 
   }
 });
 
   document.getElementById("chat-message-submit").addEventListener('click', function(){
-    sendMessage(roomTitle)
+    sendMessage()
   })
 
   function openOptions(e){
@@ -1479,6 +1508,7 @@ messageBody.addEventListener("scroll", (event) => {
   }
 });
 
+
   
   // update the ui of the chts
   function updateChatRooms(rooms) {
@@ -1506,6 +1536,7 @@ messageBody.addEventListener("scroll", (event) => {
             const openChatType = "message";
 
             roomDiv.addEventListener("click", function () {openChatRoom(room.id, messages,  openChatType, room.name, searchId);});
+            user_room_types = "group_chat"
             roomDetails[room.name] =  room.id
 
             allIndividualGroups.prepend(roomDiv);
@@ -1528,6 +1559,7 @@ messageBody.addEventListener("scroll", (event) => {
             const messages="empty";
             const openChatType = "message";
             roomDiv.addEventListener("click", function () {openChatRoom(room.id,messages,  openChatType, room.name, searchId);});
+            user_room_types = "group_chat"
             roomDetails[room.name] =  room.id
 
             newMessageNumber.className = 'w-[20px] h-[20px] bg-red-600 text-white opacity-0 rounded-full flex justify-center items-center'
@@ -1950,25 +1982,39 @@ messageBody.addEventListener("scroll", (event) => {
 
 // peronal chat region
 let personalMessagePage = document.getElementById("personal-message-page")
-let personalChatlist = document.getElementById("personal-chatList")
-let PersonalMainBody = document.getElementById("main-body")
 let mainMenu = document.getElementById('main-menu')
 let onlineStatusBar = document.getElementById('online-bar-status')
 let onlineTab = document.getElementById('online-tab')
 let chatTab = document.getElementById('chat-tab')
 let menuparent = document.getElementById('menuparent')
+let chatOnlineBackArrow = document.getElementById('chat-online-back-arrow')
 const onlineStatusContainer = document.getElementById('onlineStatusList');
 const broadcastToAllAgents = document.getElementById('broadcast-all-agent');
 const broadcastToAllHO = document.getElementById('broadcast-all-ho');
 
 
 
+// chatOnlineBackArrow
+chatOnlineBackArrow.addEventListener("click", ()=>{
+  menuparent.style.display = "block"
+  if(onlineStatusContainer.style.display = "block"){
+    onlineStatusContainer.style.display = "none"
+
+  }
+  chatOnlineBackArrow.style.display = "none"
+  onlineTab.style.textDecoration = "none"
+  chatTab.style.textDecoration = "underline"
+
+})
+
 // open onlone chat
 onlineTab.addEventListener("click", ()=>{
+  console.log("mannny");
+  chatOnlineBackArrow.style.display = "block"
   onlineTab.style.textDecoration = "underline"
   chatTab.style.textDecoration = "none"
   menuparent.style.display = "none"
-  onlineStatusContainer.style.display = "block"
+  onlineStatusContainer.style.cssText = "display:flex; flex-direction:column;"
 })
 
 chatTab.addEventListener("click", ()=>{
@@ -1982,37 +2028,43 @@ chatTab.addEventListener("click", ()=>{
 // open personal chat
 broadcastToAllAgents.addEventListener("click", ()=>{
   personalMessagePage.style.display = "block"
-  personalChatlist.style.display = "flex"
-  PersonalMainBody.style.display = "none"
+  personalMessageBodyParent.style.display = "none"
 })
 broadcastToAllHO.addEventListener("click", ()=>{
   personalMessagePage.style.display = "block"
-  personalChatlist.style.display = "flex"
-  PersonalMainBody.style.display = "none"
+  personalMessageBodyParent.style.display = "none"
 })
 document.getElementById("personal-chat").addEventListener("click", ()=>{
+  console.log("personal-message-page");
+  menuparent.style.display = "none"
   personalMessagePage.style.display = "block"
-  personalChatlist.style.display = "flex"
-  PersonalMainBody.style.display = "none"
+  personalMessageBodyParent.style.display = "block"
 })
 
 // go back to menu page
-document.getElementById("personal-message-back-arrow").addEventListener("click", ()=>{
-  personalMessagePage.style.display = "none"
-  personalChatlist.style.display = "none"
-  mainBody.style.display = "block"
-})
+
+if(personalMessageBackArrow){
+  personalMessageBackArrow.addEventListener("click", ()=>{
+    onlineStatusContainer.style.display = "none"
+    personalMessagePage.style.display = "none"
+    menuparent.style.display = "block"
+    mainBody.style.display = "block"
+  })
+
+}
 
        
 // function to show online or offline
-function renderOnlineStatus(user, online_status, username) {
+function renderOnlineStatus(user, online_status, username, status_id, room_name) {
   // if(userId === username){
   //   let noUser = document.createElement("p")
   //   noUser.setAttribute("id", "noUser")
   //   container
   //   return
   // }
-  console.log(username,"poppoo",userId);
+
+  // if(userId === username){return}
+  console.log(username,"poppoo", userId);
     if(online_status === "offline"){
       let onlineStatusChild = document.getElementById(user)
       console.log("status", onlineStatusChild, user);
@@ -2021,17 +2073,24 @@ function renderOnlineStatus(user, online_status, username) {
       }
       return
     }
-    // container.innerHTML = '';
     const statusItem = document.createElement('div');
     statusItem.classList.add('online-status-item');
-    console.log("later", user);
     statusItem.setAttribute("id", user);
-    let type = "message"
-    let roomName = null
+    statusItem.setAttribute("data-online-id", status_id);
+    roomDetails[room_name] = status_id
+    console.log("later", roomDetails);
+    
+    let type = "private"
+    let messages = null
     let searchId = null
-    statusItem.addEventListener("click", ()=>{
-      openChatRoom()
+    statusItem.addEventListener("click", (e)=>{
+      console.log("dey", e);
+      menuparent.style.display = "none"
+      personalMessagePage.style.display = "block"
+      personalMessageBodyParent.style.display = "block"
+      openChatRoom(status_id, messages, type, room_name,searchId)
     })
+    user_room_types = "private"
 
     const emailSpan = document.createElement('span');
     emailSpan.textContent = user;

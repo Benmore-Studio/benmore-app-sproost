@@ -225,6 +225,7 @@ components:
       required:
         - action
         - room_id
+        - message
       properties:
         jsExample: |
           chatSocket.send(JSON.stringify({

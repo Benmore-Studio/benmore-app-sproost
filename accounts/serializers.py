@@ -187,10 +187,13 @@ class CustomSignupSerializer(serializers.ModelSerializer):
         user.phone_number = validated_data.get('phone_number')
         user.save()
 
-        admin = User.objects.get(is_superuser=True)
-        room = ChatRoom.objects.create(name=f"Chat with {admin.username} and {user.username}", creator=admin)
-        room.members.add(admin, user)
-        room.save()
+        admin = User.objects.filter(is_superuser=True).first()
+        if admin:
+            room = ChatRoom.objects.create(name=f"Chat with {admin.username} and {user.username}", creator=admin)
+            room.members.add(admin, user)
+            room.save()
+        else:
+            pass
 
         if user.user_type == "HO":
             UserProfile.objects.create(

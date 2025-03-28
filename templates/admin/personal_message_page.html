@@ -1,18 +1,6 @@
   <!-- Chats List (Scroll) -->
-  <div id="personal-chatList" class="flex flex-col h-full w-full" style="display: none;">             
-    <!-- Back Arrow -->
-    <div id="personal-group-parents" class="mb-3">
-      <div id="personal-message-back-arrow" class="cursor-pointer ml-4 mb-4">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-3 text-black">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
-        </svg>                
-    </div>
-    
-    <div id="personal-individual-messages" class="flex flex-col h-full"></div>
-  </div>
-
   <div id="personal-message-body-parent" style="display: none;">
-    <div class="flex justify-between mr-2">
+    <div class="flex justify-between mr-2 mt-3">
         <!-- Back Arrow -->
         <div id="personal-back-arrow" class="cursor-pointer ml-4">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-3 text-black">
@@ -23,17 +11,16 @@
         <p id="personal-delete-chat" class="cursor-pointer text-red-500">Delete Chat</p>                     
       </div>
     </div>
-    <div id="personal-roomTitle" class="mt-4 text-center"></div>
 
     <div id="personal-search-navigation"></div>
     <!-- Chat List & Input (Inside a container to maintain order) -->
     <div class="flex flex-col flex-1 h-full mt-4">               
       <!-- loader modal -->
       <div id="personal-chatroom-modal" class="flex justify-center items-center w-full h-full bg-transparent bg-opacity-50">        
-        <span class="loader block"></span>
+        <span class="loader block hidden"></span>
       </div>
       <!-- Chat Messages -->
-      <div id="personal-chatList-body" class="flex-1 overflow-y-auto h-full" style="position: relative; display: none;">     
+      <div id="personal-chatList-body" class="flex-1 overflow-y-auto h-full" style="position: relative">     
         <div id="personal-message-body" class="overflow-y-auto h-full"></div>
       </div>
     </div>

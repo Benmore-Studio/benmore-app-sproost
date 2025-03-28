@@ -11,6 +11,7 @@ ROOM_TYPE_CHOICES = (
         ("group", "Group"),      
     )
 
+
 class ChatRoom(models.Model):
     name = models.CharField(max_length=100, unique=True, db_index=True)
     creator = models.ForeignKey(User, related_name='created_rooms', on_delete=models.CASCADE)

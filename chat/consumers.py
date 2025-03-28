@@ -589,6 +589,7 @@ class MultiplexChatConsumer(AsyncWebsocketConsumer):
         # Join ALL chat rooms, including new ones
         missed_messages = []
         user_rooms = await self.get_user_rooms_with_last_message(user)
+        personal_user_room_id = await self.get_personal_user_rooms_id(user)
         for room in user_rooms:
             group_name = f"chat_{room['id']}"
             # Send missed messages count**
@@ -602,7 +603,7 @@ class MultiplexChatConsumer(AsyncWebsocketConsumer):
 
         print(f"Missed Messages Count: {missed_messages}")
 
-        print("user_rooms",user_rooms)
+        # print("user_rooms",user_rooms, personal_user_room_id)
 
         # Also subscribe to a global notification group**
         await self.channel_layer.group_add("global_notifications", self.channel_name)
@@ -617,6 +618,8 @@ class MultiplexChatConsumer(AsyncWebsocketConsumer):
             "rooms": user_rooms
         }))
 
+        print("room2")
+
          
 
         # Notify user of missed messages count
@@ -626,27 +629,40 @@ class MultiplexChatConsumer(AsyncWebsocketConsumer):
         }))
 
 
-        await self.channel_layer.group_send(
-        "admin_presence",
-        {
-            "type": "user_status",
-            "user_id": self.user.email,
-            "username": self.user.username,
-            "status": "online"
-        }
-    )
+        print("room4")
+
+        if personal_user_room_id:
+            await self.channel_layer.group_send(
+                "admin_presence",
+                {
+                    "type": "user_status",
+                    "user_id": self.user.email,
+                    "username": self.user.username,
+                    "room_id": personal_user_room_id["room_id"],
+                    "room_name": personal_user_room_id["room_name"],
+                    "status": "online"
+                }
+            )
+
+        print("room5")
 
         # Only admins should receive and see online/offline notifications
     
+
     async def user_status(self, event):
-        print("jump", event["username"])
+        print("status",event)
         if self.user.is_superuser:
             await self.send(json.dumps({
                 "action": "user_status",
                 "user_id": event["user_id"],
                 "username": event["username"],
+                "room_name": event["room_name"],
+                "room_id": event["room_id"],
                 "status": event["status"]
             }))
+
+
+        print("room6")
 
 
     async def disconnect(self, close_code):
@@ -671,6 +687,9 @@ class MultiplexChatConsumer(AsyncWebsocketConsumer):
                 {
                     "type": "user_status",
                     "user_id": self.user.email,
+                    "username": self.user.username,
+                    "room_id": None,
+                    "room_name": "",
                     "status": "offline"
                 }
             )
@@ -688,6 +707,7 @@ class MultiplexChatConsumer(AsyncWebsocketConsumer):
 
         try:
             data = json.loads(text_data)
+            print("receive", data)
             action = data.get("action")
             user = self.scope.get("user", AnonymousUser())
 
@@ -707,6 +727,7 @@ class MultiplexChatConsumer(AsyncWebsocketConsumer):
                 await self.load_messages(data)
 
             elif action == "send":
+                print("scope", user)
                 await self.send_message(data, user)
                 
             else:
@@ -828,6 +849,9 @@ class MultiplexChatConsumer(AsyncWebsocketConsumer):
          # Fetch room members
         members = await self.get_room_members(room_id)
 
+        user_type = self.user.user_type
+        print("gpt",self.user, user_type)
+
         await self.send(json.dumps({
             "action": "message_list",
             "room_id": room_id,
@@ -850,6 +874,7 @@ class MultiplexChatConsumer(AsyncWebsocketConsumer):
 
         # Extract message details
         room_id = data.get("room_id")
+        room_type = data.get("room_type")
         message_text = data.get("message", "").strip()  # Ensures no empty messages
         media_list = data.get("media", [])
         broadcast_to = data.get("broadcast_to")  # List of user type codes ['HO', 'CO']
@@ -909,9 +934,8 @@ class MultiplexChatConsumer(AsyncWebsocketConsumer):
         if reply_to_msg:
             sender_username = await sync_to_async(lambda: reply_to_msg.sender.username)()
         print("")
-        print(message, "", message.id )
-        print("babe", message_dict)
-        print(reply_to_id, reply_to_msg)
+        print(message, "tobe", message.id )
+        print("idiot", user)
             
         # Save media files
         saved_media = []
@@ -923,6 +947,8 @@ class MultiplexChatConsumer(AsyncWebsocketConsumer):
             saved_media.append(saved)
 
 
+        print("my beloveth")
+
         # Broadcast message to the chat room
         group_name = f"chat_{room_id}"
         await self.channel_layer.group_send(
@@ -930,7 +956,9 @@ class MultiplexChatConsumer(AsyncWebsocketConsumer):
             {
                 "type": "chat_message",
                 "room_id": room_id,
+                "room_type":room_type,
                 "username": user.username,
+                "user_type":user.user_type,
                 "sender": user.username,
                 "message": message_text,
                 "media": media_list,
@@ -942,6 +970,9 @@ class MultiplexChatConsumer(AsyncWebsocketConsumer):
                 
             }
         )
+
+        print("my helper")
+
 
         # Notify all users in the chat room about missed messages
         # await self.notify_missed_messages(room_id)
@@ -999,8 +1030,10 @@ class MultiplexChatConsumer(AsyncWebsocketConsumer):
             "action": "message",
             "room": event.get("room_id"),
             "username": event.get("username"),
+            "user_type": event.get("user_type"),
             "sender": event.get("sender"),
             "message": event.get("message"),
+            "room_type":event.get("room_type"),
             'media': event.get("media"),
             "timestamp": event.get("timestamp"),
             "reply_to_id": event.get("reply_to_id"),
@@ -1180,8 +1213,6 @@ class MultiplexChatConsumer(AsyncWebsocketConsumer):
             return []
 
 
-
-
     @database_sync_to_async
     def update_last_read(self, room_id, user, newest_timestamp_str):
         """
@@ -1215,10 +1246,8 @@ class MultiplexChatConsumer(AsyncWebsocketConsumer):
     def jwt_get_user(self, token):
         """Validate JWT token and retrieve the user"""
         try:
-            print(f"🔑 Authenticating token: {token}")
             decoded_token = AccessToken(token)  # Validate JWT
             user = User.objects.get(id=decoded_token["user_id"])
-            print(f"✅ Authenticated user: {user.username}")
             return user
         except Exception as e:
             print(f"❌ JWT Authentication failed: {e}")
@@ -1265,6 +1294,37 @@ class MultiplexChatConsumer(AsyncWebsocketConsumer):
 
 
     @database_sync_to_async
+    def get_personal_user_rooms_id(self, user):
+        """
+        Get or create a private 1-on-1 chat room between the user and the admin.
+        """
+        print(user.is_superuser==True)
+        if not user or user.is_superuser==True:
+            print("not user")
+            return None
+
+        admin = User.objects.filter(is_superuser=True).first()
+        if not admin:
+            print("⚠️ No admin found. Skipping 1-on-1 room creation.")
+            return None
+
+        room_name = f"private_{user.id}_{admin.id}"
+        room, created = ChatRoom.objects.get_or_create(
+            name=room_name,
+            defaults={
+                "creator": user,
+                "room_type": "private"
+            }
+        )
+
+        # Ensure both admin and user are members
+        if created or not room.members.filter(id=user.id).exists():
+            room.members.add(user, admin)
+
+        return {"room_id":room.id, "room_name":room.name}
+
+    
+    @database_sync_to_async
     def get_user_rooms_with_last_message(self, user, page=1, page_size=10):
         """
         Fetch paginated chat rooms (group, private, broadcast) the user is in,
@@ -1272,7 +1332,7 @@ class MultiplexChatConsumer(AsyncWebsocketConsumer):
         """
         offset = (page - 1) * page_size
 
-        rooms = ChatRoom.objects.filter(members=user).prefetch_related("messages").prefetch_related("messages", "members").order_by("-created_at")[offset:offset + page_size]
+        rooms = ChatRoom.objects.filter(members=user, room_type="group").prefetch_related("messages").prefetch_related("messages", "members").order_by("-created_at")[offset:offset + page_size]
 
         result = []
         for room in rooms:
@@ -1409,54 +1469,54 @@ class MultiplexChatConsumer(AsyncWebsocketConsumer):
         #         message.read_by.add(user)  # Mark as read
 
 
-        @database_sync_to_async
-        def mark_messages_as_read(self, room_id, user):
-            room = ChatRoom.objects.get(id=room_id)
-            unread_messages = room.messages.exclude(read_by=user).only('id')
-
-            through_model = Message.read_by.through
-            new_links = [
-                through_model(message_id=msg.id, user_id=user.id)
-                for msg in unread_messages
-            ]
-
-            # Bulk create, ignore if already exists (you may need to handle DB constraints)
-            through_model.objects.bulk_create(new_links, ignore_conflicts=True)
-
-
     @database_sync_to_async
-    def get_each_room_type_with_last_message(self, user, room_type=None):
-        """
-        Fetch rooms for a user with optional room_type filtering.
-        """
-        query = ChatRoom.objects.filter(members=user)
-        if room_type:
-            query = query.filter(room_type=room_type)
+    def mark_messages_as_read(self, room_id, user):
+        room = ChatRoom.objects.get(id=room_id)
+        unread_messages = room.messages.exclude(read_by=user).only('id')
 
-        rooms = query.prefetch_related("messages", "members")
+        through_model = Message.read_by.through
+        new_links = [
+            through_model(message_id=msg.id, user_id=user.id)
+            for msg in unread_messages
+        ]
 
-        result = []
-        for room in rooms:
-            last_message = room.messages.order_by("-timestamp").first()
+        # Bulk create, ignore if already exists (you may need to handle DB constraints)
+        through_model.objects.bulk_create(new_links, ignore_conflicts=True)
 
-            # Determine room display name
-            if room.room_type == "private":
-                other_member = room.members.exclude(id=user.id).first()
-                room_name = f"Chat with {other_member.username}" if other_member else "Private Chat"
-            elif room.room_type == "broadcast":
-                room_name = f"Broadcast to {room.name.split('_')[-1]}"
-            else:
-                room_name = room.name
 
-            result.append({
-                "id": room.id,
-                "name": room_name,
-                "room_type": room.room_type,
-                "last_message": last_message.content if last_message else "No messages yet",
-                "last_message_time": last_message.timestamp.strftime("%Y-%m-%d %H:%M:%S") if last_message else "",
-            })
+    # @database_sync_to_async
+    # def get_each_room_type_with_last_message(self, user, room_type=None):
+    #     """
+    #     Fetch rooms for a user with optional room_type filtering.
+    #     """
+    #     query = ChatRoom.objects.filter(members=user)
+    #     if room_type:
+    #         query = query.filter(room_type=room_type)
 
-        return result
+    #     rooms = query.prefetch_related("messages", "members")
+
+    #     result = []
+    #     for room in rooms:
+    #         last_message = room.messages.order_by("-timestamp").first()
+
+    #         # Determine room display name
+    #         if room.room_type == "private":
+    #             other_member = room.members.exclude(id=user.id).first()
+    #             room_name = f"Chat with {other_member.username}" if other_member else "Private Chat"
+    #         elif room.room_type == "broadcast":
+    #             room_name = f"Broadcast to {room.name.split('_')[-1]}"
+    #         else:
+    #             room_name = room.name
+
+    #         result.append({
+    #             "id": room.id,
+    #             "name": room_name,
+    #             "room_type": room.room_type,
+    #             "last_message": last_message.content if last_message else "No messages yet",
+    #             "last_message_time": last_message.timestamp.strftime("%Y-%m-%d %H:%M:%S") if last_message else "",
+    #         })
+
+    #     return result
 
 
 
