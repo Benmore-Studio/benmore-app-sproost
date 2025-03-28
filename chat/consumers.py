@@ -857,6 +857,7 @@ class MultiplexChatConsumer(AsyncWebsocketConsumer):
             "room_id": room_id,
             "messages": messages,
             "members": members,
+            
         }))
 
 
@@ -1372,6 +1373,8 @@ class MultiplexChatConsumer(AsyncWebsocketConsumer):
             result.append({
                 "id": msg.id,
                 "username": msg.sender.username,
+                # "receiver_user_type": msg.receiver.user_type,
+                "user_type": msg.sender.user_type,
                 "message": msg.content,
                 "timestamp": msg.timestamp.strftime("%Y-%m-%d %H:%M:%S"),
                 "deleted": msg.deleted,
@@ -1381,6 +1384,8 @@ class MultiplexChatConsumer(AsyncWebsocketConsumer):
             })
         # return [{"username": msg.sender.username, "id":msg.id, "deleted":msg.deleted, "message": msg.content,  "media": media_list, "reply_to":str(msg.reply_to),"reply_to_num":msg.reply_to_num, "timestamp": msg.timestamp.strftime("%Y-%m-%d %H:%M:%S")} for msg in messages]
         return result
+
+
 
     @database_sync_to_async
     def save_message(self, room_id, user, text, reply_to_num=None, reply_to_msg=None):

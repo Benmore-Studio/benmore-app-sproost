@@ -673,7 +673,6 @@ function previousSearchResult(roomId) {
     else if (data.action === "message_list") {
       const chatMessages = document.getElementById('message-body');
         const scrollFromBottom = chatMessages.scrollHeight - chatMessages.scrollTop;
-
   
         if (globalMessageScroll === 0 && data.messages.length < 1){
           return
