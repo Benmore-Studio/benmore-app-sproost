@@ -1,3 +1,4 @@
+import uuid
 from django.db import models
 from accounts.models import User
 from address.models import AddressField
@@ -31,12 +32,13 @@ class UserProfile(models.Model):
 
 class AgentProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name = 'agent_profile')
-    agent_invited_home_owners = models.ForeignKey(User, on_delete=models.CASCADE, related_name = 'invited_home_owners')
-    agent_associated_contarctors = models.ForeignKey(User, on_delete=models.CASCADE, related_name = 'agent_associated_contarctors')
-    agent_address = models.CharField(max_length = 50, default='Nigeria')
-    registration_ID = models.CharField(max_length = 225, default='12345678', unique=True, verbose_name="license number", help_text='Also known as licences_ID')
+    agent_invited_home_owners = models.ForeignKey(User, on_delete=models.SET_NULL, related_name = 'invited_home_owners', null=True, blank=True)
+    agent_associated_contarctors = models.ForeignKey(User, on_delete=models.SET_NULL, related_name = 'agent_associated_contarctors', null=True, blank=True)
+    agent_address = models.CharField(max_length = 50)
+    registration_ID = models.CharField(max_length = 225, unique=True, verbose_name="license number", help_text='Also known as licences_ID')
     image = models.ImageField(upload_to=image_upload_location_agent, null=True)
-    country= models.CharField(max_length=500, default='Nigeria')
+    country= models.CharField(max_length=500)
+
     
     def __str__(self):
         return self.user.email
@@ -44,12 +46,12 @@ class AgentProfile(models.Model):
 
 class ContractorProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name = 'contractor_profile')
-    company_name = models.CharField(max_length = 255, default='belize')
-    specialization = models.CharField(max_length = 225, default='coding')
-    company_address = models.CharField(max_length = 50, default='Nigeria')
-    insurance_number = models.CharField(max_length=255, default='12345678')
-    license_number= models.CharField(max_length=225, default='12345678')
-    country= models.CharField(max_length=225, default='Nigeria')
+    company_name = models.CharField(max_length = 255)
+    specialization = models.CharField(max_length = 225)
+    company_address = models.CharField(max_length = 50)
+    insurance_number = models.CharField(max_length=25)
+    license_number= models.CharField(max_length=225 )
+    country= models.CharField(max_length=225)
     bio= models.CharField(max_length=500, null = True, blank = True)
     tags= models.CharField(max_length=500, null = True, blank = True)
     website = models.URLField(max_length=255, null=True)
@@ -76,50 +78,18 @@ class InvestorProfile(models.Model):
         return self.user.email
     
     
+    
+class Invitation(models.Model):
+    inviter = models.ForeignKey(User, on_delete=models.CASCADE, related_name='invitations') # for agents to agents
+    email = models.EmailField()
+    referral_code = models.CharField(max_length=50, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    accepted = models.BooleanField(default=False)
 
-class Referral(models.Model):
-    """Represents a referral made by a user.
+    def save(self, *args, **kwargs):
+        # Generate a referral code if not provided
+        if not self.referral_code:
+            self.referral_code = str(uuid.uuid4()).replace('-', '')[:10]
+        super().save(*args, **kwargs)
 
-    Attributes:
-        referrer (User): The user who made the referral.
-        referred (User): The users who have been referred.
-        code (str): The referral code.
-    """
-    referrer = models.OneToOneField(
-        User,
-        on_delete=models.CASCADE,
-        related_name='referrer',
-        help_text=_('The user who made the referral.')
-    )
-    referred = models.ManyToManyField(
-        User,
-        related_name='referred',
-        help_text=_('The users who have been referred.')
-    )
-    code = models.CharField(
-        max_length=100,
-        help_text=_('The referral code.')
-    )
-
-    class Meta:
-        verbose_name = _('Referral')
-        verbose_name_plural = _('Referrals')
-
-    def __str__(self):
-        return self.referrer.email
-
-
-class Message(models.Model):
-    content = models.TextField(max_length=512)
-    sender= models.ForeignKey(User, on_delete=models.CASCADE, related_name="messagesender")
-    receiver= models.ForeignKey(User, on_delete=models.CASCADE, related_name="messagereceiver")
-    timestamp = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        indexes = [
-            models.Index(fields=['sender', 'receiver'])
-        ]
-
-    def __str__(self):
-        return f'{self.content}'
 

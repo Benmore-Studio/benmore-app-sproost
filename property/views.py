@@ -1,20 +1,25 @@
 from quotes.models import Project, QuoteRequest
 from django.contrib.auth import get_user_model
-from .models import AssignedAccount
-
-
-from rest_framework.generics import RetrieveAPIView
+from .models import AssignedAccount, Property
+from django.db.models import Q
+from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.exceptions import NotFound, PermissionDenied
-from property.models import AssignedAccount
-from profiles.serializers import HomeOwnerSerializer 
+from profiles.serializers import HomeOwnerSerializer , SimpleUserSerializer
+from profiles.serializers import HomeOwnerSerializer , SimpleUserSerializer
+from .serializers import ( PropertyCreateSerializer,PropertyUpdateSerializer, PropertyRetrieveSerializer)
+from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework import generics, filters
+from django.shortcuts import get_object_or_404
+from django.core.exceptions import ObjectDoesNotExist
+
 
 
 User = get_user_model()
 
 
-class AgentsHomeOwnerAccountAPIView(RetrieveAPIView):
+class AgentsHomeOwnerAccountAPIView(generics.RetrieveAPIView):
     """
     API View to handle retrieving a home owner's details for agents who were assigned to them.
 
@@ -61,11 +66,153 @@ class AgentsHomeOwnerAccountAPIView(RetrieveAPIView):
             raise NotFound("Home Owner not found.")
 
         
-# class ViewAllPropertyAPIView(ListAPIView):
-#     """
-#     API View to retrieve all properties.
-#     """
-#     queryset = Property.objects.all()
-#     serializer_class = PropertySerializer
-#     permission_classes = [IsAuthenticated ]
+class PropertyCreateView(generics.CreateAPIView):
+    queryset = Property.objects.all()
+    serializer_class = PropertyCreateSerializer
+    permission_classes = [IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser]
+
+
+   
+class PropertyRetrieveView(generics.RetrieveAPIView):
+    queryset = Property.objects.all()
+    permission_classes = [IsAuthenticated]
+    serializer_class = PropertyRetrieveSerializer
+
+class PropertyUpdateView(generics.UpdateAPIView):
+    queryset = Property.objects.all()
+    permission_classes = [IsAuthenticated]
+    serializer_class = PropertyUpdateSerializer
+
+
+
+class PropertyListAPIView(generics.ListAPIView):
+    """
+    API View to retrieve all properties with search and filter options.
+    """
+    queryset = Property.objects.all()
+    serializer_class = PropertyRetrieveSerializer
+    filter_backends = [filters.SearchFilter]  # Only search, no filtering
+    search_fields = ['title', 'address', 'property_type', 'status']    
+    # Fields that can be searched using ?search=
     
+    def get_queryset(self):
+        """
+        Get properties for a specific user if `user_id` is provided in query params.
+        Otherwise, return all properties.
+        """
+        queryset = Property.objects.all()
+        user_id = self.request.query_params.get('user_id')
+
+        if user_id:
+            user = get_object_or_404(User, id=user_id)
+            queryset = queryset.filter(property_owner=user)
+
+        return queryset
+ 
+
+
+
+class UserPropertyListView(generics.ListAPIView):
+    serializer_class = PropertyRetrieveSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        user_type = getattr(user, 'user_type', None)
+        
+        # Start with an empty QuerySet.
+        qs = Property.objects.none()
+
+        if user_type == "CO":
+            # For contractors, combine properties they own and those assigned to their contractor profile.
+            qs = Property.objects.filter(property_owner=user)
+            try:
+                contractor_profile = user.contractor_profile  # Adjust attribute name if needed.
+                qs = qs | Property.objects.filter(contractors=contractor_profile)
+            except Exception:
+                pass
+        elif user_type == "AG":
+            # For agents, include properties they own and those where they are added as a home_owner_agent.
+            qs = Property.objects.filter(Q(property_owner=user) | Q(home_owner_agents=user))
+        elif user_type == "HO":
+            # For home owners, only include properties they own.
+            qs = Property.objects.filter(property_owner=user)
+        elif user_type == "IV":
+            # For investors, you might choose a different rule. Here we return properties they liked.
+            qs = Property.objects.filter(likes=user)
+        else:
+            # For any other user type, you might default to all properties.
+            qs = Property.objects.all()
+
+        return qs.distinct()
+    
+    
+class PropertyDeleteView(generics.DestroyAPIView):
+    queryset = Property.objects.all()
+    serializer_class = PropertyRetrieveSerializer
+    permission_classes = [IsAuthenticated]
+
+    def perform_destroy(self, instance):
+        request = self.request
+        # Only allow deletion if the request.user is the property owner or an admin.
+        if instance.property_owner != request.user and not request.user.is_staff:
+            from rest_framework.exceptions import PermissionDenied
+            raise PermissionDenied("You do not have permission to delete this property.")
+        instance.delete()
+        
+ 
+
+class ClientListView(generics.ListAPIView):
+    serializer_class = SimpleUserSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return User.objects.filter(
+            owned_properties__home_owner_agents=self.request.user
+        ).distinct()
+
+    def list(self, request, *args, **kwargs):
+        if self.request.user.user_type != 'AG':
+            return Response({"error": "You don't have permission to access this information"}, status=403)
+
+        return super().list(request, *args, **kwargs)
+        
+        
+class PropertyListForClientView(generics.ListAPIView):
+    serializer_class = PropertyRetrieveSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        agent = self.request.user
+        client_id = self.kwargs.get("client_id")
+
+        return Property.objects.filter(
+            property_owner__id=client_id,
+            home_owner_agents=agent
+        ).distinct()
+    
+    def list(self, request, *args, **kwargs):
+        client_id = self.kwargs.get("client_id")
+
+        if not client_id:
+            return Response(
+                {"error": "Client ID is required"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            User.objects.get(id=client_id)
+        except ObjectDoesNotExist:
+            return Response(
+                {"error": "Client not found or invalid request"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        if self.request.user.user_type != 'AG':
+            return Response(
+                {"error": "You don't have permission to access this information"},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        return super().list(request, *args, **kwargs)

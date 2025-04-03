@@ -15,7 +15,6 @@ from datetime import timedelta
 SECRET = config('SECRET')
 CLIENT_ID = config('CLIENT_ID')
 
-# print(SECRET)
 from django.core.management.utils import get_random_secret_key
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -215,11 +214,15 @@ SESSION_SAVE_EVERY_REQUEST = True  # Save the session to the database on every r
 
 
 
-# ACCOUNT_SIGNUP_REDIRECT_URL = "/jobs/job-onboarding/"
-
-# Email settings for local testing
-EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
-EMAIL_FILE_PATH = '/tmp/app-emails'  
+ 
+ 
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.sendgrid.net"
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = "apikey"  # Use "apikey" as the username
+EMAIL_HOST_PASSWORD = config('SENDGRID_API_KEY')
+DEFAULT_FROM_EMAIL = config('FROM_EMAIL')
 
 
 
@@ -233,6 +236,7 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 10,
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
     ),
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 
@@ -240,8 +244,7 @@ REST_FRAMEWORK = {
 
 }
 
-print("BASE_DR")
-print(BASE_DIR)
+
 
 SPECTACULAR_SETTINGS = {
     'TITLE': 'My API',
@@ -272,15 +275,16 @@ SOCIALACCOUNT_PROVIDERS = {
 
 AUTH_USER_MODEL = 'accounts.User'
 
-GOOGLE_API_KEY = "AIzaSyBIMv62jBi-MjrYXsARUfy8S5xZwKqeGqc"
+GOOGLE_API_KEY = config('GOOGLE_API_KEY')
 
-CSRF_TRUSTED_ORIGINS = ['https://fdb9-105-113-33-126.ngrok-free.app']
+CSRF_TRUSTED_ORIGINS = ['https://fdb9-105-113-33-126.ngrok-free.app', 'https://sproost-1d5809b5aa5b.herokuapp.com']
 
 CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': 'dnggljofw',
-    'API_KEY': '586111527832668',
-    'API_SECRET': 'WmY1BwTV7RHirzWinywslKg3tXU'
+    'CLOUD_NAME': config("CLOUD_NAME"),
+    'API_KEY': config("API_KEY"),
+    'API_SECRET': config("API_SECRET")
 }
+
 
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
@@ -292,9 +296,7 @@ CACHES = {
 }
 
 CORS_ALLOW_CREDENTIALS = True
-CSRF_TRUSTED_ORIGINS = [
-    'https://44a8b72b893325a51bc6403f5837d712.serveo.net',
-]
+
 
 CORS_ALLOW_METHODS = [
     'GET',
@@ -314,3 +316,46 @@ SIMPLE_JWT = {
     'BLACKLIST_AFTER_ROTATION': True, 
 }
 
+ENVIRONMENT = config("ENVIRONMENT", "remote").lower()
+REDIS_URL = config("REDIS_TLS_URL")
+
+
+# CHANNEL_LAYERS = {
+#     "default": {
+#         "BACKEND": "channels_redis.core.RedisChannelLayer",
+#         "CONFIG": {
+#             "hosts": [REDIS_URL],
+#         }
+#     }
+# }
+
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [
+                {
+                  "address": REDIS_URL,
+                  "ssl_cert_reqs": None,
+                  "retry_on_timeout": True,
+                  "socket_keepalive": True,
+                } if ENVIRONMENT == "remote" else REDIS_URL
+            ],
+        }
+    }
+}
+
+
+
+
+
+
+
+# CHANNEL_LAYERS = {
+#     "default": {
+#         "BACKEND": "channels.layers.InMemoryChannelLayer",
+#     },
+# }
+
+DOMAIN_NAME=config('DOMAIN_NAME', default='http://localhost:8000')

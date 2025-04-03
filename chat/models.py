@@ -1,17 +1,27 @@
 from django.db import models
-from django.contrib.auth import get_user_model
+from accounts.models import User
+from django.contrib.contenttypes.fields import GenericRelation
 
-User = get_user_model()
+
+
+# Create your models here.
+
 
 
 class ChatRoom(models.Model):
-    name = models.CharField(max_length=100, unique=True)
+    name = models.CharField(max_length=100, unique=True, db_index=True)
     creator = models.ForeignKey(User, related_name='created_rooms', on_delete=models.CASCADE)
-    members = models.ManyToManyField(User, related_name="chat_rooms")
+    members = models.ManyToManyField(User, through='RoomMembership', related_name="chat_rooms")
     created_at = models.DateTimeField(auto_now_add=True)
+    room_type = models.CharField(
+        max_length=20,
+        choices=(("group_chat", "Group"), ("private", "Private"), ("broadcast_ho", "BroadcastHO"), ("broadcast_co", "BroadcastCO"), ("broadcast_ag", "BroadcastAG"), ("broadcast_iv", "BroadcastIV")),
+        default="private"
+    )
 
     def __str__(self):
         return self.name
+
 
 class ChatRoomInvitation(models.Model):
     room = models.ForeignKey(ChatRoom, related_name='invitations', on_delete=models.CASCADE)
@@ -22,4 +32,37 @@ class ChatRoomInvitation(models.Model):
 
     def __str__(self):
         return f"Invitation for {self.email} to {self.room.name}"
+
+
+class Message(models.Model):
+    room = models.ForeignKey(ChatRoom, related_name="messages", on_delete=models.CASCADE)
+    content = models.TextField(max_length=512)
+    sender= models.ForeignKey(User, on_delete=models.CASCADE, related_name="messagesender")
+    receiver= models.ManyToManyField(User, blank=True, related_name="messagereceiver")
+    timestamp = models.DateTimeField(auto_now_add=True, db_index=True)
+    read_by = models.ManyToManyField(User, blank=True, related_name="messages_read", help_text=" Track who has read it")  # Track who has read it
+    reply_to_num = models.IntegerField(blank=True, null=True)
+    reply_to = models.ForeignKey(
+        'self',
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name='replies'
+    )
+    deleted = models.BooleanField(default=False)
+    media_paths = GenericRelation("main.Media")  
+
+
+    def __str__(self):
+        return f'{self.content}: {self.content[:20]}'
+
+
+class RoomMembership(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    room = models.ForeignKey(ChatRoom, on_delete=models.CASCADE)
+    last_read_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        unique_together = ('user', 'room')
+
 

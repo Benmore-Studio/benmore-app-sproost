@@ -1,0 +1,44 @@
+<!-- Chats List (Scroll) -->
+
+<div id="chatList" class="flex flex-col h-full" style="display: none;">             
+  <!-- Back Arrow -->
+  <div id="personal-group-parents" class="my-3">
+    <div id="personal-message-back-arrow" class="cursor-pointer ml-4 mb-4">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-3 text-black">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
+      </svg>                
+    </div>
+    <div id="all-personal-groups" class="flex flex-col h-full"></div>
+  </div>
+
+  <div id="personal-message-body-parent" class="flex flex-col h-full" style="display: none;">
+    <div class="flex justify-between mr-2 my-3">
+      <!-- Back Arrow -->
+      <div id="personal-back-arrow" class="cursor-pointer ml-4">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-3 text-black">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
+        </svg> 
+      </div>               
+      <div class="flex items-center gap-4">
+        <p id="personal-delete-chat" class="cursor-pointer text-red-500">Delete Chat</p>                     
+      </div>
+    </div>
+
+    <div id="personal-roomTitle" class="my-3 text-center"></div>
+
+    <div id="personal-search-navigation"></div>
+    
+    <!-- Chat Messages Container -->
+    <div class="flex-1 overflow-hidden">     
+        <!-- loader modal -->
+        <div id="personal-chatroom-modal" style="display: none;" class="flex justify-center items-center w-full h-full bg-transparent bg-opacity-50">        
+          <span class="loader block"></span>
+        </div>
+        
+        <!-- Actual Message Body -->
+        <div id="personal-message-body" class="px-4 h-full overflow-y-auto"></div>
+    </div>
+
+    
+  </div>
+</div>

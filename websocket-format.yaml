@@ -1,0 +1,665 @@
+openapi: 3.0.0
+info:
+  title: WebSocket Chat API
+  description: >
+    API documentation for the WebSocket-based chat system. Clients first establish the connection
+    via an HTTP GET request to the `/ws/chat/` endpoint by providing a valid JWT token in the
+    `Bearertoken` query parameter. Once connected, the server authenticates the user, subscribes
+    them to their chat rooms, and sends initial data (e.g. room list and missed messages count). 
+    The client then communicates with the server by sending JSON messages with an `action` key.
+    
+    **Client-to-Server Actions:**
+    - **send:** Send a chat message.
+    - **join:** Join a chat room.
+    - **leave:** Leave a chat room.
+    - **delete:** Delete a message.
+    - **typing:** Send typing notifications.
+    - **load_messages:** Request paginated messages.
+    
+    **Server-to-Client Actions:**
+    - **room_list:** Provides the list of chat rooms.
+    - **new_room:** Notifies of a new chat room.
+    - **message:** Broadcasts a new chat message.
+    - **message_list:** Provides a paginated list of messages.
+    - **missed_messages:** Contains unread/missed message counts.
+    - **message_deleted:** Notifies that a message has been deleted.
+  version: 1.3.0
+servers:
+  - url: ws://127.0.0.1:8000/ws/chat/?Bearertoken={token}
+    description: Local WebSocket server (development)
+  - url: wss://sproost-1d5809b5aa5b.herokuapp.com/ws/chat/?Bearertoken={token}
+    description: Production WebSocket server
+
+paths:
+  # HTTP GET endpoint to establish the WebSocket connection.
+  /ws/chat/:
+    get:
+      summary: Connect to WebSocket for Chat
+      description: >
+        Establish a WebSocket connection for real-time chat using an HTTP GET request. A valid JWT token 
+        must be provided as a query parameter named `Bearertoken`. This request will upgrade to a 
+        WebSocket connection.
+      parameters:
+        - name: Bearertoken
+          in: query
+          required: true
+          description: JWT token for authentication.
+          schema:
+            type: string
+      responses:
+        "101":
+          description: WebSocket connection established successfully (Switching Protocols).
+        "403":
+          description: Unauthorized – Invalid or missing Bearertoken.
+        "400":
+          description: Bad Request – Invalid WebSocket request.
+
+  # Additional REST endpoints
+
+  /chat/search_messages/:
+    get:
+      summary: Search Messages
+      description: >
+        Search for messages matching a given query string. The query parameter `q` is used to filter
+        messages based on their content.
+      parameters:
+        - name: q
+          in: query
+          required: true
+          description: The search query string.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: A JSON object containing search results.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        room_id:
+                          type: integer
+                          example: 1
+                        room_name:
+                          type: string
+                          example: "General Chat"
+                        messages:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              id:
+                                type: integer
+                                example: 101
+                              content:
+                                type: string
+                                example: "Hello there!"
+
+
+/profiles/rooms/{room_id}/leave/:
+  post:
+    summary: Leave a Chat Room
+    description: >
+      Allow an authenticated user to leave a chat room. The user must be a member of the chat room.
+      If the user is not a member, an error is returned.
+    parameters:
+      - name: room_id
+        in: path
+        required: true
+        description: The ID of the chat room the user wants to leave.
+        schema:
+          type: integer
+    security:
+      - bearerAuth: []
+    responses:
+      "200":
+        description: Successfully left the chat room.
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: true
+                message:
+                  type: string
+                  example: "You have left the chat room."
+      "400":
+        description: The user is not a member of the chat room.
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                error:
+                  type: string
+                  example: "You are not a member of this chat room."
+      "401":
+        description: Unauthorized – Authentication credentials were not provided or are invalid.
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                detail:
+                  type: string
+                  example: "Authentication credentials were not provided."
+
+# you can do this or store api keys securely in flutter, its much easier with api keys direct calls
+  /chat/cloudinary-signature/:
+    post:
+      summary: Get Cloudinary Signature
+      description: >
+        Retrieve a signature for uploading media to Cloudinary. The request must include the file name,
+        and the response provides the necessary signature, timestamp, API key, and cloud name.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                fileName:
+                  type: string
+                  example: "image.png"
+      responses:
+        "200":
+          description: Cloudinary signature generated successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  signature:
+                    type: string
+                    example: "abcdef1234567890"
+                  timestamp:
+                    type: string
+                    example: "1616161616"
+                  api_key:
+                    type: string
+                    example: "123456789012345"
+                  cloud_name:
+                    type: string
+                    example: "demo"
+
+  /chat/delete_media/{media_id}/:
+    delete:
+      summary: Delete Media from Cloudinary
+      description: >
+        Delete a media asset from Cloudinary. The media asset's public ID is provided as a path parameter.
+      parameters:
+        - name: media_id
+          in: path
+          required: true
+          description: The public ID of the media asset to delete.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Media deleted successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Media deleted successfully."
+        "404":
+          description: Media not found.
+
+ # REST endpoints ends
+
+components:
+  schemas:
+    SendMessage:
+      type: object
+      required:
+        - action
+        - room_id
+        - message
+      properties:
+        jsExample: |
+          chatSocket.send(JSON.stringify({
+              action: "send",
+              room_id: 1,
+              message: "Hello, world!",
+              reply_to_id: 10,
+              media: [{ url: "https://cloudinary.com/media1.jpg", type: "image" }]
+          }));
+        flutterExample: |
+          final message = {
+            "action": "send",
+            "room_id": 1,
+            "message": "Hello, world!",
+            "reply_to_id": 10,
+            "media": [{"url": "https://cloudinary.com/media1.jpg", "type": "image"}]
+          };
+          webSocketChannel.sink.add(jsonEncode(message));
+        action:
+          type: string
+          example: "send"
+          description: The action type for sending a chat message.
+        room_id:
+          type: integer
+          example: 1
+          description: The ID of the chat room.
+        message:
+          type: string
+          example: "Hello, world!"
+          description: The chat message content.
+        reply_to_id:
+          type: integer
+          example: 10
+          nullable: true
+          description: ID of the message being replied to.
+        media:
+          type: array
+          items:
+            type: object
+            properties:
+              url:
+                type: string
+                example: "https://cloudinary.com/media1.jpg"
+              type:
+                type: string
+                example: "image"
+                enum: ["image", "video"]
+          description: Optional media (images/videos) attached to the message.
+
+    JoinRoom:
+      type: object
+      required:
+        - action
+        - room
+      properties:
+        action:
+          type: string
+          example: "join"
+          description: Action to join a chat room.
+        room:
+          type: integer
+          example: 1
+          description: The chat room ID to join.
+    
+    LeaveRoom:
+      type: object
+      required:
+        - action
+        - room
+      properties:
+        action:
+          type: string
+          example: "leave"
+          description: Action to leave a chat room.
+        room:
+          type: integer
+          example: 1
+          description: The chat room ID to leave.
+    
+    DeleteMessage:
+      type: object
+      required:
+        - action
+        - message_id
+      properties:
+        action:
+          type: string
+          example: "delete"
+          description: Action to delete a message.
+        message_id:
+          type: integer
+          example: 123
+          description: The ID of the message to be deleted.
+    
+    TypingEvent:
+      type: object
+      required:
+        - action
+        - room_id
+        - typing
+      properties:
+        jsExample: |
+          chatSocket.send(JSON.stringify({
+              action: "typing",
+              room_id: 1,
+              typing: true
+          }));
+        flutterExample: |
+          final typingEvent = {
+            "action": "typing",
+            "room_id": 1,
+            "typing": true
+          };
+          webSocketChannel.sink.add(jsonEncode(typingEvent));
+        action:
+          type: string
+          example: "typing"
+          description: Action for typing events.
+        room_id:
+          type: integer
+          example: 1
+          description: The chat room ID.
+        username:
+          type: string
+          example: "user1"
+          description: The sender's username.
+        typing:
+          type: boolean
+          example: true
+          description: `true` if user is typing, `false` if not.
+    
+    LoadMessages:
+      type: object
+      required:
+        - action
+        - room_id
+      properties:
+        action:
+          type: string
+          example: "load_messages"
+          description: Action to load paginated messages.
+        room_id:
+          type: integer
+          example: 1
+          description: The chat room ID.
+        page:
+          type: integer
+          example: 1
+          description: The page number for pagination.
+    
+    RoomList:
+      type: object
+      properties:
+        action:
+          type: string
+          example: "room_list"
+          description: Indicates that the payload contains a list of chat rooms.
+        rooms:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+                example: 1
+              name:
+                type: string
+                example: "General Chat"
+              last_message:
+                type: string
+                example: "Hello there!"
+              last_message_time:
+                type: string
+                format: date-time
+                example: "2025-03-04T10:49:26Z"
+    
+    MissedMessages:
+      type: object
+      properties:
+        action:
+          type: string
+          example: "missed_messages"
+          description: Indicates that the payload contains missed message counts.
+        missed_messages:
+          type: object
+          additionalProperties:
+            type: integer
+          example: { "1": 2, "3": 5 }
+    
+    ReceiveMessage:
+      type: object
+      properties:
+        action:
+          type: string
+          example: "message"
+          description: The type of message received.
+        room:
+          type: integer
+          example: 1
+          description: The room ID.
+        username:
+          type: string
+          example: "user1"
+          description: The sender's username.
+        sender:
+          type: string
+          example: "user1"
+          description: The sender’s identifier.
+        message:
+          type: string
+          example: "Hello, world!"
+          description: The actual chat message content.
+        timestamp:
+          type: string
+          format: date-time
+          example: "2025-03-04T10:49:26Z"
+          description: Timestamp when the message was sent.
+        media:
+          type: array
+          items:
+            type: object
+            properties:
+              url:
+                type: string
+                example: "https://cloudinary.com/media1.jpg"
+              type:
+                type: string
+                example: "image"
+                enum: ["image", "video"]
+          description: Media (images/videos) attached to the message.
+        reply_to_id:
+          type: integer
+          example: 10
+          nullable: true
+          description: ID of the message being replied to.
+        reply_to_content:
+          type: string
+          example: "Original message content"
+          description: Content of the message being replied to.
+    
+    MessageList:
+      type: object
+      properties:
+        action:
+          type: string
+          example: "message_list"
+          description: Indicates that the payload contains a list of messages.
+        room_id:
+          type: integer
+          example: 1
+          description: The chat room ID.
+        messages:
+          type: array
+          items:
+            $ref: "#/components/schemas/ReceiveMessage"
+    
+    MessageDeleted:
+      type: object
+      properties:
+        action:
+          type: string
+          example: "message_deleted"
+          description: Notification that a message has been deleted.
+        message_id:
+          type: integer
+          example: 123
+          description: The ID of the deleted message.
+        room_id:
+          type: integer
+          example: 1
+          description: The room ID where the message was deleted.
+        username:
+          type: string
+          example: "user1"
+          description: The sender's username.
+
+x-client-implementation:
+  javascript:
+    description: >
+      Example JavaScript code to connect to the WebSocket server, listen for messages,
+      and handle various action types. Note that the HTTP GET request (with Bearertoken query parameter)
+      is used to establish the connection.
+    code: |
+      // Replace 'your_jwt_token' with your actual JWT token
+      const token = "your_jwt_token";
+      const wsScheme = window.location.protocol === "https:" ? "wss" : "ws";
+      const chatSocket = new WebSocket(`${wsScheme}://sproost-1d5809b5aa5b.herokuapp.com/ws/chat/?Bearertoken=${token}`);
+
+      chatSocket.onopen = function(event) {
+        console.log("WebSocket connection established");
+      };
+
+      chatSocket.onmessage = function(event) {
+        try {
+          const data = JSON.parse(event.data);
+          console.log("Received data:", data);
+
+          switch (data.action) {
+            case "room_list":
+              updateChatRooms(data);
+              break;
+            case "new_room":
+              updateChatRooms(data);
+              break;
+            case "typing":
+              updateTypingIndicator(data);
+              break;
+            case "message":
+              updateChatMessages(data);
+              break;
+            case "message_list":
+              displayMessageList(data);
+              break;
+            case "missed_messages":
+              updateMissedMessages(data);
+              break;
+            case "message_deleted":
+              handleMessageDeletion(data);
+              break;
+            default:
+              console.warn("Unknown action received:", data.action);
+          }
+        } catch (error) {
+          console.error("Error parsing WebSocket message:", error);
+        }
+      };
+
+      chatSocket.onerror = function(event) {
+        console.error("WebSocket encountered an error:", event);
+      };
+
+      chatSocket.onclose = function(event) {
+        console.log("WebSocket connection closed:", event);
+      };
+
+      // Example UI update functions (implement as needed)
+      function updateChatRooms(data) { /* ... */ }
+      function updateTypingIndicator(data) { /* ... */ }
+      function updateChatMessages(data) { /* ... */ }
+      function displayMessageList(data) { /* ... */ }
+      function updateMissedMessages(data) { /* ... */ }
+      function handleMessageDeletion(data) { /* ... */ }
+
+  flutter:
+    description: >
+      Example Flutter code to connect to the WebSocket server using the `web_socket_channel` package,
+      listen for incoming messages, decode JSON, and handle various action types.
+    code: |
+      import 'dart:convert';
+      import 'package:flutter/material.dart';
+      import 'package:web_socket_channel/web_socket_channel.dart';
+
+      class ChatScreen extends StatefulWidget {
+        final String token; // Pass your JWT token here
+        ChatScreen({required this.token});
+
+        @override
+        _ChatScreenState createState() => _ChatScreenState();
+      }
+
+      class _ChatScreenState extends State<ChatScreen> {
+        late WebSocketChannel channel;
+
+        @override
+        void initState() {
+          super.initState();
+          final url = 'wss://sproost-1d5809b5aa5b.herokuapp.com/ws/chat/?Bearertoken=${widget.token}';
+          channel = WebSocketChannel.connect(Uri.parse(url));
+
+          channel.stream.listen((message) {
+            try {
+              final data = jsonDecode(message);
+              print("Received data: $data");
+
+              switch (data['action']) {
+                case "room_list":
+                  updateChatRooms(data);
+                  break;
+                case "new_room":
+                  updateChatRooms(data);
+                  break;
+                case "typing":
+                  updateTypingIndicator(data);
+                  break;
+                case "message":
+                  updateChatMessages(data);
+                  break;
+                case "message_list":
+                  displayMessageList(data);
+                  break;
+                case "missed_messages":
+                  updateMissedMessages(data);
+                  break;
+                case "message_deleted":
+                  handleMessageDeletion(data);
+                  break;
+                default:
+                  print("Unknown action received: ${data['action']}");
+              }
+            } catch (error) {
+              print("Error decoding message: $error");
+            }
+          }, onError: (error) {
+            print("WebSocket error: $error");
+          }, onDone: () {
+            print("WebSocket connection closed");
+          });
+        }
+
+        // Example functions for handling messages (implement your UI logic)
+        void updateChatRooms(dynamic data) { print("Update chat rooms: ${data['rooms']}"); }
+        void updateTypingIndicator(dynamic data) { print("${data['username']} is ${data['typing'] ? "typing..." : "not typing"}"); }
+        void updateChatMessages(dynamic data) { print("New message: ${data['message']}"); }
+        void displayMessageList(dynamic data) { print("Displaying messages for room: ${data['room_id']}"); }
+        void updateMissedMessages(dynamic data) { print("Missed messages: ${data['missed_messages']}"); }
+        void handleMessageDeletion(dynamic data) { print("Message deleted: ${data['message_id']}"); }
+
+        @override
+        void dispose() {
+          channel.sink.close();
+          super.dispose();
+        }
+
+        @override
+        Widget build(BuildContext context) {
+          return Scaffold(
+            appBar: AppBar(title: Text("Chat")),
+            body: Center(child: Text("Listening to WebSocket messages...")),
+          );
+        }
+      }
+
+tags:
+  - name: WebSocket
+    description: WebSocket communication for real-time chat

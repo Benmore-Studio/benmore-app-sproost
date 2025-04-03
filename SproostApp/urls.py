@@ -4,6 +4,8 @@ from django.urls import path, include
 from django.conf.urls import handler400, handler500, handler404
 from django.conf.urls.static import static
 from django.conf import settings
+from django.contrib.auth import views as auth_views
+
 
 
 
@@ -44,10 +46,19 @@ urlpatterns = [
     path('user-admin/', include('admins.urls', namespace='admins')),
     path('', include('main.urls', namespace='main')),
     path('accounts/', include('accounts.urls')),
+    path('chat/', include('chat.urls')),
     path('accounts/', include('allauth.urls')),
     path('profiles/', include('profiles.urls', namespace='profile')),
     path('quotes/', include('quotes.urls', namespace='quotes')),
     path('property/', include('property.urls', namespace='property')),
+
+
+    # Django's built-in password reset views
+    path('accounts/password_reset/', auth_views.PasswordResetView.as_view(), name='password_reset'),
+    path('accounts/password_reset/done/', auth_views.PasswordResetDoneView.as_view(), name='password_reset_done'),
+    path('accounts/reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
+    path('accounts/reset/done/', auth_views.PasswordResetCompleteView.as_view(), name='password_reset_complete'),
+
 ]
 
 

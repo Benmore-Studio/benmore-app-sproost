@@ -1,9 +1,11 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
-from profiles.models import UserProfile, AgentProfile, ContractorProfile, Referral, InvestorProfile
+from profiles.models import UserProfile, AgentProfile, ContractorProfile, Invitation, InvestorProfile
 from property.models import AssignedAccount
 from phonenumber_field.formfields import PhoneNumberField
 from phonenumber_field.serializerfields import PhoneNumberField
+from quotes.models import UserPoints
+from chat.models import ChatRoom
 
 
 
@@ -18,7 +20,7 @@ class CustomSignupSerializer(serializers.ModelSerializer):
     city = serializers.CharField(max_length=100, required=False)
     state = serializers.CharField(max_length=100, required=False)
     user_type = serializers.ChoiceField(choices=[('HO', 'Home Owner'), ('AG', 'Agent'), ('CO', 'Contractor'), ('IV', 'Investor')], required=True)
-    referral_code = serializers.CharField(max_length=100, required=False)
+    referral_code = serializers.CharField(required=False, allow_blank=True)
 
 
     # Contractor Info
@@ -32,6 +34,7 @@ class CustomSignupSerializer(serializers.ModelSerializer):
     # Agent Info
     registration_ID= serializers.CharField(help_text='registration_ID', max_length=225, required=False)
     agent_address = serializers.CharField(max_length=255, required=False)
+    
 
 
     # investor info
@@ -147,6 +150,20 @@ class CustomSignupSerializer(serializers.ModelSerializer):
     #     if not email:
     #         raise serializers.ValidationError({"email": "This field is required."})
     #     return value
+    
+    def validate_referral_code(self, value):
+            # If referral code is provided, validate it exists and hasn't been used
+        if value:
+            try:
+                invitation = Invitation.objects.get(referral_code=value)
+            except Invitation.DoesNotExist:
+                raise serializers.ValidationError("Invalid referral code.")
+            
+            if invitation.accepted:
+                raise serializers.ValidationError("This referral code has already been used.")
+            
+            # Optionally, you could perform additional checks such as expiration
+        return value
 
 
     def validate_email(self, value):
@@ -170,17 +187,31 @@ class CustomSignupSerializer(serializers.ModelSerializer):
         user.phone_number = validated_data.get('phone_number')
         user.save()
 
+        admin = User.objects.filter(is_superuser=True).first()
+        if admin:
+            room = ChatRoom.objects.create(name=f"Chat with {admin.username} and {user.username}", creator=admin)
+            room.members.add(admin, user)
+            room.save()
+        else:
+            pass
+
         if user.user_type == "HO":
-            UserProfile.objects.create(
+            user_profile = UserProfile.objects.create(
                 user=user,
                 home_owner_address=validated_data.get('address')
             )
+            if user_profile:
+                room = ChatRoom.objects.create(name=f"broadcast_{user.user_type}", creator=user)
+                room.members.add(user)
+                room.save()
+
             referral_code = validated_data.get('referral_code')
             if referral_code:
                 try:
-                    referral = Referral.objects.get(code=referral_code)
-                    referral.referred.add(user)
-                    referral.save()
+                     
+                    invitation = Invitation.objects.get(referral_code=referral_code)
+                    invitation.accepted = True
+                    invitation.save()
 
                     # Handle agent assignment if referral code is agent's registration ID
                     agent = AgentProfile.objects.get(registration_ID=referral_code)
@@ -189,18 +220,37 @@ class CustomSignupSerializer(serializers.ModelSerializer):
                         assigned_by=user,
                         is_approved=True
                     )
-                except (Referral.DoesNotExist, AgentProfile.DoesNotExist):
+                except (Invitation.DoesNotExist, AgentProfile.DoesNotExist):
                     pass
 
         elif user.user_type == "AG":
-            AgentProfile.objects.create(
+            referral_code = validated_data.get('referral_code')
+            if referral_code:                     
+                invitation = Invitation.objects.get(referral_code=referral_code)
+                invitation.accepted = True
+                invitation.save()
+                
+            # Count total invitations sent by this agent  
+            invitation_count = Invitation.objects.filter(referral_code=referral_code, accepted=True).count()
+             # When the agent reaches 10 invitations milestone, reward them with 1000 points.
+            if invitation_count >= 10 and invitation_count % 10 == 0:
+                user_points, _ = UserPoints.objects.get_or_create(user=invitation.inviter)
+                user_points.total_points += 1000
+                user_points.save()
+                    
+            user_profile_agent = AgentProfile.objects.create(
                 user=user,
                 agent_address=validated_data.get('agent_address'),
                 registration_ID=validated_data.get('registration_ID'),
             )
+            if user_profile_agent:
+                room = ChatRoom.objects.create(name=f"broadcast_{user.user_type}", creator=user)
+                room.members.add(user)
+                room.save()
+
 
         elif user.user_type == "CO":
-            ContractorProfile.objects.create(
+            user_profile_contractor = ContractorProfile.objects.create(
                 user=user,
                 company_name=validated_data.get('company_name'),
                 specialization=validated_data.get('specialization'),
@@ -210,16 +260,24 @@ class CustomSignupSerializer(serializers.ModelSerializer):
                 insurance_number=validated_data.get('insurance_number'),
                 image=validated_data.get('image'),
             )
+            if user_profile_contractor:
+                room = ChatRoom.objects.create(name=f"broadcast_{user.user_type}", creator=user)
+                room.members.add(user)
+                room.save()
+
 
         elif user.user_type == "IV":
-            InvestorProfile.objects.create(
+            user_profile_investor = InvestorProfile.objects.create(
                 user=user,
                 company_name=validated_data.get('investor_company_name'),
                 specialization=validated_data.get('investor_specialization'),
                 company_address=validated_data.get('investor_company_address'),
                 country=validated_data.get('investor_country'),
             )
-
+            if user_profile_investor:
+                room = ChatRoom.objects.create(name=f"broadcast_{user.user_type}", creator=user)
+                room.members.add(user)
+                room.save()
         return user
 
 

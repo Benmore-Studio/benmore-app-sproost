@@ -18,6 +18,8 @@ class QuoteService(CustomRequestUtil):
             video_types = {'mp4', 'mkv', 'webm'}
 
             
+            print('payload', payload)
+            
             # print(user_profile,"payload")
             model_action_service = ModelAction(self.request, user_profile)
             print(model_passed, "again")
@@ -52,6 +54,7 @@ class QuoteService(CustomRequestUtil):
                         file=media_file,
                         video=media_video
                     )
+            print('quote', quote)
 
             return quote, None
 

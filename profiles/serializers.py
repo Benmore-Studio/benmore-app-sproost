@@ -1,9 +1,12 @@
 from rest_framework import serializers
-from .models import ContractorProfile, UserProfile, AgentProfile
-from quotes.models import Property
+from .models import ContractorProfile, UserProfile, AgentProfile, Invitation, InvestorProfile
+from property.models import Property
 from accounts.models import User
 from quotes.serializers import  QuoteRequestAllSerializer
+from quotes.models import QuoteRequest,UserPoints
 from rest_framework.exceptions import APIException
+from main.serializers import MediaSerializer
+
 
 
 
@@ -11,13 +14,22 @@ class SimpleUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = '__all__'
+        extra_kwargs = {
+                'password': {'write_only': True},
+                'last_login': {'read_only': True},
+                'is_superuser': {'read_only': True},
+            }
 
 
 class SimpleContractorProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = ContractorProfile
-        fields = '__all__' 
-
+        fields = '__all__'
+        
+class SimpleInvestorProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = InvestorProfile
+        fields = '__all__'
 
 class SimpleHomeOwnerProfileSerializer(serializers.ModelSerializer):
     class Meta:
@@ -25,9 +37,14 @@ class SimpleHomeOwnerProfileSerializer(serializers.ModelSerializer):
         fields = '__all__' 
 
 class SimplePropertySerializer(serializers.ModelSerializer):
+    media_paths = MediaSerializer(many=True, read_only=True)
     class Meta:
         model = Property
         fields = '__all__' 
+
+
+
+
 
 
 class SimpleAgentProfileSerializer(serializers.ModelSerializer):
@@ -43,7 +60,7 @@ class PropertySerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class ContractorSerializer(serializers.ModelSerializer):
+class ContractorUserSerializer(serializers.ModelSerializer):
     contractor_profile = SimpleContractorProfileSerializer(read_only=True)
     property_owner = PropertySerializer(many=True, read_only=True)
 
@@ -51,11 +68,34 @@ class ContractorSerializer(serializers.ModelSerializer):
         model = User
         fields = [
             'id',
+            'last_name', 'first_name',
+            'username',
+            'phone_number',
+            'user_type',
+            'email',
+            'contractor_profile',
+            'property_owner',
+        ]
+
+
+class ContractorSerializer(serializers.ModelSerializer):
+    contractor_profile = SimpleContractorProfileSerializer(read_only=True)
+    property_owner = PropertySerializer(many=True, read_only=True)
+
+    class Meta:
+        model = User
+        fields = [
+            'first_name',
+            'last_name',
+            'id',
+            'phone_number',
+            'user_type',
             'username',
             'email',
             'contractor_profile',
             'property_owner',
         ]
+
 
 
 class HomeOwnerSerializer(serializers.ModelSerializer):
@@ -66,9 +106,19 @@ class HomeOwnerSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'email', 'first_name','phone_number','user_type', 'last_name', 'user_profile'] 
+        fields = ['id', 'email', 'first_name','phone_number','user_type',  'last_name', 'user_profile'] 
 
 
+
+class AgentUserSerializer(serializers.ModelSerializer):
+    """
+    Serializer for User model, with nested AgentProfileSerializer.
+    """
+    user = SimpleUserSerializer()
+
+    class Meta:
+        model = AgentProfile
+        fields = [ 'user', 'agent_address','registration_ID','image', 'country'] 
 
 class AgentSerializer(serializers.ModelSerializer):
     """
@@ -120,19 +170,31 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'email',"user_profile", 'property_owner', 'quote_requests']
+        fields = ['id', 'username', 'last_name', 'phone_number',
+            'user_type', 'first_name', 'email',"user_profile", 'property_owner', 'quote_requests']
 
 
+
+class UserPointsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserPoints
+        fields = ['total_points']
+        
+ 
 
 class HomeViewUserSerializer(serializers.ModelSerializer):
     # using a method field for `user_profile`
     user_profile = serializers.SerializerMethodField()
     
     property_owner = SimplePropertySerializer(many=True, read_only=True)
+    
+    points = serializers.IntegerField(source="points.total_points", default=0, read_only=True)
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'user_type', 'user_profile', 'property_owner']
+        fields = ['id', 'username', 'phone_number',
+            'user_type', 'email', 'last_name', 'first_name', 'user_type', 'user_profile', 'property_owner', 'points']
+    
     
     def get_user_profile(self, user):
         """
@@ -150,10 +212,27 @@ class HomeViewUserSerializer(serializers.ModelSerializer):
             # For contractors
             return SimpleContractorProfileSerializer(user.contractor_profile).data
         
+        elif user.user_type == "IV":
+            return SimpleInvestorProfileSerializer(user.investor_profile).data
+            
         # Default case (maybe None or an empty dict)
         return None
+    
 
 
+
+class InvitationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Invitation
+        fields = ['id', 'email', 'referral_code', 'created_at']
+        read_only_fields = ['referral_code', 'created_at']
+
+class QuotePropertySerializer(serializers.ModelSerializer):
+    property = SimplePropertySerializer(read_only=True)
+
+    class Meta:
+        model = QuoteRequest
+        fields =  fields = ['id', 'property']
 
 class PolymorphicUserSerializer(serializers.Serializer):
     """

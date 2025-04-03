@@ -25,8 +25,6 @@ from rest_framework.permissions import IsAuthenticated
 from quotes.serializers import QuoteRequestAllSerializer, ProjectSerializer
 from property.serializers import AssignedAccountSerializer
 
-from profiles.models import Referral
-
 
 
 
@@ -69,21 +67,27 @@ class HomeView(GenericAPIView):
         user_type = user.user_type
     
         if user_type == "HO":
-            context = User.objects.select_related('user_profile').prefetch_related("property_owner").get(id=request.user.id)
+            context = User.objects.select_related('user_profile').prefetch_related("owned_properties").get(id=request.user.id)
             
         elif user_type == "AG":
-            context = User.objects.select_related('agent_profile').prefetch_related("property_owner").get(id=request.user.id)
+            context = User.objects.select_related('agent_profile').prefetch_related(
+                "owned_properties", "points"
+            ).get(id=request.user.id)
 
         elif user_type == "CO":
             context =  User.objects.select_related('contractor_profile').prefetch_related(
-                 'property_owner').get(id=request.user.id)
+                 'owned_properties', "points").get(id=request.user.id)
+            
+        elif user_type == "IV":
+            context = User.objects.select_related("investor_profile").get(id=request.user.id)
+            
         else:
             raise PermissionDenied("Unauthorized access")
         
         serializer = HomeViewUserSerializer(context)
         return Response(serializer.data, status=status.HTTP_200_OK)
         
-            
+        
 
 
 class HomeViewByPkAPIView(RetrieveAPIView):

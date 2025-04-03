@@ -1,41 +1,249 @@
 {% extends "admin/base.html" %}
+{% load static %}
 
 {% block extrahead %}
+
+
+
     {{ block.super }}
+
+
+<style>
+    .loader {
+  font-size: 10px;
+  width: 1em;
+  height: 1em;
+  border-radius: 50%;
+  position: relative;
+  text-indent: -9999em;
+  animation: mulShdSpin 1.1s infinite ease;
+  transform: translateZ(0);
+}
+@keyframes mulShdSpin {
+      0%, 100% {
+        box-shadow: 
+          0em -2.6em 0em 0em #000000, 
+          1.8em -1.8em 0 0em rgba(0,0,0, 0.2), 
+          2.5em 0em 0 0em rgba(0,0,0, 0.2), 
+          1.75em 1.75em 0 0em rgba(0,0,0, 0.2), 
+          0em 2.5em 0 0em rgba(0,0,0, 0.2), 
+          -1.8em 1.8em 0 0em rgba(0,0,0, 0.2), 
+          -2.6em 0em 0 0em rgba(0,0,0, 0.5), 
+          -1.8em -1.8em 0 0em rgba(0,0,0, 0.7);
+      }
+      12.5% {
+        box-shadow: 
+          0em -2.6em 0em 0em rgba(0,0,0, 0.7), 
+          1.8em -1.8em 0 0em #000000, 
+          2.5em 0em 0 0em rgba(0,0,0, 0.2), 
+          1.75em 1.75em 0 0em rgba(0,0,0, 0.2), 
+          0em 2.5em 0 0em rgba(0,0,0, 0.2), 
+          -1.8em 1.8em 0 0em rgba(0,0,0, 0.2), 
+          -2.6em 0em 0 0em rgba(0,0,0, 0.2), 
+          -1.8em -1.8em 0 0em rgba(0,0,0, 0.5);
+      }
+      25% {
+        box-shadow: 
+          0em -2.6em 0em 0em rgba(0,0,0, 0.5), 
+          1.8em -1.8em 0 0em rgba(0,0,0, 0.7), 
+          2.5em 0em 0 0em #000000, 
+          1.75em 1.75em 0 0em rgba(0,0,0, 0.2), 
+          0em 2.5em 0 0em rgba(0,0,0, 0.2), 
+          -1.8em 1.8em 0 0em rgba(0,0,0, 0.2), 
+          -2.6em 0em 0 0em rgba(0,0,0, 0.2), 
+          -1.8em -1.8em 0 0em rgba(0,0,0, 0.2);
+      }
+      37.5% {
+        box-shadow: 
+          0em -2.6em 0em 0em rgba(0,0,0, 0.2), 
+          1.8em -1.8em 0 0em rgba(0,0,0, 0.5), 
+          2.5em 0em 0 0em rgba(0,0,0, 0.7), 
+          1.75em 1.75em 0 0em #000000, 
+          0em 2.5em 0 0em rgba(0,0,0, 0.2), 
+          -1.8em 1.8em 0 0em rgba(0,0,0, 0.2), 
+          -2.6em 0em 0 0em rgba(0,0,0, 0.2), 
+          -1.8em -1.8em 0 0em rgba(0,0,0, 0.2);
+      }
+      50% {
+        box-shadow: 
+          0em -2.6em 0em 0em rgba(0,0,0, 0.2), 
+          1.8em -1.8em 0 0em rgba(0,0,0, 0.2), 
+          2.5em 0em 0 0em rgba(0,0,0, 0.5), 
+          1.75em 1.75em 0 0em rgba(0,0,0, 0.7), 
+          0em 2.5em 0 0em #000000, 
+          -1.8em 1.8em 0 0em rgba(0,0,0, 0.2), 
+          -2.6em 0em 0 0em rgba(0,0,0, 0.2), 
+          -1.8em -1.8em 0 0em rgba(0,0,0, 0.2);
+      }
+      62.5% {
+        box-shadow: 
+          0em -2.6em 0em 0em rgba(0,0,0, 0.2), 
+          1.8em -1.8em 0 0em rgba(0,0,0, 0.2), 
+          2.5em 0em 0 0em rgba(0,0,0, 0.2), 
+          1.75em 1.75em 0 0em rgba(0,0,0, 0.5), 
+          0em 2.5em 0 0em rgba(0,0,0, 0.7), 
+          -1.8em 1.8em 0 0em #000000, 
+          -2.6em 0em 0 0em rgba(0,0,0, 0.2), 
+          -1.8em -1.8em 0 0em rgba(0,0,0, 0.2);
+      }
+      75% {
+        box-shadow: 
+          0em -2.6em 0em 0em rgba(0,0,0, 0.2), 
+          1.8em -1.8em 0 0em rgba(0,0,0, 0.2), 
+          2.5em 0em 0 0em rgba(0,0,0, 0.2), 
+          1.75em 1.75em 0 0em rgba(0,0,0, 0.2), 
+          0em 2.5em 0 0em rgba(0,0,0, 0.5), 
+          -1.8em 1.8em 0 0em rgba(0,0,0, 0.7), 
+          -2.6em 0em 0 0em #000000, 
+          -1.8em -1.8em 0 0em rgba(0,0,0, 0.2);
+      }
+      87.5% {
+        box-shadow: 
+          0em -2.6em 0em 0em rgba(0,0,0, 0.2), 
+          1.8em -1.8em 0 0em rgba(0,0,0, 0.2), 
+          2.5em 0em 0 0em rgba(0,0,0, 0.2), 
+          1.75em 1.75em 0 0em rgba(0,0,0, 0.2), 
+          0em 2.5em 0 0em rgba(0,0,0, 0.2), 
+          -1.8em 1.8em 0 0em rgba(0,0,0, 0.5), 
+          -2.6em 0em 0 0em rgba(0,0,0, 0.7), 
+          -1.8em -1.8em 0 0em #000000;
+      }
+}
+
+    /* Ensure the entire chat container has a fixed height */
+.flex.flex-col.flex-1.h-full.mt-4 {
+    height: calc(100vh - 250px); /* Adjust this value based on your header and input area height */
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* Make the message body scrollable and prevent overflow */
+#individual-chatList-body {
+    flex-grow: 1;
+    overflow-y: auto;
+    max-height: 100%;
+    position: relative;
+}
+
+#message-body {
+    overflow-y: auto;
+    padding-bottom: 20px; /* Add some bottom padding */
+}
+
+/* Ensure input area stays at the bottom */
+.chat-input-container {
+    flex-shrink: 0;
+    position: sticky;
+    bottom: 0;
+    background-color: white;
+    z-index: 10;
+}
+
+/* Optional: Custom scrollbar for better appearance */
+#message-body::-webkit-scrollbar {
+    width: 6px;
+}
+
+#message-body::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+#message-body::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 3px;
+}
+
+#message-body::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+.online-status-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  max-width: 400px;
+  margin: 0 auto;
+  gap: 10px;
+}
+
+.online-status-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  cursor: pointer;
+  padding: 10px;
+  color: #417893;
+  border-radius: 8px;
+  width: 100%;
+  border-radius: 0.75rem; /* rounded-xl */
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* shadow-lg */
+  transition: transform 300ms; /* transition-transform duration-300 */
+}
+
+.online-status-item:hover {
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); /* hover:shadow-xl */
+    transform: scale(1.05); /* hover:scale-105 */
+}
+
+
+.online-status-item span {
+    font-weight: bold;
+}
+
+.status-indicator {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: #28a745;
+    }
+
+.status-offline {
+    background-color: #6c757d;
+}
+
+
+    
+  </style>
     <!-- Tailwind CSS via CDN (for demo) -->
-    <link
-      href="https://cdn.jsdelivr.net/npm/tailwindcss@3.2.7/dist/tailwind.min.css"
-      rel="stylesheet"
-    />
+  <!-- Toastify CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+
+<!-- Toastify JS -->
+<script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.2.7/dist/tailwind.min.css" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet">
 {% endblock extrahead %}
 
 {% block userlinks %}
     {{ block.super }}
-    <!-- Insert our chat icon + dropdown in the user links bar -->
-    <div id="chat-icon" onclick="toggleChatDropdown()" style="width: 16px; height: 16px; 
-    background-color:royalblue; position:relative; border-radius: 100%; padding: 8px; cursor: pointer;
-    ">
-      <!-- Simple chat icon (SVG) -->
-      <div id="message-number" style="color: white; position: absolute; top: -3px; right: -2px;">0</div>
-      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-3 ">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 8.511c.884.284 1.5 1.128 1.5 2.097v4.286c0 1.136-.847 2.1-1.98 2.193-.34.027-.68.052-1.02.072v3.091l-3-3c-1.354 0-2.694-.055-4.02-.163a2.115 2.115 0 0 1-.825-.242m9.345-8.334a2.126 2.126 0 0 0-.476-.095 48.64 48.64 0 0 0-8.048 0c-1.131.094-1.976 1.057-1.976 2.192v4.286c0 .837.46 1.58 1.155 1.951m9.345-8.334V6.637c0-1.621-1.152-3.026-2.76-3.235A48.455 48.455 0 0 0 11.25 3c-2.115 0-4.198.137-6.24.402-1.608.209-2.76 1.614-2.76 3.235v6.226c0 1.621 1.152 3.026 2.76 3.235.577.075 1.157.14 1.74.194V21l4.155-4.155" />
+
+
+   <!-- Modal (hidden by default) -->
+  <div id="view-chat-media" class="fixed inset-0 flex flex-col items-center justify-center bg-gray-900 bg-opacity-50" style="z-index: 100; display: none;">        
+    <div id="cancel-media-view" class="w-full float-right">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5 float-right text-red-500 cursor-pointer mr-3">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
       </svg>
     </div>
-
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-      <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-    </svg>
     
+    <div id="chat-media" class="w-[70%]"></div>
+  </div>
 
 
-    <!-- Button to open the modal -->
-  <button id="openModalBtn" class="bg-blue-500 text-white px-4 py-2 rounded">Create Group Chat</button>
 
-  <!-- Modal (hidden by default) -->
-  <div id="chatModal" class="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 hidden">
-    <div class="bg-white rounded-lg shadow-lg w-full max-w-md">
+    <!-- Modal (hidden by default) -->
+  <div id="create-chatModal" class="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 hidden" style="z-index: 100;">
+    <div class="bg-white rounded-lg shadow-lg w-full max-w-md fixed z-index-50">
       <!-- Modal Header -->
       <div class="px-6 py-4 border-b border-gray-200">
+
         <h3 class="text-xl font-semibold">Create Group Chat</h3>
       </div>
       <!-- Modal Body -->
@@ -43,15 +251,15 @@
         <!-- Room Name Input -->
         <div class="mb-4">
           <label for="roomName" class="block text-gray-700 text-sm font-bold mb-2">Room Name</label>
-          <input id="roomName" type="text" placeholder="Enter room name" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+          <input id="roomName" type="text" placeholder="Enter room name"  class="w-full rounded-3xl h-full focus:outline-none bg-transparent border-none focus:border-gray-500">
         </div>
         <!-- User Search Input -->
         <div class="mb-4">
           <label for="userSearch" class="block text-gray-700 text-sm font-bold mb-2">Add Users</label>
-          <input id="userSearch" type="text" placeholder="Search for users..." class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" onkeyup="liveSearchUsers()">
+          <input id="userSearch" type="text" placeholder="Search for users..." class="w-full rounded-3xl h-full focus:outline-none bg-transparent border-none focus:border-gray-500" onkeyup="liveSearchUsers()">
         </div>
         <!-- Search Results -->
-        <div id="searchResults" class="mb-4">
+        <div id="searchResults" class="mb-4 max-h-40 overflow-y-scroll">
           <!-- Live search results will appear here -->
         </div>
         <!-- No user found message -->
@@ -60,31 +268,232 @@
           <button id="sendInviteBtn" class="underline text-blue-500 ml-2">Send Invite</button>
         </div>
         <!-- Selected Users -->
-        <div id="selectedUsers" class="mb-4">
+        <div id="selectedUsers" class="mb-4 max-h-32 overflow-y-scroll">
           <h4 class="text-gray-700 font-bold mb-2">Selected Users:</h4>
           <!-- Selected users will be appended here -->
         </div>
       </div>
       <!-- Modal Footer -->
       <div class="px-6 py-4 border-t border-gray-200 flex justify-end">
-        <button id="closeModalBtn" class="bg-gray-500 text-white px-4 py-2 rounded mr-2">Cancel</button>
-        <button id="createRoomBtn" class="bg-blue-500 text-white px-4 py-2 rounded">Create Room</button>
+        <button id="closeModalBtn"  class="inline-flex items-center w-[70%] md:w-[50%] justify-center p-3 rounded-3xl bg-red-600 text-white border border-neutral-150 shadow-sm font-semibold">Cancel</button>
+        <button id="createRoomBtn"  class="inline-flex items-center w-[70%] md:w-[50%] justify-center p-3 rounded-3xl bg-[#417690] text-white border border-neutral-150 shadow-sm font-semibold">Create Room</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- only add user modal -->
+  <div id="only-add-user-modal" class="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50" style="z-index: 100; display: none;">
+    <div class="bg-white rounded-lg shadow-lg w-full max-w-md fixed z-index-50">
+      <!-- Modal Header -->
+      <div class="px-6 py-4 border-b border-gray-200">
+        <h3 class="text-xl font-semibold">Add users to Chat</h3>
+      </div>
+      <!-- Modal Body -->
+      <div class="px-6 py-4">
+        <!-- User Search Input -->
+        <div class="mb-4">
+          <label for="admin-userSearch" class="block text-gray-700 text-sm font-bold mb-2">Add Users</label>
+          <input id="admin-userSearch" type="text" placeholder="Search for users..." class="w-full rounded-3xl h-full focus:outline-none bg-transparent border-none focus:border-gray-500" onkeyup="adminLiveSearchUsers()">
+        </div>
+        <!-- Search Results -->
+        <div id="admin-searchResults" class="mb-4 max-h-40 overflow-y-scroll">
+          <!-- Live search results will appear here -->
+        </div>
+        <!-- No user found message -->
+        <div id="admin-noUserFound" class="hidden text-red-500 text-sm">
+          Oops, user not found.
+          <button id="admin-sendInviteBtn" class="underline text-blue-500 ml-2">Send Invite</button>
+        </div>
+        <!-- Selected Users -->
+        <div id="admin-selectedUsers" class="mb-4 max-h-32 overflow-y-scroll">
+          <h4 class="text-gray-700 font-bold mb-2">Selected Users:</h4>
+          <!-- Selected users will be appended here -->
+        </div>
+      </div>
+      <!-- Modal Footer -->
+      <div class="px-6 py-4 border-t border-gray-200 flex justify-end">
+        <button id="admin-closeModalBtn"  class="inline-flex items-center w-[70%] md:w-[50%] justify-center p-3 rounded-3xl bg-red-600 text-white border border-neutral-150 shadow-sm font-semibold">Cancel</button>
+        <button id="admin-add-users"  class="inline-flex items-center w-[70%] md:w-[50%] justify-center p-3 rounded-3xl bg-[#417690] text-white border border-neutral-150 shadow-sm font-semibold">Add Users</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- leave room yes or no modal-->
+  <div id="leave-room-yes-or-no-modal" class="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50" style="z-index: 100; display: none;">
+    <div class="bg-white rounded-lg shadow-lg w-full max-w-md fixed z-index-50">
+      <!-- Modal Header -->
+      <div class="px-6 py-4 border-b border-gray-200">
+        <h3 class="text-xl font-semibold">Are you sure you want to leave room?</h3>
+      </div>
+      <!-- Modal Body -->
+      <div class="px-6 py-4 border-t border-gray-200 flex justify-end">
+        <button id="leave-room-closeModalBtn"  class="inline-flex items-center w-[70%] md:w-[50%] justify-center p-3 rounded-3xl bg-red-600 text-white border border-neutral-150 shadow-sm font-semibold">Cancel</button>
+        <button id="leave-room-confirm"  class="inline-flex items-center w-[70%] md:w-[50%] justify-center p-3 rounded-3xl bg-[#417690] text-white border border-neutral-150 shadow-sm font-semibold">Leave</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete room yes or no modal-->
+  <div id="delete-room-yes-or-no-modal" class="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50" style="z-index: 100; display: none;">
+    <div class="bg-white rounded-lg shadow-lg w-full max-w-md fixed z-index-50">
+      <!-- Modal Header -->
+      <div class="px-6 py-4 border-b border-gray-200">
+        <h3 class="text-xl font-semibold">Are you sure you want to delete room?</h3>
+      </div>
+      <!-- Modal Body -->
+      <div class="px-6 py-4 border-t border-gray-200 flex justify-end">
+        <button id="delete-room-closeModalBtn"  class="inline-flex items-center w-[70%] md:w-[50%] justify-center p-3 rounded-3xl bg-red-600 text-white border border-neutral-150 shadow-sm font-semibold">Cancel</button>
+        <button id="delete-room-confirm"  class="inline-flex items-center w-[70%] md:w-[50%] justify-center p-3 rounded-3xl bg-[#417690] text-white border border-neutral-150 shadow-sm font-semibold">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- remove user yes or no modal-->
+  <div id="remove-user-yes-or-no-modal" class="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50" style="z-index: 100; display: none;">
+    <div class="bg-white rounded-lg shadow-lg w-full max-w-md fixed z-index-50">
+      <!-- Modal Header -->
+      <div class="px-6 py-4 border-b border-gray-200">
+        <h3 class="text-xl font-semibold">Are you sure you want to remove this user?</h3>
+      </div>
+      <!-- Modal Body -->
+      <div class="px-6 py-4 border-t border-gray-200 flex justify-end">
+        <button id="remove-user-closeModalBtn"  class="inline-flex items-center w-[70%] md:w-[50%] justify-center p-3 rounded-3xl bg-red-600 text-white border border-neutral-150 shadow-sm font-semibold">Cancel</button>
+        <button id="remove-user-confirm"  class="inline-flex items-center w-[70%] md:w-[50%] justify-center p-3 rounded-3xl bg-[#417690] text-white border border-neutral-150 shadow-sm font-semibold">Leave</button>
       </div>
     </div>
   </div>
 
 
-    <!-- Dropdown panel (initially hidden) -->
-    <div id="chatDropdown" class="hidden" style="position: absolute;  height: 80%; right: 0; margin-top: 8px; width: 380px; background-color: #fff; border: 1px solid #ccc; border-radius: 4px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); z-index: 50;">
-      <div style="display: flex; flex-direction: column; height: 288px;">
-        <!-- header -->
-        <!-- Message area -->
-        <div id="chatMessages" style="flex: 1; overflow-y: auto; padding: 12px;">
-          <!-- Incoming messages will appear here -->
-        </div>
-      </div>
+  <div id="icon-container" style="display: flex; justify-content: center; gap: 1rem; margin-top: -7px;">
+    <!-- Insert our chat icon + dropdown in the user links bar -->
+    <div id="chat-icon" onclick="toggleChatDropdown()" class="w-[28px] h-[28px] bg-[royalblue] relative rounded-full items-center flex justify-center">
+      <!-- Simple chat icon (SVG) -->
+      <div id="message-number" class="text-white absolute top-[-3px] right-[-2px] opacity-0">0</div>
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 8.511c.884.284 1.5 1.128 1.5 2.097v4.286c0 1.136-.847 2.1-1.98 2.193-.34.027-.68.052-1.02.072v3.091l-3-3c-1.354 0-2.694-.055-4.02-.163a2.115 2.115 0 0 1-.825-.242m9.345-8.334a2.126 2.126 0 0 0-.476-.095 48.64 48.64 0 0 0-8.048 0c-1.131.094-1.976 1.057-1.976 2.192v4.286c0 .837.46 1.58 1.155 1.951m9.345-8.334V6.637c0-1.621-1.152-3.026-2.76-3.235A48.455 48.455 0 0 0 11.25 3c-2.115 0-4.198.137-6.24.402-1.608.209-2.76 1.614-2.76 3.235v6.226c0 1.621 1.152 3.026 2.76 3.235.577.075 1.157.14 1.74.194V21l4.155-4.155" />
+      </svg>
+    </div>
+
+      <!-- Button to open the modal -->  
+    <div id="openModalBtn"  title="create chat rooms" class="cursor-pointer">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-7">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+      </svg>
     </div>
     
+  </div>
+
+
+    <!-- Dropdown panel (initially hidden) -->
+  <div id="chatDropdown" class="hidden" style="position: absolute;  height: 92%; overflow-y: hidden; right: 0; margin-top: 8px; width: 480px; background-color: #fff; border: 1px solid #ccc; border-radius: 4px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); z-index: 50;">
+        <!-- loader modal -->
+    <div id="all-chatroom-loader-modal" class="flex hidden justify-center items-center w-full h-full bg-transparent bg-opacity-50">        
+      <span class="loader block"></span>
+    </div>
+    <div id="chatroom-load" class="h-full" style="display: block;">
+      <!-- header -->
+      <!-- Message area -->        
+      <div class="h-full">
+
+  <!-- Left Sidebar (Chats List) -->
+  <div class="w-full h-full bg-white border-r border-gray-300">
+  <div class="h-full">
+    <!-- Search Bar -->
+    <div class="p-4 border-b border-gray-300 relative">
+      <input 
+        type="text" 
+        placeholder="Search..." 
+        id="messageSearchInput"
+        class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500" 
+      />
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4 absolute text-black cursor-pointer right-[23px] top-[23px]">
+        <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+      </svg>
+    </div>
+
+    <div id="message-search-results" style="display: none;" class="p-4 border rounded-md bg-white max-h-64 overflow-y-auto">
+        <!-- Live search results will be displayed here -->
+    </div>
+
+
+    <!-- main body -->
+  <div id="main-body" class="flex flex-col"> 
+    <div id="chat-online-back-arrow" class="my-3 cursor-pointer ml-3" style="display: none;">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-3 text-black">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
+      </svg>
+      
+    </div>  
+    <div id="menu-switch-tab" class="flex justify-between mx-3 mb-4 mt-2">
+      <p id="online-tab" class="cursor-pointer text-black">Online</p>
+      <p id="chat-tab" class="cursor-pointer text-black" style="text-decoration: underline;">Chats</p>
+    </div>
+    <div id="menu-chat-parent">
+      <div id="menuparent">
+        <div id="personal-chat"  class="w-full text-black hover:bg-gray-100 p-3 cursor-pointer border-b border-gray-200">Personal Chats </div>
+        <div id="group-chat" class="w-full text-black hover:bg-gray-100 p-3 cursor-pointer border-b border-gray-200">Group chats</div>
+        <div id="broadcast-all-agent" class="w-full text-black hover:bg-gray-100 p-3 cursor-pointer border-b border-gray-200">Broadcast message to Agents</div>
+        <div id="broadcast-all-ho" class="w-full text-black hover:bg-gray-100 p-3 cursor-pointer border-b border-gray-200">Broadcast message to Home Owners</div>
+      </div>
+      <div id="onlineStatusList" class="online-status-container w-full gap-4" style="display: none;"></div>
+    </div>
+  </div>
+
+  <div id="personal-message-page" class="h-[77%]" style="display: none;">
+  {% include './personal_message_page.html' %}  
+  </div>
+  <div id="group-message-page" class="" style="display: none;">
+  {% include './group_chat_list.html' %}  
+  </div>
+  <div id="broadcast-all-agent-page" class="h-full" style="display: none;">
+  {% include './broadcast_all_agent_page.html' %}  
+  </div>
+    <div id="broadcast-all-ho-page" class="" style="display: none;">
+    {% include './broadcast_all_ho_page.html' %}  
+    </div>
+
+    <div id="suggestion-div" class="bottom-[4rem] absolute h-fit w-[407px] bg-white pl-[8px]" style="display: none;">
+      <div id="mentionSuggestions" class="flex-col gap-4 bg-white w-[300px] h-fit pt-4" style="text-align: start; display: none;"></div>
+      <!-- Media Preview -->
+      <div id="mediaPreview" class="mb-3" style="display: none;"></div>
+      <div id="reply-message-div" style="text-align: start; display: none;">
+        <div class="w-full flex flex-col gap-4 bg-gray-200 text-gray-600 text-transform-none border-l-2 border-green-200 p-4 rounded-t-md mb-1">
+          <div id="reply-message-cancel" style="align-self: end;">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-3 text-red-500 cursor-pointer">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+            </svg>
+            
+          </div>
+        </div>
+      </div>
+      <div id="typing-div"></div>
+    </div>
+
+    <!-- File Upload -->
+    <input type="file" id="mediaInput" style="display: none;" accept="image/*" multiple>             
+
+      <!-- Chat Input -->
+    <div id="chat-message-parent-div" class="w-full flex justify-center items-center py-2" style="position: absolute; bottom: 0; display: none;">
+      <div id="input" class="mt-4 w-full flex gap-2 px-2 relative">
+          <input id="message" type="text" placeholder="type..." 
+                class="bg-transparent outline-none border pl-3 h-[50px] rounded-xl dark:text-white flex-1 text-md font-md" oninput="onInputChange()">
+                <label for="mediaInput" id="mediaInputLabel" class="cursor-pointer absolute bottom-4 right-[6rem]" id="messageMedia">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5 text-gray-500 cursor-pointer">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 0 0-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 0 1-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H9.75" />
+                  </svg>
+                </label>
+          <div id="chat-message-submit" class="text-[#0d2438] dark:text-white cursor-pointer flex flex-col justify-center">
+              <input class="cursor-pointer" type="button" value="Send">
+          </div>
+      </div>
+    </div>
+</div>  
+    
+    
+  </div>
+  </div>
+  </div>
+  
 {% endblock userlinks %}
 
 {% block content %}
@@ -93,133 +502,18 @@
 {% endblock content %}
 
 {% block footer %}
-    {{ block.super }}
-    <!-- Basic WebSocket chat logic + dropdown toggle -->
-    <script>
-      
-      let header = document.querySelector("#header")
-      let chatMessages = document.querySelector("#chatMessages")
-      let userTools = document.querySelector("#user-tools")
-      let chatIcon = document.querySelector("#chat-icon")
-      console.log("usertools",header);
-      header.prepend(chatIcon)
-      userTools.append(chatMessages)
-      // userTools.style.cssText = 'lign-items:center; justify-items:center;'
-      function toggleChatDropdown() {
-        const dropdown = document.getElementById('chatDropdown');
-        dropdown.classList.toggle('hidden');
-      }
+{{ block.super }}
+<script>
+  const csrfToken = "{{ csrf_token }}";  
+  const userId = "{{ request.user.username}}";
+</script>
 
-      // WebSocket setup
-      const wsScheme = window.location.protocol === "https:" ? "wss" : "ws";
-      
-      
-      const roomId = "room_ab"
-      const chatSocket = new WebSocket(
-          wsScheme + '://' + window.location.host + '/ws/chat/' + roomId + '/'
-      );
+<script src="{% static 'js/admin.js' %}"></script>
 
-      chatSocket.onopen = () => {
-        console.log("WebSocket connection established");
-      };
-
-      chatSocket.onmessage = (e) => {
-        const data = JSON.parse(e.data);
-        const chatMessages = document.getElementById('chatMessages');
-        // Create a message div
-        const msgDiv = document.createElement('div');
-        msgDiv.textContent = data.message;
-        msgDiv.className = "bg-gray-100 p-2 rounded mb-2";
-        chatMessages.appendChild(msgDiv);
-        // Auto-scroll to the bottom
-        chatMessages.scrollTop = chatMessages.scrollHeight;
-      };
-
-      chatSocket.onclose = () => {
-        console.log("WebSocket connection closed");
-      };
-
-      function sendMessage() {
-        const input = document.getElementById('chatInput');
-        const message = input.value.trim();
-        if (message) {
-          chatSocket.send(JSON.stringify({ message }));
-          input.value = '';
-        }
-      }
-
-    // Modal open and close logic
-    document.getElementById('openModalBtn').addEventListener('click', () => {
-      document.getElementById('chatModal').classList.remove('hidden');
-    });
-    document.getElementById('closeModalBtn').addEventListener('click', () => {
-      document.getElementById('chatModal').classList.add('hidden');
-    });
-
-    // Live search for users
-    function liveSearchUsers(){
-      const query = document.getElementById('userSearch').value;
-      const resultsDiv = document.getElementById('searchResults');
-      const noUserDiv = document.getElementById('noUserFound');
-      
-      if (query.length < 2) {
-        resultsDiv.innerHTML = '';
-        noUserDiv.classList.add('hidden');
-        return;
-      }
-      
-      fetch(`/api/user-search/?q=${encodeURIComponent(query)}`)
-        .then(response => response.json())
-        .then(data => {
-          resultsDiv.innerHTML = '';
-          if (data.users && data.users.length > 0) {
-            noUserDiv.classList.add('hidden');
-            data.users.forEach(user => {
-              const userDiv = document.createElement('div');
-              userDiv.className = 'flex items-center justify-between border-b border-gray-200 py-2';
-              userDiv.innerHTML = `
-                <span>${user.username} (${user.email})</span>
-                <button onclick="addUserToRoom('${user.id}', '${user.username}')" class="text-blue-500 hover:text-blue-700">Add</button>
-              `;
-              resultsDiv.appendChild(userDiv);
-            });
-          } else {
-            resultsDiv.innerHTML = '';
-            noUserDiv.classList.remove('hidden');
-          }
-        })
-        .catch(error => {
-          console.error('Error searching users:', error);
-        });
-    }
-
-    // Keep track of selected user IDs
-    let addedUserIds = [];
-
-    // Add user to selected list
-    function addUserToRoom(userId, username) {
-      if (addedUserIds.includes(userId)) return;
-      addedUserIds.push(userId);
-      
-      const selectedUsersDiv = document.getElementById('selectedUsers');
-      const userEntry = document.createElement('div');
-      userEntry.className = 'flex items-center justify-between p-2 bg-gray-100 rounded mt-2';
-      userEntry.innerHTML = `
-        <span>${username}</span>
-        <button onclick="removeUserFromRoom('${userId}', this)" class="text-red-500 hover:text-red-700">Remove</button>
-      `;
-      selectedUsersDiv.appendChild(userEntry);
-      
-      // Optionally, clear search results and input
-      document.getElementById('searchResults').innerHTML = '';
-      document.getElementById('userSearch').value = '';
-    }
-
-    // Remove a user from selected list
-    function removeUserFromRoom(userId, btn) {
-      addedUserIds = addedUserIds.filter(id => id !== userId);
-      btn.parentElement.remove();
-    }
-
-    </script>
 {% endblock footer %}
+
+
+
+
+
+
