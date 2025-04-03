@@ -5,6 +5,8 @@ from django.contrib.contenttypes.models import ContentType
 
 import cloudinary.uploader
 from .models import MessageMedia
+from main.models import Media 
+
 
 
 class AgentAssignmentSerializer(serializers.Serializer):
@@ -183,8 +185,6 @@ class BulkMediaSerializer(serializers.Serializer):
         return attrs
 
     def create(self, validated_data):
-        from django.contrib.contenttypes.models import ContentType
-        from main.models import Media 
         content_type_id = validated_data["content_type_id"]
         object_id = validated_data["object_id"]
 

@@ -8,7 +8,7 @@
     {{ block.super }}
 
 
-  <style>
+<style>
     .loader {
   font-size: 10px;
   width: 1em;
@@ -397,7 +397,7 @@
 
   <!-- Left Sidebar (Chats List) -->
   <div class="w-full h-full bg-white border-r border-gray-300">
-  <div class="">
+  <div class="h-full">
     <!-- Search Bar -->
     <div class="p-4 border-b border-gray-300 relative">
       <input 
@@ -439,13 +439,13 @@
     </div>
   </div>
 
-  <div id="personal-message-page" class="" style="display: none;">
+  <div id="personal-message-page" class="h-[77%]" style="display: none;">
   {% include './personal_message_page.html' %}  
   </div>
   <div id="group-message-page" class="" style="display: none;">
   {% include './group_chat_list.html' %}  
   </div>
-  <div id="broadcast-all-agent-page" class="" style="display: none;">
+  <div id="broadcast-all-agent-page" class="h-full" style="display: none;">
   {% include './broadcast_all_agent_page.html' %}  
   </div>
     <div id="broadcast-all-ho-page" class="" style="display: none;">

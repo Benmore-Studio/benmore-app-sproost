@@ -5,7 +5,6 @@
   let chatIcon = document.querySelector("#chat-icon")
   let iconContainer = document.querySelector("#icon-container")
   let openModalBtn = document.querySelector("#openModalBtn")
-  const chatContainer = document.getElementById("chatList");
   const ChatList = document.getElementById("chatList");
   const individualChatListBody = document.getElementById("individual-chatList-body");
   const backArrow = document.getElementById("back-arrow");
@@ -32,7 +31,15 @@
   let grouindividualGroupParentsChat = document.getElementById("individual-group-parents")
   let messageBodyParent = document.getElementById("message-body-parent")
   let personalMessageBodyParent = document.getElementById("personal-message-body-parent")
+  let personalMessageBody = document.getElementById("personal-message-body")
   let groupMessageBackArrow = document.getElementById("group-message-back-arrow")
+  let allPersonalGroups = document.getElementById("all-personal-groups")
+  let personalGroupParents = document.getElementById("personal-group-parents")
+  let broadcastChatList = document.getElementById("broadcast-chatList")
+  let broadcastAllAgentPage = document.getElementById("broadcast-all-agent-page")
+  let broadcastMessageBackArrow = document.getElementById("broadcast-message-back-arrow")
+  // broadcastmessage send button
+  let sendButton = document.getElementById("broadcast-message-submit")
 
   if(backArrow){
     backArrow.style.marginTop = '8px'
@@ -54,6 +61,7 @@
   let prependMode = false;
   let scrollFromBottom;
   let globalMessageScroll;
+  let user_broadcast_rooms = {};
   let uploadedMedia = []; 
   const maxFiles = 3;
   let globalPublicId = {};
@@ -63,8 +71,9 @@
     console.log("all-individual-groups");
     document.getElementById("group-message-page").style.display = "block"
     mainBody.style.display = "none"
+    ChatList.style.display = "flex"
+    console.log("all-individual-groups2");
     grouindividualGroupParentsChat.style.display = "block"
-    personalMessageBodyParent.style.display = "block"
   })
 
 
@@ -94,6 +103,8 @@
     mainBody.style.display = 'block'
 
   })
+
+
   backArrow.addEventListener("click", function(){
     const searchNavigation= document.getElementById("search-navigation")
     if(searchNavigation){
@@ -103,13 +114,14 @@
     messageBodyParent.style.display = 'none'
     dontUpdateMessageNumber = false
     document.getElementById('chat-message-parent-div').style.display = 'none'
+    document.getElementById("message-body").innerHTML =""
 
   })
 
 
 
-
-  function openChatRoom(roomId, messages, type, roomName, searchId) {
+// opens a chat room and requsts the firstbatch of a message that will be received in message_list action
+function openChatRoom(roomId, messages, type, roomName, searchId) {
     console.log("typppqwe", type, roomName);
     if(type == "search"){
       document.getElementById("message-search-results").style.display = "none"
@@ -130,15 +142,25 @@
     searchNavigation.innerHTML = ""   
     searchNavigation.appendChild(nextSearchResult)
     searchNavigation.appendChild(previousSearchResult)                 
-    }     
+    // Store search matches for navigation
+    currentSearchIndex = 0;
+
+    // Highlight first match
+    setTimeout(() => highlightSearchResult(0, searchId), 1000);
+  
+  } 
+
+    console.log("notopen", type);    
 
     if(type === "private"){
       dontUpdatePrivateMessageNumber = true
       mainBody.style.display = "none"
-      personalMessageBodyParent.style.cssText = "display:flex; flex-direction:column;"
+      personalGroupParents.style.display = "none"
+      personalMessageBodyParent.style.cssText = "display:flex;"
+      document.getElementById('chat-message-parent-div').style.display = 'block'
+      document.getElementById("personal-chatroom-modal").style.display ="flex"
     }
-    console.log("opened", "chat");
-    if(type == "message"){
+    if(type === "group_chat"){
       dontUpdateMessageNumber = true
       messageBodyParent.style.display = "block"
       grouindividualGroupParentsChat.style.display = "none"
@@ -146,15 +168,17 @@
       messageNumberElement.innerHTML = ''
       messageNumberElement.style.opacity = 0
       console.log("messageNumberElement",messageNumberElement);
+      document.getElementById('chat-message-parent-div').style.display = 'block'
+      document.getElementById("individual-chatroom-modal").style.display ="flex"
 
     }
     currentRoomId = roomId;
     currentPage = 1;
     document.getElementById('message-body').innerHTML = ''
-    document.getElementById('chat-message-parent-div').style.display = 'block'
-    chatContainer.style.display = 'none'
     const roomTitle = document.getElementById("roomTitle")
+    const personalRoomTitle = document.getElementById("personal-roomTitle")
     roomTitle.innerHTML = roomName
+    personalRoomTitle.innerHTML = roomName
     globalRoomName = roomName
     roomTitle.style.textAlign = 'center'
     ChatList.style.display = 'block'
@@ -167,15 +191,9 @@
         page: currentPage
     }));
 
-    if(type === "search"){
-      // Store search matches for navigation
-      currentSearchIndex = 0;
 
-      // Highlight first match
-      setTimeout(() => highlightSearchResult(0, searchId), 1000);
-    }
+    console.log("openchat");
 }
-
 
 //#region   message search
 
@@ -262,6 +280,7 @@ async function searchMessages() {
               globalSearchId = searchId
 
               const openChatType = "search";
+              console.log("search clickes2");
               // Call the openChatRoom function with correct arguments
               openChatRoom(room.room_id, room.content, openChatType, room.room_name, searchId);
           });
@@ -334,54 +353,6 @@ document.getElementById("messageSearchInput").addEventListener("input", searchMe
 //#endregion
 
 
-
-function loadChatRoom(roomId) {
-    console.log(`Loading chat room: ${roomId}`);
-
-    // Show the chat panel
-    ChatList.style.display = "block";
-
-    // Set the room title
-    document.getElementById("roomTitle").innerText = `Chat Room ${roomId}`;
-
-    // Clear previous messages
-    const chatMessages = document.getElementById("message-body");
-    chatMessages.innerHTML = "Loading messages...";
-
-    // Fetch and display messages
-    fetch(`/get-messages/?room_id=${roomId}`)
-        .then(response => response.json())
-        .then(data => {
-            chatMessages.innerHTML = "";  // Clear loading text
-
-            data.messages.forEach(msg => {
-                const msgDiv = document.createElement("div");
-                msgDiv.id = `message-${msg.id}`;  // Set unique ID for highlighting
-                msgDiv.classList.add("p-2", "border-b");
-
-                // Message structure
-                msgDiv.innerHTML = `
-                    <div class="flex gap-4">
-                        <p class="text-[#417690] font-bold">${msg.sender}</p>
-                        <p class="text-gray-300 text-sm">${msg.timestamp}</p>
-                    </div>
-                    <p>${msg.content}</p>
-                `;
-
-                chatMessages.appendChild(msgDiv);
-            });
-
-            console.log("Messages loaded successfully.");
-        })
-        .catch(error => {
-            console.error("Error loading chat messages:", error);
-            chatMessages.innerHTML = "Failed to load messages.";
-        });
-}
-
-
-
-
 // Navigate between search results
 function nextSearchResult(roomId) {
     if (searchResults.length > 0) {
@@ -406,7 +377,7 @@ function previousSearchResult(roomId) {
 
   // Customize based on your message structure
   div.innerHTML = `
-    <div class="text-sm text-gray-800 font-semibold">${msg.username}</div>
+    <div class="text-[#417690] text-bold">${msg.username}</div>
     <div class="text-sm text-gray-600">${msg.message}</div>
     <div class="text-xs text-gray-400">${msg.timestamp}</div>
   `;
@@ -416,51 +387,81 @@ function previousSearchResult(roomId) {
 
 
 
+function appendBroadcastMessage(data, room_type) {
+ 
+  const container = document.getElementById("broadcast-message-body");
+  console.log("obi", data);
+
+  const wrapper = document.createElement("div");
+  wrapper.className = "p-2 border-b relative";
+
+  wrapper.innerHTML = `
+  <div class="w-full flex gap-4 items-center">
+    <div class="text-[#417690] text-bold">${data.username}</div>
+    <div class="text-gray-300 text-small">${data.timestamp}</div>
+  </div>
+  <div class="text-base text-gray-800 justify-self-start" style="text-transform: none; font-family: Rubik, sans-serif; font-size: 13px; color:black;">${data.message}</div>
+`;
 
 
-  chatSocket.onmessage = function (event) {
-    const data = JSON.parse(event.data);
+  container.appendChild(wrapper);
+  container.scrollTop = container.scrollHeight;
+}
+
+
+
+
+chatSocket.onmessage = function (event) {
+  const data = JSON.parse(event.data);
+  if(data.action !== "typing"){
     console.log("call",data, userId);
-    if (data.action === "room_list") {
-      updateChatRooms(data);  // Update the chat room UI
-      document.getElementById("all-chatroom-loader-modal").style.display ="none"
-      ChatList.style.display ="block"
 
-    } 
-    else if (data.action === "new_room") {
-      updateChatRooms(data);  // Update the chat room UI
-    } 
-    else if (data.action === 'typing') {
-      console.log(data);
-      let roomId = `chat-room-${data.room}`
-      let room = document.getElementById(roomId)
-      let typingDiv = document.getElementById('typing-div')
-      if(data.typing === true){
-        if(data.username !== userId){
-          document.getElementById("suggestion-div").style.display = "block"
-          typingDiv.innerHTML = `${data.username} is typing` 
-          typingDiv.className = "text-green-500 text-sm mb-3 float-left"
-          typingDiv.style.cssText = "text-transform: none; font-family: Rubik, sans-serif; font-size: 13px;"      
-        }
-        room.children[3].innerHTML = `${data.username} is typing`
-        room.children[3].className = "text-green-500 text-sm"
-       
-        room.children[1].style.display = "none"
-        console.log(room.children[1], room.children[2], "room.children[1]");
-        room.children[2].style.display = "none"
-        room.children[3].style.cssText = "text-transform: none; font-family: Rubik, sans-serif; font-size: 13px;"
-      
-      }else{
-        
-        room.children[1].style.display = "block"
-        room.children[2].style.display = "block"
-        room.children[3].style.display = "none"
-        // document.getElementById("suggestion-div").style.display = "none"
-        typingDiv.style.display = "none"
-    
-      }
+  }
+  if (data.action === "room_list") {
+    for(let i of data.broadcast_rooms){
+      console.log("ppp",i);
+      user_broadcast_rooms[i.room_type] = i.room_id
     }
-    else if (data.action === "message") { 
+    console.log("just",user_broadcast_rooms);
+    updateChatRooms(data);  // Update the chat room UI
+    document.getElementById("all-chatroom-loader-modal").style.display ="none"
+    ChatList.style.display ="block"
+
+  } 
+  else if (data.action === "new_room") {
+    updateChatRooms(data);  // Update the chat room UI
+  } 
+  else if (data.action === 'typing') {
+    console.log(data);
+    let roomId = `chat-room-${data.room}`
+    let room = document.getElementById(roomId)
+    let typingDiv = document.getElementById('typing-div')
+    if(data.typing === true){
+      if(data.username !== userId){
+        document.getElementById("suggestion-div").style.display = "block"
+        typingDiv.innerHTML = `${data.username} is typing` 
+        typingDiv.className = "text-green-500 text-sm mb-3 float-left"
+        typingDiv.style.cssText = "text-transform: none; font-family: Rubik, sans-serif; font-size: 13px; color:black;"      
+      }
+      room.children[3].innerHTML = `${data.username} is typing`
+      room.children[3].className = "text-green-500 text-sm"
+      
+      room.children[1].style.display = "none"
+      console.log(room.children[1], room.children[2], "room.children[1]");
+      room.children[2].style.display = "none"
+      room.children[3].style.cssText = "text-transform: none; font-family: Rubik, sans-serif; font-size: 13px; color:black;"
+    
+    }else{
+      
+      room.children[1].style.display = "block"
+      room.children[2].style.display = "block"
+      room.children[3].style.display = "none"
+      // document.getElementById("suggestion-div").style.display = "none"
+      typingDiv.style.display = "none"
+  
+    }
+  }
+  else if (data.action === "message") { 
       console.log("uphreme", data);
       let iconString = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-3 text-gray-500 cursor-pointer">
                         <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" /> onClick="openOptions()"
@@ -551,8 +552,9 @@ function previousSearchResult(roomId) {
       // designing the message div
       const mainMessageContent = document.createElement('p');
       const replyMsgDiv = document.createElement('div');
-      mainMessageContent.textContent = formattedText;
+      mainMessageContent.innerHTML = formattedText;
       mainMessageContent.style.textAlign = "start"
+      mainMessageContent.style.color = "black"
 
       // attaching  media if any
       if(data.media.length > 0){
@@ -624,118 +626,119 @@ function previousSearchResult(roomId) {
         chatMessages.scrollTop = chatMessages.scrollHeight;
       }
       else if(data.room_type === "private"){
-        personalMessageBodyParent.appendChild(msgDiv);
-        personalMessageBodyParent.scrollTop = chatMessages.scrollHeight;
+        console.log("chukwu");
+        personalMessageBody.appendChild(msgDiv);
+        personalMessageBody.scrollTop = chatMessages.scrollHeight;
       }
+  }
+  else if (data.action === "broadcast_message"){
+    let room_type="broadcast"
+    appendBroadcastMessage(data, room_type)
+  }
+    
+  else if (data.action === "message_list") {
+    const chatMessages = document.getElementById('message-body');
+    const scrollFromBottom = chatMessages.scrollHeight - chatMessages.scrollTop;
+
+    if (globalMessageScroll === 0 && data.messages.length < 1){
+      return
     }
-    
-    // else if (data.action === "message_list") {
-    //   const chatMessages = document.getElementById('message-body');
-    //   const scrollFromBottom = chatMessages.scrollHeight - chatMessages.scrollTop;
-
-    //   if (globalMessageScroll === 0 && data.messages.length < 1){
-    //     return
-    //   }
-    //   if (prependMode) {
-    //     data.messages.forEach(msg => addMessage(msg.username, msg.deleted, msg.message, msg.timestamp, msg.id, msg.username, msg.reply_to, msg.reply_to_num, msg.url));
-    //     isLoading = false;
-    //     roomMembers = data.members
-    //     // scroll offset fix
-    //     requestAnimationFrame(() => {
-    //       chatMessages.scrollTop = chatMessages.scrollHeight - scrollFromBottom;
-    //       isLoading = false;
-    //     });
-
-    //     prependMode = false;
-    //     return;
-
-    //   }else{    
-        
-    //   console.log("wooo", data);
-
-    //   chatMessages.innerHTML = "";
-    //   // chatMessages.style.height = "60%"
-    //   // Reverse messages (oldest first) and add to chat
-    //   data.messages.reverse().forEach(msg => {addMessage(msg.username, msg.deleted, msg.message, msg.timestamp, msg.id, msg.username, msg.reply_to, msg.reply_to_num, msg.media)});
-    //   isLoading = false;
-    //   roomMembers = data.members
-    //   // scroll to the bottom
-    //   setTimeout(() => {
-    //     chatMessages.scrollTop = chatMessages.scrollHeight;
-    // }, 100);
-    // }
-    //   document.getElementById("individual-chatroom-modal").style.display ="none"
-    //   document.getElementById("message-body").style.width ="100%"
-    //   individualChatListBody.style.display ="flex"
-    // } 
-
-
-    else if (data.action === "message_list") {
-      const chatMessages = document.getElementById('message-body');
-        const scrollFromBottom = chatMessages.scrollHeight - chatMessages.scrollTop;
-  
-        if (globalMessageScroll === 0 && data.messages.length < 1){
-          return
-        }
-        if (prependMode) {
-          console.log("first", data);
-          data.messages.forEach(msg => addMessage(msg.username, msg.deleted, msg.message, msg.timestamp, msg.id, msg.username, msg.reply_to, msg.reply_to_num, msg.media));
-          isLoading = false;
-          roomMembers = data.members
-          // scroll offset fix
-          requestAnimationFrame(() => {
-            chatMessages.scrollTop = chatMessages.scrollHeight - scrollFromBottom;
-            isLoading = false;
-          });
-  
-          prependMode = false;
-          return;
-      }
-      else {    
-        console.log("wooo", data);
-    
-        chatMessages.innerHTML = "";
-        // Reverse messages (oldest first) and add to chat
-        data.messages.reverse().forEach(msg => {addMessage(msg.username, msg.deleted, msg.message, msg.timestamp, msg.id, msg.username, msg.reply_to, msg.reply_to_num, msg.media)});
+    if (prependMode) {
+      console.log("first", data);
+      data.messages.forEach(msg => addMessage(msg.username, msg.deleted, msg.message, msg.timestamp, msg.id, msg.username, msg.reply_to, msg.reply_to_num, msg.media, data.room_type));
+      isLoading = false;
+      roomMembers = data.members
+      // scroll offset fix
+      requestAnimationFrame(() => {
+        chatMessages.scrollTop = chatMessages.scrollHeight - scrollFromBottom;
         isLoading = false;
-        roomMembers = data.members
+      });
+
+      prependMode = false;
+      return;
+  
+    }
+    else {    
+      console.log("wooo", "again", data);     
+      // Reverse messages (oldest first) and add to chat
+      if(data.messages.length > 0){
+        personalMessageBody.innerHTML = "";
+        chatMessages.innerHTML = "";
+        chatMessages.classList.remove("flex", "justify-center", "text-black")
+        personalMessageBody.classList.remove("flex", "justify-center", "text-black")
+        data.messages.reverse().forEach(msg => {addMessage(msg.username, msg.deleted, msg.message, msg.timestamp, msg.id, msg.username, msg.reply_to, msg.reply_to_num, msg.media, data.room_type)});
+          console.log("acting");
+        if(data.room_type === "private"){
+          document.getElementById("personal-chatroom-modal").style.display ="none"
+            setTimeout(() => {
+              personalMessageBody.scrollTop = personalMessageBody.scrollHeight;
+            }, 100);
+        }
+        else if(data.room_type === "group_chat"){
+          document.getElementById("individual-chatroom-modal").style.display ="none"
           // scroll to the bottom
           setTimeout(() => {
             chatMessages.scrollTop = chatMessages.scrollHeight;
-        }, 100);
-          document.getElementById("individual-chatroom-modal").style.display ="none"
-          document.getElementById("personal-chatroom-modal").style.display ="none"
-          document.getElementById("message-body").style.width ="100%"
-          individualChatListBody.style.display ="flex"
-        } 
-      }    
-    
-    else if(data.action === "missed_messages"){
-      console.log("data.missed_messages", data.missed_messages);
-      data.missed_messages.forEach(keyStr => {
-        const keys = Object.keys(keyStr);
-        console.log("keyStr", keys, keyStr, keyStr[keys[0]])
-        const messageNumberElement  = document.querySelector(`#messageNumber-${keys[0]}`);
-        console.log(messageNumberElement);
-        let messageNumber = messageNumberElement.textContent
-        console.log(messageNumber !== "", messageNumber);
-        if(messageNumber !== ""){
-          messageNumberElement.textContent = Number(messageNumber) + Number(keyStr[keys[0]])
-          if(Number(messageNumberElement.textContent)>0){
-            messageNumberElement.style.opacity = 1
-          }
-        }else{
-          messageNumberElement.textContent = Number(keyStr[keys[0]])
-          if(Number(messageNumberElement.textContent)>0){
-            messageNumberElement.style.opacity = 1
-            console.log("mmmm");
-          }
+          }, 100);
+
         }
         
-      });
-      document.getElementById("all-chatroom-loader-modal").style.display ="none"
-      document.getElementById("chatroom-load").style.display ="block"
+      }else{
+        chatMessages.innerHTML = "";
+        personalMessageBody.innerHTML = "";
+        chatMessages.innerHTML = "No Messages yet Start a conversation";
+        chatMessages.classList.add("flex","flex-col", "items-center", "text-black")
+        personalMessageBody.innerHTML = "No Messages yet Start a conversation";
+        personalMessageBody.classList.add("flex", "flex-col", "items-center", "text-black")
+      }
+      roomMembers = data.members      
+      document.getElementById("message-body").style.width ="100%"
+      individualChatListBody.style.display ="flex"
+      } 
+  }
+  
+  else if(data.action === "message_list_for_broadcast"){
+    const container = document.getElementById("broadcast-message-body");
+    console.log("moliy");
+    if(data.messages.length > 0){
+      container.innerHTML = ""
+      container.classList.remove("item-center", "text-black","flex", "flex-col", "items-center", "mt-4")
+      data.messages.reverse().forEach(msg => appendBroadcastMessage(msg, data.room_type))
+    }else{
+      container.innerHTML = ""
+      container.innerHTML = "No messages yet, Broadcast a message!"
+      container.classList.add("item-center", "text-black","flex", "flex-col", "items-center", "mt-4")
+  
     }
+    
+  }
+  
+    // else if(data.action === "missed_messages"){
+    //   console.log("data.missed_messages", data.missed_messages);
+    //   data.missed_messages.forEach(keyStr => {
+    //     const keys = Object.keys(keyStr);
+    //     console.log("keyStr", keys, keyStr, keyStr[keys[0]])
+    //     const messageNumberElement  = document.querySelector(`#messageNumber-${keys[0]}`);
+    //     console.log(messageNumberElement);
+    //     let messageNumber = messageNumberElement.textContent
+    //     console.log(messageNumber !== "", messageNumber);
+    //     if(messageNumber !== ""){
+    //       messageNumberElement.textContent = Number(messageNumber) + Number(keyStr[keys[0]])
+    //       if(Number(messageNumberElement.textContent)>0){
+    //         messageNumberElement.style.opacity = 1
+    //       }
+    //     }else{
+    //       messageNumberElement.textContent = Number(keyStr[keys[0]])
+    //       if(Number(messageNumberElement.textContent)>0){
+    //         messageNumberElement.style.opacity = 1
+    //         console.log("mmmm");
+    //       }
+    //     }
+        
+    //   });
+    //   document.getElementById("all-chatroom-loader-modal").style.display ="none"
+    //   document.getElementById("chatroom-load").style.display ="block"
+    // }
     else if(data.action === "message_deleted"){
       console.log("delete", data);
       const messageElement = document.querySelector(`[data-message-id="${data.message_id}"]`);
@@ -750,6 +753,15 @@ function previousSearchResult(roomId) {
       // messageElement.parentElement.parentElement.parentElement.parentElement.children[1].className ="text-red-500 justify-self-start"
     }
     else if(data.action === "user_status"){
+      if(data.status == "online"){
+        console.log("haib", data.group_room_details.room_type, data.group_room_details);
+        // the logic here is to store each availble broadcast room, so the admin knows which rooms exists to broadcast, to cut errors
+        user_broadcast_rooms[data.group_room_details.room_type] = data.group_room_details.room_id
+        // user_broadcast_rooms = rooms.user_broadcast_rooms
+        console.log("iter", data.group_room_details.room_type, user_broadcast_rooms);
+      }else{
+        console.log("show", user_broadcast_rooms);
+      }
       renderOnlineStatus(data.user_id,  data.status, data.username, data.room_id, data.room_name)
     }
 };
@@ -848,33 +860,8 @@ async function removeMedia(publicId) {
 }
 
 
-  
-// function displayMediaPreview(url, publicId) {
-//   console.log("baby");
-//     document.getElementById("suggestion-div").style.display = "block";
-//     const previewContainer = document.getElementById("mediaPreview");
-//     previewContainer.style.display = 'block'
-//     const mediaElement = document.createElement("div");
-//     mediaElement.setAttribute("data-media-id", publicId);
-//     mediaElement.className = "w-fit"
-//     if (url.startsWith("data:video")) { // Detect video files
-//         mediaElement.innerHTML = `<button class="cursor-pointer text-red-500 text-md font-lg" onclick="removeMedia('${publicId}')">X</button> <video src="${url}" width="180" controls></video>`;
-//     } else { // Assume it's an image
-//         mediaElement.innerHTML = `<button class="cursor-pointer text-red-500 text-md font-lg" onclick="removeMedia('${publicId}')">X</button> <img src="${url}" width="180">`;
-//     }
-
-//     previewContainer.appendChild(mediaElement);
-// }
-
-
-
-// Attach event listener to file input
-// document.getElementById("mediaInput").addEventListener("change", handleFileSelect);
-
-
 
 document.getElementById("mediaInput").addEventListener("change", async (event) => {
-  console.log("object");
   const rawFiles = Array.from(event.target.files);
   const files = rawFiles.slice(0, maxFiles);
 
@@ -1005,23 +992,38 @@ async function uploadMedia(file, formData, numKey, data) {
 
 
 
-function sendMessage() {
-  const input = document.getElementById('message');
-  const message = input.value.trim();
-
+function sendMessage(sendMessageType, id) {
+  
+  console.log(id,"uwa");
   // Prevent sending if there's no text and no media
   if (!message && (!uploadedMedia || uploadedMedia.length === 0)) return;
 
   // Ensure WebSocket is open before sending a message
   if (chatSocket.readyState === WebSocket.OPEN) {
-    // Build the payload
+    const input = document.getElementById('message');
+    const broadcastInput = document.getElementById('broadcast');
+    
     const payload = {
       action: "send",
-      room_id: roomDetails[globalRoomName],
-      message: message,
-      receiver: roomMembers,
-      room_type:user_room_types 
+      
     };
+    if(sendMessageType === "normal"){
+      // Build the payload
+      const message = input.value.trim();
+      payload.room_id = roomDetails[globalRoomName]
+      payload.room_type = user_room_types
+      payload.receiver= roomMembers
+      payload.message = message
+    }
+    else if(sendMessageType === "broadcast"){
+      const dataSend = sendButton.dataset.send;
+      const message = broadcastInput.value.trim();
+      payload.message = message
+      payload.room_id = id
+      payload.room_type = "broadcast"
+      payload.broadcast_to = dataSend
+      console.log("rewq", dataSend);
+    }
 
     // If replying, attach the reply message ID
     if (replyMessageId) {
@@ -1060,6 +1062,7 @@ function sendMessage() {
 
     // Clear the text input and reset the attached media (if applicable)
     input.value = '';
+    broadcastInput.value = '';
     document.getElementById("mediaPreview").innerHTML = ""; // Clear media preview
     uploadedMedia = []; // Clear media attachments after sending
     // Optionally, also clear replyMessageId if needed:
@@ -1181,6 +1184,7 @@ function formatMessage(messageText) {
 
 
 
+
 // to updae the chat and move the message div to the top and to update message count
 function updateChatList(id, message, timestamp, sender) {  
   if(sender !== userId && dontUpdateMessageNumber === false){
@@ -1226,13 +1230,61 @@ function updateChatList(id, message, timestamp, sender) {
 document.getElementById("message").addEventListener("keydown", function(event) {
   if (event.key === "Enter") {
     event.preventDefault(); 
-    sendMessage(); 
+
+    // send takes two types of arguements, normal for private chats and broadcast for brodasts
+    let sendMessageType = "normal"
+    let id = null
+    sendMessage(sendMessageType, id); 
   }
 });
 
   document.getElementById("chat-message-submit").addEventListener('click', function(){
-    sendMessage()
+    let sendMessageType = "normal"
+    let id = null
+    sendMessage(sendMessageType, id)
   })
+
+
+  // for brodcast
+  // sending with enter key
+  sendButton.addEventListener("keydown", function(event) {
+    if (event.key === "Enter") {
+      event.preventDefault(); 
+      let sendMessageType = "broadcast";
+      let id = null;
+  
+      const dataSend = sendButton.dataset.send;
+  
+      for (let item of user_broadcast_rooms) {
+        console.log(dataSend,"object",item.room_type);
+        if (dataSend === item.room_type) {
+          id = item.room_id;
+          break; // Stop looping but don't return from the event handler
+        }
+      }
+  
+      if(id){
+        sendMessage(sendMessageType, id)
+      }
+      else{
+        return
+      }
+    }
+  });
+  
+  // sending with send button
+  sendButton.addEventListener('click', function(){
+    let sendMessageType = "broadcast"
+    let id;
+    const dataSend = sendButton.dataset.send
+      console.log("chels", dataSend, "fi", user_broadcast_rooms);
+      if(dataSend in user_broadcast_rooms){
+        id= user_broadcast_rooms[dataSend]
+      }
+      sendMessage(sendMessageType, id)
+   
+  })
+  // broadcast ends
 
   function openOptions(e){
     let messageOptions = e.target.nextElementSibling
@@ -1244,9 +1296,8 @@ document.getElementById("message").addEventListener("keydown", function(event) {
     }
   }
 
-  // Function to get all individual message to the UI
-  function addMessage(username,deleted, message, timestamp, id, sender, replymsg, replyMsgId, media) {
-    console.log("omo","why");
+  // Function to get all individual message added to the UI
+  function addMessage(username,deleted, message, timestamp, id, sender, replymsg, replyMsgId, media, Chat_room_type) {
     let iconString = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-3 text-gray-500 cursor-pointer">
                         <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" /> onClick="openOptions()"
                       </svg>`
@@ -1265,12 +1316,14 @@ document.getElementById("message").addEventListener("keydown", function(event) {
     const mainMessageContent = document.createElement('div');
     mainMessageContent.setAttribute("id", `message-child-${id}`);
     const replyMsgDiv = document.createElement('div');
-    mainMessageContent.textContent = formattedText;
-    mainMessageContent.style.textAlign = "start"
+    mainMessageContent.innerHTML = formattedText;
+    mainMessageContent.style.cssText = "textAlign:start;"
 
     const wrapperDivId = [];
 
-    console.log("oooo", media);
+
+    console.log(Chat_room_type, "Chat_room_type");
+
 
     if(media.length > 0){
       const wrapper = document.createElement("div");
@@ -1308,7 +1361,6 @@ document.getElementById("message").addEventListener("keydown", function(event) {
       }
       mainMessageContent.append(wrapper)
     }
-
       
 
     if(replymsg !== "None" && replyMsgId !== null){
@@ -1320,6 +1372,7 @@ document.getElementById("message").addEventListener("keydown", function(event) {
         <p>${replymsg}</p>
         </div>
       </div> `
+      
       messageBody.appendChild(replyMsgDiv)
       messageBody.appendChild(mainMessageContent)
     }else{
@@ -1332,102 +1385,113 @@ document.getElementById("message").addEventListener("keydown", function(event) {
     }
       
 
-      //  Setting their ids and event listeners
-      replyMessage.setAttribute("data-id", id);
-      replyMessage.addEventListener("click", (e) => {
-        replyMessageId = e.currentTarget.getAttribute("data-id");
-        const messageElement = document.querySelector(`[data-message-id="${id}"]`);
-        const replyMessageDiv = document.getElementById("reply-message-div")
-        const messageInput = document.getElementById("message")
-        messageInput.focus()
-        const gottenReplyMessageUsername= e.target.parentElement.parentElement;
-        const replyMessageUsername= document.createElement('p');
-        replyMessageUsername.className = "text-green-800"
-        const replyMessageContent = document.createElement('p');
-        if (messageElement) {
-          replyMessageContent.textContent = messageElement.textContent;
-          replyMessageContent.className = "text-black"
-          console.log("Message text:", messageElement.textContent);
-        } else {
-          replyMessageContent.textContent = "--";
-        }
-        
-        replyMessageUsername.textContent = gottenReplyMessageUsername.previousSibling.children[0].textContent
-        replyMessageDiv.style.display = "block"
-        replyMessageDiv.children[0].append(replyMessageUsername)
-        replyMessageDiv.children[0].append(replyMessageContent)
-        document.getElementById("suggestion-div").style.display = "block";
-
-        
-        e.target.parentElement.style.display = "none"
-      });
-      
-      deleteMessage.setAttribute("data-delete-id", id);
-      deleteMessage.addEventListener("click", (e)=>{
-        console.log("lls",id, wrapperDivId);
-        let messageChild = document.getElementById(`message-child-${id}`);
-        messageChild.innerHTML = ""
-        e.target.parentElement.style.display = "none"
-
-      const payload = {
-        action: "delete",
-        message_id: id,
-      };
-
-      // Only include media if publicIds is provided and not empty
-      if (wrapperDivId && wrapperDivId.length > 0) {
-        payload.public_ids = wrapperDivId;
+    //  Setting their ids and event listeners
+    replyMessage.setAttribute("data-id", id);
+    replyMessage.addEventListener("click", (e) => {
+      replyMessageId = e.currentTarget.getAttribute("data-id");
+      const messageElement = document.querySelector(`[data-message-id="${id}"]`);
+      const replyMessageDiv = document.getElementById("reply-message-div")
+      const messageInput = document.getElementById("message")
+      messageInput.focus()
+      const gottenReplyMessageUsername= e.target.parentElement.parentElement;
+      const replyMessageUsername= document.createElement('p');
+      replyMessageUsername.className = "text-green-800"
+      const replyMessageContent = document.createElement('p');
+      if (messageElement) {
+        replyMessageContent.textContent = messageElement.textContent;
+        replyMessageContent.className = "text-black"
+        console.log("Message text:", messageElement.textContent);
+      } else {
+        replyMessageContent.textContent = "--";
       }
-
-      chatSocket.send(JSON.stringify(payload));
-
-      })
-
-
-
-      messageBody.style.textTransform = "none"; 
-      messageBody.style.fontFamily = "'Rubik', sans-serif";
-      messageBody.style.fontSize = "13px";
-      const msgDivDate = document.createElement('p');
-      const msgDivUsername = document.createElement('p');
-      replyMessage.innerHTML = "reply";
-      deleteMessage.innerHTML = "delete";
-      highlightMessage.innerHTML = "highlight";
-      messageBody.setAttribute("data-message-id", id)
-      icon.innerHTML = iconString;
-      msgDivDate.textContent = timestamp;
-      msgDivUsername.textContent = username;
       
-      messageOptions.className = "message-options flex-col gap-4 bg-white w-fit absolute w-fit p-3 bottom-[-1rem] right-4";
-      messageOptions.style.display = "none"
-      replyMessage.className = "cursor-pointer text-black hover:bg-gray-100 p-2";
-      deleteMessage.className = "cursor-pointer text-black hover:bg-gray-100 p-2";
-      highlightMessage.className = "cursor-pointer text-black hover:bg-gray-100 p-2";
-      
-      msgDiv.className = "p-2 border-b relative";
-      msgDivUsername.className = "text-[#417690] text-bold";
-      msgDivDate.className = "text-gray-300 text-small";
-      
-      iconUsernameAndDate.className = "flex justify-between";
-      usernameAndDate.className = "flex gap-4";
-      messageOptions.appendChild(replyMessage)
-      messageOptions.appendChild(deleteMessage)
-      messageOptions.appendChild(highlightMessage)
-      icon.appendChild(messageOptions)
-      icon.addEventListener("click", (e)=>openOptions(e))
-      usernameAndDate.appendChild(msgDivUsername)
-      usernameAndDate.appendChild(msgDivDate)
-      iconUsernameAndDate.prepend(usernameAndDate)
-      iconUsernameAndDate.appendChild(icon)
-      msgDiv.prepend(iconUsernameAndDate)
-      msgDiv.append(messageBody)
-      if(prependMode){
-        chatMessages.prepend(msgDiv);
-      }else{
+      replyMessageUsername.textContent = gottenReplyMessageUsername.previousSibling.children[0].textContent
+      replyMessageDiv.style.display = "block"
+      replyMessageDiv.children[0].append(replyMessageUsername)
+      replyMessageDiv.children[0].append(replyMessageContent)
+      document.getElementById("suggestion-div").style.display = "block";
 
+      
+      e.target.parentElement.style.display = "none"
+    });
+    
+    deleteMessage.setAttribute("data-delete-id", id);
+    deleteMessage.addEventListener("click", (e)=>{
+      console.log("lls",id, wrapperDivId);
+      let messageChild = document.getElementById(`message-child-${id}`);
+      messageChild.innerHTML = ""
+      e.target.parentElement.style.display = "none"
+
+    const payload = {
+      action: "delete",
+      message_id: id,
+    };
+
+    // Only include media if publicIds is provided and not empty
+    if (wrapperDivId && wrapperDivId.length > 0) {
+      payload.public_ids = wrapperDivId;
+    }
+
+    chatSocket.send(JSON.stringify(payload));
+
+    })
+
+
+    messageBody.style.textTransform = "none"; 
+    messageBody.style.fontFamily = "'Rubik', sans-serif";
+    messageBody.style.fontSize = "13px";
+    messageBody.style.color = "black";
+    const msgDivDate = document.createElement('p');
+    const msgDivUsername = document.createElement('p');
+    replyMessage.innerHTML = "reply";
+    deleteMessage.innerHTML = "delete";
+    highlightMessage.innerHTML = "highlight";
+    messageBody.setAttribute("data-message-id", id)
+    icon.innerHTML = iconString;
+    msgDivDate.textContent = timestamp;
+    msgDivUsername.textContent = username;
+    
+    messageOptions.className = "message-options flex-col gap-4 bg-white w-fit absolute w-fit p-3 bottom-[-1rem] right-4";
+    messageOptions.style.display = "none"
+    replyMessage.className = "cursor-pointer text-black hover:bg-gray-100 p-2";
+    deleteMessage.className = "cursor-pointer text-black hover:bg-gray-100 p-2";
+    highlightMessage.className = "cursor-pointer text-black hover:bg-gray-100 p-2";
+      
+    msgDiv.className = "p-2 border-b relative";
+    msgDivUsername.className = "text-[#417690] text-bold";
+    msgDivDate.className = "text-gray-300 text-small";
+    
+    iconUsernameAndDate.className = "flex justify-between";
+    usernameAndDate.className = "flex gap-4";
+    messageOptions.appendChild(replyMessage)
+    messageOptions.appendChild(deleteMessage)
+    messageOptions.appendChild(highlightMessage)
+    icon.appendChild(messageOptions)
+    icon.addEventListener("click", (e)=>openOptions(e))
+    usernameAndDate.appendChild(msgDivUsername)
+    usernameAndDate.appendChild(msgDivDate)
+    iconUsernameAndDate.prepend(usernameAndDate)
+    iconUsernameAndDate.appendChild(icon)
+    msgDiv.prepend(iconUsernameAndDate)
+    msgDiv.append(messageBody)
+    if(prependMode){
+      if(Chat_room_type==="group_chat"){
+        chatMessages.prepend(msgDiv);        
+      }
+      else if(Chat_room_type==="private"){
+        personalMessageBody.prepend(msgDiv);
+
+      }
+    }else{
+      if(Chat_room_type==="group_chat"){
         chatMessages.append(msgDiv);
-        // chatMessages.scrollTop = chatMessages.scrollHeight;
       }
+      if(Chat_room_type==="private"){
+        personalMessageBody.append(msgDiv);
+
+      }
+      // chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
   }
 
 
@@ -1511,71 +1575,94 @@ messageBody.addEventListener("scroll", (event) => {
   
   // update the ui of the chts
   function updateChatRooms(rooms) {
+    let isPrivateRoom = false
+    let isGroupRoom = false
     const allIndividualGroups = document.getElementById("all-individual-groups");
-    if(rooms.action === "room_list"){
-      allIndividualGroups.innerHTML = "";
+    console.log("rooms.rooms",rooms);
+    if(rooms.action === "new_room"){
+      rooms.rooms.forEach(room => {
+        console.log("why", rooms);
+          const roomDiv = document.createElement("div");
+          roomDiv.setAttribute("id", `chat-room-${room.id}`)
+          roomDiv.setAttribute("data-type", `${room.room_type}`)
+
+          roomDiv.className = "cursor-pointer hover:bg-gray-100 p-3 border-b border-gray-200";
+          roomDiv.innerHTML = `
+              <div class="font-semibold text-gray-800">${room.name}</div>
+              <div class="text-sm text-gray-500 truncate">You have just been added to this room</div>
+          `;
+          const searchId = 0
+          const messages="empty"
+          const openChatType = roomDiv.dataset.type;
+
+          // open chat from chat group list
+          roomDiv.addEventListener("click", function () {
+            console.log("clicked 1");
+            openChatRoom(room.id, messages,  openChatType, room.name, searchId);});
+          // user_room_types = "group_chat"
+          roomDetails[room.name] =  room.id
+
+          allIndividualGroups.prepend(roomDiv);
+      });
     }
-    console.log("object",rooms);
+    else if(rooms.action === "room_list"){
+      allIndividualGroups.innerHTML = "";
+      console.log("roles", rooms);
+      rooms.rooms.forEach(room => {
+        const roomDiv = document.createElement("div");
+        const roomDivParent = document.createElement("div");
+        const newMessageNumber = document.createElement("div");
+        roomDiv.setAttribute("id", `chat-room-${room.id}`)
+        roomDivParent.setAttribute("data-type", `${room.room_type}`)
+        roomDiv.className = "w-[80%]";
+        roomDiv.innerHTML = `
+            <div class="font-semibold text-gray-800">${room.name}</div>
+            <div class="text-sm text-gray-500 truncate">${room.last_message}</div>
+            <div class="text-xs text-gray-400">${room.last_message_time}</div>
+            <div></div>
+        `;
+        const searchId = 0
+        const messages="empty";
+        roomDivParent.addEventListener("click", function () {
+          console.log("clicked 3", user_room_types, room); 
+          openChatRoom(room.id,messages,roomDivParent.dataset.type, room.name, searchId);});
+        
+        newMessageNumber.className = 'w-[20px] h-[20px] bg-red-600 text-white opacity-0 rounded-full flex justify-center items-center'
+        // newMessageNumber.style.display = "none"
+        newMessageNumber.setAttribute('id', `messageNumber-${room.id}`)
+        roomDivParent.setAttribute('id', `roomDivParent-${room.id}`)
+        roomDivParent.className = 'w-full hover:bg-gray-100 p-3 flex items-center justify-around cursor-pointer border-b border-gray-200'
+        
+        roomDivParent.appendChild(newMessageNumber);
+        roomDivParent.appendChild(roomDiv);
 
-    if (rooms.rooms.length > 0) {
-      if(rooms.action === "new_room"){
-        console.log("rooms.rooms",rooms.rooms);
-        rooms.rooms.forEach(room => {
-        console.log(room);
-        console.log(room.id);
-            const roomDiv = document.createElement("div");
-            roomDiv.setAttribute("id", `chat-room-${room.id}`)
-            roomDiv.className = "cursor-pointer hover:bg-gray-100 p-3 border-b border-gray-200";
-            roomDiv.innerHTML = `
-                <div class="font-semibold text-gray-800">${room.name}</div>
-                <div class="text-sm text-gray-500 truncate">You have just been added to this room</div>
-            `;
-            const searchId = 0
-            const messages="empty"
-            const openChatType = "message";
+        if(room.room_type === "group_chat"){
+          isGroupRoom = true 
+          user_room_types = "group_chat"
+          roomDetails[room.name] =  room.id
+          allIndividualGroups.appendChild(roomDivParent);
+          console.log("gradient", isGroupRoom);
 
-            roomDiv.addEventListener("click", function () {openChatRoom(room.id, messages,  openChatType, room.name, searchId);});
-            user_room_types = "group_chat"
-            roomDetails[room.name] =  room.id
+        }
+        if(room.room_type === "private"){
+          isPrivateRoom = true
+          user_room_types = "private"
+          roomDetails[room.name] =  room.id
+          allPersonalGroups.appendChild(roomDivParent);
+          console.log("wayo", room.name, room.id);
+        }
 
-            allIndividualGroups.prepend(roomDiv);
-        });
-      }
-      else if(rooms.action === "room_list"){
-        rooms.rooms.forEach(room => {
-            const roomDiv = document.createElement("div");
-            const roomDivParent = document.createElement("div");
-            const newMessageNumber = document.createElement("div");
-            roomDiv.setAttribute("id", `chat-room-${room.id}`)
-            roomDiv.className = "w-[80%]";
-            roomDiv.innerHTML = `
-                <div class="font-semibold text-gray-800">${room.name}</div>
-                <div class="text-sm text-gray-500 truncate">${room.last_message}</div>
-                <div class="text-xs text-gray-400">${room.last_message_time}</div>
-                <div></div>
-            `;
-            const searchId = 0
-            const messages="empty";
-            const openChatType = "message";
-            roomDiv.addEventListener("click", function () {openChatRoom(room.id,messages,  openChatType, room.name, searchId);});
-            user_room_types = "group_chat"
-            roomDetails[room.name] =  room.id
+      });
+    }
+    console.log(isPrivateRoom,"privateroom", isGroupRoom);
 
-            newMessageNumber.className = 'w-[20px] h-[20px] bg-red-600 text-white opacity-0 rounded-full flex justify-center items-center'
-            // newMessageNumber.style.display = "none"
-            newMessageNumber.setAttribute('id', `messageNumber-${room.id}`)
-            roomDivParent.setAttribute('id', `roomDivParent-${room.id}`)
-            roomDivParent.className = 'w-full hover:bg-gray-100 p-3 flex items-center justify-around cursor-pointer border-b border-gray-200'
-            // roomDivParent.setAttribute('id', `roomDivParent-${room.id}`)
-            roomDivParent.appendChild(newMessageNumber);
-            roomDivParent.appendChild(roomDiv);
-            allIndividualGroups.appendChild(roomDivParent);
-        });
-      }
-    } else {
+    if(!isPrivateRoom) {
       allIndividualGroups.innerHTML = `<div class="text-gray-500 p-3">No chat rooms available.</div>`;
     }
-  }
+    if(!isGroupRoom) {
+      allPersonalGroups.innerHTML = `<div class="text-gray-500 p-3">No chat rooms available.</div>`;
+    }
+  } 
 
 
   // Modal open and close logic
@@ -1929,7 +2016,7 @@ messageBody.addEventListener("scroll", (event) => {
         let roomId = `chat-room-${roomDetails[adminAddUserRoomTitle]}`
         let room = document.getElementById(roomId)
         messageBodyParent.style.display = "none"  
-        chatContainer.style.display = "block"  
+        ChatList.style.display = "block"  
         console.log(roomId, roomId);
         room.style.display = "none"
         Toastify({
@@ -1993,6 +2080,7 @@ const broadcastToAllHO = document.getElementById('broadcast-all-ho');
 
 
 
+
 // chatOnlineBackArrow
 chatOnlineBackArrow.addEventListener("click", ()=>{
   menuparent.style.display = "block"
@@ -2003,6 +2091,13 @@ chatOnlineBackArrow.addEventListener("click", ()=>{
   chatOnlineBackArrow.style.display = "none"
   onlineTab.style.textDecoration = "none"
   chatTab.style.textDecoration = "underline"
+
+})
+
+broadcastMessageBackArrow.addEventListener("click", ()=>{
+  broadcastChatList.style.display = "none"
+  broadcastAllAgentPage.style.display = "none"
+  mainBody.style.display = "block"
 
 })
 
@@ -2026,28 +2121,118 @@ chatTab.addEventListener("click", ()=>{
 
 // open personal chat
 broadcastToAllAgents.addEventListener("click", ()=>{
-  personalMessagePage.style.display = "block"
-  personalMessageBodyParent.style.display = "none"
+  const container = document.getElementById("broadcast-message-body");
+
+  console.log("all_ho",user_broadcast_rooms, user_broadcast_rooms.broadcast_AG);
+  if(Object.keys(user_broadcast_rooms).length>0){
+    if("broadcast_AG" in user_broadcast_rooms){
+      let input = sendButton.querySelector("input")
+      input.disabled = false
+      container.innerHTML = ""
+      container.classList.remove("item-center", "text-black","flex", "flex-col", "items-center", "mt-4")
+      currentRoomId= user_broadcast_rooms.broadcast_AG
+      chatSocket.send(JSON.stringify({
+        action: "load_messages_for_broadcast",
+        room_id: currentRoomId,
+        page: currentPage
+    }));
+    }else{
+      let input = sendButton.querySelector("input")
+      input.disabled = true
+      container.innerHTML = ""
+      container.innerHTML = "No user yet to Broadcast a message to"
+      container.classList.add("item-center", "text-black","flex", "flex-col", "items-center", "mt-4")
+    
+    }
+  }
+  else{
+    let input = sendButton.querySelector("input")
+    input.disabled = true
+    container.innerHTML = ""
+    container.innerHTML = "No user yet to Broadcast a message to"
+    container.classList.add("item-center", "text-black","flex", "flex-col", "items-center", "mt-4")
+  }
+  broadcastChatList.style.display = "block"
+  broadcastAllAgentPage.style.display = "block"
+  mainBody.style.display = "none"
+  sendButton.setAttribute("data-send", "broadcast_AG")
+  const title = document.getElementById("broadcast-roomTitle");
+  title.classList.add("text-gray-500", "font-bold", "text-bold");
+  title.innerHTML = "Agents"
 })
+
+
+
 broadcastToAllHO.addEventListener("click", ()=>{
-  personalMessagePage.style.display = "block"
-  personalMessageBodyParent.style.display = "none"
+  const container = document.getElementById("broadcast-message-body");
+
+  // checking the length of the variable
+  if(Object.keys(user_broadcast_rooms).length>0){
+    console.log("rem",user_broadcast_rooms);
+    if("broadcast_HO" in user_broadcast_rooms){
+      let input = sendButton.querySelector("input")
+      input.disabled = false
+      container.innerHTML = ""
+      container.classList.remove("item-center", "text-black","flex", "flex-col", "items-center", "mt-4")
+      currentRoomId= user_broadcast_rooms.broadcast_HO
+      chatSocket.send(JSON.stringify({
+        action: "load_messages_for_broadcast",
+        room_id: currentRoomId,
+        page: currentPage
+      }));
+    }
+    else{
+      let input = sendButton.querySelector("input")
+      input.disabled = true
+      console.log("zzzzzzzz");
+      container.innerHTML = ""
+      container.innerHTML = "No user yet to Broadcast a message to"
+      container.classList.add("item-center", "text-black","flex", "flex-col", "items-center", "mt-4")
+    }
+  }
+  else{
+    console.log("fuuuuuuiiuiui");
+    let input = sendButton.querySelector("input")
+    input.disabled = true
+    container.innerHTML = ""
+    container.innerHTML = "No user yet to Broadcast a message to"
+    container.classList.add("item-center", "text-black","flex", "flex-col", "items-center", "mt-4")
+  }
+  broadcastChatList.style.display = "block"
+  mainBody.style.display = "none"
+  broadcastAllAgentPage.style.display = "block"
+  sendButton.setAttribute("data-send", "broadcast_HO")
+  broadcastChatList.style.display = "block"
+  broadcastAllAgentPage.style.display = "block"
+  mainBody.style.display = "none"
+  sendButton.setAttribute("data-send", "broadcast_AG")
+  const title = document.getElementById("broadcast-roomTitle");
+  title.classList.add("text-gray-500", "font-bold", "text-bold");
+  title.innerHTML = "Home Owners"
 })
+
+// open up personal chat
 document.getElementById("personal-chat").addEventListener("click", ()=>{
   console.log("personal-message-page");
   menuparent.style.display = "none"
+  mainBody.style.display = "none" 
   personalMessagePage.style.display = "block"
-  personalMessageBodyParent.style.display = "block"
+})
+
+document.getElementById("personal-message-back-arrow").addEventListener("click", ()=>{
+  menuparent.style.display = "block"
+  mainBody.style.display = "block"
+  personalMessagePage.style.display = "none"
 })
 
 // go back to menu page
 
 if(personalMessageBackArrow){
   personalMessageBackArrow.addEventListener("click", ()=>{
-    onlineStatusContainer.style.display = "none"
-    personalMessagePage.style.display = "none"
-    menuparent.style.display = "block"
-    mainBody.style.display = "block"
+    // onlineStatusContainer.style.display = "none"
+    personalGroupParents.style.display = "block"
+    personalMessageBodyParent.style.display = "none"
+    personalMessageBody.innerHTML = ""
   })
 
 }
@@ -2083,10 +2268,9 @@ function renderOnlineStatus(user, online_status, username, status_id, room_name)
     let messages = null
     let searchId = null
     statusItem.addEventListener("click", (e)=>{
-      console.log("dey", e);
+      console.log("dey clicked4", e);
       menuparent.style.display = "none"
       personalMessagePage.style.display = "block"
-      personalMessageBodyParent.style.display = "block"
       openChatRoom(status_id, messages, type, room_name,searchId)
     })
     user_room_types = "private"

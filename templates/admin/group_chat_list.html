@@ -1,5 +1,5 @@
   <!-- Chats List (Scroll) -->
-  <div id="chatList" class="flex flex-col h-full" style="display: none;">             
+  <div id="chatList" class="flex flex-col h-full">             
     <!-- Back Arrow -->
     <div id="individual-group-parents" class="my-3">
       <div id="group-message-back-arrow" class="cursor-pointer ml-4 mb-4">
@@ -28,13 +28,13 @@
         
       </div>
     </div>
-    <div id="roomTitle" class="mt-4 text-center"></div>
+    <div id="roomTitle" class="mt-4 text-center text-black"></div>
 
     <div id="search-navigation"></div>
     <!-- Chat List & Input (Inside a container to maintain order) -->
     <div class="flex flex-col flex-1 h-full mt-4">               
       <!-- loader modal -->
-      <div id="individual-chatroom-modal" class="flex justify-center items-center w-full h-full bg-transparent bg-opacity-50">        
+      <div id="individual-chatroom-modal" style="display: none;" class="flex justify-center items-center w-full h-full bg-transparent bg-opacity-50">        
         <span class="loader block"></span>
       </div>
       <!-- Chat Messages -->

@@ -196,10 +196,15 @@ class CustomSignupSerializer(serializers.ModelSerializer):
             pass
 
         if user.user_type == "HO":
-            UserProfile.objects.create(
+            user_profile = UserProfile.objects.create(
                 user=user,
                 home_owner_address=validated_data.get('address')
             )
+            if user_profile:
+                room = ChatRoom.objects.create(name=f"broadcast_{user.user_type}", creator=user)
+                room.members.add(user)
+                room.save()
+
             referral_code = validated_data.get('referral_code')
             if referral_code:
                 try:
@@ -233,14 +238,19 @@ class CustomSignupSerializer(serializers.ModelSerializer):
                 user_points.total_points += 1000
                 user_points.save()
                     
-            AgentProfile.objects.create(
+            user_profile_agent = AgentProfile.objects.create(
                 user=user,
                 agent_address=validated_data.get('agent_address'),
                 registration_ID=validated_data.get('registration_ID'),
             )
+            if user_profile_agent:
+                room = ChatRoom.objects.create(name=f"broadcast_{user.user_type}", creator=user)
+                room.members.add(user)
+                room.save()
+
 
         elif user.user_type == "CO":
-            ContractorProfile.objects.create(
+            user_profile_contractor = ContractorProfile.objects.create(
                 user=user,
                 company_name=validated_data.get('company_name'),
                 specialization=validated_data.get('specialization'),
@@ -250,16 +260,24 @@ class CustomSignupSerializer(serializers.ModelSerializer):
                 insurance_number=validated_data.get('insurance_number'),
                 image=validated_data.get('image'),
             )
+            if user_profile_contractor:
+                room = ChatRoom.objects.create(name=f"broadcast_{user.user_type}", creator=user)
+                room.members.add(user)
+                room.save()
+
 
         elif user.user_type == "IV":
-            InvestorProfile.objects.create(
+            user_profile_investor = InvestorProfile.objects.create(
                 user=user,
                 company_name=validated_data.get('investor_company_name'),
                 specialization=validated_data.get('investor_specialization'),
                 company_address=validated_data.get('investor_company_address'),
                 country=validated_data.get('investor_country'),
             )
-
+            if user_profile_investor:
+                room = ChatRoom.objects.create(name=f"broadcast_{user.user_type}", creator=user)
+                room.members.add(user)
+                room.save()
         return user
 
 

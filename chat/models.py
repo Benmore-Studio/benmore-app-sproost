@@ -6,10 +6,6 @@ from django.contrib.contenttypes.fields import GenericRelation
 
 # Create your models here.
 
-ROOM_TYPE_CHOICES = (
-        ("private", "Private"),  
-        ("group", "Group"),      
-    )
 
 
 class ChatRoom(models.Model):
@@ -19,7 +15,7 @@ class ChatRoom(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     room_type = models.CharField(
         max_length=20,
-        choices=(("group", "Group"), ("private", "Private"), ("broadcast", "Broadcast")),
+        choices=(("group_chat", "Group"), ("private", "Private"), ("broadcast_ho", "BroadcastHO"), ("broadcast_co", "BroadcastCO"), ("broadcast_ag", "BroadcastAG"), ("broadcast_iv", "BroadcastIV")),
         default="private"
     )
 

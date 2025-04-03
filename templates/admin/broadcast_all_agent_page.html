@@ -1,0 +1,45 @@
+<!-- Chats List (Scroll) -->
+
+<div id="broadcast-chatList" class="flex flex-col h-[77%] overflow-y-auto">             
+    <!-- Back Arrow -->
+    <div id="broadcast-group-parents" class="my-3">
+      <div id="broadcast-message-back-arrow" class="cursor-pointer ml-4 mb-4">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-3 text-black">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
+        </svg>                
+      </div>
+    </div>
+        
+    <!-- Chat Messages Container -->
+    <div class="flex flex-col flex-1 overflow-hidden">     
+        <!-- loader modal -->
+        <div id="broadcast-chatroom-modal" class="flex justify-center items-center w-full h-full bg-transparent bg-opacity-50">        
+        <span class="loader block hidden"></span>
+        </div>
+        
+        <div id="broadcast-roomTitle" class="mt-4 text-center"></div>
+        <!-- Actual Message Body -->
+        <div id="broadcast-message-body" class="px-4 flex-1 overflow-y-auto"></div>
+    </div>
+
+        <!-- File Upload -->
+        <input type="file" id="mediaInput" style="display: none;" accept="image/*" multiple>             
+
+        <!-- Chat Input -->
+      <div id="broadcast-message-parent-div" class="w-full flex justify-center items-center py-2" style="position: absolute; bottom: 0;">
+        <div id="input" class="mt-4 w-full flex gap-2 px-2 relative">
+            <input id="broadcast" type="text" placeholder="type..." 
+                  class="bg-transparent outline-none border pl-3 h-[50px] rounded-xl dark:text-white flex-1 text-md font-md" oninput="onInputChange()">
+                  <label for="broadcast-mediaInput" id="broadcast-mediaInputLabel" class="cursor-pointer absolute bottom-4 right-[6rem]" id="broadcast-messageMedia">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5 text-gray-500 cursor-pointer">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 0 0-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 0 1-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H9.75" />
+                    </svg>
+                  </label>
+            <div id="broadcast-message-submit" class="text-[#0d2438] dark:text-white cursor-pointer flex flex-col justify-center">
+                <input class="cursor-pointer" type="button" value="Send">
+            </div>
+        </div>
+      </div>  
+
+
+  </div>
