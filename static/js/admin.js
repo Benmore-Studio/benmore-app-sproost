@@ -38,6 +38,8 @@
   let broadcastChatList = document.getElementById("broadcast-chatList")
   let broadcastAllAgentPage = document.getElementById("broadcast-all-agent-page")
   let broadcastMessageBackArrow = document.getElementById("broadcast-message-back-arrow")
+  let noMessage = document.getElementById("broadcast-no-message-yet")
+
   // broadcastmessage send button
   let sendButton = document.getElementById("broadcast-message-submit")
 
@@ -74,6 +76,8 @@
     ChatList.style.display = "flex"
     console.log("all-individual-groups2");
     grouindividualGroupParentsChat.style.display = "block"
+    menuparent.setAttribute("data-type", "group_chat")
+
   })
 
 
@@ -388,7 +392,6 @@ function previousSearchResult(roomId) {
 
 
 function appendBroadcastMessage(data, room_type) {
- 
   const container = document.getElementById("broadcast-message-body");
   console.log("obi", data);
 
@@ -406,6 +409,7 @@ function appendBroadcastMessage(data, room_type) {
 
   container.appendChild(wrapper);
   container.scrollTop = container.scrollHeight;
+
 }
 
 
@@ -528,8 +532,6 @@ chatSocket.onmessage = function (event) {
       })
 
 
-
-
       messageOptions.className = "message-options flex-col gap-4 bg-white w-fit absolute w-fit p-3 bottom-[-1rem] right-4";
       messageOptions.style.display = "none"
       replyMessage.className = "cursor-pointer text-black hover:bg-gray-100 p-2";
@@ -583,8 +585,6 @@ chatSocket.onmessage = function (event) {
         mainMessageContent.append(wrapper)
       }
 
-      
-
 
       // if a user is replying a message
       if(data.reply_to_content !== "None" && data.reply_to_id !== null){     
@@ -622,6 +622,7 @@ chatSocket.onmessage = function (event) {
       msgDiv.prepend(iconUsernameAndDate)
       msgDiv.append(messageBody)
       if(data.room_type === "group_chat"){
+        console.log("mine");
         chatMessages.appendChild(msgDiv);
         chatMessages.scrollTop = chatMessages.scrollHeight;
       }
@@ -633,6 +634,14 @@ chatSocket.onmessage = function (event) {
   }
   else if (data.action === "broadcast_message"){
     let room_type="broadcast"
+    if(noMessage.style.display === "flex"){
+      console.log("i dont know");
+      noMessage.style.display = "none"
+    }
+    if(data.message.length > 0){
+      noMessage.style.display = "none"
+
+    }
     appendBroadcastMessage(data, room_type)
   }
     
@@ -646,6 +655,12 @@ chatSocket.onmessage = function (event) {
     if (prependMode) {
       console.log("first", data);
       data.messages.forEach(msg => addMessage(msg.username, msg.deleted, msg.message, msg.timestamp, msg.id, msg.username, msg.reply_to, msg.reply_to_num, msg.media, data.room_type));
+      if(data.room_type === "private"){
+        document.getElementById("personal-chatroom-modal").style.display ="none"
+      }
+      else if(data.room_type === "group_chat"){
+        document.getElementById("individual-chatroom-modal").style.display ="none"
+      }
       isLoading = false;
       roomMembers = data.members
       // scroll offset fix
@@ -664,8 +679,8 @@ chatSocket.onmessage = function (event) {
       if(data.messages.length > 0){
         personalMessageBody.innerHTML = "";
         chatMessages.innerHTML = "";
-        chatMessages.classList.remove("flex", "justify-center", "text-black")
-        personalMessageBody.classList.remove("flex", "justify-center", "text-black")
+        document.getElementById("personal-no-message-yet").style.display = "none"
+        // document.getElementById("group-no-message-yet").style.display = "none"
         data.messages.reverse().forEach(msg => {addMessage(msg.username, msg.deleted, msg.message, msg.timestamp, msg.id, msg.username, msg.reply_to, msg.reply_to_num, msg.media, data.room_type)});
           console.log("acting");
         if(data.room_type === "private"){
@@ -686,10 +701,8 @@ chatSocket.onmessage = function (event) {
       }else{
         chatMessages.innerHTML = "";
         personalMessageBody.innerHTML = "";
-        chatMessages.innerHTML = "No Messages yet Start a conversation";
-        chatMessages.classList.add("flex","flex-col", "items-center", "text-black")
-        personalMessageBody.innerHTML = "No Messages yet Start a conversation";
-        personalMessageBody.classList.add("flex", "flex-col", "items-center", "text-black")
+        document.getElementById("personal-no-message-yet").style.display = "flex"
+        // document.getElementById("group-no-message-yet").style.display = "flex"
       }
       roomMembers = data.members      
       document.getElementById("message-body").style.width ="100%"
@@ -698,17 +711,21 @@ chatSocket.onmessage = function (event) {
   }
   
   else if(data.action === "message_list_for_broadcast"){
-    const container = document.getElementById("broadcast-message-body");
-    console.log("moliy");
+    console.log("moliy", data.messages.length);
+    
+    let broadcastroomModal = document.getElementById("broadcastroom-modal")
     if(data.messages.length > 0){
+      document.getElementById("broadcast-no-message-yet").style.display = "none"
+      const container = document.getElementById("broadcast-message-body");
       container.innerHTML = ""
-      container.classList.remove("item-center", "text-black","flex", "flex-col", "items-center", "mt-4")
+
       data.messages.reverse().forEach(msg => appendBroadcastMessage(msg, data.room_type))
+      broadcastroomModal.style.display = "none"
     }else{
-      container.innerHTML = ""
-      container.innerHTML = "No messages yet, Broadcast a message!"
-      container.classList.add("item-center", "text-black","flex", "flex-col", "items-center", "mt-4")
-  
+      noMessage.innerHTML = ""
+      noMessage.innerHTML = "No messages yet, Broadcast a message"
+      noMessage.style.display = "flex"
+      broadcastroomModal.style.display = "none"
     }
     
   }
@@ -747,6 +764,7 @@ chatSocket.onmessage = function (event) {
       messageElement.innerHTML = ""
       messageElement.innerHTML = "This message has been deleted"
       messageElement.className ="text-red-500 justify-self-start"
+      messageElement.style.color = "#ef4444"
       // messageElement.parentElement.parentElement.parentElement.parentElement.children[1].innerHTML = ""
       // messageElement.parentElement.parentElement.parentElement.parentElement.children[1].innerHTML = "This message has been deleted"
       // console.log("juuju",messageElement.parentElement.parentElement.parentElement.parentElement);
@@ -994,7 +1012,6 @@ async function uploadMedia(file, formData, numKey, data) {
 
 function sendMessage(sendMessageType, id) {
   
-  console.log(id,"uwa");
   // Prevent sending if there's no text and no media
   if (!message && (!uploadedMedia || uploadedMedia.length === 0)) return;
 
@@ -1011,7 +1028,7 @@ function sendMessage(sendMessageType, id) {
       // Build the payload
       const message = input.value.trim();
       payload.room_id = roomDetails[globalRoomName]
-      payload.room_type = user_room_types
+      payload.room_type = menuparent.dataset.type
       payload.receiver= roomMembers
       payload.message = message
     }
@@ -1035,7 +1052,7 @@ function sendMessage(sendMessageType, id) {
       payload.media = uploadedMedia;
     }
 
-    console.log("payload", payload, user_room_types);
+    console.log("payload", payload,personalMessageBodyParent.dataset.type);
     chatSocket.send(JSON.stringify(payload));
 
     // Hide the suggestion div for mentions (if present)
@@ -1197,8 +1214,6 @@ function updateChatList(id, message, timestamp, sender) {
     let individualMessage = document.getElementById(messageId);
     let roomDivParent = document.getElementById(roomDiv);
 
-    console.log("roomDivParent",roomDivParent, id, roomDiv);
-
     if (individualMessage) {
         // Updating the second child (message content)
         let messageText = individualMessage.querySelector(".text-sm");
@@ -1277,7 +1292,7 @@ document.getElementById("message").addEventListener("keydown", function(event) {
     let sendMessageType = "broadcast"
     let id;
     const dataSend = sendButton.dataset.send
-      console.log("chels", dataSend, "fi", user_broadcast_rooms);
+      console.log("chels", dataSend, "fi", user_broadcast_rooms, user_broadcast_rooms[dataSend]);
       if(dataSend in user_broadcast_rooms){
         id= user_broadcast_rooms[dataSend]
       }
@@ -1584,7 +1599,7 @@ messageBody.addEventListener("scroll", (event) => {
         console.log("why", rooms);
           const roomDiv = document.createElement("div");
           roomDiv.setAttribute("id", `chat-room-${room.id}`)
-          roomDiv.setAttribute("data-type", `${room.room_type}`)
+          personalMessageBodyParent.setAttribute("data-type", `${room.room_type}`)
 
           roomDiv.className = "cursor-pointer hover:bg-gray-100 p-3 border-b border-gray-200";
           roomDiv.innerHTML = `
@@ -1599,7 +1614,6 @@ messageBody.addEventListener("scroll", (event) => {
           roomDiv.addEventListener("click", function () {
             console.log("clicked 1");
             openChatRoom(room.id, messages,  openChatType, room.name, searchId);});
-          // user_room_types = "group_chat"
           roomDetails[room.name] =  room.id
 
           allIndividualGroups.prepend(roomDiv);
@@ -1613,7 +1627,6 @@ messageBody.addEventListener("scroll", (event) => {
         const roomDivParent = document.createElement("div");
         const newMessageNumber = document.createElement("div");
         roomDiv.setAttribute("id", `chat-room-${room.id}`)
-        roomDivParent.setAttribute("data-type", `${room.room_type}`)
         roomDiv.className = "w-[80%]";
         roomDiv.innerHTML = `
             <div class="font-semibold text-gray-800">${room.name}</div>
@@ -1624,8 +1637,8 @@ messageBody.addEventListener("scroll", (event) => {
         const searchId = 0
         const messages="empty";
         roomDivParent.addEventListener("click", function () {
-          console.log("clicked 3", user_room_types, room); 
-          openChatRoom(room.id,messages,roomDivParent.dataset.type, room.name, searchId);});
+          console.log("clicked 3", menuparent.dataset.type); 
+          openChatRoom(room.id,messages,menuparent.dataset.type, room.name, searchId);});
         
         newMessageNumber.className = 'w-[20px] h-[20px] bg-red-600 text-white opacity-0 rounded-full flex justify-center items-center'
         // newMessageNumber.style.display = "none"
@@ -1638,7 +1651,6 @@ messageBody.addEventListener("scroll", (event) => {
 
         if(room.room_type === "group_chat"){
           isGroupRoom = true 
-          user_room_types = "group_chat"
           roomDetails[room.name] =  room.id
           allIndividualGroups.appendChild(roomDivParent);
           console.log("gradient", isGroupRoom);
@@ -1646,7 +1658,6 @@ messageBody.addEventListener("scroll", (event) => {
         }
         if(room.room_type === "private"){
           isPrivateRoom = true
-          user_room_types = "private"
           roomDetails[room.name] =  room.id
           allPersonalGroups.appendChild(roomDivParent);
           console.log("wayo", room.name, room.id);
@@ -2073,7 +2084,7 @@ let onlineStatusBar = document.getElementById('online-bar-status')
 let onlineTab = document.getElementById('online-tab')
 let chatTab = document.getElementById('chat-tab')
 let menuparent = document.getElementById('menuparent')
-let chatOnlineBackArrow = document.getElementById('chat-online-back-arrow')
+// let chatOnlineBackArrow = document.getElementById('chat-online-back-arrow')
 const onlineStatusContainer = document.getElementById('onlineStatusList');
 const broadcastToAllAgents = document.getElementById('broadcast-all-agent');
 const broadcastToAllHO = document.getElementById('broadcast-all-ho');
@@ -2082,29 +2093,33 @@ const broadcastToAllHO = document.getElementById('broadcast-all-ho');
 
 
 // chatOnlineBackArrow
-chatOnlineBackArrow.addEventListener("click", ()=>{
-  menuparent.style.display = "block"
-  if(onlineStatusContainer.style.display = "block"){
-    onlineStatusContainer.style.display = "none"
+// chatOnlineBackArrow.addEventListener("click", ()=>{
+//   menuparent.style.display = "block"
+//   if(onlineStatusContainer.style.display = "block"){
+//     onlineStatusContainer.style.display = "none"
 
-  }
-  chatOnlineBackArrow.style.display = "none"
-  onlineTab.style.textDecoration = "none"
-  chatTab.style.textDecoration = "underline"
+//   }
+//   chatOnlineBackArrow.style.display = "none"
+//   onlineTab.style.textDecoration = "none"
+//   chatTab.style.textDecoration = "underline"
 
-})
+// })
 
 broadcastMessageBackArrow.addEventListener("click", ()=>{
   broadcastChatList.style.display = "none"
   broadcastAllAgentPage.style.display = "none"
   mainBody.style.display = "block"
-
+  let broadcastroomModal = document.getElementById("broadcastroom-modal")
+  if(broadcastroomModal.style.display === "flex"){
+    broadcastroomModal.style.display = "none"
+  }
+  noMessage.innerHTML = ""
 })
 
 // open onlone chat
 onlineTab.addEventListener("click", ()=>{
   console.log("mannny");
-  chatOnlineBackArrow.style.display = "block"
+  // chatOnlineBackArrow.style.display = "block"
   onlineTab.style.textDecoration = "underline"
   chatTab.style.textDecoration = "none"
   menuparent.style.display = "none"
@@ -2119,17 +2134,22 @@ chatTab.addEventListener("click", ()=>{
 
 })
 
-// open personal chat
+// open broadcast chat
+
+let broadcastroomModal = document.getElementById("broadcastroom-modal")
+
 broadcastToAllAgents.addEventListener("click", ()=>{
   const container = document.getElementById("broadcast-message-body");
-
   console.log("all_ho",user_broadcast_rooms, user_broadcast_rooms.broadcast_AG);
+  let noMessage = document.getElementById("broadcast-no-message-yet")
   if(Object.keys(user_broadcast_rooms).length>0){
+    console.log("gretaer than");
     if("broadcast_AG" in user_broadcast_rooms){
       let input = sendButton.querySelector("input")
+      broadcastroomModal.style.display = "flex"
       input.disabled = false
-      container.innerHTML = ""
-      container.classList.remove("item-center", "text-black","flex", "flex-col", "items-center", "mt-4")
+      noMessage.innerHTML = ""
+      noMessage.style.display = "none"
       currentRoomId= user_broadcast_rooms.broadcast_AG
       chatSocket.send(JSON.stringify({
         action: "load_messages_for_broadcast",
@@ -2139,18 +2159,20 @@ broadcastToAllAgents.addEventListener("click", ()=>{
     }else{
       let input = sendButton.querySelector("input")
       input.disabled = true
+      noMessage.innerHTML = ""
       container.innerHTML = ""
-      container.innerHTML = "No user yet to Broadcast a message to"
-      container.classList.add("item-center", "text-black","flex", "flex-col", "items-center", "mt-4")
-    
+      noMessage.innerHTML = "No user yet to Broadcast a message to"
+      noMessage.style.display = "flex"    
     }
   }
   else{
+    console.log("less than");
     let input = sendButton.querySelector("input")
     input.disabled = true
+    noMessage.innerHTML = ""
     container.innerHTML = ""
-    container.innerHTML = "No user yet to Broadcast a message to"
-    container.classList.add("item-center", "text-black","flex", "flex-col", "items-center", "mt-4")
+    noMessage.innerHTML = "No user yet to Broadcast a message to"
+    noMessage.style.display = "flex"
   }
   broadcastChatList.style.display = "block"
   broadcastAllAgentPage.style.display = "block"
@@ -2164,6 +2186,7 @@ broadcastToAllAgents.addEventListener("click", ()=>{
 
 
 broadcastToAllHO.addEventListener("click", ()=>{
+  let noMessage = document.getElementById("broadcast-no-message-yet")
   const container = document.getElementById("broadcast-message-body");
 
   // checking the length of the variable
@@ -2171,9 +2194,10 @@ broadcastToAllHO.addEventListener("click", ()=>{
     console.log("rem",user_broadcast_rooms);
     if("broadcast_HO" in user_broadcast_rooms){
       let input = sendButton.querySelector("input")
+      broadcastroomModal.style.display = "flex"
       input.disabled = false
-      container.innerHTML = ""
-      container.classList.remove("item-center", "text-black","flex", "flex-col", "items-center", "mt-4")
+      noMessage.innerHTML = ""
+      noMessage.style.display = "none"
       currentRoomId= user_broadcast_rooms.broadcast_HO
       chatSocket.send(JSON.stringify({
         action: "load_messages_for_broadcast",
@@ -2185,18 +2209,20 @@ broadcastToAllHO.addEventListener("click", ()=>{
       let input = sendButton.querySelector("input")
       input.disabled = true
       console.log("zzzzzzzz");
+      noMessage.innerHTML = ""
       container.innerHTML = ""
-      container.innerHTML = "No user yet to Broadcast a message to"
-      container.classList.add("item-center", "text-black","flex", "flex-col", "items-center", "mt-4")
+      noMessage.innerHTML = "No messages yet, Broadcast a message"
+      noMessage.style.display = "flex"
     }
   }
   else{
     console.log("fuuuuuuiiuiui");
     let input = sendButton.querySelector("input")
     input.disabled = true
+    noMessage.innerHTML = ""
     container.innerHTML = ""
-    container.innerHTML = "No user yet to Broadcast a message to"
-    container.classList.add("item-center", "text-black","flex", "flex-col", "items-center", "mt-4")
+    noMessage.innerHTML = "No user yet to Broadcast a message to"
+    noMessage.style.display = "flex"
   }
   broadcastChatList.style.display = "block"
   mainBody.style.display = "none"
@@ -2205,7 +2231,6 @@ broadcastToAllHO.addEventListener("click", ()=>{
   broadcastChatList.style.display = "block"
   broadcastAllAgentPage.style.display = "block"
   mainBody.style.display = "none"
-  sendButton.setAttribute("data-send", "broadcast_AG")
   const title = document.getElementById("broadcast-roomTitle");
   title.classList.add("text-gray-500", "font-bold", "text-bold");
   title.innerHTML = "Home Owners"
@@ -2213,10 +2238,14 @@ broadcastToAllHO.addEventListener("click", ()=>{
 
 // open up personal chat
 document.getElementById("personal-chat").addEventListener("click", ()=>{
-  console.log("personal-message-page");
+  console.log("personal-message-page", personalMessageBodyParent.dataset.type);
   menuparent.style.display = "none"
   mainBody.style.display = "none" 
+  personalGroupParents.style.display = "block"
   personalMessagePage.style.display = "block"
+  personalMessageBodyParent.setAttribute("data-online", false);
+  menuparent.setAttribute("data-type", "private")
+
 })
 
 document.getElementById("personal-message-back-arrow").addEventListener("click", ()=>{
@@ -2230,8 +2259,21 @@ document.getElementById("personal-message-back-arrow").addEventListener("click",
 if(personalMessageBackArrow){
   personalMessageBackArrow.addEventListener("click", ()=>{
     // onlineStatusContainer.style.display = "none"
-    personalGroupParents.style.display = "block"
+    // onlineStatusContainer.style.display = "none"
+    let isOnline = personalMessageBodyParent.dataset.online
+    document.getElementById('chat-message-parent-div').style.display = "none"
+    console.log("obiii", isOnline==="false", isOnline === "true", isOnline);
     personalMessageBodyParent.style.display = "none"
+    if(isOnline === "false"){
+      personalGroupParents.style.display = "block"
+    }
+    else if(isOnline === "true"){
+      mainBody.style.display = "block"
+      // menuparent.style.display = "block"
+      onlineStatusContainer.style.display = "flex"
+      document.getElementById('chat-message-parent-div').style.display = "none"
+
+    }
     personalMessageBody.innerHTML = ""
   })
 
@@ -2248,7 +2290,6 @@ function renderOnlineStatus(user, online_status, username, status_id, room_name)
   // }
 
   // if(userId === username){return}
-  console.log(username,"poppoo", userId);
     if(online_status === "offline"){
       let onlineStatusChild = document.getElementById(user)
       console.log("status", onlineStatusChild, user);
@@ -2272,6 +2313,9 @@ function renderOnlineStatus(user, online_status, username, status_id, room_name)
       menuparent.style.display = "none"
       personalMessagePage.style.display = "block"
       openChatRoom(status_id, messages, type, room_name,searchId)
+      personalMessageBodyParent.setAttribute("data-online", true);
+      personalMessageBodyParent.setAttribute("data-type", "private");
+
     })
     user_room_types = "private"
 

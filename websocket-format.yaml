@@ -228,12 +228,14 @@ components:
         - action
         - room_id
         - message
+        - room_type
       properties:
         jsExample: |
           chatSocket.send(JSON.stringify({
               action: "send",
               room_id: 1,
               message: "Hello, world!",
+              room_type: "broadcast" or private or group_chat
               reply_to_id: 10,
               media: [{ url: "https://cloudinary.com/media1.jpg", type: "image" }]
           }));

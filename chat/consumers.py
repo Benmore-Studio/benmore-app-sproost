@@ -441,7 +441,7 @@ class MultiplexChatConsumer(AsyncWebsocketConsumer):
          # Fetch messages
         messages = await self.get_chat_messages(room_id, page)
         if self.user is not None:
-            room = await self.get_room_type(room_id)
+            room = await self.get_room_type_for_broadcast(room_id)
 
         print("")
         print("messages", room.room_type, )
@@ -473,6 +473,9 @@ class MultiplexChatConsumer(AsyncWebsocketConsumer):
         # Extract message details
         room_id = data.get("room_id")
         room_type = data.get("room_type")
+        print("")
+        print("glk", room_type)
+        print("")
         message_text = data.get("message", "").strip()  # Ensures no empty messages
         media_list = data.get("media", [])
         broadcast_to = data.get("broadcast_to")  # user type rooms to broadcast to
@@ -961,12 +964,12 @@ class MultiplexChatConsumer(AsyncWebsocketConsumer):
 
 
 
-    # @database_sync_to_async
-    # def get_room_type(self, room_id):
-    #     room = ChatRoom.objects.filter(id=room_id).first()
-    #     if room:
-    #         print(room.members, room.room_type, room.creator)
-    #         return room
+    @database_sync_to_async
+    def get_room_type_for_broadcast(self, room_id):
+        room = ChatRoom.objects.filter(id=room_id).first()
+        if room:
+            print(room.members, room.room_type, room.creator)
+            return room
 
 
     @database_sync_to_async
